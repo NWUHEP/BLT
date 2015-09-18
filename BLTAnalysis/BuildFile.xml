@@ -1,0 +1,7 @@
+<use name="BaconAna/DataFormats"/>
+<use name="BaconAna/Utils"/>
+<use name="root"/>
+<flags CXXFLAGS="-g -Wall"/>
+<export>
+  <lib   name="1"/>
+</export>

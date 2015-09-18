@@ -1,0 +1,5 @@
+<export>
+</export>
+<library name="BLTBLTAnalysis_plugins" file="*.cc">
+  <use name="BLT/BLTAnalysis"/>
+</library>

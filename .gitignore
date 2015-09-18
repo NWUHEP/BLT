@@ -1,0 +1,15 @@
+# C/C++
+*.o
+*.d
+*.so
+
+# Python
+__init__.py
+*.py[cod]
+
+# ROOT
+*.root
+
+# Stuff
+*~
+*.log

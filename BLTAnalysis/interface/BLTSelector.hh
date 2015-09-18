@@ -36,7 +36,10 @@ public:
     Long64_t            fStatus;
     TString             fOption;
 
-    BLTSelector() : fChain(0), fStatus(0) { }
+    long int            fileCount;  // keep track of number of files opened
+    long int            unskimmedEventCount;  // keep track of number of events processed before skimming
+
+    BLTSelector() : fChain(0), fStatus(0), fileCount(0), unskimmedEventCount(0) { }
     virtual             ~BLTSelector() { }
     virtual void        Init(TTree *tree);
     virtual Bool_t      Notify();
@@ -85,6 +88,8 @@ public:
     TBranch                 *b_AddCA8Puppi;
     TBranch                 *b_CA15Puppi;
     TBranch                 *b_AddCA15Puppi;
+
+    TH1D                    *hTotalEvents;
 };
 
 void BLTSelector::Init(TTree *tree)
@@ -139,6 +144,8 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("AddCA8Puppi", &fAddCA8Puppi, &b_AddCA8Puppi);
     fChain->SetBranchAddress("CA15Puppi", &fCA15Puppi, &b_CA15Puppi);
     fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15Puppi, &b_AddCA15Puppi);
+
+    hTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
 }
 
 Bool_t BLTSelector::Notify()
@@ -148,6 +155,12 @@ Bool_t BLTSelector::Notify()
     // is started when using PROOF. It is normally not necessary to make changes
     // to the generated code, but the routine can be extended by the
     // user if needed. The return value is currently not used.
+
+    // Keep traack of number of files and number of events
+    fileCount += 1;
+    TH1* h1 = (TH1*) fChain->GetCurrentFile()->Get("TotalEvents");
+    hTotalEvents->Add(hTotalEvents);
+    unskimmedEventCount += h1->GetBinContent(1);
 
     return kTRUE;
 }

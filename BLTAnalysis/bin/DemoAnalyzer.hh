@@ -15,6 +15,8 @@
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
 #include "BLT/BLTAnalysis/interface/AnalysisParameters.hh"
+#include "BLT/BLTAnalysis/interface/AnalysisCuts.hh"
+#include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 
 // ROOT headers
@@ -38,6 +40,24 @@ public:
     void    Begin(TTree *tree);
     Bool_t  Process(Long64_t entry);
     void    Terminate();
+
+    TFile    *outFile;
+    TTree    *outTree;
+
+    // Params and cuts
+    std::unique_ptr<AnalysisParameters> params;
+    std::unique_ptr<AnalysisCuts>       cuts;
+    std::unique_ptr<TriggerSelector>    triggerSelector;
+    std::unique_ptr<ParticleSelector>   particleSelector;
+
+    // Branches
+    TLorentzVector muonOne;
+    TLorentzVector muonTwo;
+    TLorentzVector dimuon;
+
+    TLorentzVector genMuonOne;
+    TLorentzVector genMuonTwo;
+    TLorentzVector genZ;
 
 private:
 };

@@ -29,6 +29,7 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 #include <memory>
 
 
@@ -41,8 +42,10 @@ public:
     Bool_t  Process(Long64_t entry);
     void    Terminate();
 
-    TFile    *outFile;
-    TTree    *outTree;
+    TFile       *outFile;
+    TTree       *outTree;
+    std::string  outFileName;
+    std::string  outTreeName;
 
     // Params and cuts
     std::unique_ptr<AnalysisParameters> params;
@@ -50,7 +53,7 @@ public:
     std::unique_ptr<TriggerSelector>    triggerSelector;
     std::unique_ptr<ParticleSelector>   particleSelector;
 
-    // Branches
+    // Branches in the output file
     TLorentzVector muonOne;
     TLorentzVector muonTwo;
     TLorentzVector dimuon;

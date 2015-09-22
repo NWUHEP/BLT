@@ -16,6 +16,7 @@
 #include <TH1D.h>
 #include <TClonesArray.h>
 #include <TChain.h>
+#include <TFileCollection.h>
 
 // Header file for the classes stored in the TTree if any.
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
@@ -28,6 +29,7 @@
 #include "BaconAna/DataFormats/interface/TVertex.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
+#include "BLTHelper.hh"
 
 class BLTSelector
 {
@@ -39,7 +41,7 @@ public:
     long int            fileCount;  // keep track of number of files opened
     long int            unskimmedEventCount;  // keep track of number of events processed before skimming
 
-    BLTSelector() : fChain(0), fStatus(0), fileCount(0), unskimmedEventCount(0) { }
+    BLTSelector() : fChain(0), fStatus(0), fOption(""), fileCount(0), unskimmedEventCount(0) { }
     virtual             ~BLTSelector() { }
     virtual void        Init(TTree *tree);
     virtual Bool_t      Notify();
@@ -50,6 +52,8 @@ public:
     virtual void        Begin(TTree *tree);
     virtual Bool_t      Process(Long64_t entry);
     virtual void        Terminate();
+
+    Int_t               MakeMeSandwich(int argc, char **argv);  // DO NOT OVERRIDE
 
     baconhep::TEventInfo    *fInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
@@ -89,6 +93,7 @@ public:
     TBranch                 *b_CA15Puppi;
     TBranch                 *b_AddCA15Puppi;
 
+    TFile                   *fCurrentFile;
     TH1D                    *hTotalEvents;
 };
 
@@ -105,7 +110,10 @@ void BLTSelector::Init(TTree *tree)
     // Set branch addresses and branch pointers
     if (!tree) return;
     fChain = tree;
+    fCurrentFile = tree->GetCurrentFile();
     //fChain->SetMakeClass(1);
+
+    hTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
 
     fInfo                    = 0;
     fGenEvtInfo              = 0;
@@ -144,8 +152,6 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("AddCA8Puppi", &fAddCA8Puppi, &b_AddCA8Puppi);
     fChain->SetBranchAddress("CA15Puppi", &fCA15Puppi, &b_CA15Puppi);
     fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15Puppi, &b_AddCA15Puppi);
-
-    hTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
 }
 
 Bool_t BLTSelector::Notify()
@@ -158,8 +164,9 @@ Bool_t BLTSelector::Notify()
 
     // Keep traack of number of files and number of events
     fileCount += 1;
-    TH1* h1 = (TH1*) fChain->GetCurrentFile()->Get("TotalEvents");
-    hTotalEvents->Add(hTotalEvents);
+    fCurrentFile = fChain->GetCurrentFile();
+    TH1* h1 = (TH1*) fCurrentFile->Get("TotalEvents");
+    hTotalEvents->Add(h1);
     unskimmedEventCount += h1->GetBinContent(1);
 
     return kTRUE;

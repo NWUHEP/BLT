@@ -26,11 +26,15 @@
 // C++ headers
 #include <string>
 #include <vector>
+#include <map>
+#include <memory>
 #include <iostream>
 #include <cmath>
 #include <cassert>
 #include <stdexcept>
-#include <memory>
+#include <algorithm>
+#include <iterator>
+#include <regex>
 
 
 class DemoAnalyzer: public BLTSelector {
@@ -41,6 +45,9 @@ public:
     void    Begin(TTree *tree);
     Bool_t  Process(Long64_t entry);
     void    Terminate();
+
+    void    ReportPostBegin();
+    void    ReportPostTerminate();
 
     TFile       *outFile;
     TTree       *outTree;

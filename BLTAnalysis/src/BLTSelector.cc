@@ -53,11 +53,16 @@ void BLTSelector::Terminate()
 // _____________________________________________________________________________
 // MakeMeSandwich() acts like the "main" function
 
+#include <TStopwatch.h>
+
 #include <iostream>
 #include <string>
 
 Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
     int verbose = 1;
+
+    int showTiming = 1;
+    TStopwatch timer;
 
     // _________________________________________________________________________
     // Get arguments
@@ -73,10 +78,13 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         } else if (argi == "-vvv") {
             verbose = 3;
         } else {
-            option = option + " " + argi;
-
-            if (inFileName == "")
+            if (inFileName == "") {
                 inFileName = argi;
+            } else if (option == "") {
+                option = argi;
+            } else {
+                option = option + " " + argi;
+            }
         }
     }
 
@@ -113,6 +121,9 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
 
     // _________________________________________________________________________
     // Set up the selector
+
+    if (showTiming)
+        timer.Start();
 
     this->SetOption(option.c_str());
     this->Begin(fChain);
@@ -152,5 +163,13 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
     if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer has finished processing." << std::endl;
 
     // Done
+    if (showTiming) {
+        timer.Stop();
+
+        std::cout << "  ==== Timing ====" << std::endl;
+        std::cout << "  CPU  time: " << timer.CpuTime() << std::endl;
+        std::cout << "  Real time: " << timer.RealTime() << std::endl;
+    }
+
     return EXIT_SUCCESS;
 }

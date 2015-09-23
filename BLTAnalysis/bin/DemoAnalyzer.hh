@@ -3,14 +3,18 @@
 //
 // Input arguments:
 //   argv[1] => input bacon file name
-//   argv[2] => output bacon bits file name
+//   argv[2] => number of entries
+//   argv[3] => ...
 //
+// Users should inherit from BLTSelector and implement the three functions:
+//   Begin()
+//   Process()
+//   Terminate()
 // =============================================================================
 
 
 #ifndef DEMOANALYZER_HH
 #define DEMOANALYZER_HH
-
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"

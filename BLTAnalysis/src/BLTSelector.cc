@@ -64,11 +64,15 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
     int showTiming = 1;
     TStopwatch timer;
 
+    gROOT->SetBatch();
+
+
     // _________________________________________________________________________
     // Get arguments
 
     std::string option = "";
-    std::string inFileName = "";
+    std::string inputFiles = "";
+    std::string sMaxEvents = "";
     for (int i=1; i<argc; ++i) {
         std::string argi = argv[i];
         if (argi == "-v") {
@@ -78,8 +82,10 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         } else if (argi == "-vvv") {
             verbose = 3;
         } else {
-            if (inFileName == "") {
-                inFileName = argi;
+            if (inputFiles == "") {
+                inputFiles = argi;
+            } else if (sMaxEvents == "") {
+                sMaxEvents = argi;
             } else if (option == "") {
                 option = argi;
             } else {
@@ -88,88 +94,99 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         }
     }
 
+    long int maxEvents = std::stol(sMaxEvents);
+
     // _________________________________________________________________________
     // Handle input files
 
-    TChain* fChain = new TChain("Events");
-    std::string inFileExtension = get_file_extension(inFileName);
+    TChain* myChain = new TChain("Events");
+    std::string inputFileExt = get_file_extension(inputFiles);
 
-    if (inFileExtension == "root") {
-        if (fChain->Add(inFileName.c_str())) {
-            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inFileName << "." << std::endl;
+    if (inputFileExt == "root") {
+        if (myChain->Add(inputFiles.c_str())) {
+            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inputFiles << "." << std::endl;
         } else {
-            std::cout << Error() << "Failed to open" << inFileName << std::endl;
-            return EXIT_FAILURE;
+            std::cout << Error() << "Failed to open" << inputFiles << std::endl;
+            throw std::runtime_error("bad input");
         }
-    } else if (inFileExtension == "txt") {
-        TFileCollection fc("fileinfolist", "", inFileName.c_str());
-        if (fChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
-            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inFileName << "." << std::endl;
+    } else if (inputFileExt == "txt") {
+        TFileCollection fc("fileinfolist", "", inputFiles.c_str());
+        if (myChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
+            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inputFiles << "." << std::endl;
         } else {
-            std::cout << Error() << "Failed to open" << inFileName << std::endl;
-            return EXIT_FAILURE;
+            std::cout << Error() << "Failed to open" << inputFiles << std::endl;
+            throw std::runtime_error("bad input");
         }
     } else {
-        std::cout << Error() << "Unrecognized file extension: " << inFileExtension << std::endl;
-        return EXIT_FAILURE;
+        std::cout << Error() << "Unrecognized file extension: " << inputFileExt << std::endl;
+        throw std::runtime_error("bad input");
     }
 
-    if (fChain->LoadTree(0) < 0) {  // needed because TChain =/= TTree
+    if (myChain->LoadTree(0) < 0) {  // needed because TChain =/= TTree
         std::cout << Error() << "Failed to load the entries in the file." << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("bad input");
     }
-
-    // _________________________________________________________________________
-    // Set up the selector
 
     if (showTiming)
         timer.Start();
 
+    // _________________________________________________________________________
+    // Set up the selector
+    // The codes are adapted from TTreePlayer::Process()
+
+    //TTree* fTree = myChain->GetTree();  // only use TTree from here on
+    TTree* fTree = myChain;
+
     this->SetOption(option.c_str());
-    this->Begin(fChain);
-    this->Init(fChain); // Init() follows Begin() in TSelector
+    this->Begin(fTree);       //<===call user initialization function
+    this->Init(fTree);        // Init() follows Begin() as in TSelector
     if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer is initialized." << std::endl;
 
-    this->Notify();     // Notify() needs to be called explicitly for the first tree;
-                        // handled by TChain for the following trees
+    this->Notify();           // Notify() needs to be called explicitly for the first tree;
+                              // handled by TChain for the following trees
     if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer has opened the first input file." << std::endl;
 
     // _________________________________________________________________________
     // Loop over events
 
-    Long64_t firstentry = 0, nentries = fChain->GetEntriesFast(),
-             entryNumber = 0, localEntry = 0;
-    Long64_t totalEvents = 0, passedEvents = 0;
+    Bool_t process = (this->GetStatus() != -1);
+    if (process) {
 
-    for (Long64_t entry=firstentry; entry<firstentry+nentries; ++entry) {
-        entryNumber = fChain->GetEntryNumber(entry);
-        if (entryNumber < 0) break;
-        localEntry = fChain->LoadTree(entryNumber);
-        if (localEntry < 0) break;
+        Long64_t firstentry = 0, nentries = fTree->GetEntriesFast(),
+                 entryNumber = 0, localEntry = 0;
 
-        // The real work is being done here
-        Bool_t pass = this->Process(localEntry);
+        for (Long64_t entry=firstentry; entry<firstentry+nentries; entry++) {
+            if (maxEvents >= 0 && entry >= maxEvents)  break;
 
-        ++totalEvents;
-        if (pass)
-            ++passedEvents;
+            entryNumber = fTree->GetEntryNumber(entry);
+            if (entryNumber < 0) break;
+            localEntry = fTree->LoadTree(entryNumber);
+            if (localEntry < 0) break;
+
+            // The real work is being done here
+            Bool_t pass = this->Process(localEntry);        //<==call user analysis function
+
+            this->totalEvents++;
+            if (pass)
+                this->passedEvents++;
+        }
     }
-    if (verbose >= 1)  std::cout << Info() << "Selected " << passedEvents << "/" << totalEvents << " events." << std::endl;
+
+    if (verbose >= 1)  std::cout << Info() << "Processed " << this->fileCount << " files and they have " << this->unskimmedEventCount << " unskimmed events." << std::endl;
+    if (verbose >= 1)  std::cout << Info() << "Selected " << this->passedEvents << " / " << this->totalEvents << " events." << std::endl;
 
     // _________________________________________________________________________
     // Write the output
 
-    this->Terminate();
+    this->Terminate();        //<==call user termination function
     if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer has finished processing." << std::endl;
 
     // Done
     if (showTiming) {
         timer.Stop();
-
-        std::cout << "  ==== Timing ====" << std::endl;
-        std::cout << "  CPU  time: " << timer.CpuTime() << std::endl;
-        std::cout << "  Real time: " << timer.RealTime() << std::endl;
+        std::cout << Info() << "CPU  time: " << timer.CpuTime() << std::endl;
+        std::cout << Info() << "Real time: " << timer.RealTime() << std::endl;
     }
 
-    return EXIT_SUCCESS;
+    return 0;
 }

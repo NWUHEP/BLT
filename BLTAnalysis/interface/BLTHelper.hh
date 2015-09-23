@@ -18,19 +18,19 @@ bool ends_with(const std::string& str1, const std::string& str2) {
 }
 
 std::string Error() {
-    return "ERROR  : ";
+    return "[ERROR  ] ";
 }
 
 std::string Warning() {
-    return "WARNING: ";
+    return "[WARNING] ";
 }
 
 std::string Info() {
-    return "INFO   : ";
+    return "[INFO   ] ";
 }
 
 std::string Debug() {
-    return "DEBUG  : ";
+    return "[DEBUG  ] ";
 }
 
 #endif  // BLTHELPER_HH

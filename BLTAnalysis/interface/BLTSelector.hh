@@ -29,7 +29,9 @@
 #include "BaconAna/DataFormats/interface/TVertex.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
+
 #include "BLTHelper.hh"
+
 
 class BLTSelector
 {
@@ -40,8 +42,11 @@ public:
 
     long int            fileCount;  // keep track of number of files opened
     long int            unskimmedEventCount;  // keep track of number of events processed before skimming
+    long int            totalEvents;
+    long int            passedEvents;
 
-    BLTSelector() : fChain(0), fStatus(0), fOption(""), fileCount(0), unskimmedEventCount(0) { }
+    BLTSelector() : fChain(0), fStatus(0), fOption(""),
+                    fileCount(0), unskimmedEventCount(0), totalEvents(0), passedEvents(0) { }
     virtual             ~BLTSelector() { }
     virtual void        Init(TTree *tree);
     virtual Bool_t      Notify();
@@ -53,45 +58,45 @@ public:
     virtual Bool_t      Process(Long64_t entry);
     virtual void        Terminate();
 
-    Int_t               MakeMeSandwich(int argc, char **argv);  // DO NOT OVERRIDE
+    Int_t               MakeMeSandwich(int argc, char **argv);  // DO NOT OVERRIDE!
 
     baconhep::TEventInfo    *fInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
-    TClonesArray            *fGenParticle;
-    TClonesArray            *fElectron;
-    TClonesArray            *fMuon;
-    TClonesArray            *fTau;
-    TClonesArray            *fPhoton;
-    TClonesArray            *fPV;
-    TClonesArray            *fAK4CHS;
-    TClonesArray            *fAK8CHS;
-    TClonesArray            *fAddAK8CHS;
-    TClonesArray            *fCA15CHS;
-    TClonesArray            *fAddCA15CHS;
-    TClonesArray            *fAK4Puppi;
-    TClonesArray            *fCA8Puppi;
-    TClonesArray            *fAddCA8Puppi;
-    TClonesArray            *fCA15Puppi;
-    TClonesArray            *fAddCA15Puppi;
+    TClonesArray            *fGenParticleArr;
+    TClonesArray            *fElectronArr;
+    TClonesArray            *fMuonArr;
+    TClonesArray            *fTauArr;
+    TClonesArray            *fPhotonArr;
+    TClonesArray            *fPVArr;
+    TClonesArray            *fAK4CHSArr;
+    TClonesArray            *fAK8CHSArr;
+    TClonesArray            *fAddAK8CHSArr;
+    TClonesArray            *fCA15CHSArr;
+    TClonesArray            *fAddCA15CHSArr;
+    TClonesArray            *fAK4PuppiArr;
+    TClonesArray            *fCA8PuppiArr;
+    TClonesArray            *fAddCA8PuppiArr;
+    TClonesArray            *fCA15PuppiArr;
+    TClonesArray            *fAddCA15PuppiArr;
 
     TBranch                 *b_Info;
     TBranch                 *b_GenEvtInfo;
-    TBranch                 *b_GenParticle;
-    TBranch                 *b_Electron;
-    TBranch                 *b_Muon;
-    TBranch                 *b_Tau;
-    TBranch                 *b_Photon;
-    TBranch                 *b_PV;
-    TBranch                 *b_AK4CHS;
-    TBranch                 *b_AK8CHS;
-    TBranch                 *b_AddAK8CHS;
-    TBranch                 *b_CA15CHS;
-    TBranch                 *b_AddCA15CHS;
-    TBranch                 *b_AK4Puppi;
-    TBranch                 *b_CA8Puppi;
-    TBranch                 *b_AddCA8Puppi;
-    TBranch                 *b_CA15Puppi;
-    TBranch                 *b_AddCA15Puppi;
+    TBranch                 *b_GenParticleArr;
+    TBranch                 *b_ElectronArr;
+    TBranch                 *b_MuonArr;
+    TBranch                 *b_TauArr;
+    TBranch                 *b_PhotonArr;
+    TBranch                 *b_PVArr;
+    TBranch                 *b_AK4CHSArr;
+    TBranch                 *b_AK8CHSArr;
+    TBranch                 *b_AddAK8CHSArr;
+    TBranch                 *b_CA15CHSArr;
+    TBranch                 *b_AddCA15CHSArr;
+    TBranch                 *b_AK4PuppiArr;
+    TBranch                 *b_CA8PuppiArr;
+    TBranch                 *b_AddCA8PuppiArr;
+    TBranch                 *b_CA15PuppiArr;
+    TBranch                 *b_AddCA15PuppiArr;
 
     TFile                   *fCurrentFile;
     TH1D                    *hTotalEvents;
@@ -117,41 +122,41 @@ void BLTSelector::Init(TTree *tree)
 
     fInfo                    = 0;
     fGenEvtInfo              = 0;
-    fGenParticle             = 0;
-    fElectron                = 0;
-    fMuon                    = 0;
-    fTau                     = 0;
-    fPhoton                  = 0;
-    fPV                      = 0;
-    fAK4CHS                  = 0;
-    fAK8CHS                  = 0;
-    fAddAK8CHS               = 0;
-    fCA15CHS                 = 0;
-    fAddCA15CHS              = 0;
-    fAK4Puppi                = 0;
-    fCA8Puppi                = 0;
-    fAddCA8Puppi             = 0;
-    fCA15Puppi               = 0;
-    fAddCA15Puppi            = 0;
+    fGenParticleArr          = 0;
+    fElectronArr             = 0;
+    fMuonArr                 = 0;
+    fTauArr                  = 0;
+    fPhotonArr               = 0;
+    fPVArr                   = 0;
+    fAK4CHSArr               = 0;
+    fAK8CHSArr               = 0;
+    fAddAK8CHSArr            = 0;
+    fCA15CHSArr              = 0;
+    fAddCA15CHSArr           = 0;
+    fAK4PuppiArr             = 0;
+    fCA8PuppiArr             = 0;
+    fAddCA8PuppiArr          = 0;
+    fCA15PuppiArr            = 0;
+    fAddCA15PuppiArr         = 0;
 
     fChain->SetBranchAddress("Info", &fInfo, &b_Info);
     fChain->SetBranchAddress("GenEvtInfo", &fGenEvtInfo, &b_GenEvtInfo);
-    fChain->SetBranchAddress("GenParticle", &fGenParticle, &b_GenParticle);
-    fChain->SetBranchAddress("Electron", &fElectron, &b_Electron);
-    fChain->SetBranchAddress("Muon", &fMuon, &b_Muon);
-    fChain->SetBranchAddress("Tau", &fTau, &b_Tau);
-    fChain->SetBranchAddress("Photon", &fPhoton, &b_Photon);
-    fChain->SetBranchAddress("PV", &fPV, &b_PV);
-    fChain->SetBranchAddress("AK4CHS", &fAK4CHS, &b_AK4CHS);
-    fChain->SetBranchAddress("AK8CHS", &fAK8CHS, &b_AK8CHS);
-    fChain->SetBranchAddress("AddAK8CHS", &fAddAK8CHS, &b_AddAK8CHS);
-    fChain->SetBranchAddress("CA15CHS", &fCA15CHS, &b_CA15CHS);
-    fChain->SetBranchAddress("AddCA15CHS", &fAddCA15CHS, &b_AddCA15CHS);
-    fChain->SetBranchAddress("AK4Puppi", &fAK4Puppi, &b_AK4Puppi);
-    fChain->SetBranchAddress("CA8Puppi", &fCA8Puppi, &b_CA8Puppi);
-    fChain->SetBranchAddress("AddCA8Puppi", &fAddCA8Puppi, &b_AddCA8Puppi);
-    fChain->SetBranchAddress("CA15Puppi", &fCA15Puppi, &b_CA15Puppi);
-    fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15Puppi, &b_AddCA15Puppi);
+    fChain->SetBranchAddress("GenParticle", &fGenParticleArr, &b_GenParticleArr);
+    fChain->SetBranchAddress("Electron", &fElectronArr, &b_ElectronArr);
+    fChain->SetBranchAddress("Muon", &fMuonArr, &b_MuonArr);
+    fChain->SetBranchAddress("Tau", &fTauArr, &b_TauArr);
+    fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
+    fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
+    fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);
+    fChain->SetBranchAddress("AK8CHS", &fAK8CHSArr, &b_AK8CHSArr);
+    fChain->SetBranchAddress("AddAK8CHS", &fAddAK8CHSArr, &b_AddAK8CHSArr);
+    fChain->SetBranchAddress("CA15CHS", &fCA15CHSArr, &b_CA15CHSArr);
+    fChain->SetBranchAddress("AddCA15CHS", &fAddCA15CHSArr, &b_AddCA15CHSArr);
+    fChain->SetBranchAddress("AK4Puppi", &fAK4PuppiArr, &b_AK4PuppiArr);
+    fChain->SetBranchAddress("CA8Puppi", &fCA8PuppiArr, &b_CA8PuppiArr);
+    fChain->SetBranchAddress("AddCA8Puppi", &fAddCA8PuppiArr, &b_AddCA8PuppiArr);
+    fChain->SetBranchAddress("CA15Puppi", &fCA15PuppiArr, &b_CA15PuppiArr);
+    fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15PuppiArr, &b_AddCA15PuppiArr);
 }
 
 Bool_t BLTSelector::Notify()

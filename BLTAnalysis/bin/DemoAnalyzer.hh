@@ -72,6 +72,8 @@ public:
     TLorentzVector genMuonOne;
     TLorentzVector genMuonTwo;
     TLorentzVector genZ;
+    int            genMuonOneCharge;
+    int            genMuonTwoCharge;
 
 private:
 };

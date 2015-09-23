@@ -1,8 +1,7 @@
 // =============================================================================
 // This class is based on the automatically generated codes from calling
 //   Events->MakeSelector("BLTSelector")
-// on a Bacon ntuple by ROOT version 6.02/05. But this class is not
-// inherited from TSelector.
+// on a Bacon ntuple by ROOT version 6.02/05.
 // =============================================================================
 
 
@@ -17,6 +16,7 @@
 #include <TClonesArray.h>
 #include <TChain.h>
 #include <TFileCollection.h>
+#include <TSelector.h>
 
 // Header file for the classes stored in the TTree if any.
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
@@ -33,32 +33,37 @@
 #include "BLTHelper.hh"
 
 
-class BLTSelector
-{
-public:
-    TTree              *fChain;   //!pointer to the analyzed TTree or TChain
-    Long64_t            fStatus;
-    TString             fOption;
+class BLTSelector : public TSelector {
+public :
+    TTree         *fChain;   //!pointer to the analyzed TTree or TChain
 
-    long int            fileCount;  // keep track of number of files opened
-    long int            unskimmedEventCount;  // keep track of number of events processed before skimming
-    long int            totalEvents;
-    long int            passedEvents;
+    long int      fileCount;            // number of files opened
+    long int      unskimmedEventCount;  // number of events processed before skimming
+    long int      totalEvents;          // number of events processed after skimming
+    long int      passedEvents;         // number of events selected
 
-    BLTSelector() : fChain(0), fStatus(0), fOption(""),
-                    fileCount(0), unskimmedEventCount(0), totalEvents(0), passedEvents(0) { }
-    virtual             ~BLTSelector() { }
-    virtual void        Init(TTree *tree);
-    virtual Bool_t      Notify();
-    virtual Long64_t    GetStatus() const { return fStatus; }
-    virtual const char *GetOption() const { return fOption; }
-    virtual Int_t       GetEntry(Long64_t entry, Int_t getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
-    virtual void        SetOption(const char *option) { fOption = option; }
-    virtual void        Begin(TTree *tree);
-    virtual Bool_t      Process(Long64_t entry);
-    virtual void        Terminate();
+    BLTSelector(TTree * /*tree*/ =0) : fChain(0) {
+        fileCount           = 0;
+        unskimmedEventCount = 0;
+        totalEvents         = 0;
+        passedEvents        = 0;
+    }
+    virtual ~BLTSelector() { }
+    virtual Int_t   Version() const { return 2; }
+    virtual void    Begin(TTree *tree);
+    virtual void    SlaveBegin(TTree *tree);
+    virtual void    Init(TTree *tree);
+    virtual Bool_t  Notify();
+    virtual Bool_t  Process(Long64_t entry);
+    virtual Int_t   GetEntry(Long64_t entry, Int_t getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
+    virtual void    SetOption(const char *option) { fOption = option; }
+    virtual void    SetObject(TObject *obj) { fObject = obj; }
+    virtual void    SetInputList(TList *input) { fInput = input; }
+    virtual TList  *GetOutputList() const { return fOutput; }
+    virtual void    SlaveTerminate();
+    virtual void    Terminate();
 
-    Int_t               MakeMeSandwich(int argc, char **argv);  // DO NOT OVERRIDE!
+    Int_t           MakeMeSandwich(int argc, char **argv);  // DO NOT OVERRIDE!
 
     baconhep::TEventInfo    *fInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
@@ -100,8 +105,13 @@ public:
 
     TFile                   *fCurrentFile;
     TH1D                    *hTotalEvents;
+
+    ClassDef(BLTSelector,0);
 };
 
+#endif
+
+#ifdef BLTSelector_cxx
 void BLTSelector::Init(TTree *tree)
 {
     // The Init() function is called when the selector needs to initialize
@@ -170,7 +180,13 @@ Bool_t BLTSelector::Notify()
     // Keep traack of number of files and number of events
     fileCount += 1;
     fCurrentFile = fChain->GetCurrentFile();
+    if (!fCurrentFile) {
+        throw std::runtime_error("Cannot get current file");
+    }
     TH1* h1 = (TH1*) fCurrentFile->Get("TotalEvents");
+    if (!h1) {
+        throw std::runtime_error("Cannot get 'TotalEvents' histogram");
+    }
     hTotalEvents->Add(h1);
     unskimmedEventCount += h1->GetBinContent(1);
 

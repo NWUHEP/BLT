@@ -145,6 +145,7 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 {
 
     GetEntry(entry, 1);  // load all branches
+    this->totalEvents++;
 
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
@@ -157,12 +158,13 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     // GenParticles //
     //////////////////
 
-    if (!isRealData) {
-        for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-            const TGenParticle* thisGenParticle = (TGenParticle*) fGenParticleArr->At(i);
-            assert(thisGenParticle);
-
-            if (printEvent)  std::cout << "GenParticle " << i << ": " << thisGenParticle << std::endl;
+    if (printEvent) {
+        if (!isRealData) {
+            for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
+                const TGenParticle* thisGenParticle = (TGenParticle*) fGenParticleArr->At(i);
+                assert(thisGenParticle);
+                std::cout << "GenParticle " << i << ": " << thisGenParticle << std::endl;
+            }
         }
     }
 
@@ -170,65 +172,72 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     // Vertices //
     //////////////
 
-    for (int i=0; i<fPVArr->GetEntries(); i++) {
-        const TVertex* thisVertex = (TVertex*) fPVArr->At(i);
-        assert(thisVertex);
-
-        if (printEvent)  std::cout << "Vertex " << i << ": " << thisVertex << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fPVArr->GetEntries(); i++) {
+            const TVertex* thisVertex = (TVertex*) fPVArr->At(i);
+            assert(thisVertex);
+            std::cout << "Vertex " << i << ": " << thisVertex << std::endl;
+        }
     }
 
     ///////////
     // Muons //
     ///////////
 
-    for (int i=0; i<fMuonArr->GetEntries(); i++) {
-        const TMuon* thisMuon = (TMuon*) fMuonArr->At(i);
-        assert(thisMuon);
-
-        if (printEvent)  std::cout << "Muon " << i << ": " << thisMuon << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fMuonArr->GetEntries(); i++) {
+            const TMuon* thisMuon = (TMuon*) fMuonArr->At(i);
+            assert(thisMuon);
+            std::cout << "Muon " << i << ": " << thisMuon << std::endl;
+        }
     }
 
     ///////////////
     // Electrons //
     ///////////////
 
-    for (int i=0; i<fElectronArr->GetEntries(); i++) {
-        const TElectron* thisElectron = (TElectron*) fElectronArr->At(i);
-        assert(thisElectron);
-
-        if (printEvent)  std::cout << "Electron " << i << ": " << thisElectron << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fElectronArr->GetEntries(); i++) {
+            const TElectron* thisElectron = (TElectron*) fElectronArr->At(i);
+            assert(thisElectron);
+            std::cout << "Electron " << i << ": " << thisElectron << std::endl;
+        }
     }
 
     /////////////
     // Photons //
     /////////////
 
-    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
-        const TPhoton* thisPhoton = (TPhoton*) fPhotonArr->At(i);
-        assert(thisPhoton);
-
-        if (printEvent)  std::cout << "Photon " << i << ": " << thisPhoton << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fPhotonArr->GetEntries(); i++) {
+            const TPhoton* thisPhoton = (TPhoton*) fPhotonArr->At(i);
+            assert(thisPhoton);
+            std::cout << "Photon " << i << ": " << thisPhoton << std::endl;
+        }
     }
 
     //////////
     // Taus //
     //////////
 
-    for (int i=0; i<fTauArr->GetEntries(); i++) {
-        const TTau* thisTau = (TTau*) fTauArr->At(i);
-        assert(thisTau);
-
-        if (printEvent)  std::cout << "Tau " << i << ": " << thisTau << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fTauArr->GetEntries(); i++) {
+            const TTau* thisTau = (TTau*) fTauArr->At(i);
+            assert(thisTau);
+            std::cout << "Tau " << i << ": " << thisTau << std::endl;
+        }
     }
 
     //////////
     // Jets //
     //////////
 
-    for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
-        const TJet* thisJet = (TJet*) fAK4CHSArr->At(i);
-
-        if (printEvent)  std::cout << "Jet " << i << ": " << thisJet << std::endl;
+    if (printEvent) {
+        for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
+            const TJet* thisJet = (TJet*) fAK4CHSArr->At(i);
+            assert(thisJet);
+            std::cout << "Jet " << i << ": " << thisJet << std::endl;
+        }
     }
 
     /////////
@@ -243,9 +252,10 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     caloMET->pt = fInfo->caloMET;
     caloMET->phi = fInfo->caloMETphi;
 
-    if (printEvent)  std::cout << "MET " << "(PF)" << ": " << pfMET << std::endl;
-    if (printEvent)  std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
-
+    if (printEvent) {
+        std::cout << "MET " << "(PF)" << ": " << pfMET << std::endl;
+        std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
+    }
 
     ////////////
     // Select //
@@ -377,6 +387,7 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     genZ = genMuonOne + genMuonTwo;
 
     outTree->Fill();
+    this->passedEvents++;
 
     delete pfMET;
     delete caloMET;
@@ -403,6 +414,8 @@ void DemoAnalyzer::ReportPostTerminate()
 {
     std::cout << "  ==== Terminate Job ======" << std::endl;
     std::cout << "  output   : " << params->get_output_filename("demoFile") << std::endl;
+    std::cout << "           : Processed " << this->fileCount << " files with " << this->unskimmedEventCount << " unskimmed events." << std::endl;
+    std::cout << "           : Selected " << this->passedEvents << " / " << this->totalEvents << " events." << std::endl;
     std::cout << "  =========================" << std::endl;
 }
 

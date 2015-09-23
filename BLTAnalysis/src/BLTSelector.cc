@@ -1,20 +1,37 @@
-#include "BLT/BLTAnalysis/interface/BLTSelector.hh"
-
+#define BLTSelector_cxx
 // The following methods are defined in this file:
 //    Begin():        called every time a loop on the tree starts,
 //                    a convenient place to create your histograms.
+//    SlaveBegin():   called after Begin(), when on PROOF called only on the
+//                    slave servers.
 //    Process():      called for each event, in this function you decide what
 //                    to read and fill your histograms.
+//    SlaveTerminate: called at the end of the loop on the tree, when on PROOF
+//                    called only on the slave servers.
 //    Terminate():    called at the end of the loop on the tree,
 //                    a convenient place to draw/fit your histograms.
+//
 
-void BLTSelector::Begin(TTree *tree)
+#include "BLT/BLTAnalysis/interface/BLTSelector.hh"
+
+
+void BLTSelector::Begin(TTree * /*tree*/)
 {
     // The Begin() function is called at the start of the query.
     // When running with PROOF Begin() is only called on the client.
     // The tree argument is deprecated (on PROOF 0 is passed).
 
-    //TString option = GetOption();
+    TString option = GetOption();
+
+}
+
+void BLTSelector::SlaveBegin(TTree * /*tree*/)
+{
+    // The SlaveBegin() function is called after the Begin() function.
+    // When running with PROOF SlaveBegin() is called on each slave server.
+    // The tree argument is deprecated (on PROOF 0 is passed).
+
+    TString option = GetOption();
 
 }
 
@@ -42,6 +59,14 @@ Bool_t BLTSelector::Process(Long64_t entry)
     return kTRUE;
 }
 
+void BLTSelector::SlaveTerminate()
+{
+    // The SlaveTerminate() function is called after all entries or objects
+    // have been processed. When running with PROOF SlaveTerminate() is called
+    // on each slave server.
+
+}
+
 void BLTSelector::Terminate()
 {
     // The Terminate() function is the last function to be called during
@@ -59,6 +84,7 @@ void BLTSelector::Terminate()
 #include <string>
 
 Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
+
     int verbose = 1;
 
     int showTiming = 1;
@@ -104,88 +130,46 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
 
     if (inputFileExt == "root") {
         if (myChain->Add(inputFiles.c_str())) {
-            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inputFiles << "." << std::endl;
+            if (verbose >= 1)  std::cout << info() << "Successfully opened " << inputFiles << "." << std::endl;
         } else {
-            std::cout << Error() << "Failed to open" << inputFiles << std::endl;
+            std::cout << error() << "Failed to open" << inputFiles << std::endl;
             throw std::runtime_error("bad input");
         }
     } else if (inputFileExt == "txt") {
         TFileCollection fc("fileinfolist", "", inputFiles.c_str());
         if (myChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
-            if (verbose >= 1)  std::cout << Info() << "Successfully opened " << inputFiles << "." << std::endl;
+            if (verbose >= 1)  std::cout << info() << "Successfully opened " << inputFiles << "." << std::endl;
         } else {
-            std::cout << Error() << "Failed to open" << inputFiles << std::endl;
+            std::cout << error() << "Failed to open" << inputFiles << std::endl;
             throw std::runtime_error("bad input");
         }
     } else {
-        std::cout << Error() << "Unrecognized file extension: " << inputFileExt << std::endl;
+        std::cout << error() << "Unrecognized file extension: " << inputFileExt << std::endl;
         throw std::runtime_error("bad input");
     }
 
     if (myChain->LoadTree(0) < 0) {  // needed because TChain =/= TTree
-        std::cout << Error() << "Failed to load the entries in the file." << std::endl;
+        std::cout << error() << "Failed to load the entries in the file." << std::endl;
         throw std::runtime_error("bad input");
     }
 
-    if (showTiming)
+
+    // _________________________________________________________________________
+    // Run
+
+    if (showTiming) {
         timer.Start();
-
-    // _________________________________________________________________________
-    // Set up the selector
-    // The codes are adapted from TTreePlayer::Process()
-
-    //TTree* fTree = myChain->GetTree();  // only use TTree from here on
-    TTree* fTree = myChain;
-
-    this->SetOption(option.c_str());
-    this->Begin(fTree);       //<===call user initialization function
-    this->Init(fTree);        // Init() follows Begin() as in TSelector
-    if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer is initialized." << std::endl;
-
-    this->Notify();           // Notify() needs to be called explicitly for the first tree;
-                              // handled by TChain for the following trees
-    if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer has opened the first input file." << std::endl;
-
-    // _________________________________________________________________________
-    // Loop over events
-
-    Bool_t process = (this->GetStatus() != -1);
-    if (process) {
-
-        Long64_t firstentry = 0, nentries = fTree->GetEntriesFast(),
-                 entryNumber = 0, localEntry = 0;
-
-        for (Long64_t entry=firstentry; entry<firstentry+nentries; entry++) {
-            if (maxEvents >= 0 && entry >= maxEvents)  break;
-
-            entryNumber = fTree->GetEntryNumber(entry);
-            if (entryNumber < 0) break;
-            localEntry = fTree->LoadTree(entryNumber);
-            if (localEntry < 0) break;
-
-            // The real work is being done here
-            Bool_t pass = this->Process(localEntry);        //<==call user analysis function
-
-            this->totalEvents++;
-            if (pass)
-                this->passedEvents++;
-        }
     }
 
-    if (verbose >= 1)  std::cout << Info() << "Processed " << this->fileCount << " files and they have " << this->unskimmedEventCount << " unskimmed events." << std::endl;
-    if (verbose >= 1)  std::cout << Info() << "Selected " << this->passedEvents << " / " << this->totalEvents << " events." << std::endl;
-
-    // _________________________________________________________________________
-    // Write the output
-
-    this->Terminate();        //<==call user termination function
-    if (verbose >= 2)  std::cout << Debug() << "DemoAnalyzer has finished processing." << std::endl;
+    if (maxEvents < 0)
+        maxEvents = myChain->GetEntriesFast();
+    myChain->Process(this, option.c_str(), maxEvents, 0);
 
     // Done
     if (showTiming) {
         timer.Stop();
-        std::cout << Info() << "CPU  time: " << timer.CpuTime() << std::endl;
-        std::cout << Info() << "Real time: " << timer.RealTime() << std::endl;
+        std::cout << info() << "CPU  time: " << timer.CpuTime() << std::endl;
+        std::cout << info() << "Real time: " << timer.RealTime() << std::endl;
     }
 
     return 0;

@@ -119,7 +119,7 @@ void DemoAnalyzer::Begin(TTree *tree)
     // Set the cuts
     cuts.reset(new Cuts());
     triggerSelector.reset(new TriggerSelector());
-    particleSelector.reset(new ParticleSelector());
+    particleSelector.reset(new ParticleSelector(*params, *cuts));
 
     // Prepare the output tree
     outFileName = params->get_output_filename("demoFile");
@@ -152,7 +152,7 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     const bool isRealData = !(fInfo->runNum == 1);
 
-    bool printEvent = true;
+    bool printEvent = false;
 
     //////////////////
     // GenParticles //

@@ -18,13 +18,14 @@
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
-#include "BLT/BLTAnalysis/interface/AnalysisParameters.hh"
-#include "BLT/BLTAnalysis/interface/AnalysisCuts.hh"
+#include "BLT/BLTAnalysis/interface/Parameters.hh"
+#include "BLT/BLTAnalysis/interface/Cuts.hh"
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 
 // ROOT headers
 #include <TLorentzVector.h>
+#include <TVector3.h>
 #include <TMath.h>
 
 // C++ headers
@@ -59,8 +60,8 @@ public:
     std::string  outTreeName;
 
     // Params and cuts
-    std::unique_ptr<AnalysisParameters> params;
-    std::unique_ptr<AnalysisCuts>       cuts;
+    std::unique_ptr<Parameters>         params;
+    std::unique_ptr<Cuts>               cuts;
     std::unique_ptr<TriggerSelector>    triggerSelector;
     std::unique_ptr<ParticleSelector>   particleSelector;
 

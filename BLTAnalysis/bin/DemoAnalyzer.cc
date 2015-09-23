@@ -107,7 +107,7 @@ void DemoAnalyzer::Begin(TTree *tree)
     assert (options.size() == 7);
 
     // Set the parameters
-    params.reset(new AnalysisParameters());
+    params.reset(new Parameters());
     params->suffix    = options[0];
     params->abcd      = options[1];
     params->selection = options[2];
@@ -117,7 +117,7 @@ void DemoAnalyzer::Begin(TTree *tree)
     params->pileup    = options[6];
 
     // Set the cuts
-    cuts.reset(new AnalysisCuts());
+    cuts.reset(new Cuts());
     triggerSelector.reset(new TriggerSelector());
     particleSelector.reset(new ParticleSelector());
 

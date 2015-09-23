@@ -1,12 +1,12 @@
-#ifndef ANALYSISPARAMETERS_HH
-#define ANALYSISPARAMETERS_HH
+#ifndef PARAMETERS_HH
+#define PARAMETERS_HH
 
 #include <string>
 
-class AnalysisParameters {
+class Parameters {
 public:
-    AnalysisParameters() {}
-    ~AnalysisParameters() {}
+    Parameters() {}
+    ~Parameters() {}
 
     std::string get_output_filename(const std::string& name) {
         return name + "_" + this->dataname + "_" + this->jobcount + ".root";
@@ -26,6 +26,6 @@ public:
 };
 
 // Output streams
-std::ostream& operator<<(std::ostream& os, const AnalysisParameters& params);
+std::ostream& operator<<(std::ostream& os, const Parameters& params);
 
-#endif  // ANALYSISPARAMETERS_HH 
+#endif  // PARAMETERS_HH 

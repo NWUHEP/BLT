@@ -1,5 +1,8 @@
 #include "BLT/BLTAnalysis/interface/Cuts.hh"
 
+#include <iostream>
+#include <stdexcept>
+
 
 Cuts::Cuts() {
     leadJetPt   = 30;

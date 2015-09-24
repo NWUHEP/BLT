@@ -26,7 +26,6 @@
 // ROOT headers
 #include <TLorentzVector.h>
 #include <TVector3.h>
-#include <TMath.h>
 
 // C++ headers
 #include <string>

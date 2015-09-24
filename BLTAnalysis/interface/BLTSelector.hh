@@ -30,7 +30,7 @@
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 
-#include "BLTHelper.hh"
+#include "BLT/BLTAnalysis/interface/BLTHelper.hh"
 
 
 class BLTSelector : public TSelector {

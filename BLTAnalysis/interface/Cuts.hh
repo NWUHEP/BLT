@@ -3,8 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
-#include <stdexcept>
 
 class Cuts {
 public:

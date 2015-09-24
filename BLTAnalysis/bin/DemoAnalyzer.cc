@@ -4,85 +4,6 @@
 // See header file for class documentation
 //
 
-// _____________________________________________________________________________
-// Useful functions
-
-namespace baconhep {
-    class TMET : public TObject
-    {
-    public:
-        TMET():  pt(0), phi(0) {}
-        ~TMET() {}
-        float pt, phi;
-    };
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TGenParticle* p) {
-    return os << "pdgId: " << p->pdgId << " status: " << p->status << " parent: " << p->parent << " pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi << " mass: " << p->mass << " y: " << p->y;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TVertex* p) {
-    return os << "z: " << p->z << " perp: " << quad_sum(p->x, p->y) << " ndof: " << p->ndof;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TMuon* p) {
-    return os << "pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi << " q: " << p->q;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TElectron* p) {
-    return os << "pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi << " q: " << p->q;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TPhoton* p) {
-    return os << "pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TTau* p) {
-    return os << "pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi << " q: " << p->q;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TJet* p) {
-    return os << "pt: " << p->pt << " eta: " << p->eta << " phi: " << p->phi << " mass: " << p->mass;
-}
-
-std::ostream& operator<<(std::ostream& os, const baconhep::TMET* p) {
-    return os << "pt: " << p->pt << " phi: " << p->phi;
-}
-
-template<class T>
-void copy_p4(const T* lhs, float mass, TLorentzVector& rhs) {
-    rhs.SetPtEtaPhiM(lhs->pt, lhs->eta, lhs->phi, mass);
-}
-
-//template<class T>
-//bool sort_by_higher_pt(const T& lhs, const T& rhs) {
-//    return lhs.pt > rhs.pt;
-//}
-
-//template<class T>
-//bool sort_by_higher_pt(const T* lhs, const T* rhs) {
-//    return lhs->pt > rhs->pt;
-//}
-
-template<class T>
-bool sort_by_higher_pt(const T* lhs, const T* rhs) {
-    return lhs->pt > rhs->pt;
-}
-
-//bool sort_by_higher_pt(const baconhep::TMuon* lhs, const baconhep::TMuon* rhs) {
-//    return lhs->pt > rhs->pt;
-//}
-
-static const double ELE_MASS  = 0.000511;
-static const double MUON_MASS = 0.105658369;
-
-static const int ELE_PDGID  = 11;  // e-
-static const int MUON_PDGID = 13;  // mu-
-static const int Z_PDGID = 23;
-
-
-// _____________________________________________________________________________
-// DemoAnalyzer implementations
 
 using namespace baconhep;
 
@@ -118,8 +39,8 @@ void DemoAnalyzer::Begin(TTree *tree)
 
     // Set the cuts
     cuts.reset(new Cuts());
-    triggerSelector.reset(new TriggerSelector());
     particleSelector.reset(new ParticleSelector(*params, *cuts));
+    triggerSelector.reset(new TriggerSelector());
 
     // Prepare the output tree
     outFileName = params->get_output_filename("demoFile");
@@ -150,7 +71,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
-    const bool isRealData = !(fInfo->runNum == 1);
+    const bool isRealData = (fInfo->runNum != 1);
+    particleSelector->SetRealData(isRealData);
+    triggerSelector->SetRealData(isRealData);
 
     bool printEvent = false;
 
@@ -161,9 +84,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     if (printEvent) {
         if (!isRealData) {
             for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-                const TGenParticle* thisGenParticle = (TGenParticle*) fGenParticleArr->At(i);
-                assert(thisGenParticle);
-                std::cout << "GenParticle " << i << ": " << thisGenParticle << std::endl;
+                const TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+                assert(particle);
+                std::cout << "GenParticle " << i << ": " << particle << std::endl;
             }
         }
     }
@@ -174,9 +97,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fPVArr->GetEntries(); i++) {
-            const TVertex* thisVertex = (TVertex*) fPVArr->At(i);
-            assert(thisVertex);
-            std::cout << "Vertex " << i << ": " << thisVertex << std::endl;
+            const TVertex* vertex = (TVertex*) fPVArr->At(i);
+            assert(vertex);
+            std::cout << "Vertex " << i << ": " << vertex << std::endl;
         }
     }
 
@@ -186,9 +109,12 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fMuonArr->GetEntries(); i++) {
-            const TMuon* thisMuon = (TMuon*) fMuonArr->At(i);
-            assert(thisMuon);
-            std::cout << "Muon " << i << ": " << thisMuon << std::endl;
+            const TMuon* muon = (TMuon*) fMuonArr->At(i);
+            assert(muon);
+            std::cout << "Muon " << i << ": " << muon
+                      << " tightMuID: " << particleSelector->PassMuonID(muon, cuts->tightMuID)
+                      << " tightMuIso: " << particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+                      << std::endl;
         }
     }
 
@@ -198,9 +124,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fElectronArr->GetEntries(); i++) {
-            const TElectron* thisElectron = (TElectron*) fElectronArr->At(i);
-            assert(thisElectron);
-            std::cout << "Electron " << i << ": " << thisElectron << std::endl;
+            const TElectron* electron = (TElectron*) fElectronArr->At(i);
+            assert(electron);
+            std::cout << "Electron " << i << ": " << electron << std::endl;
         }
     }
 
@@ -210,9 +136,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fPhotonArr->GetEntries(); i++) {
-            const TPhoton* thisPhoton = (TPhoton*) fPhotonArr->At(i);
-            assert(thisPhoton);
-            std::cout << "Photon " << i << ": " << thisPhoton << std::endl;
+            const TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
+            assert(photon);
+            std::cout << "Photon " << i << ": " << photon << std::endl;
         }
     }
 
@@ -222,9 +148,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fTauArr->GetEntries(); i++) {
-            const TTau* thisTau = (TTau*) fTauArr->At(i);
-            assert(thisTau);
-            std::cout << "Tau " << i << ": " << thisTau << std::endl;
+            const TTau* tau = (TTau*) fTauArr->At(i);
+            assert(tau);
+            std::cout << "Tau " << i << ": " << tau << std::endl;
         }
     }
 
@@ -234,9 +160,9 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     if (printEvent) {
         for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
-            const TJet* thisJet = (TJet*) fAK4CHSArr->At(i);
-            assert(thisJet);
-            std::cout << "Jet " << i << ": " << thisJet << std::endl;
+            const TJet* jet = (TJet*) fAK4CHSArr->At(i);
+            assert(jet);
+            std::cout << "Jet " << i << ": " << jet << std::endl;
         }
     }
 
@@ -264,11 +190,11 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     std::vector<const TMuon*> muons;
 
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
-        const TMuon* thisMuon = (TMuon*) fMuonArr->At(i);
-        assert(thisMuon);
+        const TMuon* muon = (TMuon*) fMuonArr->At(i);
+        assert(muon);
 
-        if (thisMuon->pt > 20 && std::abs(thisMuon->eta) < 2.4)
-            muons.push_back(thisMuon);
+        if (muon->pt > 20 && std::abs(muon->eta) < 2.4)
+            muons.push_back(muon);
     }
 
     std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -309,49 +235,34 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     int tmp_genMuonOneCharge = 0;
     int tmp_genMuonTwoCharge = 0;
 
-/*
-    int idx_genZ = -1;
-    for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-        const TGenParticle* thisGenParticle = (TGenParticle*) fGenParticleArr->At(i);
-        assert(thisGenParticle);
-
-        if (std::abs(thisGenParticle->pdgId) == Z_PDGID && thisGenParticle->status == 22) {
-            idx_genZ = i;
-            copy_p4(thisGenParticle, thisGenParticle->mass, tmp_genZ);
-        }
-    }
-
-    assert(idx_genZ != -1);
-*/
-
     int idx_genMuonOne = -1;
     int idx_genMuonTwo = -1;
     for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-        const TGenParticle* thisGenParticle = (TGenParticle*) fGenParticleArr->At(i);
-        assert(thisGenParticle);
+        const TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+        assert(particle);
 
-        if (std::abs(thisGenParticle->pdgId) == 13 && thisGenParticle->status == 1) {
+        if (std::abs(particle->pdgId) == 13 && particle->status == 1) {
             // Check parent
-            const TGenParticle* thisGenParticleParent = 0;
-            if (thisGenParticle->parent >= 0) {
-                thisGenParticleParent = (TGenParticle*) fGenParticleArr->At(thisGenParticle->parent);
-                while (thisGenParticleParent->pdgId == thisGenParticle->pdgId && thisGenParticleParent->parent >= 0) {
-                    thisGenParticleParent = (TGenParticle*) fGenParticleArr->At(thisGenParticleParent->parent);
+            const TGenParticle* particleParent = 0;
+            if (particle->parent >= 0) {
+                particleParent = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                while (particleParent->pdgId == particle->pdgId && particleParent->parent >= 0) {
+                    particleParent = (TGenParticle*) fGenParticleArr->At(particleParent->parent);
                 }
             }
 
-            if (!thisGenParticleParent || thisGenParticleParent->pdgId != Z_PDGID)
+            if (!particleParent || particleParent->pdgId != Z_PDGID)
                 continue;
 
             if (idx_genMuonOne == -1) {
                 idx_genMuonOne = i;
-                copy_p4(thisGenParticle, thisGenParticle->mass, tmp_genMuonOne);
-                tmp_genMuonOneCharge = -1 * thisGenParticle->pdgId / std::abs(thisGenParticle->pdgId);
+                copy_p4(particle, particle->mass, tmp_genMuonOne);
+                tmp_genMuonOneCharge = -1 * particle->pdgId / std::abs(particle->pdgId);
 
             } else if (idx_genMuonTwo == -1) {
                 idx_genMuonTwo = i;
-                copy_p4(thisGenParticle, thisGenParticle->mass, tmp_genMuonTwo);
-                tmp_genMuonTwoCharge = -1 * thisGenParticle->pdgId / std::abs(thisGenParticle->pdgId);
+                copy_p4(particle, particle->mass, tmp_genMuonTwo);
+                tmp_genMuonTwoCharge = -1 * particle->pdgId / std::abs(particle->pdgId);
 
             } else {
                 assert(false);

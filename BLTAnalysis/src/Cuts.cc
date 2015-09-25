@@ -20,6 +20,38 @@ Cuts::Cuts() {
     zgMassLow   = 100;
     zgMassHigh  = 190;
 
+    //combined rel ISO, 2012 Data, 0.5 GeV
+    EAMu[0] =   0.674; //         eta < 1.0
+    EAMu[1] =   0.565; // 1.0   < eta < 1.5
+    EAMu[2] =   0.442; // 1.5   < eta < 2.0
+    EAMu[3] =   0.515; // 2.0   < eta < 2.2
+    EAMu[4] =   0.821; // 2.2   < eta < 2.3
+    EAMu[5] =   0.660; // 2.3   < eta < 2.4
+
+    EAEl[0] =   0.208; //         eta < 1.0
+    EAEl[1] =   0.209; // 1.0   < eta < 1.5
+    EAEl[2] =   0.115; // 1.5   < eta < 2.0
+    EAEl[3] =   0.143; // 2.0   < eta < 2.2
+    EAEl[4] =   0.183; // 2.2   < eta < 2.3
+    EAEl[5] =   0.194; // 2.3   < eta < 2.4
+    EAEl[6] =   0.261; // 2.4   < eta
+
+    //   ch      nh       ph
+    float EAPhoTemp[7][3] = {
+        {0.012,  0.030,   0.148}, //         eta < 1.0
+        {0.010,  0.057,   0.130}, // 1.0   < eta < 1.479
+        {0.014,  0.039,   0.112}, // 1.479 < eta < 2.0
+        {0.012,  0.015,   0.216}, // 2.0   < eta < 2.2
+        {0.016,  0.024,   0.262}, // 2.2   < eta < 2.3
+        {0.020,  0.039,   0.260}, // 2.3   < eta < 2.4
+        {0.012,  0.072,   0.266}  // 2.4   < eta
+    };
+
+    for (unsigned int i =0; i<7; i++)
+        for (unsigned int j =0; j<3; j++)
+            EAPho[i][j] = EAPhoTemp[i][j];
+
+
     vetoElID.cutName                      = "vetoElID";
     vetoElID.dEtaIn[0]                    = 0.007;
     vetoElID.dPhiIn[0]                    = 0.8;
@@ -314,70 +346,23 @@ Cuts::Cuts() {
     vbfJetID.dR2Mean[2]                     = 0.05;
     vbfJetID.dR2Mean[3]                     = 0.055;
 
+    looseJetID.cutName                      = "looseJetID";
+    looseJetID.NHF                          = 0.99;
+    looseJetID.NEMF                         = 0.99;
+    looseJetID.NumConst                     = 1;
+    looseJetID.MUF                          = 0.8;
+    looseJetID.CHF                          = 0;
+    looseJetID.CHM                          = 0;
+    looseJetID.CEMF                         = 0.99;
+    looseJetID.CSV                          = -99;
+
     bJetID.cutName                          = "bJetID";
-    bJetID.betaStarC[0]                     = 0.2;
-    bJetID.dR2Mean[0]                       = 0.06;
-    bJetID.betaStarC[1]                     = 0.3;
-    bJetID.dR2Mean[1]                       = 0.05;
-    bJetID.dR2Mean[2]                       = 0.05;
-    bJetID.dR2Mean[3]                       = 0.055;
-}
-
-void Cuts::InitEA(const std::string year)
-{
-    if (year.find("2012") != std::string::npos) {
-        //combined rel ISO, 2012 Data, 0.5 GeV
-        EAMu[0] =   0.674; //         eta < 1.0
-        EAMu[1] =   0.565; // 1.0   < eta < 1.5
-        EAMu[2] =   0.442; // 1.5   < eta < 2.0
-        EAMu[3] =   0.515; // 2.0   < eta < 2.2
-        EAMu[4] =   0.821; // 2.2   < eta < 2.3
-        EAMu[5] =   0.660; // 2.3   < eta < 2.4
-
-        EAEl[0] =   0.208; //         eta < 1.0
-        EAEl[1] =   0.209; // 1.0   < eta < 1.5
-        EAEl[2] =   0.115; // 1.5   < eta < 2.0
-        EAEl[3] =   0.143; // 2.0   < eta < 2.2
-        EAEl[4] =   0.183; // 2.2   < eta < 2.3
-        EAEl[5] =   0.194; // 2.3   < eta < 2.4
-        EAEl[6] =   0.261; // 2.4   < eta
-
-    } else if (year.find("2011") != std::string::npos) {
-        //combined rel ISO, 2011 Data, 0.5 GeV
-        EAMu[0] =   0.132; //         eta < 1.0
-        EAMu[1] =   0.120; // 1.0   < eta < 1.5
-        EAMu[2] =   0.114; // 1.5   < eta < 2.0
-        EAMu[3] =   0.139; // 2.0   < eta < 2.2
-        EAMu[4] =   0.168; // 2.2   < eta < 2.3
-        EAMu[5] =   0.189; // 2.3   < eta < 2.4
-
-        EAEl[0] =   0.208; //         eta < 1.0
-        EAEl[1] =   0.209; // 1.0   < eta < 1.5
-        EAEl[2] =   0.115; // 1.5   < eta < 2.0
-        EAEl[3] =   0.143; // 2.0   < eta < 2.2
-        EAEl[4] =   0.183; // 2.2   < eta < 2.3
-        EAEl[5] =   0.194; // 2.3   < eta < 2.4
-        EAEl[6] =   0.261; // 2.4   < eta
-
-    } else {
-        std::cout << "period: " << year << " != 2011 OR 2012, figure your shit out" << std::endl;
-        throw std::invalid_argument("Cuts::InitEA");
-    }
-
-    //   ch      nh       ph
-    float EAPhTemp[7][3] = {
-        {0.012,  0.030,   0.148}, //         eta < 1.0
-        {0.010,  0.057,   0.130}, // 1.0   < eta < 1.479
-        {0.014,  0.039,   0.112}, // 1.479 < eta < 2.0
-        {0.012,  0.015,   0.216}, // 2.0   < eta < 2.2
-        {0.016,  0.024,   0.262}, // 2.2   < eta < 2.3
-        {0.020,  0.039,   0.260}, // 2.3   < eta < 2.4
-        {0.012,  0.072,   0.266}  // 2.4   < eta
-    };
-
-    for (unsigned int i =0; i<7; i++){
-        for (unsigned int j =0; j<3; j++){
-            EAPh[i][j] = EAPhTemp[i][j];
-        }
-    }
+    bJetID.NHF                              = 0.99;
+    bJetID.NEMF                             = 0.99;
+    bJetID.NumConst                         = 1;
+    bJetID.MUF                              = 0.8;
+    bJetID.CHF                              = 0;
+    bJetID.CHM                              = 0;
+    bJetID.CEMF                             = 0.99;
+    bJetID.CSV                              = 0.679;  // medium WP
 }

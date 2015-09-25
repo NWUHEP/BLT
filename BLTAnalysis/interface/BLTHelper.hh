@@ -28,6 +28,7 @@ static const double MUON_MASS = 0.105658369;
 
 static const int ELE_PDGID  = 11;  // e-
 static const int MUON_PDGID = 13;  // mu-
+static const int TAU_PDGID = 15;   // tau-
 static const int Z_PDGID = 23;
 
 // Math
@@ -39,6 +40,11 @@ bool starts_with(const std::string& str1, const std::string& str2);
 bool ends_with(const std::string& str1, const std::string& str2);
 
 // Copy functions
+template<class T>
+void copy_xyz(const T* lhs, TVector3& rhs) {
+    rhs.SetXYZ(lhs->x, lhs->y, lhs->z);
+}
+
 template<class T>
 void copy_p4(const T* lhs, float mass, TLorentzVector& rhs) {
     rhs.SetPtEtaPhiM(lhs->pt, lhs->eta, lhs->phi, mass);

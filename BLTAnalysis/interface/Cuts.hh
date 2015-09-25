@@ -13,7 +13,7 @@ public:
           zMassLow, zMassHigh, metLow, metHigh, zgMassLow, zgMassHigh;
     float EAMu[6];
     float EAEl[7];
-    float EAPh[7][3];
+    float EAPho[7][3];
 
     struct muIDCuts {
         float IsPF;
@@ -37,7 +37,7 @@ public:
         std::string cutName;
     } looseMuIso, tightMuIso;
 
-    struct elIDCuts{
+    struct elIDCuts {
         //broken into [0] barrel and [1] endcap
         float dEtaIn[2];
         float dPhiIn[2];
@@ -55,7 +55,7 @@ public:
         std::string cutName;
     } vetoElID, looseElID, mediumElID, mvaPreElID;
 
-    struct elIsoCuts{
+    struct elIsoCuts {
         float chIso04;
         float nhIso04;
         float phIso04;
@@ -68,7 +68,7 @@ public:
     } looseElIso, mediumElIso;
 
 
-    struct phIDCuts{
+    struct phIDCuts {
         //broken into [0] barrel and [1] endcap
         float PassedEleSafeVeto[2];
         float HadOverEm[2];
@@ -79,7 +79,7 @@ public:
         std::string cutName;
     } loosePhID, mediumPhID, preSelPhID;
 
-    struct phIsoCuts{
+    struct phIsoCuts {
         float chIso03[2];
         float nhIso03[2];
         float phIso03[2];
@@ -87,7 +87,7 @@ public:
         std::string cutName;
     } loosePhIso, mediumPhIso;
 
-    struct phMVACuts{
+    struct phMVACuts {
         float mvaValCat1;
         float mvaValCat2;
         float mvaValCat3;
@@ -95,7 +95,7 @@ public:
         std::string cutName;
     } catPhMVAID;
 
-    struct elMVACuts{
+    struct elMVACuts {
         float mvaVal[6];
         float pt[2];
         float eta[3];
@@ -105,13 +105,23 @@ public:
         std::string cutName;
     } hzgMVAID, hzzMVAID, hwwMVAID;
 
-    struct jetIDCuts{
+    struct vbfJetIDCuts {
         float betaStarC[2];
         float dR2Mean[4];
         std::string cutName;
-    } vbfJetID, bJetID;
+    } vbfJetID;
 
-    void InitEA(const std::string year);
+    struct jetIDCuts {
+        unsigned int NumConst;
+        unsigned int CHM;
+        float NHF;
+        float NEMF;
+        float CHF;
+        float CEMF;
+        float MUF;
+        float CSV;
+        std::string cutName;
+    } looseJetID, bJetID;
 };
 
 #endif  // CUTS_HH

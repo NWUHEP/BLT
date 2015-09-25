@@ -56,8 +56,6 @@ void DemoAnalyzer::Begin(TTree *tree)
     outTree->Branch("genMuonOne", &genMuonOne);
     outTree->Branch("genMuonTwo", &genMuonTwo);
     outTree->Branch("genZ", &genZ);
-    outTree->Branch("genMuonOneCharge", &genMuonOneCharge);
-    outTree->Branch("genMuonTwoCharge", &genMuonTwoCharge);
 
     ReportPostBegin();
 }
@@ -72,7 +70,18 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
     const bool isRealData = (fInfo->runNum != 1);
+
     particleSelector->SetRealData(isRealData);
+    if (fInfo->hasGoodPV) {
+        assert(fPVArr->GetEntries() != 0);
+        TVector3 pv;
+        copy_xyz((TVertex*) fPVArr->At(0), pv);
+        particleSelector->SetPV(pv);
+    } else {
+        particleSelector->SetPV(TVector3());
+    }
+    particleSelector->SetNPV(fInfo->nPU + 1);
+    particleSelector->SetRho(fInfo->rhoJet);
     triggerSelector->SetRealData(isRealData);
 
     bool printEvent = false;
@@ -187,10 +196,10 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     // Select //
     ////////////
 
-    std::vector<const TMuon*> muons;
+    std::vector<TMuon*> muons;
 
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
-        const TMuon* muon = (TMuon*) fMuonArr->At(i);
+        TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
 
         if (muon->pt > 20 && std::abs(muon->eta) < 2.4)
@@ -199,80 +208,24 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
 
-    bool found_dimuon = false;
-    TLorentzVector tmp_muonOne;
-    TLorentzVector tmp_muonTwo;
-    TLorentzVector tmp_dimuon;
+    TLorentzVector tmp_muonOne, tmp_muonTwo;
+    int            idx_muonOne, idx_muonTwo;
 
-    for (unsigned i=0; i<muons.size(); ++i) {
-        const TMuon* imuon = muons.at(i);
-        copy_p4(imuon, MUON_MASS, tmp_muonOne);
-
-        for (unsigned j=i+1; j<muons.size(); ++j) {
-            const TMuon* jmuon = muons.at(j);
-            copy_p4(jmuon, MUON_MASS, tmp_muonTwo);
-
-            tmp_dimuon = tmp_muonOne + tmp_muonTwo;
-
-            if (imuon->q != jmuon->q) {
-                if (70 < tmp_dimuon.M() && tmp_dimuon.M() < 120) {
-                    found_dimuon = true;
-                    break;
-                }
-            }
-        }
-
-        if (found_dimuon)
-            break;
-    }
+    bool found_dimuon = particleSelector->FindGoodDiMuons(muons, tmp_muonOne, tmp_muonTwo, idx_muonOne, idx_muonTwo);
 
     if (!found_dimuon)
         return kFALSE;
 
-    TLorentzVector tmp_genMuonOne;
-    TLorentzVector tmp_genMuonTwo;
-    TLorentzVector tmp_genZ;
-    int tmp_genMuonOneCharge = 0;
-    int tmp_genMuonTwoCharge = 0;
+    TLorentzVector tmp_genZ, tmp_genMuonOne, tmp_genMuonTwo;
+    int            idx_genZ, idx_genMuonOne, idx_genMuonTwo;
 
-    int idx_genMuonOne = -1;
-    int idx_genMuonTwo = -1;
-    for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-        const TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-        assert(particle);
+    bool found_genZ = particleSelector->FindGenZToLL(fGenParticleArr, tmp_genZ, tmp_genMuonOne, tmp_genMuonTwo, idx_genZ, idx_genMuonOne, idx_genMuonTwo);
 
-        if (std::abs(particle->pdgId) == 13 && particle->status == 1) {
-            // Check parent
-            const TGenParticle* particleParent = 0;
-            if (particle->parent >= 0) {
-                particleParent = (TGenParticle*) fGenParticleArr->At(particle->parent);
-                while (particleParent->pdgId == particle->pdgId && particleParent->parent >= 0) {
-                    particleParent = (TGenParticle*) fGenParticleArr->At(particleParent->parent);
-                }
-            }
+    if (!found_genZ)
+        return kFALSE;
 
-            if (!particleParent || particleParent->pdgId != Z_PDGID)
-                continue;
-
-            if (idx_genMuonOne == -1) {
-                idx_genMuonOne = i;
-                copy_p4(particle, particle->mass, tmp_genMuonOne);
-                tmp_genMuonOneCharge = -1 * particle->pdgId / std::abs(particle->pdgId);
-
-            } else if (idx_genMuonTwo == -1) {
-                idx_genMuonTwo = i;
-                copy_p4(particle, particle->mass, tmp_genMuonTwo);
-                tmp_genMuonTwoCharge = -1 * particle->pdgId / std::abs(particle->pdgId);
-
-            } else {
-                assert(false);
-            }
-        }
-    }
-
-    assert((idx_genMuonOne == -1 && idx_genMuonTwo == -1) || (idx_genMuonOne != -1 && idx_genMuonTwo != -1));
-
-    if (idx_genMuonOne == -1 || idx_genMuonTwo == -1)  // FIXME
+    if (std::abs(((TGenParticle *)fGenParticleArr->At(idx_genMuonOne))->pdgId) != MUON_PDGID ||
+        std::abs(((TGenParticle *)fGenParticleArr->At(idx_genMuonTwo))->pdgId) != MUON_PDGID)
         return kFALSE;
 
 
@@ -282,18 +235,14 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
 
     muonOne = tmp_muonOne;
     muonTwo = tmp_muonTwo;
-    dimuon  = tmp_dimuon;
+    dimuon  = muonOne + muonTwo;
 
     if (tmp_genMuonOne.Pt() > tmp_genMuonTwo.Pt()) {
         genMuonOne = tmp_genMuonOne;
         genMuonTwo = tmp_genMuonTwo;
-        genMuonOneCharge = tmp_genMuonOneCharge;
-        genMuonTwoCharge = tmp_genMuonTwoCharge;
     } else {
         genMuonOne = tmp_genMuonTwo;
         genMuonTwo = tmp_genMuonOne;
-        genMuonOneCharge = tmp_genMuonTwoCharge;
-        genMuonTwoCharge = tmp_genMuonOneCharge;
     }
     genZ = genMuonOne + genMuonTwo;
 

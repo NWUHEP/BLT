@@ -8,7 +8,7 @@ using namespace baconhep;
 using namespace std;
 
 bool test_bits(unsigned int bits, unsigned int test) {
-    return !!(bits & test);
+    return (bits & test) == test;
 }
 
 ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cuts) {

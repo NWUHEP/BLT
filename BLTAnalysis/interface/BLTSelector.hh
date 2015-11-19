@@ -68,6 +68,7 @@ public :
     baconhep::TEventInfo    *fInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
     TClonesArray            *fGenParticleArr;
+    TClonesArray            *fLHEWeightArr;
     TClonesArray            *fElectronArr;
     TClonesArray            *fMuonArr;
     TClonesArray            *fTauArr;
@@ -87,6 +88,7 @@ public :
     TBranch                 *b_Info;
     TBranch                 *b_GenEvtInfo;
     TBranch                 *b_GenParticleArr;
+    TBranch                 *b_LHEWeightArr;
     TBranch                 *b_ElectronArr;
     TBranch                 *b_MuonArr;
     TBranch                 *b_TauArr;
@@ -133,6 +135,7 @@ void BLTSelector::Init(TTree *tree)
     fInfo                    = 0;
     fGenEvtInfo              = 0;
     fGenParticleArr          = 0;
+    fLHEWeightArr            = 0;
     fElectronArr             = 0;
     fMuonArr                 = 0;
     fTauArr                  = 0;
@@ -152,6 +155,7 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("Info", &fInfo, &b_Info);
     fChain->SetBranchAddress("GenEvtInfo", &fGenEvtInfo, &b_GenEvtInfo);
     fChain->SetBranchAddress("GenParticle", &fGenParticleArr, &b_GenParticleArr);
+    fChain->SetBranchAddress("LHEWeight", &fLHEWeightArr, &b_LHEWeightArr);
     fChain->SetBranchAddress("Electron", &fElectronArr, &b_ElectronArr);
     fChain->SetBranchAddress("Muon", &fMuonArr, &b_MuonArr);
     fChain->SetBranchAddress("Tau", &fTauArr, &b_TauArr);

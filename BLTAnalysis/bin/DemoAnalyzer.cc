@@ -258,18 +258,18 @@ void DemoAnalyzer::Terminate()
 
 void DemoAnalyzer::ReportPostBegin()
 {
-    std::cout << "  ==== Begin Job ==========" << std::endl;
+    std::cout << "  ==== Begin Job =============================================" << std::endl;
     std::cout << *params << std::endl;
-    std::cout << "  =========================" << std::endl;
+    std::cout << "  ============================================================" << std::endl;
 }
 
 void DemoAnalyzer::ReportPostTerminate()
 {
-    std::cout << "  ==== Terminate Job ======" << std::endl;
+    std::cout << "  ==== Terminate Job =========================================" << std::endl;
     std::cout << "  output   : " << params->get_output_filename("demoFile") << std::endl;
     std::cout << "           : Processed " << this->fileCount << " files with " << this->unskimmedEventCount << " unskimmed events." << std::endl;
     std::cout << "           : Selected " << this->passedEvents << " / " << this->totalEvents << " events." << std::endl;
-    std::cout << "  =========================" << std::endl;
+    std::cout << "  ============================================================" << std::endl;
 }
 
 

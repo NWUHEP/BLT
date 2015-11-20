@@ -173,28 +173,4 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15PuppiArr, &b_AddCA15PuppiArr);
 }
 
-Bool_t BLTSelector::Notify()
-{
-    // The Notify() function is called when a new file is opened. This
-    // can be either for a new TTree in a TChain or when when a new TTree
-    // is started when using PROOF. It is normally not necessary to make changes
-    // to the generated code, but the routine can be extended by the
-    // user if needed. The return value is currently not used.
-
-    // Keep traack of number of files and number of events
-    fileCount += 1;
-    fCurrentFile = fChain->GetCurrentFile();
-    if (!fCurrentFile) {
-        throw std::runtime_error("Cannot get current file");
-    }
-    TH1* h1 = (TH1*) fCurrentFile->Get("TotalEvents");
-    if (!h1) {
-        throw std::runtime_error("Cannot get 'TotalEvents' histogram");
-    }
-    hTotalEvents->Add(h1);
-    unskimmedEventCount += h1->GetBinContent(1);
-
-    return kTRUE;
-}
-
 #endif  // BLTSELECTOR_HH

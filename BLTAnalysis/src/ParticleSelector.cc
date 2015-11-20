@@ -550,7 +550,6 @@ bool ParticleSelector::FindGenZToLL(const TClonesArray* genParticles,
     }
 
     bool goodZToLL = false;
-
     for (int i=0; i<genParticles->GetEntries(); i++) {
         const TGenParticle* particle = (TGenParticle*) genParticles->At(i);
         assert(particle);
@@ -579,7 +578,8 @@ bool ParticleSelector::FindGenZToLL(const TClonesArray* genParticles,
                 copy_p4(particle, particle->mass, genLep2);
                 goodZToLL = true;
             } else {
-                assert(false);
+                // More than 2 leptons
+                goodZToLL = false;
             }
         }
     }

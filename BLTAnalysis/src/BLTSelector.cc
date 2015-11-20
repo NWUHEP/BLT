@@ -14,6 +14,12 @@
 
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
 
+#include <TStopwatch.h>
+
+#include <iostream>
+#include <string>
+#include <stdexcept>
+
 
 void BLTSelector::Begin(TTree * /*tree*/)
 {
@@ -76,13 +82,38 @@ void BLTSelector::Terminate()
 }
 
 // _____________________________________________________________________________
+// Notify() keeps track of the files that are processed
+
+Bool_t BLTSelector::Notify()
+{
+    // The Notify() function is called when a new file is opened. This
+    // can be either for a new TTree in a TChain or when when a new TTree
+    // is started when using PROOF. It is normally not necessary to make changes
+    // to the generated code, but the routine can be extended by the
+    // user if needed. The return value is currently not used.
+
+    // Keep traack of number of files and number of events
+    fileCount += 1;
+    fCurrentFile = fChain->GetCurrentFile();
+    if (!fCurrentFile) {
+        throw std::runtime_error("Cannot get current file");
+    }
+    TH1* h1 = (TH1*) fCurrentFile->Get("TotalEvents");
+    if (!h1) {
+        throw std::runtime_error("Cannot get 'TotalEvents' histogram");
+    }
+    hTotalEvents->Add(h1);
+
+    long int eventCount = h1->GetBinContent(1);
+    unskimmedEventCount += eventCount;
+
+    std::cout << info() << "Processing " << fCurrentFile->GetName() << " with " << eventCount << " unskimmed events." << std::endl;
+
+    return kTRUE;
+}
+
+// _____________________________________________________________________________
 // MakeMeSandwich() acts like the "main" function
-
-#include <TStopwatch.h>
-
-#include <iostream>
-#include <string>
-#include <stdexcept>
 
 Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
 
@@ -133,7 +164,7 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         if (myChain->AddFile(inputFiles.c_str())) {
             if (verbose >= 1)  std::cout << info() << "Trying to open " << inputFiles << "." << std::endl;
         } else {
-            std::cout << error() << "Failed to open" << inputFiles << std::endl;
+            std::cout << error() << "Failed to open " << inputFiles << std::endl;
             throw std::runtime_error("bad input");
         }
     } else if (inputFileExt == "txt") {
@@ -141,7 +172,7 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         if (fc.AddFromFile(inputFiles.c_str()) && myChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
             if (verbose >= 1)  std::cout << info() << "Trying to open " << inputFiles << "." << std::endl;
         } else {
-            std::cout << error() << "Failed to open" << inputFiles << std::endl;
+            std::cout << error() << "Failed to open " << inputFiles << std::endl;
             throw std::runtime_error("bad input");
         }
     } else {

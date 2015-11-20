@@ -1,59 +1,66 @@
 #!/usr/bin/env python
 
+"""
+A condor job submitter. This script prepares the input source file, the job
+config, and the executable.
+"""
+
 import os
 import sys
 import subprocess
-import logging
-import string
 
-#from CRABClient.JobType.UserTarball import UserTarball
-from pack import UserTarball
-from CRABClient.UserUtilities import config
+class CondorJobType(object):
 
+    def __init__(self):
 
-# Based on CRABClient.JobType.BasicJobType and CRABClient.JobType.Analysis
-class BasicJobType(object):
-    '''
-    BasicJobType
-    '''
+        self.projdir        = 'blt_projects'
+        self.srcdir         = 'sourceFiles'
+        self.tgz_name       = 'default.tgz'
+        self.txt_name       = 'input.txt'
+        self.jdl_name       = 'blt.jdl'
+        self.exe_name       = 'blt.sh'
+        self.jobid          = 1
 
-    def __init__(self, config, logger):
-        self.config = config
-        self.logger = logger
-        self.projdir = 'blt_projects'
-        self.srcdir = 'sourceFiles'
-        self.tarFilename = 'default.tgz'
-        self.txtFilename = 'input.txt'
-        self.jdlFilename = 'blt.jdl'
-        self.exeFilename = 'blt.sh'
-        self.jobid = 1
-        self.njobs = self.config.User.njobs
+        self.analyzer       = sys.argv[1]
+        self.dataset        = sys.argv[2]
+        self.datasetgroup   = sys.argv[3]
+        self.selection      = sys.argv[4]
+        self.period         = sys.argv[5]
+        self.njobs          = int(sys.argv[6])
 
-        self.configurations = {
+        self.config = {
             'PROJDIR'      : self.projdir,
             'SRCDIR'       : self.srcdir,
-            'TARBALL'      : self.tarFilename,
-            'SOURCEFILE'   : self.txtFilename,
-            'JOBAD'        : self.jdlFilename,
-            'EXECUTABLE'   : self.exeFilename,
+            'TARBALL'      : self.tgz_name,
+            'SOURCEFILE'   : self.txt_name,
+            'JOBAD'        : self.jdl_name,
+            'EXECUTABLE'   : self.exe_name,
             'JOBID'        : self.jobid,
+
+            'ANALYZER'     : self.analyzer,
+            'DATASET'      : self.dataset,
+            'DATASETGROUP' : self.datasetgroup,
+            'SELECTION'    : self.selection,
+            'PERIOD'       : self.period,
+            'NJOBS'        : self.njobs,
+
             'MACHINE'      : 'cmslpc',
             'MAXEVENTS'    : '-1',
             'JOBNAME'      : 'job',
             'LOGNAME'      : 'res',
         }
 
-        for k, v in self.config.User.dictionary_().iteritems():
-            self.configurations[string.upper(k)] = v
-        self.configurations['JOBPATH'] = '{PROJDIR}/{ANALYZER}/{DATASET}'.format(**self.configurations)
+        self.config['JOBPATH'] = '{PROJDIR}/{ANALYZER}/{DATASET}'.format(**self.config)
 
+    def safety_check(self):
+        if not os.path.exists('{SRCDIR}/{DATASET}.txt'.format(**self.config)):
+            raise Exception('Cannot find source file: {SRCDIR}/{DATASET}.txt'.format(**job.configurations))
+
+        if not os.path.exists('{TARBALL}'.format(**self.config)):
+            raise Exception('Cannot find tarball: {TARBALL}'.format(**self.config))
 
     def run(self):
-        print('[INFO   ] Job directory: %s' % self.configurations['JOBPATH'])
-
         self.make_dirs()
-
-        self.write_tgz()
 
         self.write_exe()
 
@@ -63,9 +70,9 @@ class BasicJobType(object):
             else:
                 self.append_jdl()
             self.jobid += 1
-            self.configurations['JOBID'] = self.jobid
+            self.config['JOBID'] = self.jobid
 
-        self.submit()
+        self.submit_jobs()
         return
 
     def make_dirs(self):
@@ -74,19 +81,12 @@ class BasicJobType(object):
 rm -rf {JOBPATH}/*
 mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
 cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
-'''.format(**self.configurations)
+'''.format(**self.config)
         commands = commands.strip().split('\n')
 
         #print commands
         for cmd in commands:
             subprocess.call(cmd, shell=True)
-        return
-
-    def write_tgz(self):
-        cfgOutputName = None
-        with UserTarball(name=self.tarFilename, logger=self.logger, config=self.config) as tb:
-            inputFiles = [re.sub(r'^file:', '', file) for file in getattr(self.config.JobType, 'inputFiles', [])]
-            tb.addFiles(userFiles=inputFiles, cfgOutputName=cfgOutputName)
         return
 
     def write_jdl(self):
@@ -107,10 +107,10 @@ x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 Queue 1
-'''.format(**self.configurations)
+'''.format(**self.config)
 
         #print writeme
-        with open(self.jdlFilename, 'w') as f:
+        with open(self.jdl_name, 'w') as f:
             f.write(writeme)
         return
 
@@ -118,10 +118,10 @@ Queue 1
         writeme = \
 '''Arguments               = {SOURCEFILE} {MAXEVENTS} {DATASET} {DATASETGROUP} {SELECTION} {PERIOD} {JOBID}
 Queue 1
-'''.format(**self.configurations)
+'''.format(**self.config)
 
         #print writeme
-        with open(self.jdlFilename, 'a') as f:
+        with open(self.jdl_name, 'a') as f:
             f.write(writeme)
         return
 
@@ -132,11 +132,16 @@ Queue 1
 
 echo "Job submitted on host `hostname` on `date`"
 echo ">>> arguments: $@"
-echo ">>> pwd: `pwd`"
+
+RUNTIME_AREA=`pwd`
+echo ">>> RUNTIME_AREA=$RUNTIME_AREA"
 
 JOBID=$7
+echo ">>> JOBID=$JOBID"
 
 MACHINE={MACHINE}
+echo ">>> MACHINE=$MACHINE"
+
 if [ $MACHINE == "cmslpc" ]; then
     export SCRAM_ARCH=slc6_amd64_gcc491
     export CMSSW_VERSION=CMSSW_7_4_14
@@ -147,17 +152,27 @@ else
     source /software/tier3/osg/cmsset_default.sh
 fi
 
+# Setup CMSSW environment
 scram project CMSSW $CMSSW_VERSION
 cd $CMSSW_VERSION
 eval `scram runtime -sh`
 
+SOFTWARE_DIR=`pwd`
+echo ">>> SOFTWARE_DIR=$SOFTWARE_DIR"
+
+# Extract files
 tar -xzf ../default.tgz
 
-cd -
+echo ">>> Listing SOFTWARE_DIR"
+ls -Al $SOFTWARE_DIR
 
-echo ">>> ls -l:"
-ls -l
+# Return to working directory
+cd $RUNTIME_AREA
 
+echo ">>> Listing RUNTIME_AREA"
+ls -Al $RUNTIME_AREA
+
+# Modify source file
 cat <<EOF >> modify_source_file.py
 # Modify input source
 def chunk(l,n,i):
@@ -182,27 +197,29 @@ cat {SOURCEFILE}
 echo ">>> which {ANALYZER}:"
 which {ANALYZER}
 
+# Run the analyzer
 echo ">>> {ANALYZER} $@"
 {ANALYZER} $@
 
-echo ">>> ls -l:"
-ls -l
+# Done
+echo ">>> Listing RUNTIME_AREA"
+ls -Al $RUNTIME_AREA
 
 rm input.txt modify_source_file.py
 echo "Job finished on host `hostname` on `date`"
-'''.format(**self.configurations)
+'''.format(**self.config)
 
         #print writeme
-        with open(self.exeFilename, 'w') as f:
+        with open(self.exe_name, 'w') as f:
             f.write(writeme)
-        os.chmod(self.exeFilename, 0744)
+        os.chmod(self.exe_name, 0744)  # make executable
         return
 
-    def submit(self):
+    def submit_jobs(self):
         commands = \
 '''mv {EXECUTABLE} {SOURCEFILE} {JOBAD} {JOBPATH}/{JOBNAME}/
 cd {JOBPATH}/ && condor_submit {JOBNAME}/{JOBAD}
-'''.format(**self.configurations)
+'''.format(**self.config)
         commands = commands.strip().split('\n')
 
         #print commands
@@ -210,34 +227,28 @@ cd {JOBPATH}/ && condor_submit {JOBNAME}/{JOBAD}
             subprocess.call(cmd, shell=True)
         return
 
+
+# ______________________________________________________________________________
 def main():
 
     if len(sys.argv) < 7:
         raise Exception('Expect 6 command line arguments, received %i' % (len(sys.argv)-1))
 
+    print('[INFO   ] Creating condor jobs ...')
+    print('[INFO   ] %sPlease make sure your GRID proxy is valid!%s' % ('\033[93m', '\033[0m'))
     print('[INFO   ] Command line arguments: %s' % (' '.join(sys.argv[1:])))
 
-    logging.basicConfig(filename='jobify.log',level=logging.DEBUG)
-    logger = logging.getLogger()
+    job = CondorJobType()
+    job.safety_check()
 
-    jobconfig = config()
-    jobconfig.JobType.pluginName = 'Analysis'
-
-    jobconfig.User.analyzer     = sys.argv[1]
-    jobconfig.User.dataset      = sys.argv[2]
-    jobconfig.User.datasetgroup = sys.argv[3]
-    jobconfig.User.selection    = sys.argv[4]
-    jobconfig.User.period       = sys.argv[5]
-    jobconfig.User.njobs        = int(sys.argv[6])
-
-    job = BasicJobType(jobconfig, logger)
-
-    if not os.path.exists('{SRCDIR}/{DATASET}.txt'.format(**job.configurations)):
-        raise Exception('Cannot find source file: %s' % ('{SRCDIR}/{DATASET}.txt'.format(**job.configurations)))
+    print('[INFO   ] Job directory: %s' % job.config['JOBPATH'])
 
     job.run()
 
+    print('[INFO   ] %s%i jobs are submitted to condor.%s' % ('\033[92m', job.config['NJOBS'], '\033[0m'))
 
+
+# ______________________________________________________________________________
 if __name__ == '__main__':
 
     main()

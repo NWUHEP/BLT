@@ -1,164 +1,69 @@
 #!/usr/bin/env python
 
 """
-    Based on CERN CRAB3 UserTarball.py
+Based on CERN CRAB3 UserTarball.py
 """
 
 import os
 import sys
 import tarfile
-import tempfile
+import glob
 
 class UserTarball(object):
-    """
-        _UserTarball_
 
-            A subclass of TarFile for the user code tarballs. By default
-            creates a new tarball with the user libraries from lib, module,
-            and the data/ and interface/ sections of the src/ area.
+    def __init__(self, name='default.tgz', mode='w:gz'):
+        self.name = name
+        self.mode = mode
+        self.directories = ['lib', 'module', 'bin']
+        self.dataDirs = ['data']
+        self.dataDirsRoot = ['BaconAna', 'BLT']
 
-            Also adds user specified files in the right place.
-    """
-
-    def __init__(self, name=None, mode='w:gz', config=None, logger=None):
-        #self.config = config
-        #self.logger = logger
-        #self.scram = ScramEnvironment(logger=self.logger)
-        #self.logger.debug("Making tarball in %s" % name)
-        self.tarfile = tarfile.open(name=name , mode=mode, dereference=True)
-        self.checksum = None
-
-    def addFiles(self, userFiles=None, cfgOutputName=None):
-        """
-        Add the necessary files to the tarball
-        """
-        #directories = ['lib', 'biglib', 'module']
-        directories = ['lib', 'biglib', 'module', 'bin']
-        #if getattr(self.config.JobType, 'sendPythonFolder', configParametersInfo['JobType.sendPythonFolder']['default']):
-        #    directories.append('python')
-        # /data/ subdirs contain data files needed by the code
-        # /interface/ subdirs contain C++ header files needed e.g. by ROOT6
-        dataDirs    = ['data','interface']
+    def addFiles(self, userFiles=None):
         userFiles = userFiles or []
 
-        # Tar up whole directories
-        for directory in directories:
-            #fullPath = os.path.join(self.scram.getCmsswBase(), directory)
-            #self.logger.debug("Checking directory %s" % fullPath)
-            fullPath = os.path.join(os.environ["CMSSW_BASE"], directory)
-            if os.path.exists(fullPath):
-                #self.logger.debug("Adding directory %s to tarball" % fullPath)
-                self.checkdirectory(fullPath)
-                self.tarfile.add(fullPath, directory, recursive=True)
+        with tarfile.open(self.name, self.mode) as tar:
 
-        # Search for and tar up "data" directories in src/
-        #srcPath = os.path.join(self.scram.getCmsswBase(), 'src')
-        srcPath = os.path.join(os.environ["CMSSW_BASE"], 'src')
-        for root, _dummy, _dummy in os.walk(srcPath):
-            if os.path.basename(root) in dataDirs:
-                directory = root.replace(srcPath,'src')
-                #self.logger.debug("Adding data directory %s to tarball" % root)
-                self.checkdirectory(root)
-                self.tarfile.add(root, directory, recursive=True)
+            # Tar up whole directories
+            for directory in self.directories:
+                fullPath = os.path.join(os.environ['CMSSW_BASE'], directory)
+                if os.path.exists(fullPath):
+                    tar.add(fullPath, directory, recursive=True)
 
-        # Tar up extra files the user needs
-        for globName in userFiles:
-            fileNames = glob.glob(globName)
-            if not fileNames:
-                raise InputFileNotFoundException("The input file '%s' taken from parameter config.JobType.inputFiles cannot be found." % globName)
-            for filename in fileNames:
-                #self.logger.debug("Adding file %s to tarball" % filename)
-                self.checkdirectory(filename)
-                self.tarfile.add(filename, os.path.basename(filename), recursive=True)
+            # Search for and tar up "data" directories in src/
+            srcPath = os.path.join(os.environ['CMSSW_BASE'], 'src')
+            for root, dirs, files in os.walk(srcPath):
+                # Prune the directories visited by os.walk
+                if os.path.basename(root) == 'src':
+                    dirs[:] = [d for d in dirs if d in self.dataDirsRoot]
+                dirs[:] = [d for d in dirs if d != '.git']
 
+                if os.path.basename(root) in self.dataDirs:
+                    directory = root.replace(srcPath,'src')
+                    tar.add(root, directory, recursive=True)
 
-        #scriptExe = getattr(self.config.JobType, 'scriptExe', None)
-        scriptExe = None
-        if scriptExe:
-            self.tarfile.add(scriptExe, arcname=os.path.basename(scriptExe))
-
-        # Adding the pset files to the tarfile
-        if cfgOutputName:
-            basedir = os.path.dirname(cfgOutputName)
-            self.tarfile.add(cfgOutputName, arcname=BOOTSTRAP_CFGFILE)
-            self.tarfile.add(os.path.join(basedir, BOOTSTRAP_CFGFILE_PKL), arcname=BOOTSTRAP_CFGFILE_PKL)
-            self.tarfile.add(os.path.join(basedir, BOOTSTRAP_CFGFILE_DUMP), arcname=BOOTSTRAP_CFGFILE_DUMP)
-
-        #debug directory
-        configtmp = tempfile.NamedTemporaryFile(delete=True)
-        #configtmp.write(str(self.config))
-        #configtmp.flush()
-        #psetfilename = getattr(self.config.JobType, 'psetName', None)
-        configtmp.flush()
-        psetfilename = None
-        if not psetfilename == None:
-            self.tarfile.add(psetfilename,'/debug/originalPSet.py')
-        else:
-            #self.logger.debug('Failed to add pset to tarball')
-            pass
-        self.tarfile.add(configtmp.name, '/debug/crabConfig.py')
-        configtmp.close()
+            # Tar up extra files the user needs
+            for globName in userFiles:
+                fileNames = glob.glob(globName)
+                if not fileNames:
+                    raise Exception("The input file '%s' cannot be found." % globName)
+                for filename in fileNames:
+                    directory = os.path.basename(filename)
+                    tar.add(filename, directory, recursive=True)
 
 
-    def writeContent(self):
-        """Save the content of the tarball"""
-        self.content = [(int(x.size), x.name) for x in self.tarfile.getmembers()]
+# ______________________________________________________________________________
+def main():
+
+    print('[INFO   ] Packing tarball ...')
+    print('[INFO   ] Using CMSSW_BASE: %s' % (os.environ['CMSSW_BASE']))
+
+    tb = UserTarball()
+    tb.addFiles()
+
+    print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', tb.name, os.stat(tb.name).st_size >> 20, '\033[0m'))
 
 
-    def close(self):
-        """
-        Calculate the checkum and close
-        """
-        self.writeContent()
-        return self.tarfile.close()
+# ______________________________________________________________________________
+if __name__ == '__main__':
 
-
-    #def upload(self, filecacheurl=None):
-    #    """
-    #    Upload the tarball to the File Cache
-    #    """
-    #    self.close()
-    #    archiveName = self.tarfile.name
-    #    self.logger.debug("Uploading archive %s to the CRAB cache. Using URI %s" % (archiveName, filecacheurl))
-    #    ufc = CRABClient.Emulator.getEmulator('ufc')({'endpoint' : filecacheurl})
-    #    result = ufc.upload(archiveName, excludeList = USER_SANDBOX_EXCLUSIONS)
-    #    if 'hashkey' not in result:
-    #        self.logger.error("Failed to upload source files: %s" % str(result))
-    #        raise CachefileNotFoundException
-    #    return str(result['hashkey'])
-
-
-    def checkdirectory(self, dir_):
-        #checking for infinite symbolic link loop
-        try:
-            for root , _ , files in os.walk(dir_, followlinks = True):
-                for file_ in files:
-                    os.stat(os.path.join(root, file_ ))
-        except OSError as msg:
-            err = '%sError%s: Infinite directory loop found in: %s \nStderr: %s' % \
-                    (colors.RED, colors.NORMAL, dir_ , msg)
-            raise EnvironmentException(err)
-
-
-    def __getattr__(self, *args):
-        """
-        Pass any unknown functions or attribute requests on to the TarFile object
-        """
-        self.logger.debug("Passing getattr %s on to TarFile" % args)
-        return self.tarfile.__getattribute__(*args)
-
-
-    def __enter__(self):
-        """
-        Allow use as context manager
-        """
-        return self
-
-
-    def __exit__(self, excType, excValue, excTrace):
-        """
-        Allow use as context manager
-        """
-        self.tarfile.close()
-        if excType:
-            return False
+    main()

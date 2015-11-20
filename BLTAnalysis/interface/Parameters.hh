@@ -1,6 +1,7 @@
 #ifndef PARAMETERS_HH
 #define PARAMETERS_HH
 
+#include <vector>
 #include <string>
 
 class Parameters {
@@ -9,20 +10,20 @@ public:
     ~Parameters() {}
 
     std::string get_output_filename(const std::string& name) {
-        return name + "_" + this->dataname + "_" + this->jobcount + ".root";
+        return name + "_" + this->datasetgroup + "_" + this->jobid + ".root";
     }
 
     std::string get_output_treename(const std::string& name) {
-        return name + "_" + this->suffix;
+        return name + "_" + this->dataset;
     }
 
-    std::string suffix;
-    std::string abcd;
+    void setup(const std::vector<std::string>& options);
+
+    std::string dataset;
+    std::string datasetgroup;
     std::string selection;
     std::string period;
-    std::string dataname;
-    std::string jobcount;
-    std::string pileup;
+    std::string jobid;
 };
 
 // Output streams

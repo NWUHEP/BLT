@@ -25,17 +25,10 @@ void DemoAnalyzer::Begin(TTree *tree)
     std::regex re_whitespace("(\\s+)");  // split by white space
     std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1),
               std::sregex_token_iterator(), std::back_inserter(options));
-    assert (options.size() == 7);
 
     // Set the parameters
     params.reset(new Parameters());
-    params->suffix    = options[0];
-    params->abcd      = options[1];
-    params->selection = options[2];
-    params->period    = options[3];
-    params->dataname  = options[4];
-    params->jobcount  = options[5];
-    params->pileup    = options[6];
+    params->setup(options);
 
     // Set the cuts
     cuts.reset(new Cuts());

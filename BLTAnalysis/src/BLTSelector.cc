@@ -82,6 +82,7 @@ void BLTSelector::Terminate()
 
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
 
@@ -129,16 +130,16 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
     std::string inputFileExt = get_file_extension(inputFiles);
 
     if (inputFileExt == "root") {
-        if (myChain->Add(inputFiles.c_str())) {
-            if (verbose >= 1)  std::cout << info() << "Successfully opened " << inputFiles << "." << std::endl;
+        if (myChain->AddFile(inputFiles.c_str())) {
+            if (verbose >= 1)  std::cout << info() << "Trying to open " << inputFiles << "." << std::endl;
         } else {
             std::cout << error() << "Failed to open" << inputFiles << std::endl;
             throw std::runtime_error("bad input");
         }
     } else if (inputFileExt == "txt") {
-        TFileCollection fc("fileinfolist", "", inputFiles.c_str());
-        if (myChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
-            if (verbose >= 1)  std::cout << info() << "Successfully opened " << inputFiles << "." << std::endl;
+        TFileCollection fc;
+        if (fc.AddFromFile(inputFiles.c_str()) && myChain->AddFileInfoList((TCollection*) fc.GetList()) ) {
+            if (verbose >= 1)  std::cout << info() << "Trying to open " << inputFiles << "." << std::endl;
         } else {
             std::cout << error() << "Failed to open" << inputFiles << std::endl;
             throw std::runtime_error("bad input");

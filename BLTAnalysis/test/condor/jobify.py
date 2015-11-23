@@ -19,6 +19,7 @@ class CondorJobType(object):
         self.txt_name       = 'input.txt'
         self.jdl_name       = 'blt.jdl'
         self.exe_name       = 'blt.sh'
+        self.chk_name       = '.checkfile.txt'
         self.jobid          = 1
 
         self.analyzer       = sys.argv[1]
@@ -35,6 +36,7 @@ class CondorJobType(object):
             'SOURCEFILE'   : self.txt_name,
             'JOBAD'        : self.jdl_name,
             'EXECUTABLE'   : self.exe_name,
+            'CHECKFILE'    : self.chk_name,
             'JOBID'        : self.jobid,
 
             'ANALYZER'     : self.analyzer,
@@ -72,6 +74,8 @@ class CondorJobType(object):
             self.jobid += 1
             self.config['JOBID'] = self.jobid
 
+        self.add_check()
+
         self.submit_jobs()
         return
 
@@ -90,6 +94,11 @@ cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
         return
 
     def write_jdl(self):
+
+        if 'X509_USER_PROXY' not in os.environ:
+            myproxy = '/tmp/x509up_u%s' % subprocess.check_output('id -u', shell=True)
+            os.environ['X509_USER_PROXY'] = myproxy.rstrip('\n')
+
         writeme = \
 '''Universe                = vanilla
 Notification            = Error
@@ -102,7 +111,7 @@ Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
 request_disk            = 1000000
 request_memory          = 199
-notify_user             = NOBODY@FNAL.GOV
+#notify_user             = NOBODY@FNAL.GOV
 x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
@@ -202,6 +211,8 @@ echo ">>> {ANALYZER} $@"
 {ANALYZER} $@
 
 # Done
+echo "Exit status is $?"
+
 echo ">>> Listing RUNTIME_AREA"
 ls -Al $RUNTIME_AREA
 
@@ -213,6 +224,17 @@ echo "Job finished on host `hostname` on `date`"
         with open(self.exe_name, 'w') as f:
             f.write(writeme)
         os.chmod(self.exe_name, 0744)  # make executable
+        return
+
+    def add_check(self):
+        commands = \
+'''echo {JOBPATH} {NJOBS} `wc -l < {SOURCEFILE}` >> {CHECKFILE}
+'''.format(**self.config)
+        commands = commands.strip().split('\n')
+
+        #print commands
+        for cmd in commands:
+            subprocess.call(cmd, shell=True)
         return
 
     def submit_jobs(self):

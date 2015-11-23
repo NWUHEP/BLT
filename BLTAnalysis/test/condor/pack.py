@@ -11,14 +11,21 @@ import glob
 
 class UserTarball(object):
 
-    def __init__(self, name='default.tgz', mode='w:gz'):
+    def __init__(self, name='default.tgz', mode='w:gz', chk='.checkfile.txt'):
         self.name = name
         self.mode = mode
+        self.chk = chk
         self.directories = ['lib', 'module', 'bin']
         self.dataDirs = ['data']
         self.dataDirsRoot = ['BaconAna', 'BLT']
 
-    def addFiles(self, userFiles=None):
+    def run(self):
+
+        self.add_files()
+
+        self.add_check()
+
+    def add_files(self, userFiles=None):
         userFiles = userFiles or []
 
         with tarfile.open(self.name, self.mode) as tar:
@@ -50,6 +57,10 @@ class UserTarball(object):
                     directory = os.path.basename(filename)
                     tar.add(filename, directory, recursive=True)
 
+    def add_check(self):
+        # Make a blank file
+        open(self.chk, 'w').close()
+
 
 # ______________________________________________________________________________
 def main():
@@ -58,7 +69,7 @@ def main():
     print('[INFO   ] Using CMSSW_BASE: %s' % (os.environ['CMSSW_BASE']))
 
     tb = UserTarball()
-    tb.addFiles()
+    tb.run()
 
     print('[INFO   ] %s%s is created (%iM).%s' % ('\033[92m', tb.name, os.stat(tb.name).st_size >> 20, '\033[0m'))
 

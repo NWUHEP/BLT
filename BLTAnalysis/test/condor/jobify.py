@@ -109,8 +109,8 @@ Output                  = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stdout
 Error                   = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).stderr
 Log                     = {LOGNAME}/{JOBNAME}_$(Cluster)_$(Process).out
 Requirements            = (OpSys == "LINUX") && (Arch != "DUMMY")
-request_disk            = 1000000
-request_memory          = 199
+request_disk            = 2000000
+request_memory          = 1024
 #notify_user             = NOBODY@FNAL.GOV
 x509userproxy           = $ENV(X509_USER_PROXY)
 should_transfer_files   = YES
@@ -160,6 +160,8 @@ else
     export CMSSW_VERSION=CMSSW_7_4_12
     source /software/tier3/osg/cmsset_default.sh
 fi
+
+echo ">>> X509_USER_PROXY=$X509_USER_PROXY"
 
 # Setup CMSSW environment
 scram project CMSSW $CMSSW_VERSION

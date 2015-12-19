@@ -17,8 +17,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
     bool muPass = false;
-
     if (cutLevel.cutName == "tightMuID") {
+      /*
         if (
             //fabs(mu->eta) < 2.4  // uncomment to apply eta requirement
             fabs(mu->eta) < 99.
@@ -35,6 +35,8 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCut
 
         if (test_bits(mu->pogIDBits, baconhep::kPOGTightMuon) != muPass)
             std::cout << warning() << "BLT tightMuID does not agree with the CMSSW version" << std::endl;
+            */
+      muPass = test_bits(mu->pogIDBits, baconhep::kPOGTightMuon);
     }
     return muPass;
 }
@@ -284,7 +286,7 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
         }
         if (phoPass1 && phoPass2) phoPass = true;
 
-    } else {
+    } else if (cutLevel.cutName == "medPhID"){
         if (fabs(ph->scEta) > 1.4442 && fabs(ph->scEta) < 1.566) return phoPass;
         if (
             (

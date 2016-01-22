@@ -2,6 +2,7 @@
 <use name="BaconAna/Utils"/>
 <use name="root"/>
 <use name="rootcore"/>
+<use name="rootrflx"/>
 <flags CXXFLAGS="-g -Wall"/>
 <export>
   <lib   name="1"/>

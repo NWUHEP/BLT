@@ -179,13 +179,13 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     pfMET->pt = fInfo->pfMET;
     pfMET->phi = fInfo->pfMETphi;
 
-    TMET* caloMET = new TMET();
-    caloMET->pt = fInfo->caloMET;
-    caloMET->phi = fInfo->caloMETphi;
+    //TMET* caloMET = new TMET();
+    //caloMET->pt = fInfo->caloMET;
+    //caloMET->phi = fInfo->caloMETphi;
 
     if (printEvent) {
         std::cout << "MET " << "(PF)" << ": " << pfMET << std::endl;
-        std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
+        //std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
     }
 
     ////////////
@@ -193,7 +193,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     ////////////
 
     std::vector<TMuon*> muons;
-    std::vector<TMuon*> photons;
+    std::vector<TPhoton*> photons;
 
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
@@ -201,18 +201,21 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
 
         if (muon->pt > 20 && std::abs(muon->eta) < 2.4
             && particleSelector->PassMuonID(muon, cuts->tightMuID)
-            && particleSelector->PassMuonIso(muon, cuts->tightMuIso))
+            && particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+           )
             muons.push_back(muon);
     }
 
     for (int i=0; i<fPhotonArr->GetEntries(); i++) {
         TPhoton* photon= (TPhoton*) fPhotonArr->At(i);
-        assert(muon);
+        assert(photon);
 
-        if (photon->pt > 40 && std::abs(photon->eta) < 2.4
-            && particleSelector->PassPhotonID(photon, cuts->tightMuID)
-            && particleSelector->PassPhotonIso(photon, cuts->tightMuIso))
-            muons.push_back(muon);
+        if (photon->pt > 40 
+            && std::abs(photon->eta) < 2.4
+            //&& particleSelector->PassPhotonID(photon, cuts->tightMuID)
+            //&& particleSelector->PassPhotonIso(photon, cuts->tightMuIso)
+           )
+            photons.push_back(photon);
     }
 
     std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -259,7 +262,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     this->passedEvents++;
 
     delete pfMET;
-    delete caloMET;
+    //delete caloMET;
 
     return kTRUE;
 }

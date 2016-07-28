@@ -180,11 +180,14 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         throw std::runtime_error("bad input");
     }
 
+    std::cout << info() << "Successfully openned input file; loading tree..." << std::endl;
+
     if (myChain->LoadTree(0) < 0) {  // needed because TChain =/= TTree
         std::cout << error() << "Failed to load the entries in the file." << std::endl;
         throw std::runtime_error("bad input");
     }
 
+    std::cout << info() << "Successfully loaded tree..." << std::endl;
 
     // _________________________________________________________________________
     // Run

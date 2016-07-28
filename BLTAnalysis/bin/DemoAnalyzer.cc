@@ -59,8 +59,7 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
 
-    //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
-    //if (entry%1==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+    if (entry%100==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
     const bool isRealData = (fInfo->runNum != 1);
 
@@ -176,13 +175,13 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     pfMET->pt = fInfo->pfMET;
     pfMET->phi = fInfo->pfMETphi;
 
-    TMET* caloMET = new TMET();
-    caloMET->pt = fInfo->caloMET;
-    caloMET->phi = fInfo->caloMETphi;
+    //TMET* caloMET = new TMET();
+    //caloMET->pt = fInfo->caloMET;
+    //caloMET->phi = fInfo->caloMETphi;
 
     if (printEvent) {
         std::cout << "MET " << "(PF)" << ": " << pfMET << std::endl;
-        std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
+        //std::cout << "MET " << "(C) " << ": " << caloMET << std::endl;
     }
 
     ////////////
@@ -243,7 +242,7 @@ Bool_t DemoAnalyzer::Process(Long64_t entry)
     this->passedEvents++;
 
     delete pfMET;
-    delete caloMET;
+    //delete caloMET;
 
     return kTRUE;
 }

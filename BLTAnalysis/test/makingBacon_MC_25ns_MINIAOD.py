@@ -11,7 +11,7 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 
 process.load('BaconProd/Ntupler/myJecFromDB_cff')
-process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Summer15_25nsV6_DATA.db')
+#process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Summer15_25nsV6_DATA.db')
 #--------------------------------------------------------------------------------
 # Import of standard configurations
 #================================================================================

@@ -75,3 +75,22 @@ or alternatively you can provide a text file with a list of input files,
 ```
 DemoAnalyzer input.txt 1000 DYJetsToLL_M-50 DYJetsToLL mumu 2015 0
 ```
+
+## Running a BLT analyzer with condor
+
+These instructions are intended for running on the Northwestern tier 3, but can be easily modified to run on any batch system that uses condor as a scheduler (e.g., cmslpc).
+
+```
+cd BLT/BLTAnalysis/test/condor
+```
+
+Edit jobify.py L49 from 'MACHINE':'cmslpc' to   'MACHINE'      : 'ttgrid',
+
+```
+./run_all_20151119.sh
+```
+When the condor jobs are done, run the following,
+
+```
+python retrieve.py
+```

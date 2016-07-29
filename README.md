@@ -8,7 +8,7 @@ Setup
 
 The master version has been tested to run with CMSSW_7_4_14 with ROOT6.  This will work cmslpc using scientific linux 6.
 
-# Build and source environment
+### Build and source environment
 
 ```
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -18,7 +18,7 @@ cd CMSSW_7_4_14/src
 cmsenv
 ```
 
-# Checkout dependencies
+### Checkout dependencies
 
 These forks are sync'ed to Kevin's repositories on 2015/11/17
 
@@ -37,21 +37,21 @@ source BaconProd/scripts/setup_prod.sh
 #   scp -r -C <USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/k/ksung/public/Development/Run2Packages/* ./
 ```
 
-# Checkout and compile BLT code
+### Checkout and compile BLT code
 
 ```
 git clone git@github.com:jiafulow/BLT.git
 scram b -j 12
 ```
 
-# Make Bacon ntuples
+### Make Bacon ntuples
 
 ```
 cd BLT/BLTAnalysis/test
 cmsRun makingBacon_MC_25ns_MINIAOD.py 
 ```
 
-# (Optional) Sync forked repositories
+### (Optional) Sync forked repositories
 
 ```
 cd BaconProd && git checkout master && git fetch upstream && git merge upstream/master && git push origin master && cd -

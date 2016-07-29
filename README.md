@@ -57,3 +57,21 @@ cmsRun makingBacon_MC_25ns_MINIAOD.py
 cd BaconProd && git checkout master && git fetch upstream && git merge upstream/master && git push origin master && cd -
 cd BaconAna && git checkout master && git fetch upstream && git merge upstream/master && git push origin master && cd -
 ```
+
+## Running the demo analyzer
+
+There are two example analyzers included in the BLT repository.  These produce a set of skimmed ntuples...
+
+7 input arguments are mandatory: [input file] [no of events] [dataset] [datasetgroup] [selection] [period] [jobid]
+[input file] can be either a root file, or a txt file with a list of root files.
+
+```
+cd BLT/BLTAnalysis/test
+DemoAnalyzer Output.root 1000 DYJetsToLL_M-50 DYJetsToLL mumu 2015 0
+```
+
+or alternatively you can provide a text file with a list of input files,
+
+```
+DemoAnalyzer input.txt 1000 DYJetsToLL_M-50 DYJetsToLL mumu 2015 0
+```

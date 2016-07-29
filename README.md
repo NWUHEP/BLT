@@ -40,7 +40,7 @@ source BaconProd/scripts/setup_prod.sh
 ### Checkout and compile BLT code
 
 ```
-git clone git@github.com:jiafulow/BLT.git
+git clone git@github.com:NWUHEP/BLT.git
 scram b -j 12
 ```
 
@@ -63,7 +63,7 @@ cd BaconAna && git checkout master && git fetch upstream && git merge upstream/m
 There are two example analyzers included in the BLT repository.  These produce a set of skimmed ntuples...
 
 7 input arguments are mandatory: [input file] [no of events] [dataset] [datasetgroup] [selection] [period] [jobid]
-[input file] can be either a root file, or a txt file with a list of root files.
+[input fil]e
 
 ```
 cd BLT/BLTAnalysis/test

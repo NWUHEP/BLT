@@ -24,9 +24,7 @@ These forks are sync'ed to Kevin's repositories on 2015/11/17
 
 ```
 git clone git@github.com:NWUHEP/BaconProd.git
-cd BaconProd && git remote add upstream git@github.com:ksung25/BaconProd.git && cd -
 git clone git@github.com:NWUHEP/BaconAna.git
-cd BaconAna && git remote add upstream git@github.com:ksung25/BaconAna.git && cd -
 ```
 
 If you plan on producing ntuples using the bacon framework, you will need to checkout some additional CMSSW dependencies,

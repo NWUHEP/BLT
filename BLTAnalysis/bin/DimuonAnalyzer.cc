@@ -186,7 +186,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     met = pfMET->pt;
     met_phi = pfMET->phi;
 
-    jet = jets
+    //jet = jets
 
     if (tmp_genMuonOne.Pt() > tmp_genMuonTwo.Pt()) {
         genMuonOne = tmp_genMuonOne;

@@ -11,6 +11,8 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 
 process.load('BaconProd/Ntupler/myJecFromDB_cff')
+from BaconProd.Ntupler.myJecFromDB_cff import setupJEC
+setupJEC(process,is_data_flag)
 #process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Summer15_25nsV6_DATA.db')
 #--------------------------------------------------------------------------------
 # Import of standard configurations
@@ -39,32 +41,32 @@ else:
 process.load('BaconProd/Ntupler/myGenJets_cff')
 process.load('BaconProd/Ntupler/myJetExtrasAK4CHS_cff')
 process.load('BaconProd/Ntupler/myJetExtrasAK8CHS_cff')
-process.load('BaconProd/Ntupler/myJetExtrasCA8CHS_cff')
 process.load('BaconProd/Ntupler/myJetExtrasCA15CHS_cff')
+process.load('BaconProd/Ntupler/myJetExtrasCA8CHS_cff')
 
 process.load('BaconProd/Ntupler/myJetExtrasAK4Puppi_cff')
-process.load('BaconProd/Ntupler/myJetExtrasCA8Puppi_cff')
 process.load('BaconProd/Ntupler/myJetExtrasCA15Puppi_cff')
+process.load('BaconProd/Ntupler/myJetExtrasCA8Puppi_cff')
 
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets
 from BaconProd.Ntupler.myJetExtrasAK4CHS_cff    import setMiniAODAK4CHS
 from BaconProd.Ntupler.myJetExtrasAK8CHS_cff    import setMiniAODAK8CHS
-from BaconProd.Ntupler.myJetExtrasCA8CHS_cff    import setMiniAODCA8CHS
 from BaconProd.Ntupler.myJetExtrasCA15CHS_cff   import setMiniAODCA15CHS
+from BaconProd.Ntupler.myJetExtrasCA8CHS_cff    import setMiniAODCA8CHS
 
 from BaconProd.Ntupler.myJetExtrasAK4Puppi_cff  import setMiniAODAK4Puppi
-from BaconProd.Ntupler.myJetExtrasCA8Puppi_cff  import setMiniAODCA8Puppi
 from BaconProd.Ntupler.myJetExtrasCA15Puppi_cff import setMiniAODCA15Puppi
+from BaconProd.Ntupler.myJetExtrasCA8Puppi_cff  import setMiniAODCA8Puppi
 
 setMiniAODGenJets(process)
 setMiniAODAK4CHS(process)
 setMiniAODAK8CHS(process)
-setMiniAODCA8CHS(process)
 setMiniAODCA15CHS(process)
+setMiniAODCA8CHS(process)
 
 setMiniAODAK4Puppi (process)
-setMiniAODCA8Puppi (process)
 setMiniAODCA15Puppi(process)
+setMiniAODCA8Puppi (process)
 
 # MVA MET
 from BaconProd.Ntupler.myMVAMet_cff import setMiniAODMVAMet
@@ -83,13 +85,14 @@ process.producePFMETCorrections = cms.Sequence(process.producePFMETCorrectionsMC
 if is_data_flag:
   process.producePFMETCorrections = cms.Sequence(process.producePFMETCorrectionsData)
   process.AK4QGTaggerCHS.jec  = cms.InputTag("ak4chsL1FastL2L3ResidualCorrector")
-  process.CA8QGTaggerCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
   process.AK8QGTaggerCHS.jec  = cms.InputTag("ak8chsL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerCHS.jec = cms.InputTag("ca15chsL1FastL2L3ResidualCorrector")
+  process.CA8QGTaggerCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
+
   process.AK4QGTaggerSubJetsCHS.jec  = cms.InputTag("ak4chsL1FastL2L3ResidualCorrector")
-  process.CA8QGTaggerSubJetsCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
   process.AK8QGTaggerSubJetsCHS.jec  = cms.InputTag("ak8chsL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerSubJetsCHS.jec = cms.InputTag("ca15chsL1FastL2L3ResidualCorrector")
+  process.CA8QGTaggerSubJetsCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
 
 # produce photon isolation with proper footprint removal
 process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
@@ -116,11 +119,11 @@ process.producePFMETCorrectionsPuppi = cms.Sequence(process.producePFMETCorrecti
 if is_data_flag:
   process.producePFMETCorrectionsPuppi   = cms.Sequence(process.producePFMETCorrectionsPuppiData)
   process.AK4QGTaggerPuppi.jec           = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
-  process.CA8QGTaggerPuppi.jec           = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerPuppi.jec          = cms.InputTag("ca15PuppiL1FastL2L3ResidualCorrector")
+  process.CA8QGTaggerPuppi.jec           = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
   process.AK4QGTaggerSubJetsPuppi.jec    = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
-  process.CA8QGTaggerSubJetsPuppi.jec    = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerSubJetsPuppi.jec   = cms.InputTag("ca15PuppiL1FastL2L3ResidualCorrector")
+  process.CA8QGTaggerSubJetsPuppi.jec    = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
 
 # ALPACA
 #process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')

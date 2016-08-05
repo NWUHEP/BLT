@@ -67,6 +67,8 @@ public:
     // Branches in the output file
     TLorentzVector muonOne;
     TLorentzVector muonTwo;
+    TLorentzVector bjet;
+    TLorentzVector jet;
     TLorentzVector dimuon;
 
     TLorentzVector genMuonOne;

@@ -417,7 +417,7 @@ bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJe
 
 bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool jetPass = false;
-    std::cout << warning() << "BLT jet ID is not doing cross cleaning." << std::endl;
+    //std::cout << warning() << "BLT jet ID is not doing cross cleaning." << std::endl;
 
     //if (fabs(jet->eta) > 4.7) return isoPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "looseJetID") {

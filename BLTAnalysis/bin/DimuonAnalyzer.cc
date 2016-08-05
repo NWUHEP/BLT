@@ -45,6 +45,8 @@ void DimuonAnalyzer::Begin(TTree *tree)
 
     outTree->Branch("muonOne", &muonOne);
     outTree->Branch("muonTwo", &muonTwo);
+    outTree->Branch("bjet", &bjet);
+    outTree->Branch("jet", &jet);
     outTree->Branch("dimuon", &dimuon);
     outTree->Branch("genMuonOne", &genMuonOne);
     outTree->Branch("genMuonTwo", &genMuonTwo);
@@ -137,6 +139,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 jets.push_back(jet);
         }
     }
+    std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+    std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
     TMET* pfMET = new TMET();
@@ -174,12 +178,15 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     // Fill //
     //////////
 
+    
     muonOne = tmp_muonOne;
     muonTwo = tmp_muonTwo;
     dimuon  = muonOne + muonTwo;
 
     met = pfMET->pt;
     met_phi = pfMET->phi;
+
+    jet = jets
 
     if (tmp_genMuonOne.Pt() > tmp_genMuonTwo.Pt()) {
         genMuonOne = tmp_genMuonOne;

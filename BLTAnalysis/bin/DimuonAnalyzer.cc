@@ -43,14 +43,27 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outFile->cd();
     outTree = new TTree(outTreeName.c_str(), "demoTree");
 
-    outTree->Branch("muonOne", &muonOne);
-    outTree->Branch("muonTwo", &muonTwo);
-    outTree->Branch("bjet", &bjet);
-    outTree->Branch("jet", &jet);
-    outTree->Branch("dimuon", &dimuon);
-    outTree->Branch("genMuonOne", &genMuonOne);
-    outTree->Branch("genMuonTwo", &genMuonTwo);
-    outTree->Branch("genZ", &genZ);
+    outTree->Branch("muonOnePt", &muonOnePt);
+    outTree->Branch("muonOneEta", &muonOneEta);
+    outTree->Branch("muonOnePhi", &muonOnePhi);
+    outTree->Branch("muonTwoPt", &muonTwoPt);
+    outTree->Branch("muonTwoEta", &muonTwoEta);
+    outTree->Branch("muonTwoPhi", &muonTwoPhi);
+
+    outTree->Branch("jetPt", &jetPt);
+    outTree->Branch("jetEta", &jetEta);
+    outTree->Branch("jetPhi", &jetPhi);
+    outTree->Branch("jetMass", &jetMass);
+    outTree->Branch("bjetPt", &bjetPt);
+    outTree->Branch("bjetEta", &bjetEta);
+    outTree->Branch("bjetPhi", &bjetPhi);
+    outTree->Branch("bjetMass", &bjetMass);
+
+    outTree->Branch("dimuonPt", &dimuonPt);
+    outTree->Branch("dimuonEta", &dimuonEta);
+    outTree->Branch("dimuonPhi", &dimuonPhi);
+    outTree->Branch("dimuonMass", &dimuonMass);
+
     outTree->Branch("met", &met);
     outTree->Branch("met_phi", &met_phi);
 
@@ -116,8 +129,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             && std::abs(muon->eta) < 2.4
             && particleSelector->PassMuonID(muon, cuts->tightMuID)
             && particleSelector->PassMuonIso(muon, cuts->tightMuIso)
-           )
+           ) {
             muons.push_back(muon);
+        }
     }
 
     std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -147,55 +161,55 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     pfMET->pt = fInfo->pfMET;
     pfMET->phi = fInfo->pfMETphi;
 
-    if (printEvent) {
-        std::cout << "MET " << "(PF)" << ": " << pfMET << std::endl;
-    }
-
+    ////////////////////////////
     /* Apply dimuon selection */
-    TLorentzVector tmp_muonOne, tmp_muonTwo;
-    int            idx_muonOne, idx_muonTwo;
+    ////////////////////////////
+    
+    if (muons.size() != 2) 
+        return kTRUE;
 
-    bool found_dimuon = particleSelector->FindGoodDiMuons(muons, tmp_muonOne, tmp_muonTwo, idx_muonOne, idx_muonTwo);
+    if (muons[0]->q == muons[1]->q)
+        return kTRUE;
 
-    if (!found_dimuon)
-        return kFALSE;
+    if (bjets.size() < 1)
+        return kTRUE;
 
-    /* Gen matching */
-    TLorentzVector tmp_genZ, tmp_genMuonOne, tmp_genMuonTwo;
-    int            idx_genZ, idx_genMuonOne, idx_genMuonTwo;
+    if (jets.size() < 1)
+        return kTRUE;
 
-    bool found_genZ = particleSelector->FindGenZToLL(fGenParticleArr, tmp_genZ, tmp_genMuonOne, tmp_genMuonTwo, idx_genZ, idx_genMuonOne, idx_genMuonTwo);
-
-    if (!found_genZ)
-        return kFALSE;
-
-    if (std::abs(((TGenParticle *)fGenParticleArr->At(idx_genMuonOne))->pdgId) != MUON_PDGID ||
-        std::abs(((TGenParticle *)fGenParticleArr->At(idx_genMuonTwo))->pdgId) != MUON_PDGID)
-        return kFALSE;
-
+    /* Prepare Lorentz vectors */
+    TLorentzVector muon1, muon2, dimuon;
+    copy_p4(muons[0], MUON_MASS, muon1);
+    copy_p4(muons[1], MUON_MASS, muon2);
+    dimuon = muon1 + muon2;
 
     //////////
     // Fill //
     //////////
 
-    
-    muonOne = tmp_muonOne;
-    muonTwo = tmp_muonTwo;
-    dimuon  = muonOne + muonTwo;
+    muonOnePt  = muons[0]->pt;
+    muonOneEta = muons[0]->eta;
+    muonOnePhi = muons[0]->phi;
+    muonTwoPt  = muons[1]->pt;
+    muonTwoEta = muons[1]->eta;
+    muonTwoPhi = muons[1]->phi;
 
-    met = pfMET->pt;
+    jetPt    = jets[0]->pt;
+    jetEta   = jets[0]->eta;
+    jetPhi   = jets[0]->phi;
+    jetMass  = jets[0]->mass;
+    bjetPt   = bjets[0]->pt;
+    bjetEta  = bjets[0]->eta;
+    bjetPhi  = bjets[0]->phi;
+    bjetMass = bjets[0]->mass;
+
+    dimuonPt   = dimuon.Pt();
+    dimuonEta  = dimuon.Eta();
+    dimuonPhi  = dimuon.Phi();
+    dimuonMass = dimuon.M();
+
+    met     = pfMET->pt;
     met_phi = pfMET->phi;
-
-    //jet = jets
-
-    if (tmp_genMuonOne.Pt() > tmp_genMuonTwo.Pt()) {
-        genMuonOne = tmp_genMuonOne;
-        genMuonTwo = tmp_genMuonTwo;
-    } else {
-        genMuonOne = tmp_genMuonTwo;
-        genMuonTwo = tmp_genMuonOne;
-    }
-    genZ = genMuonOne + genMuonTwo;
 
     outTree->Fill();
     this->passedEvents++;

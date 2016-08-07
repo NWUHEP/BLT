@@ -77,7 +77,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     this->totalEvents++;
 
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
-    //if (entry%1==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+    if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);

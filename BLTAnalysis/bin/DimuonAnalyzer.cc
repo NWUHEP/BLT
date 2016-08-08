@@ -83,22 +83,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
     triggerSelector->SetRealData(isRealData);
 
-    bool printEvent = false;
-
-    //////////////////
-    // GenParticles //
-    //////////////////
-
-    if (printEvent) {
-        if (!isRealData) {
-            for (int i=0; i<fGenParticleArr->GetEntries(); i++) {
-                const TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-                assert(particle);
-                std::cout << "GenParticle " << i << ": " << particle << std::endl;
-            }
-        }
-    }
-
     /* Vertices */
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
@@ -119,7 +103,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     /* MUONS */
     std::vector<TMuon*> muons;
-
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
@@ -137,10 +120,16 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
 
     /* JETS */
+    TClonesArray* jetCollection;
+    if (params->period == "2012") 
+        jetCollection = fAK5Arr;
+    else 
+        jetCollection = fAK4CHSArr;
+
     std::vector<TJet*> jets;
     std::vector<TJet*> bjets;
-    for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
-        TJet* jet = (TJet*) fAK4CHSArr->At(i);
+    for (int i=0; i < jetCollection->GetEntries(); i++) {
+        TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
         if (
                 jet->pt > 30
@@ -155,6 +144,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     }
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
+
 
     /* MET */
     TMET* pfMET = new TMET();
@@ -182,6 +172,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     copy_p4(muons[0], MUON_MASS, muon1);
     copy_p4(muons[1], MUON_MASS, muon2);
     dimuon = muon1 + muon2;
+
+    if (dimuon.M() < 12.)
+        return kTRUE;
 
     //////////
     // Fill //

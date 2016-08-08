@@ -12,31 +12,29 @@ bool test_bits(unsigned int bits, unsigned int test) {
 }
 
 ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cuts) {
-
+    this->_parameters = parameters;
+    this->_cuts = cuts;
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
     bool muPass = false;
     if (cutLevel.cutName == "tightMuID") {
-      /*
-        if (
-            //fabs(mu->eta) < 2.4  // uncomment to apply eta requirement
-            fabs(mu->eta) < 99.
-            && test_bits(mu->typeBits, baconhep::kPFMuon) == cutLevel.IsPF
-            && test_bits(mu->typeBits, baconhep::kGlobal) == cutLevel.IsGLB
-            && mu->muNchi2    < cutLevel.NormalizedChi2
-            && mu->nValidHits > cutLevel.NumberOfValidMuonHits
-            && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
-            && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
-            && mu->nTkLayers  > cutLevel.TrackLayersWithMeasurement
-            && fabs(mu->d0)   < cutLevel.dxy
-            && fabs(mu->dz)   < cutLevel.dz
-        ) muPass = true;
+        if (this->_parameters.period == "2012") {
+            if (
+                    mu->muNchi2    < cutLevel.NormalizedChi2
+                    && mu->nValidHits > cutLevel.NumberOfValidMuonHits
+                    && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
+                    && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
+                    && mu->nTkLayers  > cutLevel.TrackLayersWithMeasurement
+                    && fabs(mu->d0)   < cutLevel.dxy
+                    && fabs(mu->dz)   < cutLevel.dz
+                    && test_bits(mu->typeBits, baconhep::kPFMuon) == cutLevel.IsPF
+                    && test_bits(mu->typeBits, baconhep::kGlobal) == cutLevel.IsGLB
+               ) muPass = true;
 
-        if (test_bits(mu->pogIDBits, baconhep::kPOGTightMuon) != muPass)
-            std::cout << warning() << "BLT tightMuID does not agree with the CMSSW version" << std::endl;
-            */
-      muPass = test_bits(mu->pogIDBits, baconhep::kPOGTightMuon);
+        } else {
+            muPass = test_bits(mu->pogIDBits, baconhep::kPOGTightMuon);
+        }
     }
     return muPass;
 }

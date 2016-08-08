@@ -81,11 +81,11 @@ class CondorJobType(object):
 
     def make_dirs(self):
         commands = \
-'''mkdir -p {JOBPATH}/
-rm -rf {JOBPATH}/*
-mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
-cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
-'''.format(**self.config)
+        '''mkdir -p {JOBPATH}/
+        rm -rf {JOBPATH}/*
+        mkdir {JOBPATH}/{JOBNAME}/ {JOBPATH}/{LOGNAME}/
+        cp {SRCDIR}/{DATASET}.txt {SOURCEFILE}
+        '''.format(**self.config)
         commands = commands.strip().split('\n')
 
         #print commands

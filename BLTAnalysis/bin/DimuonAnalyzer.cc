@@ -36,8 +36,8 @@ void DimuonAnalyzer::Begin(TTree *tree)
     triggerSelector.reset(new TriggerSelector());
 
     // Prepare the output tree
-    outFileName = params->get_output_filename("demoFile");
-    outTreeName = params->get_output_treename("demoTree");
+    outFileName = params->get_output_filename("output");
+    outTreeName = params->get_output_treename("data");
 
     outFile = new TFile(outFileName.c_str(),"RECREATE");
     outFile->cd();
@@ -110,8 +110,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         if (
             muon->pt > 20 
             && std::abs(muon->eta) < 2.4
-            && particleSelector->PassMuonID(muon, cuts->tightMuID)
-            && particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+            //&& particleSelector->PassMuonID(muon, cuts->tightMuID)
+            //&& particleSelector->PassMuonIso(muon, cuts->tightMuIso)
            ) {
             muons.push_back(muon);
         }

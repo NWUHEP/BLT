@@ -43,27 +43,14 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outFile->cd();
     outTree = new TTree(outTreeName.c_str(), "demoTree");
 
-    outTree->Branch("muonOnePt", &muonOnePt);
-    outTree->Branch("muonOneEta", &muonOneEta);
-    outTree->Branch("muonOnePhi", &muonOnePhi);
-    outTree->Branch("muonTwoPt", &muonTwoPt);
-    outTree->Branch("muonTwoEta", &muonTwoEta);
-    outTree->Branch("muonTwoPhi", &muonTwoPhi);
-
-    outTree->Branch("jetPt", &jetPt);
-    outTree->Branch("jetEta", &jetEta);
-    outTree->Branch("jetPhi", &jetPhi);
-    outTree->Branch("jetMass", &jetMass);
-    outTree->Branch("bjetPt", &bjetPt);
-    outTree->Branch("bjetEta", &bjetEta);
-    outTree->Branch("bjetPhi", &bjetPhi);
-    outTree->Branch("bjetMass", &bjetMass);
-
-    outTree->Branch("dimuonPt", &dimuonPt);
-    outTree->Branch("dimuonEta", &dimuonEta);
-    outTree->Branch("dimuonPhi", &dimuonPhi);
-    outTree->Branch("dimuonMass", &dimuonMass);
-
+    outTree->Branch("runNumber", &runNumber);
+    outTree->Branch("evtNumber", &evtNumber);
+    outTree->Branch("lumiSection", &lumiSection);
+    outTree->Branch("muonOneP4", &muonOneP4);
+    outTree->Branch("muonTwoP4", &muonTwoP4);
+    outTree->Branch("dimuonP4", &dimuonP4);
+    outTree->Branch("jetP4", &jetP4);
+    outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("met", &met);
     outTree->Branch("met_phi", &met_phi);
 
@@ -91,7 +78,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         particleSelector->SetPV(pv);
     } else {
         return kTRUE;
-        //particleSelector->SetPV(TVector3());
     }
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
@@ -110,8 +96,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         if (
             muon->pt > 20 
             && std::abs(muon->eta) < 2.4
-            //&& particleSelector->PassMuonID(muon, cuts->tightMuID)
-            //&& particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+            && particleSelector->PassMuonID(muon, cuts->tightMuID)
+            && particleSelector->PassMuonIso(muon, cuts->tightMuIso)
            ) {
             muons.push_back(muon);
         }
@@ -132,7 +118,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
         if (
-                jet->pt > 30
+                jet->pt > 25
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
            ) {
 
@@ -179,27 +165,17 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     //////////
     // Fill //
     //////////
+      
+    runNumber = fInfo->runNum;
+    evtNumber = fInfo->evtNum;
+    lumiSection = fInfo->lumiSec;
 
-    muonOnePt  = muons[0]->pt;
-    muonOneEta = muons[0]->eta;
-    muonOnePhi = muons[0]->phi;
-    muonTwoPt  = muons[1]->pt;
-    muonTwoEta = muons[1]->eta;
-    muonTwoPhi = muons[1]->phi;
+    muonOneP4 = muon1;
+    muonTwoP4 = muon2;
+    dimuonP4  = dimuon;
 
-    jetPt    = jets[0]->pt;
-    jetEta   = jets[0]->eta;
-    jetPhi   = jets[0]->phi;
-    jetMass  = jets[0]->mass;
-    bjetPt   = bjets[0]->pt;
-    bjetEta  = bjets[0]->eta;
-    bjetPhi  = bjets[0]->phi;
-    bjetMass = bjets[0]->mass;
-
-    dimuonPt   = dimuon.Pt();
-    dimuonEta  = dimuon.Eta();
-    dimuonPhi  = dimuon.Phi();
-    dimuonMass = dimuon.M();
+    jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+    jetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
 
     met     = pfMET->pt;
     met_phi = pfMET->phi;

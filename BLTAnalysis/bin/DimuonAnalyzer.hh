@@ -66,14 +66,10 @@ public:
     std::unique_ptr<ParticleSelector>   particleSelector;
 
     // Branches in the output file
-    Float_t muonOnePt, muonOneEta, muonOnePhi;
-    Float_t muonTwoPt, muonTwoEta, muonTwoPhi;
-    Float_t jetPt, jetEta, jetPhi, jetMass;
-    Float_t bjetPt, bjetEta, bjetPhi, bjetMass;
-    Float_t dimuonPt, dimuonEta, dimuonPhi, dimuonMass;
-
+    TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
     Float_t met;
     Float_t met_phi;
+    UInt_t runNumber, evtNumber, lumiSection;
 
     //ClassDef(DimuonAnalyzer,0);
 };

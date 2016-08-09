@@ -124,7 +124,6 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
 
     gROOT->SetBatch();
 
-
     // _________________________________________________________________________
     // Get arguments
 

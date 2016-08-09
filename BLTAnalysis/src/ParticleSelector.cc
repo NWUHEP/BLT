@@ -43,7 +43,12 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
     bool isoPass = false;
     if (cutLevel.cutName == "tightMuIso" || cutLevel.cutName == "looseMuIso") {
         float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
-        if (combIso/mu->pt < cutLevel.relCombIso04) isoPass = true;
+        if (combIso/mu->pt < cutLevel.relCombIso04) 
+            isoPass = true;
+
+    } else if (cutLevel.cutName == "amumuDetIso") {
+        if (mu->trkIso/mu->pt > 0.1) 
+            isoPass = true;
     }
     return isoPass;
 }
@@ -427,6 +432,7 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
                 && jet->chHadFrac     > cutLevel.CHF
                 && jet->nCharged      > cutLevel.CHM
                 && jet->chEmFrac      < cutLevel.CEMF
+                && jet->csv           > cutLevel.CSV
             ) jetPass = true;
         } else {
             if (

@@ -37,6 +37,14 @@ public:
         std::string cutName;
     } looseMuIso, tightMuIso;
 
+    struct muDetIsoCuts {
+        float hcalIso03;
+        float ecalIso03;
+        float trkIso03;
+        float relCombIso03;
+        std::string cutName;
+    } looseMuDetIso, tightMuDetIso, amumuMuDetIso;
+
     struct elIDCuts {
         //broken into [0] barrel and [1] endcap
         float dEtaIn[2];

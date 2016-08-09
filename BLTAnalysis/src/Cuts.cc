@@ -164,6 +164,8 @@ Cuts::Cuts() {
     mediumElIso.phIso03                   = 99999;
     mediumElIso.relCombIso03              = 0.15;
 
+
+    /* Muon ID */
     tightMuID.cutName                     = "tightMuID";
     tightMuID.IsPF                        = 1;
     tightMuID.IsGLB                       = 1;
@@ -175,6 +177,25 @@ Cuts::Cuts() {
     tightMuID.TrackLayersWithMeasurement  = 5;
     tightMuID.dxy                         = 0.2;
     tightMuID.dz                          = 0.5;
+
+    /* Muon ISO */
+    amumuMuDetIso.cutName                    = "amumuMuDetIso";
+    amumuMuDetIso.hcalIso03                  = 99999;
+    amumuMuDetIso.ecalIso03                  = 99999;
+    amumuMuDetIso.trkIso03                   = 99999;
+    amumuMuDetIso.relCombIso03               = 0.2;
+
+    looseMuDetIso.cutName                    = "looseMuDetIso";
+    looseMuDetIso.hcalIso03                  = 99999;
+    looseMuDetIso.ecalIso03                  = 99999;
+    looseMuDetIso.trkIso03                   = 99999;
+    looseMuDetIso.relCombIso03               = 0.2;
+
+    tightMuDetIso.cutName                    = "tightMuDetIso";
+    tightMuDetIso.hcalIso03                  = 99999;
+    tightMuDetIso.ecalIso03                  = 99999;
+    tightMuDetIso.trkIso03                   = 99999;
+    tightMuDetIso.relCombIso03               = 0.2;
 
     looseMuIso.cutName                    = "looseMuIso";
     looseMuIso.chIso04                    = 99999;

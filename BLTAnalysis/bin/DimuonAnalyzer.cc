@@ -48,7 +48,6 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("muonOneP4", &muonOneP4);
     outTree->Branch("muonTwoP4", &muonTwoP4);
-    outTree->Branch("dimuonP4", &dimuonP4);
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("met", &met);
@@ -70,6 +69,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
     triggerSelector->SetRealData(isRealData);
 
+    /* Trigger selection */
+
+    ///////////////////
+    // Select objects//
+    ///////////////////
+
     /* Vertices */
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
@@ -81,11 +86,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     }
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
-
-
-    ///////////////////
-    // Select objects//
-    ///////////////////
 
     /* MUONS */
     std::vector<TMuon*> muons;

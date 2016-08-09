@@ -46,7 +46,7 @@ class CondorJobType(object):
             'PERIOD'       : self.period,
             'NJOBS'        : self.njobs,
 
-            'MACHINE'      : 'cmslpc',
+            'MACHINE'      : 'ttgrid',
             'MAXEVENTS'    : '-1',
             'JOBNAME'      : 'job',
             'LOGNAME'      : 'res',

@@ -131,11 +131,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
-
     /* MET */
-    TMET* pfMET = new TMET();
-    pfMET->pt = fInfo->pfMET;
-    pfMET->phi = fInfo->pfMETphi;
+    met = fInfo->pfMET;
+    met_phi = fInfo->pfMETphi;
 
     ////////////////////////////
     /* Apply dimuon selection */
@@ -175,10 +173,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     dimuonP4  = dimuon;
 
     jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-    jetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
-
-    met     = pfMET->pt;
-    met_phi = pfMET->phi;
+    bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
 
     outTree->Fill();
     this->passedEvents++;

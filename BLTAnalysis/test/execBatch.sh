@@ -13,6 +13,8 @@ SELECTION=$4
 PERIOD=$5
 
 ### Transfer files, prepare directory ###
+TOPDIR=$PWD
+
 export SCRAM_ARCH=slc6_amd64_gcc491
 export CMSSW_VERSION=CMSSW_7_4_12
 source /software/tier3/osg/cmsset_default.sh
@@ -22,17 +24,14 @@ scram project CMSSW $CMSSW_VERSION
 cd $CMSSW_VERSION/src
 eval `scram runtime -sh`
 
-echo $PWD
-
-cp ../../source.tar.gz .
+cp $TOPDIR/source.tar.gz .
 tar -xzf source.tar.gz
-ls
+scram build
 cd BLT/BLTAnalysis/test
-cp ../../../../input_${DATANAME}_${COUNT}.txt input.txt
+cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
 ### Run the analyzer
-#DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-#rename .root _${DATANAME}_$COUNT.root histos/fcncHistograms*
-#cp ouput_*.root ${_CONDOR_SCRATCH_DIR}
+cp output_${SUFFIX}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

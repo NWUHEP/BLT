@@ -108,17 +108,15 @@ class BatchMaster():
         make_directory(self._stageDir, clear=False)
 
         print 'Creating tarball of current workspace...'
-        os.system('tar czf {0}/source.tar.gz $CMSSW_BASE/src/* 2> /dev/null'.format(self._stageDir))
+        #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/src 2> /dev/null'.format(self._stageDir))
+        os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/src .'.format(self._stageDir))
         subprocess.call('cp {0} {1}'.format(self._executable, self._stageDir), shell=True)
         os.chdir(self._stageDir)
         make_directory('reports', clear=False)
         
         print 'Ready to submit to batch system {0}!'.format(bSystem)
         if bSystem is 'lpc':
-
             for cfg in self._configList:
                 sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
                 self.make_batch_lpc(cfg, sourceFiles)
                 subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._dataName), shell=True)
-
-

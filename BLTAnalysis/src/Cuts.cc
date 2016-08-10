@@ -182,7 +182,7 @@ Cuts::Cuts() {
     amumuMuDetIso.cutName                    = "amumuMuDetIso";
     amumuMuDetIso.hcalIso03                  = 99999;
     amumuMuDetIso.ecalIso03                  = 99999;
-    amumuMuDetIso.trkIso03                   = 99999;
+    amumuMuDetIso.trkIso03                   = 0.1;
     amumuMuDetIso.relCombIso03               = 0.2;
 
     looseMuDetIso.cutName                    = "looseMuDetIso";

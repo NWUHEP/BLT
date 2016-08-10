@@ -70,6 +70,7 @@ public:
     Float_t met;
     Float_t met_phi;
     UInt_t runNumber, evtNumber, lumiSection;
+    UInt_t nJets, nBJets;
 
     //ClassDef(DimuonAnalyzer,0);
 };

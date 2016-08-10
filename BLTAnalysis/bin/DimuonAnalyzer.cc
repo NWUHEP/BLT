@@ -52,6 +52,8 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("met", &met);
     outTree->Branch("met_phi", &met_phi);
+    outTree->Branch("nJets", &nJets);
+    outTree->Branch("nBJets", &nBJets);
 
     ReportPostBegin();
 }
@@ -97,7 +99,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             muon->pt > 20 
             && std::abs(muon->eta) < 2.4
             && particleSelector->PassMuonID(muon, cuts->tightMuID)
-            && particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+            && particleSelector->PassMuonIso(muon, cuts->amumuMuDetIso)
            ) {
             muons.push_back(muon);
         }
@@ -122,10 +124,15 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
            ) {
 
-            if (particleSelector->PassJetID(jet, cuts->bJetID))
+            if (particleSelector->PassJetID(jet, cuts->bJetID)) {
                 bjets.push_back(jet);
-            else 
+                if (jet->pt > 30 and fabs(jet->eta) < 2.4) 
+                    ++nBJets;
+            } else {
                 jets.push_back(jet);
+                if (jet->pt > 30 and fabs(jet->eta) < 2.4) 
+                    ++nJets;
+            }
         }
     }
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
@@ -178,7 +185,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     outTree->Fill();
     this->passedEvents++;
 
-    delete pfMET;
+    nJets = 0;
+    nBJets = 0;
 
     return kTRUE;
 }

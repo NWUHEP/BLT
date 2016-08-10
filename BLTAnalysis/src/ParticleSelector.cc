@@ -46,12 +46,18 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
         if (combIso/mu->pt < cutLevel.relCombIso04) 
             isoPass = true;
 
-    } else if (cutLevel.cutName == "amumuDetIso") {
-        if (mu->trkIso/mu->pt > 0.1) 
-            isoPass = true;
-    }
-    return isoPass;
+    }     return isoPass;
 }
+
+bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
+    bool isoPass = false;
+    if (mu->trkIso/mu->pt < cutLevel.trkIso03
+        && mu->hcalIso/mu->pt < cutLevel.hcalIso03
+        && mu->ecalIso/mu->pt < cutLevel.ecalIso03
+            ) 
+        isoPass = true;
+    return isoPass;
+    }
 
 bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const {
     bool elPass = false;

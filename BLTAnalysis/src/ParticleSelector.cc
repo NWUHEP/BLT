@@ -52,73 +52,71 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
     bool isoPass = false;
     if (mu->trkIso/mu->pt < cutLevel.trkIso03
-        && mu->hcalIso/mu->pt < cutLevel.hcalIso03
-        && mu->ecalIso/mu->pt < cutLevel.ecalIso03
-            ) 
+            && mu->hcalIso/mu->pt < cutLevel.hcalIso03
+            && mu->ecalIso/mu->pt < cutLevel.ecalIso03
+       ) 
         isoPass = true;
     return isoPass;
-    }
+}
 
 bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const {
     bool elPass = false;
-    std::cout << warning() << "BLT electron ID is missing certain variables." << std::endl;
 
     //if (fabs(el->scEta) > 2.5) return elPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "mvaPreElID"){
         if (fabs(el->scEta) < 1.479) {
             if (
-                el->sieie                            < cutLevel.sigmaIetaIeta[0]
-                && el->hovere                        < cutLevel.HadOverEm[0]
-                && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[0]
-                && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[0]
-                && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[0]
-                //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[0]  //FIXME
-            ) elPass = true;
+                    el->sieie                            < cutLevel.sigmaIetaIeta[0]
+                    && el->hovere                        < cutLevel.HadOverEm[0]
+                    && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[0]
+                    && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[0]
+                    && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[0]
+                    //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[0]  //FIXME
+               ) elPass = true;
         } else {
             if (
-                el->sieie                            < cutLevel.sigmaIetaIeta[1]
-                && el->hovere                        < cutLevel.HadOverEm[1]
-                && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[1]
-                && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[1]
-                && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[1]
-                //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[1]  //FIXME
-            ) elPass = true;
+                    el->sieie                            < cutLevel.sigmaIetaIeta[1]
+                    && el->hovere                        < cutLevel.HadOverEm[1]
+                    && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[1]
+                    && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[1]
+                    && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[1]
+                    //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[1]  //FIXME
+               ) elPass = true;
         }
 
     } else {
         if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566)  return elPass;
         if (
-            (
-                fabs(el->scEta) < 1.479
-                && fabs(el->dEtaIn)                         < cutLevel.dEtaIn[0]
-                && fabs(el->dPhiIn)                         < cutLevel.dPhiIn[0]
-                && el->sieie                                < cutLevel.sigmaIetaIeta[0]
-                && el->hovere                               < cutLevel.HadOverEm[0]
-                && fabs(el->d0)                             < cutLevel.dxy[0]
-                && fabs(el->dz)                             < cutLevel.dz[0]
-                //&& el->inverseEnergyMomentumDiff            < cutLevel.fabsEPDiff[0]  //FIXME
-                && el->nMissingHits                        <= cutLevel.ConversionMissHits[0]
-                && (!el->isConv)                           == cutLevel.PassedConversionProb[0]
-            ) || (
-                fabs(el->scEta) > 1.479
-                && fabs(el->dEtaIn)                         < cutLevel.dEtaIn[1]
-                && fabs(el->dPhiIn)                         < cutLevel.dPhiIn[1]
-                && el->sieie                                < cutLevel.sigmaIetaIeta[1]
-                && el->hovere                               < cutLevel.HadOverEm[1]
-                && fabs(el->d0)                             < cutLevel.dxy[1]
-                && fabs(el->dz)                             < cutLevel.dz[1]
-                //&& el->inverseEnergyMomentumDiff            < cutLevel.fabsEPDiff[1]  //FIXME
-                && el->nMissingHits                        <= cutLevel.ConversionMissHits[1]
-                && (!el->isConv)                           == cutLevel.PassedConversionProb[1]
-            )
-        ) elPass = true;
+                (
+                 fabs(el->scEta) < 1.479
+                 && fabs(el->dEtaIn)                         < cutLevel.dEtaIn[0]
+                 && fabs(el->dPhiIn)                         < cutLevel.dPhiIn[0]
+                 && el->sieie                                < cutLevel.sigmaIetaIeta[0]
+                 && el->hovere                               < cutLevel.HadOverEm[0]
+                 && fabs(el->d0)                             < cutLevel.dxy[0]
+                 && fabs(el->dz)                             < cutLevel.dz[0]
+                 //&& el->inverseEnergyMomentumDiff            < cutLevel.fabsEPDiff[0]  //FIXME
+                 && el->nMissingHits                        <= cutLevel.ConversionMissHits[0]
+                 && (!el->isConv)                           == cutLevel.PassedConversionProb[0]
+                ) || (
+                    fabs(el->scEta) > 1.479
+                    && fabs(el->dEtaIn)                         < cutLevel.dEtaIn[1]
+                    && fabs(el->dPhiIn)                         < cutLevel.dPhiIn[1]
+                    && el->sieie                                < cutLevel.sigmaIetaIeta[1]
+                    && el->hovere                               < cutLevel.HadOverEm[1]
+                    && fabs(el->d0)                             < cutLevel.dxy[1]
+                    && fabs(el->dz)                             < cutLevel.dz[1]
+                    //&& el->inverseEnergyMomentumDiff            < cutLevel.fabsEPDiff[1]  //FIXME
+                    && el->nMissingHits                        <= cutLevel.ConversionMissHits[1]
+                    && (!el->isConv)                           == cutLevel.PassedConversionProb[1]
+                    )
+                ) elPass = true;
     }
     return elPass;
 }
 
 bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts::elMVACuts& cutLevel) const {
     bool elPass = false;
-    std::cout << warning() << "BLT electron MVA ID is missing certain variables." << std::endl;
 
     if (cutLevel.cutName == "hzgMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
@@ -131,48 +129,48 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[0])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[0])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[0])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[0])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[0])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[0])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[1]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[1])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[1])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[1])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[1])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[1])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[1])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[2]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[2])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[2])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[2])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[2])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[2])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[2])
+                   ) elPass = true;
             }
         } else if (el->pt > cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[3])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[3])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[3])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[3])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[3])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[3])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[1]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[4])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[4])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[4])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[4])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[4])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[4])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[2]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[5])  //FIXME
-                    //&& (el->nMissingHits        < cutLevel.missHits[5])  //FIXME
-                    1
-                    && (el->sip3d               < cutLevel.sip[5])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[5])  //FIXME
+                        //&& (el->nMissingHits        < cutLevel.missHits[5])  //FIXME
+                        1
+                        && (el->sip3d               < cutLevel.sip[5])
+                   ) elPass = true;
             }
         }
 
@@ -180,48 +178,48 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[0])  //FIXME
-                    //&& (el->nMissingHits       == cutLevel.missHits[0])  //FIXME
-                    1
-                    && ((!el->isConv)          == cutLevel.conversionVeto[0])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[0])  //FIXME
+                        //&& (el->nMissingHits       == cutLevel.missHits[0])  //FIXME
+                        1
+                        && ((!el->isConv)          == cutLevel.conversionVeto[0])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[1]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[1])  //FIXME
-                    //&& (el->nMissingHits       == cutLevel.missHits[1])  //FIXME
-                    1
-                    && ((!el->isConv)          == cutLevel.conversionVeto[1])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[1])  //FIXME
+                        //&& (el->nMissingHits       == cutLevel.missHits[1])  //FIXME
+                        1
+                        && ((!el->isConv)          == cutLevel.conversionVeto[1])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[2]) {
                 if (
-                    //(el->mvaHZZ                 > cutLevel.mvaVal[2])  //FIXME
-                    //&& (el->nMissingHits       == cutLevel.missHits[2])  //FIXME
-                    1
-                    && ((!el->isConv)          == cutLevel.conversionVeto[2])
-                ) elPass = true;
+                        //(el->mvaHZZ                 > cutLevel.mvaVal[2])  //FIXME
+                        //&& (el->nMissingHits       == cutLevel.missHits[2])  //FIXME
+                        1
+                        && ((!el->isConv)          == cutLevel.conversionVeto[2])
+                   ) elPass = true;
             }
         } else if (el->pt > cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {
                 if (
-                    //(el->mvaHZZ                  > cutLevel.mvaVal[3])  //FIXME
-                    //&& (el->nMissingHits        == cutLevel.missHits[3])  //FIXME
-                    1
-                    && ((!el->isConv)           == cutLevel.conversionVeto[3])
-                ) elPass = true;
+                        //(el->mvaHZZ                  > cutLevel.mvaVal[3])  //FIXME
+                        //&& (el->nMissingHits        == cutLevel.missHits[3])  //FIXME
+                        1
+                        && ((!el->isConv)           == cutLevel.conversionVeto[3])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[1]) {
                 if (
-                    //(el->mvaHZZ                  > cutLevel.mvaVal[4])  //FIXME
-                    //&& (el->nMissingHits        == cutLevel.missHits[4])  //FIXME
-                    1
-                    && ((!el->isConv)           == cutLevel.conversionVeto[4])
-                ) elPass = true;
+                        //(el->mvaHZZ                  > cutLevel.mvaVal[4])  //FIXME
+                        //&& (el->nMissingHits        == cutLevel.missHits[4])  //FIXME
+                        1
+                        && ((!el->isConv)           == cutLevel.conversionVeto[4])
+                   ) elPass = true;
             } else if (fabs(el->eta) < cutLevel.eta[2]) {
                 if (
-                    //(el->mvaHZZ                  > cutLevel.mvaVal[5])  //FIXME
-                    //&& (el->nMissingHits        == cutLevel.missHits[5])  //FIXME
-                    1
-                    && ((!el->isConv)           == cutLevel.conversionVeto[5])
-                ) elPass = true;
+                        //(el->mvaHZZ                  > cutLevel.mvaVal[5])  //FIXME
+                        //&& (el->nMissingHits        == cutLevel.missHits[5])  //FIXME
+                        1
+                        && ((!el->isConv)           == cutLevel.conversionVeto[5])
+                   ) elPass = true;
             }
         }
     }
@@ -261,9 +259,9 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
         if (fabs(ph->scEta) > 1.4442 && fabs(ph->scEta) < 1.566) return phoPass;
         if (fabs(ph->scEta) < 1.479) {
             if (
-                (!ph->isConv)                   == cutLevel.PassedEleSafeVeto[0]
-                && ph->sieie                     < cutLevel.sigmaIetaIeta[0]
-            ) {
+                    (!ph->isConv)                   == cutLevel.PassedEleSafeVeto[0]
+                    && ph->sieie                     < cutLevel.sigmaIetaIeta[0]
+               ) {
                 if (ph->r9 > 0.9) {
                     if (ph->hovere               < cutLevel.HadOverEm[0]) phoPass1 = true;
                 } else {
@@ -272,44 +270,44 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
             }
         } else {
             if (
-                (!ph->isConv)                   == cutLevel.PassedEleSafeVeto[1]
-                && ph->sieie                     < cutLevel.sigmaIetaIeta[1]
-                && ph->hovere                    < cutLevel.HadOverEm[1]
-            ) phoPass1 = true;
+                    (!ph->isConv)                   == cutLevel.PassedEleSafeVeto[1]
+                    && ph->sieie                     < cutLevel.sigmaIetaIeta[1]
+                    && ph->hovere                    < cutLevel.HadOverEm[1]
+               ) phoPass1 = true;
         }
 
         if (ph->r9 > 0.9) {
             if (
-                //ph->hcalIso03 - 0.005*ph->pt     < cutLevel.HcalIso[0]  //FIXME
-                //&& ph->trkIso03 - 0.002*ph->pt   < cutLevel.TrkIso[0]   //FIXME
-                //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[0]  //FIXME
-                1
-            ) phoPass2 = true;
+                    //ph->hcalIso03 - 0.005*ph->pt     < cutLevel.HcalIso[0]  //FIXME
+                    //&& ph->trkIso03 - 0.002*ph->pt   < cutLevel.TrkIso[0]   //FIXME
+                    //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[0]  //FIXME
+                    1
+               ) phoPass2 = true;
         } else {
             if (
-                //ph->hcalIso03 - 0.005*ph->pt     < cutLevel.HcalIso[1]  //FIXME
-                //&& ph->trkIso03 - 0.002*ph->pt   < cutLevel.TrkIso[1]   //FIXME
-                //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[1]  //FIXME
-                1
-            ) phoPass2 = true;
+                    //ph->hcalIso03 - 0.005*ph->pt     < cutLevel.HcalIso[1]  //FIXME
+                    //&& ph->trkIso03 - 0.002*ph->pt   < cutLevel.TrkIso[1]   //FIXME
+                    //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[1]  //FIXME
+                    1
+               ) phoPass2 = true;
         }
         if (phoPass1 && phoPass2) phoPass = true;
 
     } else if (cutLevel.cutName == "medPhID"){
         if (fabs(ph->scEta) > 1.4442 && fabs(ph->scEta) < 1.566) return phoPass;
         if (
-            (
-                fabs(ph->scEta)  < 1.4442
-                && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[0]
-                && ph->hovere                    < cutLevel.HadOverEm[0]
-                && ph->sieie                     < cutLevel.sigmaIetaIeta[0]
-            ) || (
-                fabs(ph->scEta)  > 1.566
-                && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[1]
-                && ph->hovere                    < cutLevel.HadOverEm[1]
-                && ph->sieie                     < cutLevel.sigmaIetaIeta[1]
-            )
-        ) phoPass = true;
+                (
+                 fabs(ph->scEta)  < 1.4442
+                 && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[0]
+                 && ph->hovere                    < cutLevel.HadOverEm[0]
+                 && ph->sieie                     < cutLevel.sigmaIetaIeta[0]
+                ) || (
+                    fabs(ph->scEta)  > 1.566
+                    && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[1]
+                    && ph->hovere                    < cutLevel.HadOverEm[1]
+                    && ph->sieie                     < cutLevel.sigmaIetaIeta[1]
+                    )
+           ) phoPass = true;
     }
     return phoPass;
 }
@@ -366,31 +364,31 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
 
     if (cutLevel.cutName == "loosePhIso"){
         if (
-            (
-                fabs(ph->scEta) < 1.4442
-                && max((double)chIsoCor,0.)      < cutLevel.chIso03[0]
-                && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[0] + 0.04*ph->pt
-                && max((double)phIsoCor,0.)      < cutLevel.phIso03[0] + 0.005*ph->pt
-            ) || (
-                fabs(ph->scEta) > 1.566
-                && max((double)chIsoCor,0.)      < cutLevel.chIso03[1]
-                && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[1] + 0.04*ph->pt
-            )
-        ) isoPass = true;
+                (
+                 fabs(ph->scEta) < 1.4442
+                 && max((double)chIsoCor,0.)      < cutLevel.chIso03[0]
+                 && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[0] + 0.04*ph->pt
+                 && max((double)phIsoCor,0.)      < cutLevel.phIso03[0] + 0.005*ph->pt
+                ) || (
+                    fabs(ph->scEta) > 1.566
+                    && max((double)chIsoCor,0.)      < cutLevel.chIso03[1]
+                    && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[1] + 0.04*ph->pt
+                    )
+           ) isoPass = true;
     } else {
         if (
-            (
-                fabs(ph->scEta) < 1.4442
-                && max((double)chIsoCor,0.)      < cutLevel.chIso03[0]
-                && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[0] + 0.04*ph->pt
-                && max((double)phIsoCor,0.)      < cutLevel.phIso03[0] + 0.005*ph->pt
-            ) || (
-                fabs(ph->scEta) > 1.566
-                && max((double)chIsoCor,0.)      < cutLevel.chIso03[1]
-                && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[1] + 0.04*ph->pt
-                && max((double)phIsoCor,0.)      < cutLevel.phIso03[1] + 0.005*ph->pt
-            )
-        ) isoPass = true;
+                (
+                 fabs(ph->scEta) < 1.4442
+                 && max((double)chIsoCor,0.)      < cutLevel.chIso03[0]
+                 && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[0] + 0.04*ph->pt
+                 && max((double)phIsoCor,0.)      < cutLevel.phIso03[0] + 0.005*ph->pt
+                ) || (
+                    fabs(ph->scEta) > 1.566
+                    && max((double)chIsoCor,0.)      < cutLevel.chIso03[1]
+                    && max((double)nhIsoCor,0.)      < cutLevel.nhIso03[1] + 0.04*ph->pt
+                    && max((double)phIsoCor,0.)      < cutLevel.phIso03[1] + 0.005*ph->pt
+                    )
+           ) isoPass = true;
     }
     return isoPass;
 }
@@ -403,22 +401,22 @@ bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJe
     if (cutLevel.cutName == "vbfJetID"){
         if (fabs(jet->eta) < 2.5) {
             if (
-                jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[0]
-                && jet->dR2Mean                  < cutLevel.dR2Mean[0]
-            ) jetPass = true;
+                    jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[0]
+                    && jet->dR2Mean                  < cutLevel.dR2Mean[0]
+               ) jetPass = true;
         } else if (fabs(jet->eta) < 2.75) {
             if(
-                jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[1]
-                && jet->dR2Mean                  < cutLevel.dR2Mean[1]
-            ) jetPass = true;
+                    jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[1]
+                    && jet->dR2Mean                  < cutLevel.dR2Mean[1]
+              ) jetPass = true;
         } else if (fabs(jet->eta) < 3.0) {
             if(
-                jet->dR2Mean                     < cutLevel.dR2Mean[2]
-            ) jetPass = true;
+                    jet->dR2Mean                     < cutLevel.dR2Mean[2]
+              ) jetPass = true;
         } else {
             if(
-                jet->dR2Mean                     < cutLevel.dR2Mean[3]
-            ) jetPass = true;
+                    jet->dR2Mean                     < cutLevel.dR2Mean[3]
+              ) jetPass = true;
         }
     }
     return jetPass;
@@ -426,12 +424,8 @@ bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJe
 
 bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool jetPass = false;
-    //std::cout << warning() << "BLT jet ID is not doing cross cleaning." << std::endl;
-
-    //if (fabs(jet->eta) > 4.7) return isoPass;  // uncomment to apply eta requirement
-    if (cutLevel.cutName == "looseJetID") {
-        if (fabs(jet->eta) <= 2.4) {
-            if (
+    if (fabs(jet->eta) <= 2.4) {
+        if (
                 jet->neuHadFrac       < cutLevel.NHF
                 && jet->neuEmFrac     < cutLevel.NEMF
                 && jet->nParticles    > cutLevel.NumConst
@@ -439,33 +433,52 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
                 && jet->nCharged      > cutLevel.CHM
                 && jet->chEmFrac      < cutLevel.CEMF
                 && jet->csv           > cutLevel.CSV
-            ) jetPass = true;
-        } else {
-            if (
-                jet->neuHadFrac       < cutLevel.NHF
-                && jet->neuEmFrac     < cutLevel.NEMF
-                && jet->nParticles    > cutLevel.NumConst
-            ) jetPass = true;
-        }
-
+           ) jetPass = true;
     } else {
-        if (fabs(jet->eta) <= 2.4) {
-            if (
+        if (
                 jet->neuHadFrac       < cutLevel.NHF
                 && jet->neuEmFrac     < cutLevel.NEMF
                 && jet->nParticles    > cutLevel.NumConst
-                && jet->chHadFrac     > cutLevel.CHF
-                && jet->nCharged      > cutLevel.CHM
-                && jet->chEmFrac      < cutLevel.CEMF
-                && jet->csv           > cutLevel.CSV
-            ) jetPass = true;
-        }
+           ) jetPass = true;
     }
+
+    /*else if (fabs(jet->eta) <= 3.0) { 
+      if (
+      jet->neuHadFrac       < cutLevel.NHF
+      && jet->neuEmFrac     < cutLevel.NEMF
+      && jet->nParticles    > cutLevel.NumConst
+      ) jetPass = true;
+      } else {
+      if (this->_parameters.period == "2012") {
+      if (jet->neuHadFrac    < cutLevel.NHF
+      && jet->neuEmFrac  < cutLevel.NEMF
+      && jet->nParticles > cutLevel.NumConst
+      ) jetPass = true; 
+      } else {
+      if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
+      jetPass = true;
+      }
+      }*/
+
     return jetPass;
 }
 
+bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
+    bool pass = false;
+    if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5 && jet->mva >= -0.63) 
+        pass = true;
+    else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75 && jet->mva >= -0.60) 
+        pass = true;
+    else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3 && jet->mva >= -0.55) 
+        pass = true;
+    else if(3    <= fabs(jet->eta) && fabs(jet->eta) < 5 && jet->mva >= -0.45) 
+        pass = true;
+
+    return pass;
+}
+
 bool ParticleSelector::FindGoodDiMuons(const std::vector<baconhep::TMuon*>& muons,
-                         TLorentzVector& mu1, TLorentzVector& mu2, int& index1, int& index2) const {
+        TLorentzVector& mu1, TLorentzVector& mu2, int& index1, int& index2) const {
     bool goodZ = false;
     TLorentzVector tmpZ;
     index1 = -1;
@@ -502,7 +515,7 @@ bool ParticleSelector::FindGoodDiMuons(const std::vector<baconhep::TMuon*>& muon
 }
 
 bool ParticleSelector::FindGoodDiElectrons(const std::vector<baconhep::TElectron*>& electrons,
-                             TLorentzVector& el1, TLorentzVector& el2, int& index1, int& index2) const {
+        TLorentzVector& el1, TLorentzVector& el2, int& index1, int& index2) const {
     bool goodZ = false;
     TLorentzVector tmpZ;
     index1 = -1;
@@ -539,8 +552,8 @@ bool ParticleSelector::FindGoodDiElectrons(const std::vector<baconhep::TElectron
 }
 
 bool ParticleSelector::FindGenZToLL(const TClonesArray* genParticles,
-                      TLorentzVector& genZ, TLorentzVector& genLep1, TLorentzVector& genLep2,
-                      int& indexZ, int& indexLep1, int& indexLep2) const {
+        TLorentzVector& genZ, TLorentzVector& genLep1, TLorentzVector& genLep2,
+        int& indexZ, int& indexLep1, int& indexLep2) const {
     bool goodZ = false;
     indexZ = -1;
     indexLep1 = -1;
@@ -567,9 +580,9 @@ bool ParticleSelector::FindGenZToLL(const TClonesArray* genParticles,
         assert(particle);
 
         if (
-            (std::abs(particle->pdgId) == ELE_PDGID || std::abs(particle->pdgId) == MUON_PDGID)  // not including tau
-            && particle->status == 1
-        ) {
+                (std::abs(particle->pdgId) == ELE_PDGID || std::abs(particle->pdgId) == MUON_PDGID)  // not including tau
+                && particle->status == 1
+           ) {
             // Check parent
             const TGenParticle* particleParent = 0;
             if (particle->parent >= 0) {

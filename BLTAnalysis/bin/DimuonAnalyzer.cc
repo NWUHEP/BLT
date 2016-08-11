@@ -4,8 +4,9 @@
 // See header file for class documentation
 //
 
-
 using namespace baconhep;
+
+bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
 DimuonAnalyzer::DimuonAnalyzer() : BLTSelector()
 {
@@ -24,7 +25,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     std::vector<std::string> options;
     std::regex re_whitespace("(\\s+)");  // split by white space
     std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1),
-              std::sregex_token_iterator(), std::back_inserter(options));
+            std::sregex_token_iterator(), std::back_inserter(options));
 
     // Set the parameters
     params.reset(new Parameters());
@@ -33,7 +34,11 @@ void DimuonAnalyzer::Begin(TTree *tree)
     // Set the cuts
     cuts.reset(new Cuts());
     particleSelector.reset(new ParticleSelector(*params, *cuts));
-    triggerSelector.reset(new TriggerSelector());
+
+    // Trigger bits mapping file
+    const std::string cmssw_base = getenv("CMSSW_BASE");
+    std::string trigfilename = cmssw_base + std::string("/src/BaconAna/DataFormats/data/HLTFile_v2");
+    trigger.reset(new baconhep::TTrigger(trigfilename));
 
     // Prepare the output tree
     outFileName = params->get_output_filename("output");
@@ -69,9 +74,13 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
-    triggerSelector->SetRealData(isRealData);
 
     /* Trigger selection */
+    bool passTrigger;
+    passTrigger= trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
+
+    if (!passTrigger)
+        return kTRUE;
 
     ///////////////////
     // Select objects//
@@ -90,22 +99,36 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRho(fInfo->rhoJet);
 
     /* MUONS */
-    std::vector<TMuon*> muons;
+    std::vector<TLorentzVector> muons;
+    std::vector<TLorentzVector> veto_muons;
+    std::vector<unsigned> muon_q;
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
 
         if (
-            muon->pt > 20 
-            && std::abs(muon->eta) < 2.4
-            && particleSelector->PassMuonID(muon, cuts->tightMuID)
-            && particleSelector->PassMuonIso(muon, cuts->amumuMuDetIso)
+                muon->pt > 25 
+                && std::abs(muon->eta) < 2.1
+                && particleSelector->PassMuonID(muon, cuts->tightMuID)
+                && particleSelector->PassMuonIso(muon, cuts->amumuMuDetIso)
            ) {
-            muons.push_back(muon);
+            TLorentzVector muonP4;
+            copy_p4(muon, MUON_MASS, muonP4);
+            muons.push_back(muonP4);
+            muon_q.push_back(muon->q);
+        } else if (
+                muon->pt > 5 
+                && std::abs(muon->eta) < 2.4
+                && particleSelector->PassMuonID(muon, cuts->tightMuID)
+                ) {
+            TLorentzVector muonP4;
+            copy_p4(muon, MUON_MASS, muonP4);
+            veto_muons.push_back(muonP4);
         }
+
     }
 
-    std::sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
+    std::sort(muons.begin(), muons.end(), P4SortCondition);
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -115,78 +138,91 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         jetCollection = fAK4CHSArr;
 
     std::vector<TJet*> jets;
+    std::vector<TJet*> fwdjets;
     std::vector<TJet*> bjets;
+    nJets  = 0;
+    nBJets = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
+
         if (
-                jet->pt > 25
+                jet->pt > 30 
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
+                && particleSelector->PassJetPUID(jet, cuts->looseJetID)
            ) {
 
-            if (particleSelector->PassJetID(jet, cuts->bJetID)) {
+            // Prevent overlap of muons and jets
+            TLorentzVector vJet; 
+            vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            bool muOverlap = false;
+            for (const auto& mu: muons) {
+                if (vJet.DeltaR(mu) < 0.5) {
+                    muOverlap = true;
+                    break;
+                }
+            }
+            if (muOverlap) continue;
+
+            if (fabs(jet->eta) <= 2.4 && particleSelector->PassJetID(jet, cuts->bJetID)) {
                 bjets.push_back(jet);
-                if (jet->pt > 30 and fabs(jet->eta) < 2.4) 
-                    ++nBJets;
+                ++nBJets;
             } else {
-                jets.push_back(jet);
-                if (jet->pt > 30 and fabs(jet->eta) < 2.4) 
+                if (fabs(jet->eta) <= 2.4) {
                     ++nJets;
+                    jets.push_back(jet);
+                } else {
+                    fwdjets.push_back(jet);
+                }
             }
         }
     }
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+    std::sort(fwdjets.begin(), fwdjets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
     met = fInfo->pfMET;
     met_phi = fInfo->pfMETphi;
 
+
     ////////////////////////////
     /* Apply dimuon selection */
     ////////////////////////////
-    
+
     if (muons.size() != 2) 
         return kTRUE;
 
-    if (muons[0]->q == muons[1]->q)
+    if (muon_q[0] == muon_q[1]) 
         return kTRUE;
 
-    if (bjets.size() < 1)
-        return kTRUE;
-
-    if (jets.size() < 1)
-        return kTRUE;
-
-    /* Prepare Lorentz vectors */
-    TLorentzVector muon1, muon2, dimuon;
-    copy_p4(muons[0], MUON_MASS, muon1);
-    copy_p4(muons[1], MUON_MASS, muon2);
-    dimuon = muon1 + muon2;
-
-    if (dimuon.M() < 12.)
+    TLorentzVector dimuon;
+    dimuon = muons[0] + muons[1];
+    if (dimuon.M() < 12. || dimuon.M() > 70.)
         return kTRUE;
 
     //////////
     // Fill //
     //////////
-      
+
     runNumber = fInfo->runNum;
     evtNumber = fInfo->evtNum;
     lumiSection = fInfo->lumiSec;
 
-    muonOneP4 = muon1;
-    muonTwoP4 = muon2;
+    muonOneP4 = muons[0];
+    muonTwoP4 = muons[1];
     dimuonP4  = dimuon;
 
-    jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+    if (fwdjets.size() > 0)
+        jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
+    else
+        jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+
     bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+
 
     outTree->Fill();
     this->passedEvents++;
-
-    nJets = 0;
-    nBJets = 0;
 
     return kTRUE;
 }

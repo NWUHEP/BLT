@@ -24,7 +24,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     std::vector<std::string> options;
     std::regex re_whitespace("(\\s+)");  // split by white space
     std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1),
-              std::sregex_token_iterator(), std::back_inserter(options));
+            std::sregex_token_iterator(), std::back_inserter(options));
 
     // Set the parameters
     params.reset(new Parameters());
@@ -33,7 +33,6 @@ void DimuonAnalyzer::Begin(TTree *tree)
     // Set the cuts
     cuts.reset(new Cuts());
     particleSelector.reset(new ParticleSelector(*params, *cuts));
-    triggerSelector.reset(new TriggerSelector());
 
     // Prepare the output tree
     outFileName = params->get_output_filename("demoFile");
@@ -71,7 +70,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
-    triggerSelector->SetRealData(isRealData);
 
     bool printEvent = false;
 
@@ -115,12 +113,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-            muon->pt > 20 
-            && std::abs(muon->eta) < 2.4
-            && particleSelector->PassMuonID(muon, cuts->tightMuID)
-            //&& particleSelector->PassMuonIso(muon, cuts->tightMuIso)
-	    && (muon->chHadIso + std::max(0.,(double)muon->neuHadIso + muon->gammaIso - 0.5*muon->puIso))/muon->pt < 0.15
-	    )
+                muon->pt > 20 
+                && std::abs(muon->eta) < 2.4
+                && particleSelector->PassMuonID(muon, cuts->tightMuID)
+                //&& particleSelector->PassMuonIso(muon, cuts->tightMuIso)
+                && (muon->chHadIso + std::max(0.,(double)muon->neuHadIso + muon->gammaIso - 0.5*muon->puIso))/muon->pt < 0.15
+           )
             muons.push_back(muon);
     }
 
@@ -132,35 +130,34 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
         TJet* jet = (TJet*) fAK4CHSArr->At(i);
         assert(jet);
-	if(jet->pt < 30) continue;
+        if(jet->pt < 30) continue;
 
-	bool jetPass = false;
+        bool jetPass = false;
+        if (fabs(jet->eta) <= 3.0) {
+            bool cond1 = 
+                jet->neuHadFrac < 0.99
+                && jet->neuEmFrac < 0.99
+                && jet->nParticles > 1;
 
-	if (fabs(jet->eta) <= 3.0) {
-	  bool cond1 = 
-	    jet->neuHadFrac < 0.99
-	    && jet->neuEmFrac < 0.99
-	    && jet->nParticles > 1;
-	  
-	  bool cond2 = 
-	    fabs(jet->eta) <= 2.4 
-	    && jet->chHadFrac > 0.
-	    && jet->nCharged > 0
-	    && jet->chEmFrac < 0.99;
-	  
-	  bool cond3 = fabs(jet->eta) > 2.4;
-	  jetPass = cond1 && (cond2 || cond3);
-	}
-	
-	if (fabs(jet->eta) > 3.0) {
-	  bool cond1 = 
-	    jet->neuEmFrac < 0.9
-	    && jet->nNeutrals > 10;
-	  jetPass = cond1;
-	}
+            bool cond2 = 
+                fabs(jet->eta) <= 2.4 
+                && jet->chHadFrac > 0.
+                && jet->nCharged > 0
+                && jet->chEmFrac < 0.99;
 
-	if(jetPass)jets.push_back(jet);
-	if(jetPass && jet->csv > 0.605)bjets.push_back(jet);
+            bool cond3 = fabs(jet->eta) > 2.4;
+            jetPass = cond1 && (cond2 || cond3);
+        }
+
+        if (fabs(jet->eta) > 3.0) {
+            bool cond1 = 
+                jet->neuEmFrac < 0.9
+                && jet->nNeutrals > 10;
+            jetPass = cond1;
+        }
+
+        if(jetPass)jets.push_back(jet);
+        if(jetPass && jet->csv > 0.605)bjets.push_back(jet);
     }
 
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
@@ -202,7 +199,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     // Fill //
     //////////
 
-    
+
     muonOneP4 = tmp_muonOne;
     muonTwoP4 = tmp_muonTwo;
     //dimuon  = muonOne + muonTwo;

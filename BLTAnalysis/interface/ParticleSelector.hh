@@ -49,6 +49,7 @@ public:
     bool PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::phIsoCuts& cutLevel, float EAPho[7][3]) const;
     bool PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJetIDCuts& cutLevel) const;
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
+    bool PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
 
     // Finders
     bool FindGoodDiMuons(const std::vector<baconhep::TMuon*>& muons,

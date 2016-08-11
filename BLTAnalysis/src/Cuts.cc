@@ -385,5 +385,5 @@ Cuts::Cuts() {
     bJetID.CHF                              = 0;
     bJetID.CHM                              = 0;
     bJetID.CEMF                             = 0.99;
-    bJetID.CSV                              = 0.679;  // medium WP
+    bJetID.CSV                              = 0.898;  // medium WP
 }

@@ -54,7 +54,9 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("muonOneP4", &muonOneP4);
     outTree->Branch("muonTwoP4", &muonTwoP4);
     outTree->Branch("jetP4", &jetP4);
+    outTree->Branch("jet_d0", &jetD0);
     outTree->Branch("bjetP4", &bjetP4);
+    outTree->Branch("bjet_d0", &bjetD0);
     outTree->Branch("met", &met);
     outTree->Branch("met_phi", &met_phi);
     outTree->Branch("nJets", &nJets);
@@ -107,25 +109,23 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 25 
-                && std::abs(muon->eta) < 2.1
+                muon->pt > 20 
+                && std::abs(muon->eta) < 2.4
                 && particleSelector->PassMuonID(muon, cuts->tightMuID)
-                && particleSelector->PassMuonIso(muon, cuts->amumuMuDetIso)
            ) {
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
-            muons.push_back(muonP4);
-            muon_q.push_back(muon->q);
-        } else if (
-                muon->pt > 5 
-                && std::abs(muon->eta) < 2.4
-                && particleSelector->PassMuonID(muon, cuts->tightMuID)
-                ) {
-            TLorentzVector muonP4;
-            copy_p4(muon, MUON_MASS, muonP4);
             veto_muons.push_back(muonP4);
-        }
 
+            if (
+                    muon->pt > 25 
+                    && std::abs(muon->eta) < 2.1
+                    && particleSelector->PassMuonIso(muon, cuts->amumuMuDetIso)
+               ) {
+                muons.push_back(muonP4);
+                muon_q.push_back(muon->q);
+            }
+        }
     }
 
     std::sort(muons.begin(), muons.end(), P4SortCondition);
@@ -146,23 +146,24 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
 
+        // Prevent overlap of muons and jets
+        TLorentzVector vJet; 
+        vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+        bool muOverlap = false;
+        for (const auto& mu: muons) {
+            if (vJet.DeltaR(mu) < 0.5) {
+                muOverlap = true;
+                break;
+            }
+        }
+        if (muOverlap) continue;
+
         if (
                 jet->pt > 30 
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
                 && particleSelector->PassJetPUID(jet, cuts->looseJetID)
            ) {
 
-            // Prevent overlap of muons and jets
-            TLorentzVector vJet; 
-            vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            bool muOverlap = false;
-            for (const auto& mu: muons) {
-                if (vJet.DeltaR(mu) < 0.5) {
-                    muOverlap = true;
-                    break;
-                }
-            }
-            if (muOverlap) continue;
 
             if (fabs(jet->eta) <= 2.4 && particleSelector->PassJetID(jet, cuts->bJetID)) {
                 bjets.push_back(jet);
@@ -177,6 +178,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             }
         }
     }
+
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(fwdjets.begin(), fwdjets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
@@ -184,7 +186,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     /* MET */
     met = fInfo->pfMET;
     met_phi = fInfo->pfMETphi;
-
 
     ////////////////////////////
     /* Apply dimuon selection */
@@ -201,6 +202,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     if (dimuon.M() < 12. || dimuon.M() > 70.)
         return kTRUE;
 
+    if (fwdjets.size() + jets.size() < 1)
+        return kTRUE;
+
+    if (bjets.size() < 1)
+        return kTRUE;
+
     //////////
     // Fill //
     //////////
@@ -213,13 +220,13 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     muonTwoP4 = muons[1];
     dimuonP4  = dimuon;
 
+    jetD0  = jets[0]->d0;
+    bjetD0 = bjets[0]->d0;
     if (fwdjets.size() > 0)
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
     else
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-
     bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
-
 
     outTree->Fill();
     this->passedEvents++;

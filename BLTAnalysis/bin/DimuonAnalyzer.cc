@@ -220,13 +220,16 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     muonTwoP4 = muons[1];
     dimuonP4  = dimuon;
 
-    jetD0  = jets[0]->d0;
-    bjetD0 = bjets[0]->d0;
-    if (fwdjets.size() > 0)
-        jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
-    else
-        jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
     bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+    bjetD0 = bjets[0]->d0;
+    if (fwdjets.size() > 0) {
+        jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
+        jetD0  = fwdjets[0]->d0;
+    } else {
+        jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+        jetD0  = fwdjets[0]->d0;
+    }
+
 
     outTree->Fill();
     this->passedEvents++;

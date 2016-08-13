@@ -150,7 +150,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         TLorentzVector vJet; 
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
-        for (const auto& mu: muons) {
+        for (const auto& mu: veto_muons) {
             if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;

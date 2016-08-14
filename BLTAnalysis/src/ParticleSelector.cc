@@ -51,7 +51,8 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
 
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
     bool isoPass = false;
-    if (mu->trkIso/mu->pt < cutLevel.trkIso03
+    if (
+            mu->trkIso/mu->pt < cutLevel.trkIso03
             && mu->hcalIso/mu->pt < cutLevel.hcalIso03
             && mu->ecalIso/mu->pt < cutLevel.ecalIso03
        ) 

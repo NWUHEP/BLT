@@ -71,6 +71,7 @@ public:
     TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
     Float_t met, met_phi;
     Float_t jetD0, bjetD0;
+    Float_t jetPUID, bjetPUID;
     UInt_t runNumber, evtNumber, lumiSection;
     UInt_t nJets, nBJets;
 

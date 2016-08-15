@@ -21,7 +21,7 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCut
     if (cutLevel.cutName == "tightMuID") {
         if (this->_parameters.period == "2012") {
             if (
-                    mu->muNchi2    < cutLevel.NormalizedChi2
+                    mu->muNchi2       < cutLevel.NormalizedChi2
                     && mu->nValidHits > cutLevel.NumberOfValidMuonHits
                     && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
                     && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
@@ -438,8 +438,8 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
     } else {
         if (
                 jet->neuHadFrac       < cutLevel.NHF
-                && jet->neuEmFrac     < cutLevel.NEMF
-                && jet->nParticles    > cutLevel.NumConst
+                && jet->neuEmFrac     < 0.9
+                && jet->nParticles    > 10
            ) jetPass = true;
     }
 
@@ -466,14 +466,19 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
 
 bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool pass = false;
-    if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5 && jet->mva >= -0.63) 
-        pass = true;
-    else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75 && jet->mva >= -0.60) 
-        pass = true;
-    else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3 && jet->mva >= -0.55) 
-        pass = true;
-    else if(3    <= fabs(jet->eta) && fabs(jet->eta) < 5 && jet->mva >= -0.45) 
-        pass = true;
+    if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5) {
+        if(jet->mva >= -0.63) 
+            pass = true;
+    } else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
+        if (jet->mva >= -0.60) 
+            pass = true;
+    } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
+        if (jet->mva >= -0.55) 
+            pass = true;
+    } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
+        if (jet->mva >= -0.45) 
+            pass = true;
+    }
 
     return pass;
 }

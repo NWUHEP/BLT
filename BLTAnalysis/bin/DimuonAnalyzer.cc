@@ -114,17 +114,18 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 5 
+                muon->pt > 20 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID 2012
+                && (muon->typeBits & baconhep::kPFMuon) 
                 && (muon->typeBits & baconhep::kGlobal) 
-                && muon->nMatchStn  > 1
-                && muon->nValidHits > 0
                 && muon->muNchi2    < 10.
+                && muon->nMatchStn  > 1
                 && muon->nPixHits   > 0
                 && fabs(muon->d0)   < 0.2
                 && fabs(muon->dz)   < 0.5
-                && muon->nTkLayers  >= 6 
+                && muon->nTkLayers  > 5 
+                && muon->nValidHits > 0
                 // tight muon detector ISO 2012
                 && muon->trkIso/muon->pt < 0.1
            ) {
@@ -143,6 +144,24 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         }
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
+
+    /* ELECTRONS */
+    std::vector<TLorentzVector> electrons;
+    for (int i=0; i<fElectronArr->GetEntries(); i++) {
+        TElectron* electron = (TElectron*) fElectronArr->At(i);
+        assert(electron);
+
+        if (
+                electron->pt > 10 
+                && fabs(electron->eta) < 2.5
+           ) {
+            TLorentzVector electronP4;
+            copy_p4(electron, ELE_MASS, electronP4);
+            electrons.push_back(electronP4);
+        }
+    }
+    
+    std::sort(electrons.begin(), electrons.end(), P4SortCondition);
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -174,16 +193,19 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
         if (
                 jet->pt > 30 
+                && fabs(jet->eta < 4.7)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
-                && particleSelector->PassJetPUID(jet, cuts->looseJetID)
            ) {
 
-
-            if (fabs(jet->eta) <= 2.4) { 
+            if (
+                    jet->pt > 30 
+                    && fabs(jet->eta) <= 2.4 
+                    && particleSelector->PassJetPUID(jet, cuts->looseJetID)
+                    ) { 
                 if (jet->csv > 0.898) {
                     bjets.push_back(jet);
                     ++nBJets;
-                } else if (fabs(jet->eta) <= 2.4) {
+                } else {
                     jets.push_back(jet);
                     ++nJets;
                 }
@@ -198,7 +220,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
-    met = fInfo->pfMET;
+    met     = fInfo->pfMET;
     met_phi = fInfo->pfMETphi;
 
     ////////////////////////////
@@ -235,20 +257,20 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     dimuonP4  = dimuon;
 
     bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
-    bjetD0 = bjets[0]->d0;
+    bjetD0   = bjets[0]->d0;
     bjetPUID = bjets[0]->mva;
     if (fwdjets.size() > 0) {
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
-        jetD0  = fwdjets[0]->d0;
+        jetD0   = fwdjets[0]->d0;
         jetPUID = fwdjets[0]->mva;
     } else {
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+        jetD0   = jets[0]->d0;
         jetPUID = jets[0]->mva;
     }
 
     outTree->Fill();
     this->passedEvents++;
-
     return kTRUE;
 }
 

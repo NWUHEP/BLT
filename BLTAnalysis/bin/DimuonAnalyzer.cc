@@ -129,9 +129,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
                 // tight muon detector ISO 2012
-                && muon->trkIso/muon->pt < 0.1
+                && muon->trkIso03/muon->pt < 0.1
            ) {
-            std::cout << muon->trkIso << std::endl;
+            std::cout << muon->trkIso03 << std::endl;
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
             veto_muons.push_back(muonP4);

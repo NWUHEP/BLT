@@ -21,7 +21,7 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCut
     if (cutLevel.cutName == "tightMuID") {
         if (this->_parameters.period == "2012") {
             if (
-                    mu->muNchi2    < cutLevel.NormalizedChi2
+                    mu->muNchi2       < cutLevel.NormalizedChi2
                     && mu->nValidHits > cutLevel.NumberOfValidMuonHits
                     && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
                     && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
@@ -51,7 +51,8 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
 
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
     bool isoPass = false;
-    if (mu->trkIso/mu->pt < cutLevel.trkIso03
+    if (
+            mu->trkIso/mu->pt < cutLevel.trkIso03
             && mu->hcalIso/mu->pt < cutLevel.hcalIso03
             && mu->ecalIso/mu->pt < cutLevel.ecalIso03
        ) 
@@ -228,7 +229,6 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
 
 bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel) const {
     bool isoPass = false;
-    std::cout << warning() << "BLT electron iso is missing certain variables." << std::endl;
 
     float effArea = 0;
     //float effArea = el->effArea;  //FIXME
@@ -252,7 +252,6 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
     bool phoPass = false;
     bool phoPass1 = false;
     bool phoPass2 = false;
-    std::cout << warning() << "BLT photon ID is missing certain variables." << std::endl;
 
     //if (fabs(ph->scEta) > 2.5) return phoPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "preSelPhID") {
@@ -314,7 +313,6 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
 
 bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const {
     bool phoPass = false;
-    std::cout << warning() << "BLT photon MVA ID is missing certain variables." << std::endl;
 
     //FIXME
 
@@ -323,7 +321,6 @@ bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::ph
 
 bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::phIsoCuts& cutLevel, float EAPho[7][3]) const {
     bool isoPass = false;
-    std::cout << warning() << "BLT photon iso is missing certain variables." << std::endl;
 
     //if (fabs(ph->scEta) > 2.5) return isoPass;  // uncomment to apply eta requirement
 
@@ -395,7 +392,6 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
 
 bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJetIDCuts& cutLevel) const {
     bool jetPass = false;
-    std::cout << warning() << "BLT VBF jet ID is missing certain variables." << std::endl;
 
     //if (fabs(jet->eta) > 4.7) return isoPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "vbfJetID"){
@@ -437,8 +433,8 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
     } else {
         if (
                 jet->neuHadFrac       < cutLevel.NHF
-                && jet->neuEmFrac     < cutLevel.NEMF
-                && jet->nParticles    > cutLevel.NumConst
+                && jet->neuEmFrac     < 0.9
+                && jet->nParticles    > 10
            ) jetPass = true;
     }
 
@@ -465,14 +461,19 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
 
 bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool pass = false;
-    if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5 && jet->mva >= -0.63) 
-        pass = true;
-    else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75 && jet->mva >= -0.60) 
-        pass = true;
-    else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3 && jet->mva >= -0.55) 
-        pass = true;
-    else if(3    <= fabs(jet->eta) && fabs(jet->eta) < 5 && jet->mva >= -0.45) 
-        pass = true;
+    if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5) {
+        if(jet->mva >= -0.63) 
+            pass = true;
+    } else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
+        if (jet->mva >= -0.60) 
+            pass = true;
+    } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
+        if (jet->mva >= -0.55) 
+            pass = true;
+    } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
+        if (jet->mva >= -0.45) 
+            pass = true;
+    }
 
     return pass;
 }

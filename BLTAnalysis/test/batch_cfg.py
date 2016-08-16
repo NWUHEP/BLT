@@ -24,18 +24,18 @@ dataList.extend([
         args     = 'muon_2012A muon 2012'
        ),
     cfg(dataName = 'muon_2012B',
-        path     = '{0}/SingleMu_2012B-22Jan2013'.format(path),
-        nJobs    = 10,
+        path     = '{0}/04/SingleMu_2012B-22Jan2013'.format(path),
+        nJobs    = 15,
         args     = 'muon_2012B muon 2012'
        ),
     cfg(dataName = 'muon_2012C',
-        path     = '{0}/SingleMu_2012C-22Jan2013'.format(path),
-        nJobs    = 10,
+        path     = '{0}/04/SingleMu_2012C-22Jan2013'.format(path),
+        nJobs    = 15,
         args     = 'muon_2012C muon 2012'
        ),
     cfg(dataName = 'muon_2012D',
-        path     = '{0}/SingleMu_2012D-22Jan2013'.format(path),
-        nJobs    = 10,
+        path     = '{0}/04/SingleMu_2012D-22Jan2013'.format(path),
+        nJobs    = 15,
         args     = 'muon_2012D muon 2012'
        )
     ])

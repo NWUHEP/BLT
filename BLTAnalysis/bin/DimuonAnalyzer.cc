@@ -108,7 +108,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     /* MUONS */
     std::vector<TLorentzVector> muons;
     std::vector<TLorentzVector> veto_muons;
-    std::vector<unsigned> muon_q;
+    int leadMuonQ = 0;
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
@@ -117,7 +117,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 muon->pt > 20 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID 2012
-                && (muon->typeBits & baconhep::kPFMuon) 
+                //&& (muon->typeBits & baconhep::kPFMuon) 
                 && (muon->typeBits & baconhep::kGlobal) 
                 && muon->muNchi2    < 10.
                 && muon->nMatchStn  > 1
@@ -138,8 +138,14 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                     && fabs(muon->eta) < 2.1
                     && muon->trkIso/muon->pt < 0.1
                ) {
-                muons.push_back(muonP4);
-                muon_q.push_back(muon->q);
+                if (muons.size() == 0) { // get the highest pt muon
+                    muons.push_back(muonP4);
+                    leadMuonQ = muon->q;
+                } else if (muons.size() == 1) { // require second muon to be os
+                    if (muon->q != leadMuonQ) {
+                        muons.push_back(muonP4);
+                    }
+                } 
             }
         }
     }
@@ -152,16 +158,39 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         if (
-                electron->pt > 10 
+                electron->pt > 20 
                 && fabs(electron->eta) < 2.5
+                && particleSelector->PassElectronID(electron, cuts->mvaPreElID)
+                && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
+                && particleSelector->PassElectronIso(electron, cuts->mediumElIso)
            ) {
             TLorentzVector electronP4;
             copy_p4(electron, ELE_MASS, electronP4);
             electrons.push_back(electronP4);
         }
     }
-    
+
     std::sort(electrons.begin(), electrons.end(), P4SortCondition);
+
+    /* PHOTONS */
+    std::vector<TLorentzVector> photons;
+    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
+        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
+        assert(photon);
+
+        if (
+                photon->pt > 10 
+                && fabs(photon->eta) < 2.5
+                && particleSelector->PassPhotonID(photon, cuts->loosePhID)
+                && particleSelector->PassPhotonIso(photon, cuts->loosePhIso, cuts->EAPho)
+           ) {
+            TLorentzVector photonP4;
+            copy_p4(photon, 0., photonP4);
+            photons.push_back(photonP4);
+        }
+    }
+
+    std::sort(photons.begin(), photons.end(), P4SortCondition);
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -189,7 +218,14 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (muOverlap) continue;
+        bool elOverlap = false;
+        for (const auto& el: electrons) {
+            if (vJet.DeltaR(el) < 0.5) {
+                elOverlap = true;
+                break;
+            }
+        }
+        if (muOverlap || elOverlap) continue;
 
         if (
                 jet->pt > 30 
@@ -201,7 +237,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                     jet->pt > 30 
                     && fabs(jet->eta) <= 2.4 
                     && particleSelector->PassJetPUID(jet, cuts->looseJetID)
-                    ) { 
+               ) { 
                 if (jet->csv > 0.898) {
                     bjets.push_back(jet);
                     ++nBJets;
@@ -227,10 +263,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     /* Apply dimuon selection */
     ////////////////////////////
 
-    if (muons.size() != 2) 
-        return kTRUE;
-
-    if (muon_q[0] == muon_q[1]) 
+    if (muons.size() < 2)
         return kTRUE;
 
     TLorentzVector dimuon;

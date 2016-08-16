@@ -229,7 +229,6 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
 
 bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel) const {
     bool isoPass = false;
-    std::cout << warning() << "BLT electron iso is missing certain variables." << std::endl;
 
     float effArea = 0;
     //float effArea = el->effArea;  //FIXME
@@ -253,7 +252,6 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
     bool phoPass = false;
     bool phoPass1 = false;
     bool phoPass2 = false;
-    std::cout << warning() << "BLT photon ID is missing certain variables." << std::endl;
 
     //if (fabs(ph->scEta) > 2.5) return phoPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "preSelPhID") {
@@ -315,7 +313,6 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
 
 bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const {
     bool phoPass = false;
-    std::cout << warning() << "BLT photon MVA ID is missing certain variables." << std::endl;
 
     //FIXME
 
@@ -324,7 +321,6 @@ bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::ph
 
 bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::phIsoCuts& cutLevel, float EAPho[7][3]) const {
     bool isoPass = false;
-    std::cout << warning() << "BLT photon iso is missing certain variables." << std::endl;
 
     //if (fabs(ph->scEta) > 2.5) return isoPass;  // uncomment to apply eta requirement
 
@@ -396,7 +392,6 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
 
 bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJetIDCuts& cutLevel) const {
     bool jetPass = false;
-    std::cout << warning() << "BLT VBF jet ID is missing certain variables." << std::endl;
 
     //if (fabs(jet->eta) > 4.7) return isoPass;  // uncomment to apply eta requirement
     if (cutLevel.cutName == "vbfJetID"){

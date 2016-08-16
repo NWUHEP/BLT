@@ -131,7 +131,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 // tight muon detector ISO 2012
                 && muon->trkIso03/muon->pt < 0.1
            ) {
-            std::cout << muon->trkIso03 << std::endl;
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
             veto_muons.push_back(muonP4);
@@ -139,12 +138,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             if (muon->pt > 25 && fabs(muon->eta) < 2.1) {
                 if (muons.size() == 0) { // get the highest pt muon
                     muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso);
+                    muons_iso.push_back(muon->trkIso03);
                     leadMuonQ = muon->q;
                 } else if (muons.size() == 1) { // require second muon to be os
                     if (muon->q != leadMuonQ) {
                         muons.push_back(muonP4);
-                        muons_iso.push_back(muon->trkIso);
+                        muons_iso.push_back(muon->trkIso03);
                     }
                 } 
             }

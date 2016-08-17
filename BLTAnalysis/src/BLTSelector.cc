@@ -195,8 +195,7 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         timer.Start();
     }
 
-    if (maxEvents < 0)
-        maxEvents = myChain->GetEntriesFast();
+    if (maxEvents < 0) maxEvents = myChain->GetEntriesFast();
     myChain->Process(this, option.c_str(), maxEvents, 0);
 
     // Done
@@ -205,6 +204,5 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
         std::cout << info() << "CPU  time: " << timer.CpuTime() << std::endl;
         std::cout << info() << "Real time: " << timer.RealTime() << std::endl;
     }
-
     return 0;
 }

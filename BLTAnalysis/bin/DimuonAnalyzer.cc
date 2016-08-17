@@ -38,7 +38,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
 
     // Trigger bits mapping file
     const std::string cmssw_base = getenv("CMSSW_BASE");
-    std::string trigfilename = cmssw_base + std::string("/src/BaconAna/DataFormats/data/HLTFile_v2");
+    std::string trigfilename = cmssw_base + std::string("/src/BaconAna/DataFormats/data/HLTFile_25ns");
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     // Prepare the output tree
@@ -85,8 +85,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     /* Trigger selection */
     bool passTrigger;
-    passTrigger= trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
-
+    passTrigger= true;//trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
     if (!passTrigger)
         return kTRUE;
 
@@ -119,7 +118,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 muon->pt > 20 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID 2012
-                //&& (muon->typeBits & baconhep::kPFMuon) 
+                && (muon->typeBits & baconhep::kPFMuon) 
                 && (muon->typeBits & baconhep::kGlobal) 
                 && muon->muNchi2    < 10.
                 && muon->nMatchStn  > 1
@@ -129,7 +128,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
                 // tight muon detector ISO 2012
-                && muon->trkIso03/muon->pt < 0.1
+                && muon->trkIso/muon->pt < 0.1
            ) {
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
@@ -138,12 +137,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             if (muon->pt > 25 && fabs(muon->eta) < 2.1) {
                 if (muons.size() == 0) { // get the highest pt muon
                     muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso03);
+                    muons_iso.push_back(muon->trkIso);
                     leadMuonQ = muon->q;
                 } else if (muons.size() == 1) { // require second muon to be os
                     if (muon->q != leadMuonQ) {
                         muons.push_back(muonP4);
-                        muons_iso.push_back(muon->trkIso03);
+                        muons_iso.push_back(muon->trkIso);
                     }
                 } 
             }
@@ -195,10 +194,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     /* JETS */
     TClonesArray* jetCollection;
-    if (params->period == "2012") 
-        jetCollection = fAK5Arr;
-    else 
-        jetCollection = fAK4CHSArr;
+    jetCollection = fAK4CHSArr;
 
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;

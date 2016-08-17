@@ -40,7 +40,7 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCut
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const {
     bool isoPass = false;
     if (cutLevel.cutName == "tightMuIso" || cutLevel.cutName == "looseMuIso") {
-        float combIso = (mu->chHadIso04 + std::max(0.,(double)mu->neuHadIso04 + mu->gammaIso04 - 0.5*mu->puIso04));
+        float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
         if (combIso/mu->pt < cutLevel.relCombIso04) 
             isoPass = true;
 
@@ -50,9 +50,9 @@ bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoC
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
     bool isoPass = false;
     if (
-            mu->trkIso03/mu->pt < cutLevel.trkIso03
-            && mu->hcalIso03/mu->pt < cutLevel.hcalIso03
-            && mu->ecalIso03/mu->pt < cutLevel.ecalIso03
+            mu->trkIso/mu->pt < cutLevel.trkIso03
+            && mu->hcalIso/mu->pt < cutLevel.hcalIso03
+            && mu->ecalIso/mu->pt < cutLevel.ecalIso03
        ) 
         isoPass = true;
     return isoPass;
@@ -67,18 +67,18 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
             if (
                     el->sieie                            < cutLevel.sigmaIetaIeta[0]
                     && el->hovere                        < cutLevel.HadOverEm[0]
-                    && el->trkIso03/el->pt                 < cutLevel.dr03TkSumPt[0]
-                    && el->ecalIso03/el->pt                < cutLevel.dr03EcalRecHitSumEt[0]
-                    && el->hcalIso03/el->pt                < cutLevel.dr03HcalTowerSumEt[0]
+                    && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[0]
+                    && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[0]
+                    && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[0]
                     //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[0]  //FIXME
                ) elPass = true;
         } else {
             if (
                     el->sieie                            < cutLevel.sigmaIetaIeta[1]
                     && el->hovere                        < cutLevel.HadOverEm[1]
-                    && el->trkIso03/el->pt                 < cutLevel.dr03TkSumPt[1]
-                    && el->ecalIso03/el->pt                < cutLevel.dr03EcalRecHitSumEt[1]
-                    && el->hcalIso03/el->pt                < cutLevel.dr03HcalTowerSumEt[1]
+                    && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[1]
+                    && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[1]
+                    && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[1]
                     //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[1]  //FIXME
                ) elPass = true;
         }
@@ -231,7 +231,7 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
     float effArea = 0;
     //float effArea = el->effArea;  //FIXME
 
-    float combIso = (el->chHadIso04 + std::max(0.,(double)el->neuHadIso04 + el->gammaIso04 - _rhoFactor*effArea));
+    float combIso = (el->chHadIso + std::max(0.,(double)el->neuHadIso + el->gammaIso - _rhoFactor*effArea));
 
     if (cutLevel.cutName == "mediumElIso") {
         if (el->pt < 20) {
@@ -348,9 +348,9 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
         phEA = EAPho[6][2];
     }
 
-    chIsoCor = ph->chHadIso03 - _rhoFactor*chEA;
-    nhIsoCor = ph->neuHadIso03 - _rhoFactor*nhEA;
-    phIsoCor = ph->gammaIso03 -_rhoFactor*phEA;
+    chIsoCor = ph->chHadIso - _rhoFactor*chEA;
+    nhIsoCor = ph->neuHadIso - _rhoFactor*nhEA;
+    phIsoCor = ph->gammaIso -_rhoFactor*phEA;
 
     if (cutLevel.cutName == "loosePhIso"){
         if (

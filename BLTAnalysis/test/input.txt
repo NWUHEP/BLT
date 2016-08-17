@@ -1,3 +1,1 @@
-root://cmsxrootd-site.fnal.gov//store/group/lpchzg/makingBacon/01/DYJetsToLL_M-50/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/CRAB3/151119_131149/0000//Output_6.root
-root://cmsxrootd-site.fnal.gov//store/group/lpchzg/makingBacon/01/DYJetsToLL_M-50/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/CRAB3/151119_131149/0000//Output_7.root
-root://cmsxrootd-site.fnal.gov//store/group/lpchzg/makingBacon/01/DYJetsToLL_M-50/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/CRAB3/151119_131149/0000//Output_8.root
+root://cmseos.fnal.gov//store/user/naodell/bacontuples/SingleMu_2012A-22Jan2013/SingleMu_2012A-22Jan2013_bacon.root

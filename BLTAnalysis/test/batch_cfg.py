@@ -4,11 +4,17 @@ import sys
 
 
 ''' Specify parameters '''
+system     = 'lpc'
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production'
-executable = 'execBatch.sh'
 selection  = 'amumu'
-period     = '2012'
+period     = '2016'
+
+if system == 'lpc':
+    path       = '/tthome/share/bacon/production'
+    executable = 'execBatch.sh'
+elif system == 'tier3':
+    path       = '/tthome/share/bacon/production'
+    executable = 'execBatch.sh'
 
 ''' 
     Set job configurations.  The order of arguments is: (Dataset, path to data,

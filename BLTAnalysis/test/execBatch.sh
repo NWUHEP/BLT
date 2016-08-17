@@ -16,17 +16,18 @@ PERIOD=$5
 TOPDIR=$PWD
 
 export SCRAM_ARCH=slc6_amd64_gcc491
-export CMSSW_VERSION=CMSSW_7_4_12
-source /software/tier3/osg/cmsset_default.sh
+export CMSSW_VERSION=CMSSW_7_4_14
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 # Setup CMSSW environment
-scram project CMSSW $CMSSW_VERSION
-cd $CMSSW_VERSION/src
-eval `scram runtime -sh`
+#scram project CMSSW $CMSSW_VERSION
+#cd $CMSSW_VERSION/src
+#eval `scram runtime -sh`
 
-cp $TOPDIR/source.tar.gz .
+#cp $TOPDIR/source.tar.gz .
 tar -xzf source.tar.gz
-scram build
+cd $CMSSW_VERSION/src/
+cmsenv
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 

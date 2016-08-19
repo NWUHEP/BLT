@@ -82,7 +82,6 @@ void DimuonAnalyzer::Begin(TTree *tree)
 
 Bool_t DimuonAnalyzer::Process(Long64_t entry)
 {
-
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
 
@@ -92,17 +91,20 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
 
     /* Lumi mask */
-    //if (isRealData) {
-    //    RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
-    //    if(!lumiMask->HasRunLumi(rl)) 
-    //        return kTRUE;
-    //}
+    if (isRealData) {
+        RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
+        if(!lumiMask->HasRunLumi(rl)) 
+            return kTRUE;
+    }
+    hTotalEvents->Fill(2);
 
     /* Trigger selection */
     bool passTrigger;
     passTrigger= trigger->pass("HLT_IsoMu22_v*", fInfo->triggerBits);
     if (!passTrigger)
         return kTRUE;
+
+    hTotalEvents->Fill(3);
 
     ///////////////////
     // Select objects//
@@ -117,6 +119,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     } else {
         return kTRUE;
     }
+    hTotalEvents->Fill(4);
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
 
@@ -282,17 +285,21 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     if (muons.size() < 2)
         return kTRUE;
+    hTotalEvents->Fill(5);
 
     TLorentzVector dimuon;
     dimuon = muons[0] + muons[1];
     if (dimuon.M() < 12. || dimuon.M() > 70.)
         return kTRUE;
+    hTotalEvents->Fill(6);
 
     if (fwdjets.size() + jets.size() < 1)
         return kTRUE;
+    hTotalEvents->Fill(7);
 
     if (bjets.size() < 1)
         return kTRUE;
+    hTotalEvents->Fill(8);
 
     //////////
     // Fill //

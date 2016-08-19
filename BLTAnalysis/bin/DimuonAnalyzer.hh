@@ -69,6 +69,7 @@ public:
 
     // Branches in the output file
     TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
+    Float_t muonOneIso, muonTwoIso;
     Float_t met, met_phi;
     Float_t jetD0, bjetD0;
     UInt_t runNumber, evtNumber, lumiSection;

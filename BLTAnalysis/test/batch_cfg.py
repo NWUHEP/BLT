@@ -5,8 +5,8 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-#path       = '/tthome/share/bacon/production/04'
-path       = '/eos/uscms/store/user/naodell/bacontuples'
+path       = '/tthome/share/bacon/production/04'
+#path       = '/eos/uscms/store/user/naodell/bacontuples'
 executable = 'execBatch.sh'
 selection  = 'amumu'
 period     = '2012'
@@ -25,17 +25,17 @@ dataList.extend([
        ),
     cfg(dataName = 'muon_2012B',
         path     = '{0}/SingleMu_2012B-22Jan2013'.format(path),
-        nJobs    = 10,
+        nJobs    = 15,
         args     = 'muon_2012B muon 2012'
        ),
     cfg(dataName = 'muon_2012C',
         path     = '{0}/SingleMu_2012C-22Jan2013'.format(path),
-        nJobs    = 10,
+        nJobs    = 15,
         args     = 'muon_2012C muon 2012'
        ),
     cfg(dataName = 'muon_2012D',
         path     = '{0}/SingleMu_2012D-22Jan2013'.format(path),
-        nJobs    = 10,
+        nJobs    = 15,
         args     = 'muon_2012D muon 2012'
        )
     ])

@@ -30,6 +30,10 @@
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 
+// JSON file parser
+#include "BaconAna/Utils/interface/RunLumiRangeMap.h"
+
+// Miscellaneous utilities
 #include "BLT/BLTAnalysis/interface/BLTHelper.hh"
 
 

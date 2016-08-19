@@ -41,6 +41,15 @@ void DimuonAnalyzer::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + std::string("/src/BaconAna/DataFormats/data/HLTFile_25ns");
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
+    // Lumi mask
+    // Set up object to handle good run-lumi filtering if necessary
+
+    lumiMask.reset(new RunLumiRangeMap());
+    if (true) { // this will need to be turned off for MC
+        string jsonFileName = "src/BLT/BLTAnalyzer/test/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt";
+        lumiMask->AddJSONFile(jsonFileName);
+    }
+
     // Prepare the output tree
     outFileName = params->get_output_filename("output");
     outTreeName = params->get_output_treename("data");
@@ -82,6 +91,12 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
+
+    if (isRealData) {
+        RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
+        if(!lumiMask->HasRunLumi(rl)) 
+            return kTRUE;
+    }
 
     /* Trigger selection */
     bool passTrigger;

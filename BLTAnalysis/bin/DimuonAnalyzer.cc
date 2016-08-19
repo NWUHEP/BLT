@@ -86,7 +86,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
 
-    //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
     const bool isRealData = (fInfo->runNum != 1);
@@ -132,7 +131,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         if (
                 muon->pt > 20 
                 && fabs(muon->eta) < 2.4
-                // tight muon ID 2012
+                // tight muon ID
                 && (muon->typeBits & baconhep::kPFMuon) 
                 && (muon->typeBits & baconhep::kGlobal) 
                 && muon->muNchi2    < 10.
@@ -142,7 +141,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 && fabs(muon->dz)   < 0.5
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
-                // tight muon detector ISO 2012
+                // loose muon detector ISO
                 && muon->trkIso/muon->pt < 0.1
            ) {
             TLorentzVector muonP4;

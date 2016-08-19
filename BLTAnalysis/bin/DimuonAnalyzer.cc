@@ -91,15 +91,16 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
 
-    if (isRealData) {
-        RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
-        if(!lumiMask->HasRunLumi(rl)) 
-            return kTRUE;
-    }
+    /* Lumi mask */
+    //if (isRealData) {
+    //    RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
+    //    if(!lumiMask->HasRunLumi(rl)) 
+    //        return kTRUE;
+    //}
 
     /* Trigger selection */
     bool passTrigger;
-    passTrigger= true;//trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
+    passTrigger= trigger->pass("HLT_IsoMu22_v*", fInfo->triggerBits);
     if (!passTrigger)
         return kTRUE;
 

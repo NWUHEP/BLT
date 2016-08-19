@@ -66,7 +66,7 @@ public:
     std::unique_ptr<Cuts>               cuts;
     std::unique_ptr<ParticleSelector>   particleSelector;
     std::unique_ptr<baconhep::TTrigger> trigger;
-     td::unique_ptr<RunLumiRangeMap>    lumiMask;
+    std::unique_ptr<RunLumiRangeMap>    lumiMask;
 
     // Branches in the output file
     TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;

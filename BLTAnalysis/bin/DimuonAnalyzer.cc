@@ -97,6 +97,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         if(!lumiMask->HasRunLumi(rl)) 
             return kTRUE;
     }
+    hTotalEvents->Fill(2);
 
     /* Trigger selection */
     bool passTrigger;
@@ -104,6 +105,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     if (!passTrigger)
         return kTRUE;
+    hTotalEvents->Fill(3);
 
     ///////////////////
     // Select objects//
@@ -118,6 +120,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     } else {
         return kTRUE;
     }
+    hTotalEvents->Fill(4);
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
 
@@ -286,17 +289,21 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     if (muons.size() < 2)
         return kTRUE;
+    hTotalEvents->Fill(5);
 
     TLorentzVector dimuon;
     dimuon = muons[0] + muons[1];
     if (dimuon.M() < 12. || dimuon.M() > 70.)
         return kTRUE;
+    hTotalEvents->Fill(6);
 
     if (fwdjets.size() + jets.size() < 1)
         return kTRUE;
+    hTotalEvents->Fill(7);
 
     if (bjets.size() < 1)
         return kTRUE;
+    hTotalEvents->Fill(8);
 
     //////////
     // Fill //

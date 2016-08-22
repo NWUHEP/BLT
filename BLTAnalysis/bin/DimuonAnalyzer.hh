@@ -64,7 +64,9 @@ public:
     std::unique_ptr<Cuts>               cuts;
     std::unique_ptr<ParticleSelector>   particleSelector;
     std::unique_ptr<baconhep::TTrigger> trigger;
-    std::unique_ptr<RunLumiRangeMap>    lumiMask;
+
+    // Lumi mask
+    RunLumiRangeMap lumiMask;
 
     // Branches in the output file
     TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
@@ -72,6 +74,7 @@ public:
     Float_t met, met_phi;
     Float_t jetD0, bjetD0;
     UInt_t runNumber, evtNumber, lumiSection;
+    Bool_t triggerStatus;
     UInt_t nJets, nBJets;
 
     //ClassDef(DimuonAnalyzer,0);

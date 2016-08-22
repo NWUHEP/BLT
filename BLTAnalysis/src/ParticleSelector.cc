@@ -415,39 +415,23 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
     bool jetPass = false;
     if (fabs(jet->eta) <= 2.4) {
         if (
-                jet->neuHadFrac       < cutLevel.NHF
-                && jet->neuEmFrac     < cutLevel.NEMF
-                && jet->nParticles    > cutLevel.NumConst
-                && jet->chHadFrac     > cutLevel.CHF
-                && jet->nCharged      > cutLevel.CHM
-                && jet->chEmFrac      < cutLevel.CEMF
-                && jet->csv           > cutLevel.CSV
+                jet->neuHadFrac       < 0.99
+                && jet->neuEmFrac     < 0.99
+                && jet->nParticles    > 1
+                && jet->chHadFrac     > 0
+                && jet->nCharged      > 0
+                && jet->chEmFrac      < 0.99
+           ) jetPass = true;
+    } else if (fabs(jet->eta) <= 3.0) { 
+        if (
+                jet->neuHadFrac       < 0.99
+                && jet->neuEmFrac     < 0.99
+                && jet->nParticles    > 1
            ) jetPass = true;
     } else {
-        if (
-                jet->neuHadFrac       < cutLevel.NHF
-                && jet->neuEmFrac     < 0.9
-                && jet->nParticles    > 10
-           ) jetPass = true;
+        if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
+            jetPass = true;
     }
-
-    /*else if (fabs(jet->eta) <= 3.0) { 
-      if (
-      jet->neuHadFrac       < cutLevel.NHF
-      && jet->neuEmFrac     < cutLevel.NEMF
-      && jet->nParticles    > cutLevel.NumConst
-      ) jetPass = true;
-      } else {
-      if (this->_parameters.period == "2012") {
-      if (jet->neuHadFrac    < cutLevel.NHF
-      && jet->neuEmFrac  < cutLevel.NEMF
-      && jet->nParticles > cutLevel.NumConst
-      ) jetPass = true; 
-      } else {
-      if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
-      jetPass = true;
-      }
-      }*/
 
     return jetPass;
 }

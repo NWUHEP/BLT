@@ -34,7 +34,7 @@ class BatchMaster():
         self._configList = configList
         self._executable = executable
         self._shortQueue = shortQueue
-        self._location  = 'lpc'
+        self._location   = location
     
     def split_jobs_by_dataset(self, directory, nJobs):
 
@@ -101,13 +101,14 @@ class BatchMaster():
         batch_tmp.close()
         
 
-    def submit_to_batch(self, bSystem = 'lpc'):
+    def submit_to_batch(self):
         '''
         Submits batch jobs to batch.  Currently only works
         for lpc batch system, but should be updated for more 
         general use
         '''
 
+        print 'Running on {0}'.format(self._location)
         print 'Setting up stage directory...'
         self._stageDir  = '{0}/{1}'.format(self._stageDir, get_current_time())
         make_directory(self._stageDir, clear=False)
@@ -120,12 +121,13 @@ class BatchMaster():
         else:
             cmssw_version = os.getenv('CMSSW_BASE').split('/')[-1]
             os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/.. {1}'.format(self._stageDir, cmssw_version))
+
         subprocess.call('cp {0} {1}'.format(self._executable, self._stageDir), shell=True)
         os.chdir(self._stageDir)
         make_directory('reports', clear=False)
         
-        print 'Ready to submit to batch system {0}!'.format(bSystem)
-        if bSystem is 'lpc':
+        print 'Ready to submit to batch system {0}!'.format(self._location)
+        if self._location in ['lpc', 'nut3']:
             for cfg in self._configList:
                 sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
                 self.make_batch_lpc(cfg, sourceFiles)

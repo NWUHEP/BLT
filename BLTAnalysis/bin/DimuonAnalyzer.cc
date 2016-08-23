@@ -134,7 +134,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 20 
+                muon->pt > 5 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID 2012
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -153,7 +153,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             copy_p4(muon, MUON_MASS, muonP4);
             veto_muons.push_back(muonP4);
 
-            if (muon->pt > 25 && fabs(muon->eta) < 2.1) {
+            if (muon->pt > 5 && fabs(muon->eta) < 2.1) {
                 if (muons.size() == 0) { // get the highest pt muon
                     muons.push_back(muonP4);
                     muons_iso.push_back(muon->trkIso03);
@@ -213,10 +213,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     /* JETS */
     TClonesArray* jetCollection;
-    if (params->period == "2012") 
-        jetCollection = fAK5Arr;
-    else 
-        jetCollection = fAK4CHSArr;
+    jetCollection = fAK5Arr;
 
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;

@@ -153,8 +153,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
             muons.push_back(muonP4);
-            muons_q.push_back(muon->q);
             muons_iso.push_back(muon->trkIso03);
+            muons_q.push_back(muon->q);
 
             if (muon->pt > 25 && fabs(muon->eta) < 2.1) {
                 triggerMuon = true;
@@ -287,7 +287,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     TLorentzVector dimuon;
     dimuon = muons[0] + muons[1];
-    if (dimuon.M() < 12. || dimuon.M() > 70.)
+    //if (dimuon.M() < 12. || dimuon.M() > 70.)
+    if (dimuon.M() > 70.)
         return kTRUE;
     hTotalEvents->Fill(6);
 

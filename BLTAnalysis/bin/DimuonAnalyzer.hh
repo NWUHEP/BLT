@@ -73,7 +73,8 @@ public:
     Float_t muonOneIso, muonTwoIso;
     Float_t met, met_phi;
     Float_t jetD0, bjetD0;
-    UInt_t runNumber, evtNumber, lumiSection;
+    UInt_t runNumber, lumiSection;
+    ULong64_t evtNumber;
     UInt_t nJets, nBJets;
 
     //ClassDef(DimuonAnalyzer,0);

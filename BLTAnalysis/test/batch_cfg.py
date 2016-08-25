@@ -44,7 +44,8 @@ batch = bm.BatchMaster(configList = dataList,
                       shortQueue = False,
                       stageDir   = 'batch',
                       executable = executable,
-                      selection  = '{0}_{1}'.format(selection, period)
+                      selection  = '{0}_{1}'.format(selection, period),
+                      location   = 'nut3'
                      )
 batch.submit_to_batch()
 

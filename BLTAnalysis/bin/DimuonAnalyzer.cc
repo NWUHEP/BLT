@@ -92,11 +92,11 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
 
     // Apply lumi mask
-    if (isRealData) {
-        RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
-        if(!lumiMask->HasRunLumi(rl)) 
-            return kTRUE;
-    }
+    //if (isRealData) {
+    //    RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
+    //    if(!lumiMask->HasRunLumi(rl)) 
+    //        return kTRUE;
+    //}
     hTotalEvents->Fill(2);
 
     /* Trigger selection */
@@ -126,9 +126,10 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     /* MUONS */
     std::vector<TLorentzVector> muons;
-    std::vector<float> muons_iso;
     std::vector<TLorentzVector> veto_muons;
-    int leadMuonQ = 0;
+    std::vector<float> muons_iso;
+    std::vector<int> muons_q;
+    bool triggerMuon = false; // If muon found passing trigger requirements
     for (int i=0; i<fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
@@ -151,23 +152,19 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
            ) {
             TLorentzVector muonP4;
             copy_p4(muon, MUON_MASS, muonP4);
-            veto_muons.push_back(muonP4);
+            muons.push_back(muonP4);
+            muons_q.push_back(muon->q);
+            muons_iso.push_back(muon->trkIso03);
 
-            if (muon->pt > 5 && fabs(muon->eta) < 2.1) {
-                if (muons.size() == 0) { // get the highest pt muon
-                    muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso03);
-                    leadMuonQ = muon->q;
-                } else if (muons.size() == 1) { // require second muon to be os
-                    if (muon->q != leadMuonQ) {
-                        muons.push_back(muonP4);
-                        muons_iso.push_back(muon->trkIso03);
-                    }
-                } 
+            if (muon->pt > 25 && fabs(muon->eta) < 2.1) {
+                triggerMuon = true;
             }
         }
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
+
+    if (!triggerMuon) 
+        return kTRUE;
 
     /* ELECTRONS */
     std::vector<TLorentzVector> electrons;
@@ -228,7 +225,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         TLorentzVector vJet; 
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
-        for (const auto& mu: veto_muons) {
+        for (const auto& mu: muons) {
             if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;
@@ -310,11 +307,11 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     evtNumber = fInfo->evtNum;
     lumiSection = fInfo->lumiSec;
 
-    muonOneP4 = muons[0];
+    muonOneP4  = muons[0];
     muonOneIso = muons_iso[0];
-    muonTwoP4 = muons[1];
+    muonTwoP4  = muons[1];
     muonTwoIso = muons_iso[1];
-    dimuonP4  = dimuon;
+    dimuonP4   = dimuon;
 
     bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
     bjetD0   = bjets[0]->d0;

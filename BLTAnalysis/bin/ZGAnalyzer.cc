@@ -164,8 +164,8 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     //////////
 
     if (printEvent) {
-        for (int i=0; i<fAK4CHSArr->GetEntries(); i++) {
-            const TJet* jet = (TJet*) fAK4CHSArr->At(i);
+        for (int i=0; i<fAK5Arr->GetEntries(); i++) {
+            const TJet* jet = (TJet*) fAK5Arr->At(i);
             assert(jet);
             std::cout << "Jet " << i << ": " << jet << std::endl;
         }

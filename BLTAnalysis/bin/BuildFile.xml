@@ -3,4 +3,5 @@
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="DemoAnalyzer.cc"   name="DemoAnalyzer"></bin>
 <bin file="DimuonAnalyzer.cc" name="DimuonAnalyzer"></bin>
+<bin file="DimuonAnalyzerGen.cc" name="DimuonAnalyzerGen"></bin>
 <bin file="ZGAnalyzer.cc"     name="ZGAnalyzer"></bin>

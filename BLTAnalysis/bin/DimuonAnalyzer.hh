@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef DEMOANALYZER_HH
-#define DEMOANALYZER_HH
+#ifndef DIMUONANALYZER_HH
+#define DIMUONANALYZER_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -23,6 +23,9 @@
 #include "BLT/BLTAnalysis/interface/Cuts.hh"
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
+
+#include "BLT/BLTAnalysis/interface/RoccoR.h"
+#include "BLT/BLTAnalysis/interface/rochcor2016.h"
 
 // ROOT headers
 #include <TLorentzVector.h>
@@ -43,42 +46,46 @@
 
 
 class DimuonAnalyzer: public BLTSelector {
-public:
-    DimuonAnalyzer();
-    ~DimuonAnalyzer();
+    public:
+        DimuonAnalyzer();
+        ~DimuonAnalyzer();
 
-    void    Begin(TTree *tree);
-    Bool_t  Process(Long64_t entry);
-    void    Terminate();
+        void    Begin(TTree *tree);
+        Bool_t  Process(Long64_t entry);
+        void    Terminate();
 
-    void    ReportPostBegin();
-    void    ReportPostTerminate();
+        void    ReportPostBegin();
+        void    ReportPostTerminate();
 
-    TFile       *outFile;
-    TTree       *outTree;
-    std::string  outFileName;
-    std::string  outTreeName;
+        TFile       *outFile;
+        TTree       *outTree;
+        std::string  outFileName;
+        std::string  outTreeName;
 
-    // Params and cuts
-    std::unique_ptr<Parameters>         params;
-    std::unique_ptr<Cuts>               cuts;
-    std::unique_ptr<ParticleSelector>   particleSelector;
-    std::unique_ptr<baconhep::TTrigger> trigger;
+        // Params and cuts
+        std::unique_ptr<Parameters>         params;
+        std::unique_ptr<Cuts>               cuts;
+        std::unique_ptr<ParticleSelector>   particleSelector;
+        std::unique_ptr<baconhep::TTrigger> trigger;
 
-    // Lumi mask
-    RunLumiRangeMap lumiMask;
+        // Lumi mask
+        RunLumiRangeMap lumiMask;
 
-    // Branches in the output file
-    TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
-    Float_t muonOneIso, muonTwoIso;
-    Float_t met, met_phi;
-    Float_t jetD0, bjetD0;
-    UInt_t runNumber, evtNumber, lumiSection;
-    Bool_t triggerStatus;
-    UInt_t nJets, nBJets;
+        // rochester muon corrections
+        rochcor2016 *muonCorr;
 
-    //ClassDef(DimuonAnalyzer,0);
+        // Branches in the output file
+        TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
+        Float_t muonOneIso, muonTwoIso;
+        Float_t met, met_phi;
+        Float_t jetD0, bjetD0;
+        UInt_t runNumber, lumiSection;
+        ULong_t evtNumber;
+        Bool_t triggerStatus;
+        UInt_t nJets, nBJets;
+
+        //ClassDef(DimuonAnalyzer,0);
 };
 
 
-#endif  // DEMOANALYZER_HH
+#endif  // DIMUONANALYZER_HH

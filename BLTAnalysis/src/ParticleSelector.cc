@@ -70,7 +70,7 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                     && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[0]
                     && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[0]
                     && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[0]
-                    //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[0]  //FIXME
+                    //&& el->nMissingHits                 == cutLevel.numberOfLostHits[0]  //FIXME
                ) elPass = true;
         } else {
             if (
@@ -79,7 +79,7 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                     && el->trkIso/el->pt                 < cutLevel.dr03TkSumPt[1]
                     && el->ecalIso/el->pt                < cutLevel.dr03EcalRecHitSumEt[1]
                     && el->hcalIso/el->pt                < cutLevel.dr03HcalTowerSumEt[1]
-                    //&& el->nMissingLostHits             == cutLevel.numberOfLostHits[1]  //FIXME
+                    //&& el->nMissingHits                 == cutLevel.numberOfLostHits[1]  //FIXME
                ) elPass = true;
         }
 

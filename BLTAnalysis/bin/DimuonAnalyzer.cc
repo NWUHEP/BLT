@@ -169,7 +169,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         copy_p4(tmp_muons[i], MUON_MASS, muonP4);
 
         // Remove muon track pt from muon track isolation variable
-        /*for (unsigned j = i+1; j < tmp_muons.size(); j++) {
+        for (unsigned j = i+1; j < tmp_muons.size(); j++) {
             TLorentzVector muon_j;
             copy_p4(tmp_muons[j], MUON_MASS, muon_j);
 
@@ -177,7 +177,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 muon->trkIso = max(0., muon->trkIso - muon_j.Pt());
                 tmp_muons[j]->trkIso = max(0., tmp_muons[j]->trkIso - muonP4.Pt());
             }
-        }*/
+        }
 
         // Apply rochester muon momentum corrections
         float qter = 1.;

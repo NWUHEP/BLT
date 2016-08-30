@@ -62,7 +62,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree = new TTree(outTreeName.c_str(), "dataTree");
 
     outTree->Branch("runNumber", &runNumber);
-    outTree->Branch("evtNumber", &evtNumber);
+    outTree->Branch("evtNumber", &evtNumber, "evtNumber/l");
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
 
@@ -74,6 +74,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jet_d0", &jetD0);
     outTree->Branch("nJets", &nJets);
+    outTree->Branch("nFwdJets", &nFwdJets);
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjet_d0", &bjetD0);
     outTree->Branch("nBJets", &nBJets);
@@ -95,6 +96,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
 
     /* Lumi mask */
+    // Doing this offline for the time beeeeeeing
     //if (isRealData) {
     //    RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
     //    if(!lumiMask.HasRunLumi(rl)) 
@@ -150,7 +152,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
            ) {
-
             tmp_muons.push_back(muon);
         }
     }
@@ -164,35 +165,34 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     for (unsigned i = 0; i < tmp_muons.size(); i++) {
         TMuon* muon = tmp_muons[i];
 
-        TLorentzVector muon_i;
-        copy_p4(tmp_muons[i], MUON_MASS, muon_i);
+        TLorentzVector muonP4;
+        copy_p4(tmp_muons[i], MUON_MASS, muonP4);
 
         // Remove muon track pt from muon track isolation variable
-        for (unsigned j = i+1; j < tmp_muons.size(); j++) {
+        /*for (unsigned j = i+1; j < tmp_muons.size(); j++) {
             TLorentzVector muon_j;
             copy_p4(tmp_muons[j], MUON_MASS, muon_j);
 
-            if (muon_i.DeltaR(muon_j) < 0.3) {
+            if (muonP4.DeltaR(muon_j) < 0.3) {
                 muon->trkIso = max(0., muon->trkIso - muon_j.Pt());
-                tmp_muons[j]->trkIso = max(0., tmp_muons[j]->trkIso - muon_i.Pt());
+                tmp_muons[j]->trkIso = max(0., tmp_muons[j]->trkIso - muonP4.Pt());
             }
-        }
+        }*/
 
         // Apply rochester muon momentum corrections
         float qter = 1.;
-        muonCorr->momcor_data(muon_i, muon->q, 0, qter);
+        muonCorr->momcor_data(muonP4, muon->q, 0, qter);
 
-        if (muon->trkIso/muon_i.Pt()) {
-            // Fill containers
-            veto_muons.push_back(muon_i);
+        if (muon->trkIso/muonP4.Pt() < 0.1) {
+            veto_muons.push_back(muonP4);
 
-            if (muon_i.Pt() > 25 && fabs(muon_i.Eta()) < 2.1) {
+            if (muonP4.Pt() > 25 && fabs(muonP4.Eta()) < 2.1) {
                 if (muons.size() == 0) {
-                    muons.push_back(muon_i);
+                    muons.push_back(muonP4);
                     muons_iso.push_back(muon->trkIso);
                     leadMuonQ = muon->q;
                 } else if (muons.size() == 1 && muon->q != leadMuonQ) {
-                    muons.push_back(muon_i);
+                    muons.push_back(muonP4);
                     muons_iso.push_back(muon->trkIso);
                 }
             }
@@ -251,8 +251,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;
     std::vector<TJet*> bjets;
-    nJets  = 0;
-    nBJets = 0;
+    nJets    = 0;
+    nFwdJets = 0;
+    nBJets   = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
@@ -300,6 +301,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             } else {
                 if (jet->pt > 30) {
                     fwdjets.push_back(jet);
+                    ++nFwdJets;
                 }
             }
         }
@@ -323,40 +325,40 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     TLorentzVector dimuon;
     dimuon = muons[0] + muons[1];
-    if (dimuon.M() > 70.)
+    if (dimuon.M() < 12 || dimuon.M() > 70.)
         return kTRUE;
     hTotalEvents->Fill(6);
-
-    if (fwdjets.size() + jets.size() < 1)
-        return kTRUE;
-    hTotalEvents->Fill(7);
-
-    if (bjets.size() < 1)
-        return kTRUE;
-    hTotalEvents->Fill(8);
 
     //////////
     // Fill //
     //////////
 
-    runNumber = fInfo->runNum;
-    evtNumber = fInfo->evtNum;
+    runNumber   = fInfo->runNum;
+    evtNumber   = fInfo->evtNum;
     lumiSection = fInfo->lumiSec;
 
     muonOneP4  = muons[0];
     muonOneIso = muons_iso[0];
     muonTwoP4  = muons[1];
     muonTwoIso = muons_iso[1];
-    dimuonP4   = dimuon;
 
-    bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
-    bjetD0   = bjets[0]->d0;
+    if (bjets.size() > 0) {
+        bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+        bjetD0   = bjets[0]->d0;
+    } else {
+        bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        bjetD0   = 0.;
+    }
+
     if (fwdjets.size() > 0) {
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
         jetD0   = fwdjets[0]->d0;
-    } else {
+    } else if (jets.size() > 0) {
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
         jetD0   = jets[0]->d0;
+    } else {
+        jetP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        jetD0   = 0.;
     }
 
     outTree->Fill();

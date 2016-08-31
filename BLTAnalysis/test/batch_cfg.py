@@ -32,16 +32,16 @@ dataList.extend([
         nJobs    = 30,
         args     = 'muon_2016D muon 2016'
        ),
-    #cfg(dataName = 'muon_2016E',
-    #    path     = '{0}/SingleMuonRun2016E_PromptReco_v2'.format(path),
-    #    nJobs    = 30,
-    #    args     = 'muon_2016E muon 2016'
-    #   ),
-    #cfg(dataName = 'muon_2016F',
-    #    path     = '{0}/SingleMuonRun2016F_PromptReco_v1'.format(path),
-    #    nJobs    = 25,
-    #    args     = 'muon_2016F muon 2016'
-    #   ),
+    cfg(dataName = 'muon_2016E',
+        path     = '{0}/SingleMuonRun2016E_PromptReco_v2'.format(path),
+        nJobs    = 30,
+        args     = 'muon_2016E muon 2016'
+       ),
+    cfg(dataName = 'muon_2016F',
+        path     = '{0}/SingleMuonRun2016F_PromptReco_v1'.format(path),
+        nJobs    = 25,
+        args     = 'muon_2016F muon 2016'
+       ),
     ])
 
 batch = bm.BatchMaster(configList = dataList, 

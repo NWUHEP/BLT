@@ -178,7 +178,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
         // Apply rochester muon momentum corrections
         float qter = 1.;
         muonCorr->momcor_data(muonP4, muon->q, 0, qter);
-
         if (muon->trkIso03/muonP4.Pt() < 0.1) {
             veto_muons.push_back(muonP4);
 

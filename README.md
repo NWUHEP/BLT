@@ -1,7 +1,7 @@
 BLT
 ===
 
-BLT is a framework for analyzing bacon ntuples originally developed by @jiafulow.
+BLT is a framework based on the ROOT TSelector class specifically for working with [bacon ntuples](https://github.com/ksung25/BaconProd) developed and maintained by Kevin Sung and Phil Harris. 
 
 Setup
 =====
@@ -23,16 +23,21 @@ cmsenv
 These forks are sync'ed to Kevin's repositories on 2015/11/17
 
 ```
-git clone git@github.com:NWUHEP/BaconProd.git
 git clone git@github.com:NWUHEP/BaconAna.git
 ```
 
-If you plan on producing ntuples using the bacon framework, you will need to checkout some additional CMSSW dependencies,
+Depending on which branch of BLT you are working with you will need to check out a specific tag of BaconAna.  These are listed in the following table:
+
+| BLT branch | BaconAna tag |
+|:---:|:---:|
+| master    | -- |
+| amumu_2012 | 04 |
+| amumu_2016 | 10 |
+
+To check out a tag do the following from the top of the BaconAna repository,
 
 ```
-source BaconProd/scripts/setup_prod.sh
-# If copying via AFS is too slow, use scp instead:
-#   scp -r -C <USERNAME>@lxplus.cern.ch:/afs/cern.ch/work/k/ksung/public/Development/Run2Packages/* ./
+git checkout tags/<tag>
 ```
 
 ### Checkout and compile BLT code
@@ -40,13 +45,6 @@ source BaconProd/scripts/setup_prod.sh
 ```
 git clone git@github.com:NWUHEP/BLT.git
 scram b -j 12
-```
-
-### Make Bacon ntuples
-
-```
-cd BLT/BLTAnalysis/test
-cmsRun makingBacon_MC_25ns_MINIAOD.py 
 ```
 
 ### (Optional) Sync forked repositories
@@ -75,19 +73,4 @@ DemoAnalyzer input.txt 1000 DYJetsToLL_M-50 DYJetsToLL mumu 2015 0
 
 ## Running a BLT analyzer with condor
 
-These instructions are intended for running on the Northwestern tier 3, but can be easily modified to run on any batch system that uses condor as a scheduler (e.g., cmslpc).
-
-```
-cd BLT/BLTAnalysis/test/condor
-```
-
-Edit jobify.py L49 from 'MACHINE':'cmslpc' to   'MACHINE'      : 'ttgrid',
-
-```
-./run_all_20151119.sh
-```
-When the condor jobs are done, run the following,
-
-```
-python retrieve.py
-```
+The batch submission is handled by the BatchMaster class.  

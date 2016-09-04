@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import BatchMaster as bm
+import BLT.BLTAnalysis.BatchMaster as bm
 import sys
 
 

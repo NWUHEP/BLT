@@ -24,6 +24,9 @@
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 
+#include "BLT/BLTAnalysis/interface/muresolution.h"
+#include "BLT/BLTAnalysis/interface/rochcor2012wasym.h"
+
 // ROOT headers
 #include <TLorentzVector.h>
 #include <TVector3.h>
@@ -59,7 +62,8 @@ public:
     std::string  outFileName;
     std::string  outTreeName;
 
-    // 
+    // rochester muon corrections
+    rochcor2012 *muonCorr;
 
     // Params and cuts
     std::unique_ptr<Parameters>         params;
@@ -69,7 +73,7 @@ public:
     std::unique_ptr<RunLumiRangeMap>    lumiMask;
 
     // Branches in the output file
-    TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4, dimuonP4;
+    TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4;
     Float_t muonOneIso, muonTwoIso;
     Float_t met, met_phi;
     Float_t jetD0, bjetD0;

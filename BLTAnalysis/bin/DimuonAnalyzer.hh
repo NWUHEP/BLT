@@ -79,7 +79,8 @@ public:
     Float_t jetD0, bjetD0;
     UInt_t runNumber, lumiSection;
     ULong64_t evtNumber;
-    UInt_t nJets, nBJets;
+    Bool_t triggerStatus;
+    UInt_t nJets, nFwdJets, nBJets;
 
     //ClassDef(DimuonAnalyzer,0);
 };

@@ -40,12 +40,22 @@ dataList.extend([
        )
     ])
 
-batch = bm.BatchMaster(configList = dataList, 
-                      shortQueue = False,
-                      stageDir   = 'batch',
-                      executable = executable,
-                      selection  = '{0}_{1}'.format(selection, period),
-                      location   = 'nut3'
+mcList = []
+mcList.extend([
+    cfg(dataName = 'ttbar_leptonic',
+        path     = '{0}/Summer12_TTJets_FullLeptMGDecays'.format(path),
+        nJobs    = 50,
+        args     = 'ttbar_lep_2012 muon 2012'
+       )
+    ])
+
+batchList = mcList
+batch = bm.BatchMaster(configList = batchList, 
+                       shortQueue = False,
+                       stageDir   = 'batch',
+                       executable = executable,
+                       selection  = '{0}_{1}'.format(selection, period),
+                       location   = 'nut3'
                      )
 batch.submit_to_batch()
 

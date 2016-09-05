@@ -63,6 +63,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("runNumber", &runNumber);
     outTree->Branch("evtNumber", &evtNumber);
     outTree->Branch("lumiSection", &lumiSection);
+    outTree->Branch("triggerStatus", &triggerStatus);
 
     outTree->Branch("muonOneP4", &muonOneP4);
     outTree->Branch("muonOneIso", &muonOneIso);
@@ -72,6 +73,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jet_d0", &jetD0);
     outTree->Branch("nJets", &nJets);
+    outTree->Branch("nFwdJets", &nFwdJets);
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjet_d0", &bjetD0);
     outTree->Branch("nBJets", &nBJets);
@@ -105,7 +107,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     /* Trigger selection */
     bool passTrigger;
     passTrigger= trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
-
+    triggerStatus = passTrigger;
     if (!passTrigger)
         return kTRUE;
     hTotalEvents->Fill(3);
@@ -243,8 +245,9 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;
     std::vector<TJet*> bjets;
-    nJets  = 0;
-    nBJets = 0;
+    nJets    = 0;
+    nFwdJets = 0;
+    nBJets   = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
@@ -291,6 +294,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
             } else {
                 if (jet->pt > 30) {
                     fwdjets.push_back(jet);
+                    ++nFwdJets;
                 }
             }
         }

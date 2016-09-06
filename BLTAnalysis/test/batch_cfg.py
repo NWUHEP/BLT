@@ -49,7 +49,7 @@ mcList.extend([
        )
     ])
 
-batchList = mcList
+batchList = mcList + dataList
 batch = bm.BatchMaster(configList = batchList, 
                        shortQueue = False,
                        stageDir   = 'batch',

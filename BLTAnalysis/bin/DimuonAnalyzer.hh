@@ -77,12 +77,14 @@ class DimuonAnalyzer: public BLTSelector {
         // Branches in the output file
         TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4;
         Float_t muonOneIso, muonTwoIso;
-        Float_t met, met_phi;
+        Int_t muonOneQ, muonTwoQ;
         Float_t jetD0, bjetD0;
+        Float_t bjetTag;
+        UInt_t nJets, nFwdJets, nBJets;
+        Float_t met, metPhi;
         UInt_t runNumber, lumiSection;
         ULong64_t evtNumber;
         Bool_t triggerStatus;
-        UInt_t nJets, nFwdJets, nBJets;
 
         //ClassDef(DimuonAnalyzer,0);
 };

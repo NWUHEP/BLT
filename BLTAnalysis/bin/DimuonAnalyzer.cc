@@ -75,7 +75,7 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("muonTwoQ", &muonTwoQ);
 
     outTree->Branch("jetP4", &jetP4);
-    outTree->Branch("jet_d0", &jetD0);
+    outTree->Branch("jetD0", &jetD0);
     outTree->Branch("nJets", &nJets);
     outTree->Branch("nFwdJets", &nFwdJets);
 

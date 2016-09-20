@@ -5,7 +5,7 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/noobs/bacon/production/10'
+path       = '/tthome/share/bacon/production/10'
 executable = 'execBatch.sh'
 selection  = 'amumu'
 period     = '2016'
@@ -44,7 +44,16 @@ dataList.extend([
     #   ),
     ])
 
-batch = bm.BatchMaster(configList = dataList, 
+mcList = []
+mcList.extend([
+    cfg(dataName = 'TTJets',
+        path     = '{0}/TTJets_13TeV_amcatnloFXFX_pythia8'.format(path),
+        nJobs    = 100,
+        args     = 'TTJets muon 2016'
+       ),
+    ])
+
+batch = bm.BatchMaster(configList = mcList, 
                        shortQueue = False,
                        stageDir   = 'batch',
                        executable = executable,

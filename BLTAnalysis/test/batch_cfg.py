@@ -21,22 +21,22 @@ dataList.extend([
     cfg(dataName = 'muon_2012A',
         path     = '{0}/SingleMu_2012A-22Jan2013'.format(path),
         nJobs    = 1,
-        args     = 'muon_2012A muon 2012'
+        args     = 'muon_2012 muon 2012'
        ),
     cfg(dataName = 'muon_2012B',
         path     = '{0}/SingleMu_2012B-22Jan2013'.format(path),
         nJobs    = 15,
-        args     = 'muon_2012B muon 2012'
+        args     = 'muon_2012 muon 2012'
        ),
     cfg(dataName = 'muon_2012C',
         path     = '{0}/SingleMu_2012C-22Jan2013'.format(path),
         nJobs    = 15,
-        args     = 'muon_2012C muon 2012'
+        args     = 'muon_2012 muon 2012'
        ),
     cfg(dataName = 'muon_2012D',
         path     = '{0}/SingleMu_2012D-22Jan2013'.format(path),
         nJobs    = 15,
-        args     = 'muon_2012D muon 2012'
+        args     = 'muon_2012 muon 2012'
        )
     ])
 
@@ -45,8 +45,13 @@ mcList.extend([
     cfg(dataName = 'ttbar_leptonic',
         path     = '{0}/Summer12_TTJets_FullLeptMGDecays'.format(path),
         nJobs    = 50,
-        args     = 'ttbar_lep_2012 muon 2012'
-       )
+        args     = 'ttbar_lep muon 2012'
+       ),
+    cfg(dataName = 'DYJetsToLL_M-50',
+        path     = '{0}/Summer12_DYJetsToLL_M-50_TuneZ2Star'.format(path),
+        nJobs    = 50,
+        args     = 'zjets_m-50 muon 2012'
+       ),
     ])
 
 batchList = mcList + dataList

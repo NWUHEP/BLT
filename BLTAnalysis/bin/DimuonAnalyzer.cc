@@ -38,15 +38,15 @@ void DimuonAnalyzer::Begin(TTree *tree)
 
     // Trigger bits mapping file
     const std::string cmssw_base = getenv("CMSSW_BASE");
-    std::string trigfilename = cmssw_base + std::string("/src/BaconAna/DataFormats/data/HLTFile_v2");
+    std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_v2";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
-    lumiMask.reset(new RunLumiRangeMap());
+    lumiMask = RunLumiRangeMap();
     if (true) { // this will need to be turned off for MC
-        string jsonFileName = "src/BLT/BLTAnalyzer/test/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt";
-        lumiMask->AddJSONFile(jsonFileName);
+        string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/test/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt";
+        lumiMask.AddJSONFile(jsonFileName);
     }
 
     // muon momentum corrections
@@ -54,32 +54,37 @@ void DimuonAnalyzer::Begin(TTree *tree)
 
     // Prepare the output tree
     outFileName = params->get_output_filename("output");
-    outTreeName = params->get_output_treename("data");
+    outTreeName = params->get_output_treename("");
 
     outFile = new TFile(outFileName.c_str(),"RECREATE");
     outFile->cd();
-    outTree = new TTree(outTreeName.c_str(), "demoTree");
+    outTree = new TTree(outTreeName.c_str(), "bltTree");
 
     outTree->Branch("runNumber", &runNumber);
-    outTree->Branch("evtNumber", &evtNumber);
+    outTree->Branch("evtNumber", &evtNumber, "eventNumber/l");
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
+    outTree->Branch("eventWeight", &eventWeight);
 
     outTree->Branch("muonOneP4", &muonOneP4);
     outTree->Branch("muonOneIso", &muonOneIso);
+    outTree->Branch("muonOneQ", &muonOneQ);
     outTree->Branch("muonTwoP4", &muonTwoP4);
     outTree->Branch("muonTwoIso", &muonTwoIso);
+    outTree->Branch("muonTwoQ", &muonTwoQ);
 
     outTree->Branch("jetP4", &jetP4);
-    outTree->Branch("jet_d0", &jetD0);
+    outTree->Branch("jetD0", &jetD0);
     outTree->Branch("nJets", &nJets);
     outTree->Branch("nFwdJets", &nFwdJets);
+
     outTree->Branch("bjetP4", &bjetP4);
-    outTree->Branch("bjet_d0", &bjetD0);
+    outTree->Branch("bjetTag", &bjetTag);
+    outTree->Branch("bjetD0", &bjetD0);
     outTree->Branch("nBJets", &nBJets);
 
     outTree->Branch("met", &met);
-    outTree->Branch("met_phi", &met_phi);
+    outTree->Branch("metPhi", &metPhi);
 
     ReportPostBegin();
 }
@@ -97,11 +102,11 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRealData(isRealData);
 
     // Apply lumi mask
-    //if (isRealData) {
-    //    RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
-    //    if(!lumiMask->HasRunLumi(rl)) 
-    //        return kTRUE;
-    //}
+    if (isRealData) {
+        RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
+        if(!lumiMask.HasRunLumi(rl)) 
+            return kTRUE;
+    }
     hTotalEvents->Fill(2);
 
     /* Trigger selection */
@@ -110,6 +115,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     triggerStatus = passTrigger;
     if (!passTrigger)
         return kTRUE;
+
     hTotalEvents->Fill(3);
 
     ///////////////////
@@ -159,7 +165,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     vector<TLorentzVector> muons;
     vector<TLorentzVector> veto_muons;
     vector<float> muons_iso;
-    int leadMuonQ = 0;
+    vector<float> muons_q;
     for (unsigned i = 0; i < tmp_muons.size(); i++) {
         TMuon* muon = tmp_muons[i];
 
@@ -187,17 +193,20 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
                 if (muons.size() == 0) {
                     muons.push_back(muonP4);
                     muons_iso.push_back(muon->trkIso03);
-                    leadMuonQ = muon->q;
-                } else if (muons.size() == 1 && muon->q != leadMuonQ) {
-                    muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso03);
+                    muons_q.push_back(muon->q);
+                } else if (muons.size() == 1) {
+                    if (muon->q != muons_q[0]) {
+                        muons.push_back(muonP4);
+                        muons_iso.push_back(muon->trkIso03);
+                        muons_q.push_back(muon->q);
+                    }
                 }
             }
         }
     }
 
     /* ELECTRONS */
-    std::vector<TLorentzVector> electrons;
+    /*std::vector<TLorentzVector> electrons;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -215,6 +224,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     }
 
     std::sort(electrons.begin(), electrons.end(), P4SortCondition);
+    */
 
     /* PHOTONS */
     /* Don't need these just now
@@ -305,8 +315,8 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
-    met     = fInfo->pfMET;
-    met_phi = fInfo->pfMETphi;
+    met    = fInfo->pfMET;
+    metPhi = fInfo->pfMETphi;
 
     ////////////////////////////
     /* Apply dimuon selection */
@@ -318,31 +328,40 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     TLorentzVector dimuon;
     dimuon = muons[0] + muons[1];
-    //if (dimuon.M() < 12. || dimuon.M() > 70.)
-    if (dimuon.M() > 70.)
+    if (dimuon.M() < 12. || dimuon.M() > 70.)
         return kTRUE;
     hTotalEvents->Fill(6);
 
+    ////////////////////////////
+    // Get event weights here //
+    ////////////////////////////
+
+    /*HERE!!!*/
 
     //////////
     // Fill //
     //////////
 
-    runNumber = fInfo->runNum;
-    evtNumber = fInfo->evtNum;
+    runNumber   = fInfo->runNum;
+    evtNumber   = fInfo->evtNum;
     lumiSection = fInfo->lumiSec;
+    eventWeight = 1;
 
     muonOneP4  = muons[0];
     muonOneIso = muons_iso[0];
+    muonOneQ   = muons_q[0];
     muonTwoP4  = muons[1];
     muonTwoIso = muons_iso[1];
+    muonTwoQ   = muons_q[1];
 
     if (bjets.size() > 0) {
         bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetD0   = bjets[0]->d0;
+        bjetTag  = bjets[0]->csv;
     } else {
         bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         bjetD0   = 0.;
+        bjetTag  = 0.;
     }
 
     if (fwdjets.size() > 0) {

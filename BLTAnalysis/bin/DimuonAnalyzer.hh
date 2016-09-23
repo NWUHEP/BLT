@@ -59,8 +59,6 @@ public:
 
     TFile       *outFile;
     TTree       *outTree;
-    std::string  outFileName;
-    std::string  outTreeName;
 
     // Lumi mask
     RunLumiRangeMap lumiMask;

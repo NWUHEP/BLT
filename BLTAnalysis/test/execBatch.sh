@@ -41,4 +41,4 @@ cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-cp output_${SUFFIX}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
+cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

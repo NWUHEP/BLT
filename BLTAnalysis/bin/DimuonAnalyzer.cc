@@ -53,8 +53,8 @@ void DimuonAnalyzer::Begin(TTree *tree)
     muonCorr = new rochcor2012();
 
     // Prepare the output tree
-    outFileName = params->get_output_filename("output");
-    outTreeName = params->get_output_treename("");
+    string outFileName = params->get_output_filename("output");
+    string outTreeName = params->get_output_treename("tree");
 
     outFile = new TFile(outFileName.c_str(),"RECREATE");
     outFile->cd();
@@ -86,6 +86,10 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
 
+    // Event counter
+    string outHistName = params->get_output_treename("TotalEvents");
+    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
+    
     ReportPostBegin();
 }
 
@@ -94,6 +98,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
+    hTotalEvents->Fill(1);
 
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
@@ -185,7 +190,11 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
 
         // Apply rochester muon momentum corrections
         float qter = 1.;
-        muonCorr->momcor_data(muonP4, muon->q, 0, qter);
+        if (isRealData) {
+            muonCorr->momcor_data(muonP4, muon->q, 0, qter);
+        } else {
+            muonCorr->momcor_mc(muonP4, muon->q, 0, qter);
+        }
         if (muon->trkIso03/muonP4.Pt() < 0.1) {
             veto_muons.push_back(muonP4);
 

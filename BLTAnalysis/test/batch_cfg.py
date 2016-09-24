@@ -47,6 +47,11 @@ mcList.extend([
         nJobs    = 50,
         args     = 'ttbar_lep muon 2012'
        ),
+    cfg(dataName = 'ttbar_semileptonic',
+        path     = '{0}/Summer12_TTJets_SemiLeptMGDecays'.format(path),
+        nJobs    = 50,
+        args     = 'ttbar_semilep muon 2012'
+       ),
     cfg(dataName = 'DYJetsToLL_M-50',
         path     = '{0}/Summer12_DYJetsToLL_M-50_TuneZ2Star'.format(path),
         nJobs    = 50,
@@ -114,7 +119,9 @@ mcList.extend([
        ),
     ])
 
-batchList = mcList + dataList
+batchList = []
+batchList += mcList 
+batchList += dataList
 batch = bm.BatchMaster(configList = batchList, 
                        shortQueue = False,
                        stageDir   = 'batch',

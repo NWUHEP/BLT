@@ -345,7 +345,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     // Get event weights here //
     ////////////////////////////
 
-    /*HERE!!!*/
+    eventWeight = 1;
 
     //////////
     // Fill //
@@ -354,7 +354,6 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     runNumber   = fInfo->runNum;
     evtNumber   = fInfo->evtNum;
     lumiSection = fInfo->lumiSec;
-    eventWeight = 1;
 
     muonOneP4  = muons[0];
     muonOneIso = muons_iso[0];

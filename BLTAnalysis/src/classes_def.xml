@@ -1,5 +1,6 @@
 <lcgdict>
   <class name="BLTSelector"/>
+  <class name="WeightUtils"/>
   <class name="rochcor2012wasym"/>
   <class name="muresolution"/>
 </lcgdict>

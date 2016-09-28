@@ -2,4 +2,5 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="DimuonAnalyzer.cc" name="DimuonAnalyzer"></bin>
-<bin file="ZGAnalyzer.cc"     name="ZGAnalyzer"></bin>
+<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
+<!--bin file="ZGAnalyzer.cc"     name="ZGAnalyzer"></bin-->

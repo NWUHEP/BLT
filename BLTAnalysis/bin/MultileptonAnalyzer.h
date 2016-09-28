@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef DIMUONANALYZER_HH
-#define DIMUONANALYZER_HH
+#ifndef MULTILEPTONANALYZER_HH
+#define MULTILEPTONANALYZER_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -49,10 +49,10 @@
 #include <regex>
 
 
-class DimuonAnalyzer: public BLTSelector {
+class MultileptonAnalyzer: public BLTSelector {
 public:
-    DimuonAnalyzer();
-    ~DimuonAnalyzer();
+    MultileptonAnalyzer();
+    ~MultileptonAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -79,20 +79,23 @@ public:
     std::unique_ptr<WeightUtils>        weights;
 
     // Branches in the output file
-    TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4;
-    Float_t muonOneIso, muonTwoIso;
-    Int_t muonOneQ, muonTwoQ;
-    Float_t jetD0, bjetD0;
-    Float_t bjetTag;
-    UInt_t nJets, nFwdJets, nBJets;
-    Float_t met, metPhi;
     UInt_t runNumber, lumiSection, nPU;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight;
 
-    //ClassDef(DimuonAnalyzer,0);
+    TLorentzVector leptonOneP4, leptonTwoP4, jetP4, bjetP4;
+    Float_t leptonOneIso, leptonTwoIso;
+    Int_t leptonOneQ, leptonTwoQ;
+    Int_t leptonOneFlavor, leptonTwoFlavor;
+
+    UInt_t nJets, nFwdJets, nBJets;
+    Float_t jetD0, bjetD0;
+    Float_t bjetTag, jetTag;
+    Float_t met, metPhi;
+
+    //ClassDef(MultileptonAnalyzer,0);
 };
 
 
-#endif  // DEMOANALYZER_HH
+#endif  // MULTILEPTONANALYZER_HH

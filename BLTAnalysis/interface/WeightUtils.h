@@ -16,20 +16,12 @@
 // ROOT libraries
 #include "TROOT.h"
 #include "TObject.h"
+#include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
-#include "TFile.h"
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
-
-// boost libraries
-//#include <boost/array.hpp>
-
-// custom libraries
-#include "../interface/TCPhysObject.h"
-#include "../interface/TCPhoton.h"
-#include "../interface/TCJet.h"
-#include "../interface/TCGenJet.h"
+#include "TLorentzVector.h"
 
 using namespace std;
 
@@ -37,22 +29,20 @@ class WeightUtils: public TObject {
     public:
         WeightUtils() {};
         virtual ~WeightUtils() {};
-        WeightUtils(string sampleName, string dataPeriod, string selection, bool isRealData);
+        WeightUtils(string dataPeriod, string selection, bool isRealData);
 
         void    Initialize();
         void    SetDataBit(bool);
         void    SetDataPeriod(string);
-        void    SetSampleName(string);
         void    SetSelection(string);
-        void    SetPassTrigger(string); 
-        void    SetObjects(vector<TCPhysObject>&, vector<TCJet>&, float, string);
 
-        float   GetPUWeight(unsigned);
-        float   RecoWeight();
-        float   GetElectronEff(TLorentzVector&) const;
-        float   GetMuEff(TLorentzVector&) const; 
-        float   GetMuTriggerEff(TLorentzVector&, TLorentzVector&) const;
-        float   GetEleTriggerEff(TLorentzVector&, TLorentzVector&) const;
+        float   GetPUWeight(float);
+        float   GetTriggerEffWeight(string, TLorentzVector) const;
+        float   GetIdEffWeight(string, TLorentzVector) const;
+        //float   GetElectronRecoEff(TLorentzVector&) const;
+        //float   GetMuonRecoEff(TLorentzVector&) const; 
+        //float   GetMuonTriggerEff(string, vector<TLorentzVector>&) const;
+        //float   GetEleTriggerEff(string, vector<TLorentzVector>&) const;
 
         ClassDef(WeightUtils, 0);
 
@@ -63,15 +53,14 @@ class WeightUtils: public TObject {
         string _selection;
         bool   _isRealData;
 
-        //sources
         TH1D*  puReweight;
+        TGraphErrors* _sf_IsoMu24_Eta2p1[3];
 
-        TGraphErrors *_muSF2012_ID[4], *_muSF2012_ISO[4];
-        TGraph *_muSF2012_ID_err[4], *_muSF2012_ISO_err[4];
+        //TGraphErrors *_muSF2012_ID[4], *_muSF2012_ISO[4];
+        //TGraph *_muSF2012_ID_err[4], *_muSF2012_ISO_err[4];
 
-        TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
-        TH2D    *h2_EleMVASF;
-        TH2D    *h2_DielectronMisQ;
+        //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
+        //TH2D    *h2_EleMVASF;
 };
 
 #endif

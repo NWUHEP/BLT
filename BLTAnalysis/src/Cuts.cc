@@ -28,13 +28,13 @@ Cuts::Cuts() {
     EAMu[4] =   0.821; // 2.2   < eta < 2.3
     EAMu[5] =   0.660; // 2.3   < eta < 2.4
 
-    EAEl[0] =   0.208; //         eta < 1.0
-    EAEl[1] =   0.209; // 1.0   < eta < 1.5
-    EAEl[2] =   0.115; // 1.5   < eta < 2.0
-    EAEl[3] =   0.143; // 2.0   < eta < 2.2
-    EAEl[4] =   0.183; // 2.2   < eta < 2.3
-    EAEl[5] =   0.194; // 2.3   < eta < 2.4
-    EAEl[6] =   0.261; // 2.4   < eta
+    EAEl[0] =   0.13; //         eta < 1.0
+    EAEl[1] =   0.14; // 1.0   < eta < 1.5
+    EAEl[2] =   0.07; // 1.5   < eta < 2.0
+    EAEl[3] =   0.09; // 2.0   < eta < 2.2
+    EAEl[4] =   0.11; // 2.2   < eta < 2.3
+    EAEl[5] =   0.11; // 2.3   < eta < 2.4
+    EAEl[6] =   0.14; // 2.4   < eta
 
     //   ch      nh       ph
     float EAPhoTemp[7][3] = {
@@ -61,7 +61,6 @@ Cuts::Cuts() {
     vetoElID.dz[0]                        = 0.2;
     vetoElID.fabsEPDiff[0]                = 99999;
     vetoElID.ConversionMissHits[0]        = 99999;
-    vetoElID.PassedConversionProb[0]      = 1;
 
     vetoElID.dEtaIn[1]                    = 0.01;
     vetoElID.dPhiIn[1]                    = 0.7;
@@ -71,8 +70,28 @@ Cuts::Cuts() {
     vetoElID.dz[1]                        = 0.2;
     vetoElID.fabsEPDiff[1]                = 999999;
     vetoElID.ConversionMissHits[1]        = 999999;
-    vetoElID.PassedConversionProb[1]      = 1;
 
+    // tight electorn ID
+    tightElID.cutName                    = "tightElID";
+    tightElID.dEtaIn[0]                  = 0.004;
+    tightElID.dPhiIn[0]                  = 0.03;
+    tightElID.sigmaIetaIeta[0]           = 0.01;
+    tightElID.HadOverEm[0]               = 0.12;
+    tightElID.dxy[0]                     = 0.02;
+    tightElID.dz[0]                      = 0.1;
+    tightElID.fabsEPDiff[0]              = 0.05;
+    tightElID.ConversionMissHits[0]      = 0;
+
+    tightElID.dEtaIn[1]                  = 0.007;
+    tightElID.dPhiIn[1]                  = 0.03;
+    tightElID.sigmaIetaIeta[1]           = 0.03;
+    tightElID.HadOverEm[1]               = 0.10;
+    tightElID.dxy[1]                     = 0.02;
+    tightElID.dz[1]                      = 0.1;
+    tightElID.fabsEPDiff[1]              = 0.05;
+    tightElID.ConversionMissHits[1]      = 1;
+
+    // medium electron ID
     mediumElID.cutName                    = "mediumElID";
     mediumElID.dEtaIn[0]                  = 0.004;
     mediumElID.dPhiIn[0]                  = 0.06;
@@ -82,7 +101,6 @@ Cuts::Cuts() {
     mediumElID.dz[0]                      = 0.1;
     mediumElID.fabsEPDiff[0]              = 0.05;
     mediumElID.ConversionMissHits[0]      = 1;
-    mediumElID.PassedConversionProb[0]    = 1;
 
     mediumElID.dEtaIn[1]                  = 0.007;
     mediumElID.dPhiIn[1]                  = 0.03;
@@ -92,7 +110,6 @@ Cuts::Cuts() {
     mediumElID.dz[1]                      = 0.1;
     mediumElID.fabsEPDiff[1]              = 0.05;
     mediumElID.ConversionMissHits[1]      = 1;
-    mediumElID.PassedConversionProb[1]    = 1;
 
     looseElID.cutName                     = "looseElID";
     looseElID.dEtaIn[0]                   = 0.007;
@@ -103,7 +120,6 @@ Cuts::Cuts() {
     looseElID.dz[0]                       = 0.2;
     looseElID.fabsEPDiff[0]               = 0.05;
     looseElID.ConversionMissHits[0]       = 1;
-    looseElID.PassedConversionProb[0]     = 1;
 
     looseElID.dEtaIn[1]                   = 0.009;
     looseElID.dPhiIn[1]                   = 0.10;
@@ -113,7 +129,6 @@ Cuts::Cuts() {
     looseElID.dz[1]                       = 0.2;
     looseElID.fabsEPDiff[1]               = 0.05;
     looseElID.ConversionMissHits[1]       = 1;
-    looseElID.PassedConversionProb[1]     = 1;
 
     mvaPreElID.cutName                    = "mvaPreElID";
     mvaPreElID.dEtaIn[0]                  = 99999;
@@ -124,7 +139,6 @@ Cuts::Cuts() {
     mvaPreElID.dz[0]                      = 99999;
     mvaPreElID.fabsEPDiff[0]              = 99999;
     mvaPreElID.ConversionMissHits[0]      = 99999;
-    mvaPreElID.PassedConversionProb[0]    = 99999;
     mvaPreElID.dr03TkSumPt[0]             = 0.2;
     mvaPreElID.dr03EcalRecHitSumEt[0]     = 0.2;
     mvaPreElID.dr03HcalTowerSumEt[0]      = 0.2;
@@ -138,7 +152,6 @@ Cuts::Cuts() {
     mvaPreElID.dz[1]                      = 99999;
     mvaPreElID.fabsEPDiff[1]              = 99999;
     mvaPreElID.ConversionMissHits[1]      = 99999;
-    mvaPreElID.PassedConversionProb[1]    = 99999;
     mvaPreElID.dr03TkSumPt[1]             = 0.2;
     mvaPreElID.dr03EcalRecHitSumEt[1]     = 0.2;
     mvaPreElID.dr03HcalTowerSumEt[1]      = 0.2;
@@ -164,6 +177,15 @@ Cuts::Cuts() {
     mediumElIso.phIso03                   = 99999;
     mediumElIso.relCombIso03              = 0.15;
 
+    tightElIso.cutName                   = "tightElIso";
+    tightElIso.chIso04                   = 99999;
+    tightElIso.nhIso04                   = 99999;
+    tightElIso.phIso04                   = 99999;
+    tightElIso.relCombIso04              = 0.1;
+    tightElIso.chIso03                   = 99999;
+    tightElIso.nhIso03                   = 99999;
+    tightElIso.phIso03                   = 99999;
+    tightElIso.relCombIso03              = 0.1;
 
     /* Muon ID */
     tightMuID.cutName                     = "tightMuID";

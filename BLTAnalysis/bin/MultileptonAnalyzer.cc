@@ -226,9 +226,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             veto_muons.push_back(muonP4);
 
             if (muonP4.Pt() > 25 && fabs(muonP4.Eta()) < 2.1) {
-                    muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso03);
-                    muons_q.push_back(muon->q);
+                muons.push_back(muonP4);
+                muons_iso.push_back(muon->trkIso03);
+                muons_q.push_back(muon->q);
             }
         }
     }
@@ -340,7 +340,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
     }
-
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(fwdjets.begin(), fwdjets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
@@ -373,9 +372,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoQ      = muons_q[1];
         leptonTwoFlavor = 1;
 
-        if (!isRealData) {
-            eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
-        }
+        //if (!isRealData) {
+        //    eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
+        //}
 
     } else if (params->selection == "ee") {
         

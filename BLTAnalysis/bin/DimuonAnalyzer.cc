@@ -371,7 +371,7 @@ Bool_t DimuonAnalyzer::Process(Long64_t entry)
     eventWeight = 1;
     if (!isRealData) {
         eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
-        //eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]); // pileup reweighting
+        //eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]); // trigger reweighting
     }
 
     //////////

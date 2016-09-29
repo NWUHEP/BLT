@@ -120,9 +120,19 @@ mcList.extend([
        ),
     ])
 
+sigList = []
+sigList.extend([
+    cfg(dataName = 'Bprime2Xb_X2mumu',
+        path     = '{0}/Summer12_Bprime2Xb_X2mumu'.format(path),
+        nJobs    = 5,
+        args     = 'bprime_xb mumu 2012'
+       ),
+    ])
+
 batchList = []
-batchList += mcList 
-batchList += dataList
+#batchList += mcList 
+#batchList += dataList
+batchList += sigList
 batch = bm.BatchMaster(configList = batchList, 
                        shortQueue = False,
                        stageDir   = 'batch',

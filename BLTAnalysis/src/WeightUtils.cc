@@ -16,9 +16,9 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     // IsoMu24_eta2p1 efficiency ratios
     std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/SingleMuonTriggerEfficiencies_eta2p1_Run2012ABCD_v5trees.root";
     TFile* triggerFile = new TFile(triggerFileName.c_str(), "OPEN");
-    _sf_IsoMu24_Eta2p1[0] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_Data_over_MC_TightID_PT_ABSETA_Barrel_0to0p9_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1[1] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_Data_over_MC_TightID_PT_ABSETA_Transition_0p9to1p2_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1[2] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_Data_over_MC_TightID_PT_ABSETA_Endcaps_1p2to2p1_pt25-500_2012ABCD");
+    _sf_IsoMu24_Eta2p1[0] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_over_MC_TightID_PT_ABSETA_Barrel_0to0p9_pt25-500_2012ABCD");
+    _sf_IsoMu24_Eta2p1[1] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_over_MC_TightID_PT_ABSETA_Transition_0p9to1p2_pt25-500_2012ABCD");
+    _sf_IsoMu24_Eta2p1[2] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_over_MC_TightID_PT_ABSETA_Endcaps_1p2to2p1_pt25-500_2012ABCD");
 
 }
 
@@ -50,9 +50,9 @@ float WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector lepton
             weight *= _sf_IsoMu24_Eta2p1[0]->Eval(leptonP4.Pt());
         } else if (fabs(leptonP4.Eta()) > 0.9 && fabs(leptonP4.Eta()) < 1.2) {
             weight *= _sf_IsoMu24_Eta2p1[1]->Eval(leptonP4.Pt());
-        } else if (fabs(leptonP4.Eta()) > 0.9 && fabs(leptonP4.Eta()) < 1.2) {
+        } else if (fabs(leptonP4.Eta()) > 1.2 && fabs(leptonP4.Eta()) < 2.4) {
             weight *= _sf_IsoMu24_Eta2p1[2]->Eval(leptonP4.Pt());
-        }
+        } 
     }
     return weight;
 }

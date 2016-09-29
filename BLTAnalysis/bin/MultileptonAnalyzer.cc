@@ -372,9 +372,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoQ      = muons_q[1];
         leptonTwoFlavor = 1;
 
-        //if (!isRealData) {
-        //    eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
-        //}
+        if (!isRealData) {
+            eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
+        }
 
     } else if (params->selection == "ee") {
         

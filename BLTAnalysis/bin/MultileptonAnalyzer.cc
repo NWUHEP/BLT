@@ -327,12 +327,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         bool elOverlap = false;
-        //for (const auto& el: electrons) {
-        //    if (vJet.DeltaR(el) < 0.5) {
-        //        elOverlap = true;
-        //        break;
-        //    }
-        //}
+        for (const auto& el: electrons) {
+            if (vJet.DeltaR(el) < 0.5) {
+                elOverlap = true;
+                break;
+            }
+        }
 
         if (
                 jet->pt > 30 

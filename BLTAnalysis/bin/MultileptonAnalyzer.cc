@@ -41,6 +41,12 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_v2";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
+    if (params->selection == "mumu") {
+        triggerNames.push_back("HLT_IsoMu24_eta2p1_v*");
+    } else if (params->selection == "ee") {
+        triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
+    }
+
     // Weight utility class
     weights.reset(new WeightUtils(params->period, params->selection, false));
 
@@ -74,10 +80,12 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneQ", &leptonOneQ);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
+    outTree->Branch("leptonOneTrigger", &leptonOneTrigger);
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonTwoQ", &leptonTwoQ);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
+    outTree->Branch("leptonTwoTrigger", &leptonTwoTrigger);
 
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jetD0", &jetD0);
@@ -123,10 +131,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     /* Trigger selection */
     bool passTrigger = false;
-    if (params->selection == "mumu") {
-        passTrigger |= trigger->pass("HLT_IsoMu24_eta2p1_v*", fInfo->triggerBits);
-    } else if (params->selection == "ee") {
-        passTrigger |= trigger->pass("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*", fInfo->triggerBits);
+    for (unsigned i = 0; i < triggerNames.size(); ++i) {
+        passTrigger |= trigger->pass(triggerNames[i], fInfo->triggerBits);
     }
     if (!passTrigger)
         return kTRUE;
@@ -196,6 +202,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     vector<TLorentzVector> veto_muons;
     vector<float> muons_iso;
     vector<float> muons_q;
+    vector<bool> muons_trigger;
     for (unsigned i = 0; i < tmp_muons.size(); i++) {
         TMuon* muon = tmp_muons[i];
 
@@ -229,6 +236,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 muons.push_back(muonP4);
                 muons_iso.push_back(muon->trkIso03);
                 muons_q.push_back(muon->q);
+
+                // trigger matching
+                bool triggered = false;
+                for (unsigned i = 0; i < triggerNames.size(); ++i) {
+                    triggered |= trigger->passObj(triggerNames[i], 1, muon->hltMatchBits);
+                }
+                cout << triggered << endl;
+                muons_trigger.push_back(triggered);
             }
         }
     }
@@ -237,6 +252,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::vector<TLorentzVector> electrons;
     vector<float> electrons_iso;
     vector<float> electrons_q;
+    vector<bool> electrons_trigger;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -252,6 +268,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             electrons.push_back(electronP4);
             electrons_iso.push_back(0.);
             electrons_q.push_back(electron->q);
+
+            // trigger matching
+            bool triggered = false;
+            for (unsigned i = 0; i < triggerNames.size(); ++i) {
+                triggered |= trigger->passObj(triggerNames[i], 1, electron->hltMatchBits);
+            }
+            electrons_trigger.push_back(triggered);
         }
     }
 
@@ -367,10 +390,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneIso    = muons_iso[0];
         leptonOneQ      = muons_q[0];
         leptonOneFlavor = 1;
+        leptonTwoFlavor = muons_trigger[0];
         leptonTwoP4     = muons[1];
         leptonTwoIso    = muons_iso[1];
         leptonTwoQ      = muons_q[1];
         leptonTwoFlavor = 1;
+        leptonTwoFlavor = muons_trigger[1];
 
         if (!isRealData) {
             eventWeight *= weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
@@ -391,11 +416,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electrons[0];
         leptonOneIso    = electrons_iso[0];
         leptonOneQ      = electrons_q[0];
+        leptonTwoFlavor = electrons_trigger[0];
         leptonOneFlavor = 0;
         leptonTwoP4     = electrons[1];
         leptonTwoIso    = electrons_iso[1];
         leptonTwoQ      = electrons_q[1];
         leptonOneFlavor = 0;
+        leptonTwoFlavor = electrons_trigger[1];
     } 
 
     ///////////////////

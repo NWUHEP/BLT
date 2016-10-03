@@ -78,6 +78,8 @@ public:
     std::unique_ptr<baconhep::TTrigger> trigger;
     std::unique_ptr<WeightUtils>        weights;
 
+    std::vector<string> triggerNames;
+
     // Branches in the output file
     UInt_t runNumber, lumiSection, nPU;
     ULong64_t evtNumber;
@@ -88,6 +90,7 @@ public:
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneQ, leptonTwoQ;
     Int_t leptonOneFlavor, leptonTwoFlavor;
+    Bool_t leptonOneTrigger, leptonTwoTrigger;
 
     UInt_t nJets, nFwdJets, nBJets;
     Float_t jetD0, bjetD0;

@@ -6,8 +6,6 @@ echo ">>> arguments: $@"
 ### Required parameters #####
 DATANAME=$1
 COUNT=$2
-
-### Specify addtional arguments here ####
 SUFFIX=$3
 SELECTION=$4
 PERIOD=$5

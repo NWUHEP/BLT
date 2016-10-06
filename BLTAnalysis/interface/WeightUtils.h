@@ -37,10 +37,9 @@ class WeightUtils: public TObject {
         void    SetSelection(string);
 
         float   GetPUWeight(float);
-        float   GetTriggerEffWeight(string, TLorentzVector) const;
-        float   GetIdEffWeight(string, TLorentzVector) const;
+        pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
+        float   GetMuonRecoEff(TLorentzVector&) const; 
         //float   GetElectronRecoEff(TLorentzVector&) const;
-        //float   GetMuonRecoEff(TLorentzVector&) const; 
         //float   GetMuonTriggerEff(string, vector<TLorentzVector>&) const;
         //float   GetEleTriggerEff(string, vector<TLorentzVector>&) const;
 
@@ -54,9 +53,9 @@ class WeightUtils: public TObject {
         bool   _isRealData;
 
         TH1D*  puReweight;
-        TGraphErrors* _sf_IsoMu24_Eta2p1[3];
+        TGraphErrors *_sf_IsoMu24_Eta2p1_data[3], *_sf_IsoMu24_Eta2p1_mc[3];
 
-        //TGraphErrors *_muSF2012_ID[4], *_muSF2012_ISO[4];
+        TGraphErrors *_muSF2012_ID[4]; 
         //TGraph *_muSF2012_ID_err[4], *_muSF2012_ISO_err[4];
 
         //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8

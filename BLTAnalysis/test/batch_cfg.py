@@ -8,7 +8,7 @@ cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/04'
 #path       = '/eos/uscms/store/user/naodell/bacontuples'
 executable = 'execBatch.sh'
-selection  = 'ee'
+selection  = 'emu'
 period     = '2012'
 
 ''' 
@@ -17,7 +17,7 @@ period     = '2012'
 '''
 
 dataList = []
-if selection == 'mumu':
+if selection == 'mumu' or selection == 'emu':
     dataList.extend([
         cfg(data_name = 'muon_2012A',
             path     = '{0}/SingleMu_2012A-22Jan2013'.format(path),

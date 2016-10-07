@@ -1,43 +1,36 @@
 import sys, os, subprocess, fileinput, math, datetime
 
 def get_current_time():
-
     now = datetime.datetime.now()
     currentTime = '{0:02d}{1:02d}{2:02d}_{3:02d}{4:02d}{5:02d}'.format(now.year, now.month, now.day, now.hour, now.minute, now.second)
     return currentTime
 
-
 def make_directory(filePath, clear = True):
-
     if not os.path.exists(filePath):
         os.system('mkdir -p '+filePath)
-
     if clear and len(os.listdir(filePath)) != 0:
         os.system('rm '+filePath+'/*')
 
-
 class JobConfig():
     '''Class for storing configuration for each dataset'''
-    def __init__(self, dataName = 'TEST', path = '/uscms/home/naodell/nobackup/TEST', nJobs = 1, args = 'TEST 0 muon'):
-        self._dataName  = dataName
+    def __init__(self, data_name, path, suffix, nJobs=1):
+        self._data_name  = data_name
         self._path      = path
+        self._suffix    = suffix
         self._nJobs     = nJobs
-        self._args      = args
-
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, configList, shortQueue = False, stageDir = 'outputBatch', executable = 'execBatch.csh', selection = 'test', location = 'lpc'):
-        self._selection  = selection
-        self._current    = os.path.abspath('.')
-        self._stageDir   = stageDir
-        self._configList = configList
-        self._executable = executable
-        self._shortQueue = shortQueue
-        self._location   = location
+    def __init__(self, config_list, stage_dir, selection, period, executable='execBatch.sh', location='lpc'):
+        self._current     = os.path.abspath('.')
+        self._stage_dir   = stage_dir
+        self._config_list = config_list
+        self._selection   = selection
+        self._period      = period
+        self._executable  = executable
+        self._location    = location
     
     def split_jobs_by_dataset(self, directory, nJobs):
-
         fileList = os.listdir(directory)
         nFiles = len(fileList)
         
@@ -51,7 +44,6 @@ class BatchMaster():
 
         return fileSplit
 
-
     def make_batch_lpc(self, cfg, sources):
         '''
         Prepares for submission to lpc.  Does the following:
@@ -61,7 +53,7 @@ class BatchMaster():
         '''
 
         ## Writing the batch config file
-        batch_tmp = open('.batch_tmp_{0}'.format(cfg._dataName,), 'w')
+        batch_tmp = open('.batch_tmp_{0}'.format(cfg._data_name,), 'w')
         batch_tmp.write('Universe              = vanilla\n')
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
@@ -73,15 +65,12 @@ class BatchMaster():
             batch_tmp.write('Requirements          = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
             batch_tmp.write('request_disk          = 2000000\n')
             batch_tmp.write('request_memory        = 2048\n')
-
-        if self._shortQueue:
-            batch_tmp.write('+LENGTH               = "SHORT"\n')
         batch_tmp.write('\n')
 
         for i, source in enumerate(sources):
 
             ## make file with list of inputs ntuples for the analyzer
-            input = open('input_{1}_{2}.txt'.format(self._stageDir, cfg._dataName, str(i+1)), 'w')
+            input = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._data_name, str(i+1)), 'w')
             path = cfg._path
             if self._location == 'lpc':
                 path = 'root://cmseos.fnal.gov/' + cfg._path[10:]
@@ -90,12 +79,12 @@ class BatchMaster():
                 input.write(path+'/'+file+'\n')
             input.close()
 
-            batch_tmp.write('Arguments             = {0} {1} {2}\n'.format(cfg._dataName, i+1, cfg._args))
+            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period))
             batch_tmp.write('Executable            = {0}\n'.format(self._executable))
-            batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._dataName, i+1))
-            batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._dataName, i+1))
-            batch_tmp.write('Error                 = reports/{0}_{1}_$(Cluster)_$(Process).stderr\n'.format(cfg._dataName, i+1))
-            batch_tmp.write('Log                   = reports/{0}_{1}_$(Cluster)_$(Process).log   \n'.format(cfg._dataName, i+1))
+            batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._data_name, i+1))
+            batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._data_name, i+1))
+            batch_tmp.write('Error                 = reports/{0}_{1}_$(Cluster)_$(Process).stderr\n'.format(cfg._data_name, i+1))
+            batch_tmp.write('Log                   = reports/{0}_{1}_$(Cluster)_$(Process).log   \n'.format(cfg._data_name, i+1))
             batch_tmp.write('Queue\n\n')
 
         batch_tmp.close()
@@ -110,25 +99,25 @@ class BatchMaster():
 
         print 'Running on {0}'.format(self._location)
         print 'Setting up stage directory...'
-        self._stageDir  = '{0}/{1}'.format(self._stageDir, get_current_time())
-        make_directory(self._stageDir, clear=False)
+        self._stage_dir  = '{0}/{1}'.format(self._stage_dir, get_current_time())
+        make_directory(self._stage_dir, clear=False)
 
-        print 'Creating tarball of current workspace in {0}'.format(self._stageDir)
-        #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/src . 2> /dev/null'.format(self._stageDir))
+        print 'Creating tarball of current workspace in {0}'.format(self._stage_dir)
+        #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/src . 2> /dev/null'.format(self._stage_dir))
         if os.getenv('CMSSW_BASE') == '':
             print 'You must source the CMSSW environment you are working in...'
             exit()
         else:
             cmssw_version = os.getenv('CMSSW_BASE').split('/')[-1]
-            os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/.. {1}'.format(self._stageDir, cmssw_version))
+            os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/.. {1}'.format(self._stage_dir, cmssw_version))
 
-        subprocess.call('cp {0} {1}'.format(self._executable, self._stageDir), shell=True)
-        os.chdir(self._stageDir)
+        subprocess.call('cp {0} {1}'.format(self._executable, self._stage_dir), shell=True)
+        os.chdir(self._stage_dir)
         make_directory('reports', clear=False)
         
         print 'Ready to submit to batch system {0}!'.format(self._location)
         if self._location in ['lpc', 'nut3']:
-            for cfg in self._configList:
+            for cfg in self._config_list:
                 sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
                 self.make_batch_lpc(cfg, sourceFiles)
-                subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._dataName), shell=True)
+                subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._data_name), shell=True)

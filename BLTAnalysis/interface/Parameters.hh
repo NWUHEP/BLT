@@ -10,11 +10,11 @@ public:
     ~Parameters() {}
 
     std::string get_output_filename(const std::string& name) {
-        return name + "_" + this->datasetgroup + "_" + this->jobid + ".root";
+        return name + "_" + this->dataset + "_" + this->jobid + ".root";
     }
 
     std::string get_output_treename(const std::string& name) {
-        return name + "_" + this->dataset;
+        return name + "_" + this->datasetgroup;
     }
 
     void setup(const std::vector<std::string>& options);

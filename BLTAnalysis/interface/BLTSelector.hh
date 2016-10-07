@@ -131,7 +131,6 @@ void BLTSelector::Init(TTree *tree)
     fCurrentFile = tree->GetCurrentFile();
     //fChain->SetMakeClass(1);
 
-    hTotalEvents = new TH1D("TotalEvents","TotalEvents", 10, 0.5, 10.5);
 
     fInfo                    = 0;
     fGenEvtInfo              = 0;

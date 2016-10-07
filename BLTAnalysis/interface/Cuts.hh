@@ -38,10 +38,10 @@ public:
     } looseMuIso, tightMuIso;
 
     struct muDetIsoCuts {
-        float hcalIso03;
-        float ecalIso03;
-        float trkIso03;
-        float relCombIso03;
+        float hcalIso;
+        float ecalIso;
+        float trkIso;
+        float relCombIso;
         std::string cutName;
     } looseMuDetIso, tightMuDetIso, amumuMuDetIso;
 
@@ -55,25 +55,24 @@ public:
         float dz[2];
         float fabsEPDiff[2];
         float ConversionMissHits[2];
-        float PassedConversionProb[2];
         float dr03TkSumPt[2];
         float dr03EcalRecHitSumEt[2];
         float dr03HcalTowerSumEt[2];
         int   numberOfLostHits[2];
         std::string cutName;
-    } vetoElID, looseElID, mediumElID, mvaPreElID;
+    } vetoElID, looseElID, mediumElID, tightElID, mvaPreElID;
 
     struct elIsoCuts {
         float chIso04;
         float nhIso04;
         float phIso04;
         float relCombIso04;
-        float chIso03;
-        float nhIso03;
-        float phIso03;
-        float relCombIso03;
+        float chIso;
+        float nhIso;
+        float phIso;
+        float relCombIso;
         std::string cutName;
-    } looseElIso, mediumElIso;
+    } looseElIso, mediumElIso, tightElIso;
 
 
     struct phIDCuts {
@@ -88,10 +87,10 @@ public:
     } loosePhID, mediumPhID, preSelPhID;
 
     struct phIsoCuts {
-        float chIso03[2];
-        float nhIso03[2];
-        float phIso03[2];
-        float relCombIso03[2];
+        float chIso[2];
+        float nhIso[2];
+        float phIso[2];
+        float relCombIso[2];
         std::string cutName;
     } loosePhIso, mediumPhIso;
 

@@ -102,7 +102,6 @@ Bool_t BLTSelector::Notify()
     if (!h1) {
         throw std::runtime_error("Cannot get 'TotalEvents' histogram");
     }
-    hTotalEvents->SetBinContent(1, h1->GetEntries());
 
     long int eventCount = h1->GetBinContent(1);
     unskimmedEventCount += eventCount;

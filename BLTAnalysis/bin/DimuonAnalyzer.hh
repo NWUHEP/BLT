@@ -23,6 +23,10 @@
 #include "BLT/BLTAnalysis/interface/Cuts.hh"
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
+#include "BLT/BLTAnalysis/interface/WeightUtils.h"
+
+// BaconAna class definitions (might need to add more)
+#include "BaconAna/Utils/interface/TTrigger.hh"
 
 #include "BLT/BLTAnalysis/interface/RoccoR.h"
 #include "BLT/BLTAnalysis/interface/rochcor2016.h"
@@ -50,29 +54,29 @@ class DimuonAnalyzer: public BLTSelector {
         DimuonAnalyzer();
         ~DimuonAnalyzer();
 
-        void    Begin(TTree *tree);
-        Bool_t  Process(Long64_t entry);
-        void    Terminate();
+        void   Begin(TTree *tree);
+        Bool_t Process(Long64_t entry);
+        void   Terminate();
+        void   ReportPostBegin();
+        void   ReportPostTerminate();
 
-        void    ReportPostBegin();
-        void    ReportPostTerminate();
-
-        TFile       *outFile;
-        TTree       *outTree;
-        std::string  outFileName;
-        std::string  outTreeName;
-
-        // Params and cuts
-        std::unique_ptr<Parameters>         params;
-        std::unique_ptr<Cuts>               cuts;
-        std::unique_ptr<ParticleSelector>   particleSelector;
-        std::unique_ptr<baconhep::TTrigger> trigger;
+        TFile *outFile;
+        TTree *outTree;
 
         // Lumi mask
         RunLumiRangeMap lumiMask;
 
         // rochester muon corrections
         rochcor2016 *muonCorr;
+
+        // Params and cuts
+        std::unique_ptr<Parameters>         params;
+        std::unique_ptr<Cuts>               cuts;
+
+        // Utilities
+        std::unique_ptr<ParticleSelector>   particleSelector;
+        std::unique_ptr<baconhep::TTrigger> trigger;
+        std::unique_ptr<WeightUtils>        weights;
 
         // Branches in the output file
         TLorentzVector muonOneP4, muonTwoP4, jetP4, bjetP4;
@@ -82,9 +86,10 @@ class DimuonAnalyzer: public BLTSelector {
         Float_t bjetTag;
         UInt_t nJets, nFwdJets, nBJets;
         Float_t met, metPhi;
-        UInt_t runNumber, lumiSection;
+        UInt_t runNumber, lumiSection, nPU;
         ULong64_t evtNumber;
         Bool_t triggerStatus;
+        Float_t eventWeight;
 
         //ClassDef(DimuonAnalyzer,0);
 };

@@ -1,7 +1,6 @@
 <use name="BLT/BLTAnalysis"/>
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
-<!--bin file="BaconSkimmer.cc"   name="BaconSkimmer"></bin-->
 <bin file="DimuonAnalyzer.cc" name="DimuonAnalyzer"></bin>
-<bin file="DimuonAnalyzerGen.cc" name="DimuonAnalyzerGen"></bin>
-<bin file="ZGAnalyzer.cc"     name="ZGAnalyzer"></bin>
+<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
+<!--bin file="ZGAnalyzer.cc"     name="ZGAnalyzer"></bin-->

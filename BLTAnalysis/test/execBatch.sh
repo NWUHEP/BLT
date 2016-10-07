@@ -6,8 +6,6 @@ echo ">>> arguments: $@"
 ### Required parameters #####
 DATANAME=$1
 COUNT=$2
-
-### Specify addtional arguments here ####
 SUFFIX=$3
 SELECTION=$4
 PERIOD=$5
@@ -38,7 +36,8 @@ cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
 ### Run the analyzer
-DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-cp output_${SUFFIX}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
+cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

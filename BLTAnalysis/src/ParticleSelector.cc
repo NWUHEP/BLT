@@ -376,33 +376,6 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
     return isoPass;
 }
 
-bool ParticleSelector::PassVBFJetID(const baconhep::TJet* jet, const Cuts::vbfJetIDCuts& cutLevel) const {
-    bool jetPass = false;
-
-    //if (fabs(jet->eta) > 4.7) return isoPass;  // uncomment to apply eta requirement
-    if (cutLevel.cutName == "vbfJetID"){
-        if (fabs(jet->eta) < 2.5) {
-            if (
-                    jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[0]
-                    && jet->dR2Mean                  < cutLevel.dR2Mean[0]
-               ) jetPass = true;
-        } else if (fabs(jet->eta) < 2.75) {
-            if(
-                    jet->betaStar/log(_npv-0.64)     < cutLevel.betaStarC[1]
-                    && jet->dR2Mean                  < cutLevel.dR2Mean[1]
-              ) jetPass = true;
-        } else if (fabs(jet->eta) < 3.0) {
-            if(
-                    jet->dR2Mean                     < cutLevel.dR2Mean[2]
-              ) jetPass = true;
-        } else {
-            if(
-                    jet->dR2Mean                     < cutLevel.dR2Mean[3]
-              ) jetPass = true;
-        }
-    }
-    return jetPass;
-}
 
 bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool jetPass = false;

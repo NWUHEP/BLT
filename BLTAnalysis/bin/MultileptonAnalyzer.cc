@@ -390,17 +390,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        leptonOneP4     = muons[0];
-        leptonOneIso    = muons_iso[0];
-        leptonOneQ      = muons_q[0];
-        leptonOneFlavor = 1;
-        leptonTwoFlavor = muons_trigger[0];
+        leptonOneP4      = muons[0];
+        leptonOneIso     = muons_iso[0];
+        leptonOneQ       = muons_q[0];
+        leptonOneTrigger = muons_trigger[0];
+        leptonOneFlavor  = 1;
 
-        leptonTwoP4     = muons[1];
-        leptonTwoIso    = muons_iso[1];
-        leptonTwoQ      = muons_q[1];
-        leptonTwoFlavor = 1;
-        leptonTwoFlavor = muons_trigger[1];
+        leptonTwoP4      = muons[1];
+        leptonTwoIso     = muons_iso[1];
+        leptonTwoQ       = muons_q[1];
+        leptonTwoTrigger = muons_trigger[1];
+        leptonTwoFlavor  = 1;
 
         if (!isRealData) {
             eventWeight *= weights->GetMuonRecoEff(muons[0]);
@@ -424,17 +424,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        leptonOneP4     = electrons[0];
-        leptonOneIso    = electrons_iso[0];
-        leptonOneQ      = electrons_q[0];
-        leptonTwoFlavor = electrons_trigger[0];
-        leptonOneFlavor = 0;
+        leptonOneP4      = electrons[0];
+        leptonOneIso     = electrons_iso[0];
+        leptonOneQ       = electrons_q[0];
+        leptonOneTrigger = electrons_trigger[0];
+        leptonOneFlavor  = 0;
 
-        leptonTwoP4     = electrons[1];
-        leptonTwoIso    = electrons_iso[1];
-        leptonTwoQ      = electrons_q[1];
-        leptonOneFlavor = 0;
-        leptonTwoFlavor = electrons_trigger[1];
+        leptonTwoP4      = electrons[1];
+        leptonTwoIso     = electrons_iso[1];
+        leptonTwoQ       = electrons_q[1];
+        leptonTwoTrigger = electrons_trigger[1];
+        leptonOneFlavor  = 0;
     } else if (params->selection == "emu") {
         
         if (muons.size() != 1 || electrons.size() != 1)
@@ -447,17 +447,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        leptonOneP4     = muons[0];
-        leptonOneIso    = muons_iso[0];
-        leptonOneQ      = muons_q[0];
-        leptonTwoFlavor = muons_trigger[0];
-        leptonOneFlavor = 0;
+        leptonOneP4      = muons[0];
+        leptonOneIso     = muons_iso[0];
+        leptonOneQ       = muons_q[0];
+        leptonOneTrigger = muons_trigger[0];
+        leptonOneFlavor  = 0;
 
-        leptonTwoP4     = electrons[0];
-        leptonTwoIso    = electrons_iso[0];
-        leptonTwoQ      = electrons_q[0];
-        leptonOneFlavor = 1;
-        leptonTwoFlavor = electrons_trigger[0];
+        leptonTwoP4      = electrons[0];
+        leptonTwoIso     = electrons_iso[0];
+        leptonTwoQ       = electrons_q[0];
+        leptonTwoTrigger = 1;
+        leptonTwoFlavor  = electrons_trigger[0];
 
         if (!isRealData) {
             eventWeight *= weights->GetMuonRecoEff(muons[0]);

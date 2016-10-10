@@ -55,7 +55,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
     if (true) { // this will need to be turned off for MC
-        string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/test/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt";
+        string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
     }
 
@@ -119,6 +119,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+
+    //if (fInfo->runNum != 274442 || fInfo->evtNum != 465923411)
+    //if (fInfo->runNum != 274969 || fInfo->evtNum != 1052250092)
+    //if (fInfo->runNum != 274160 || fInfo->evtNum != 333373440)
+    if (fInfo->runNum != 274241 || fInfo->evtNum != 1547101550)
+        return kTRUE;
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
@@ -232,10 +238,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // Fill containers
         if (muon->trkIso/muonP4.Pt() < 0.1) {
+            // For synchronization
+            cout << muonP4.Pt() << "|" << muon->pt << "|" 
+             << muon->eta << "|" << muon->phi << endl;
+
             if (muonP4.Pt() > 20)
                 veto_muons.push_back(muonP4);
 
-            if (muonP4.Pt() > 5 && fabs(muonP4.Eta()) < 2.4) {
+            if (muonP4.Pt() > 25 && fabs(muonP4.Eta()) < 2.4) {
                 muons.push_back(muonP4);
                 muons_iso.push_back(muon->trkIso);
                 muons_q.push_back(muon->q);
@@ -329,12 +339,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         bool elOverlap = false;
-        for (const auto& el: electrons) {
-            if (vJet.DeltaR(el) < 0.5) {
-                elOverlap = true;
-                break;
-            }
-        }
+        //for (const auto& el: electrons) {
+        //    if (vJet.DeltaR(el) < 0.5) {
+        //        elOverlap = true;
+        //        break;
+        //    }
+        //}
+        //
+        cout << jet->pt << "|" << jet->ptRaw << "|" 
+             << jet->eta << "|" << jet->phi << "|" 
+             << muOverlap << "|" << jet->csv << "|" 
+             << particleSelector->PassJetID(jet, cuts->looseJetID) << endl;
 
         if (
                 jet->pt > 30 
@@ -382,13 +397,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0].Pt() < 25 && fabs(muons[0].Eta()) < 2.4)
+        if (muons[0].Pt() < 25 && fabs(muons[0].Eta()) < 2.1)
             return kTRUE;
         hTotalEvents->Fill(6);
 
         TLorentzVector dimuon;
         dimuon = muons[0] + muons[1];
-        if (dimuon.M() > 70.)
+        if (dimuon.M() < 12 || dimuon.M() > 70.)
             return kTRUE;
         hTotalEvents->Fill(7);
 
@@ -498,6 +513,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetD0   = 0.;
         jetTag  = 0.;
     } 
+
+    // Synchronization printout
+    //cout << nBJets << " | " << nJets << " | " << nFwdJets << endl;
+    if (nBJets > 0 && (nJets > 0 || nFwdJets > 0)) {
+        TLorentzVector dijet = bjetP4 + jetP4;
+        TLorentzVector dimuon = muons[0] + muons[1];
+        cout << met << " | " << fabs(dimuon.DeltaPhi(dijet)) << endl;
+    }
+
 
     outTree->Fill();
     this->passedEvents++;

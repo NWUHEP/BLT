@@ -118,6 +118,7 @@ class BatchMaster():
         print 'Ready to submit to batch system {0}!'.format(self._location)
         if self._location in ['lpc', 'nut3']:
             for cfg in self._config_list:
+                print cfg._data_name
                 sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
                 self.make_batch_lpc(cfg, sourceFiles)
                 subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._data_name), shell=True)

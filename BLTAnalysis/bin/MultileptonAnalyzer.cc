@@ -120,11 +120,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
 
-    //if (fInfo->runNum != 274442 || fInfo->evtNum != 465923411)
-    //if (fInfo->runNum != 274969 || fInfo->evtNum != 1052250092)
-    //if (fInfo->runNum != 274160 || fInfo->evtNum != 333373440)
+    /*
+    if (fInfo->runNum != 274442 || fInfo->evtNum != 465923411)
+    if (fInfo->runNum != 274969 || fInfo->evtNum != 1052250092)
+    if (fInfo->runNum != 274160 || fInfo->evtNum != 333373440)
     if (fInfo->runNum != 274241 || fInfo->evtNum != 1547101550)
         return kTRUE;
+    */
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
@@ -239,8 +241,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Fill containers
         if (muon->trkIso/muonP4.Pt() < 0.1) {
             // For synchronization
-            cout << muonP4.Pt() << "|" << muon->pt << "|" 
-             << muon->eta << "|" << muon->phi << endl;
+            //cout << muonP4.Pt() << "|" << muon->pt << "|" 
+            // << muon->eta << "|" << muon->phi << endl;
 
             if (muonP4.Pt() > 20)
                 veto_muons.push_back(muonP4);
@@ -339,17 +341,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         bool elOverlap = false;
-        //for (const auto& el: electrons) {
-        //    if (vJet.DeltaR(el) < 0.5) {
-        //        elOverlap = true;
-        //        break;
-        //    }
-        //}
-        //
-        cout << jet->pt << "|" << jet->ptRaw << "|" 
-             << jet->eta << "|" << jet->phi << "|" 
-             << muOverlap << "|" << jet->csv << "|" 
-             << particleSelector->PassJetID(jet, cuts->looseJetID) << endl;
+        for (const auto& el: electrons) {
+            if (vJet.DeltaR(el) < 0.5) {
+                elOverlap = true;
+                break;
+            }
+        }
+        
+        //cout << jet->pt << "|" << jet->ptRaw << "|" 
+        //     << jet->eta << "|" << jet->phi << "|" 
+        //     << muOverlap << "|" << jet->csv << "|" 
+        //     << particleSelector->PassJetID(jet, cuts->looseJetID) << endl;
 
         if (
                 jet->pt > 30 
@@ -364,7 +366,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         && !muOverlap 
                         && !elOverlap
                    ) { 
-                    if (jet->csv > 0.898) {
+                    if (jet->csv > 0.935) {
                         bjets.push_back(jet);
                         ++nBJets;
                     } else {
@@ -397,7 +399,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0].Pt() < 25 && fabs(muons[0].Eta()) < 2.1)
+        if (muons[0].Pt() < 25 || fabs(muons[0].Eta()) > 2.1)
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -451,7 +453,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoIso     = electrons_iso[1];
         leptonTwoQ       = electrons_q[1];
         leptonTwoTrigger = electrons_trigger[1];
-        leptonOneFlavor  = 0;
+        leptonTwoFlavor  = 0;
     } else if (params->selection == "emu") {
         
         if (muons.size() != 1 || electrons.size() != 1)
@@ -460,7 +462,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector dilepton;
         dilepton = muons[0] + electrons[0];
-        if (dilepton.M() > 12 && dilepton.M() < 70)
+        if (dilepton.M() < 12 || dilepton.M() > 70)
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -474,7 +476,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoIso     = electrons_iso[0];
         leptonTwoQ       = electrons_q[0];
         leptonTwoTrigger = electrons_trigger[0];
-        leptonOneFlavor  = 1;
+        leptonTwoFlavor  = 1;
 
         if (!isRealData) {
             eventWeight *= weights->GetMuonRecoEff(muons[0]);
@@ -516,11 +518,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     // Synchronization printout
     //cout << nBJets << " | " << nJets << " | " << nFwdJets << endl;
-    if (nBJets > 0 && (nJets > 0 || nFwdJets > 0)) {
-        TLorentzVector dijet = bjetP4 + jetP4;
-        TLorentzVector dimuon = muons[0] + muons[1];
-        cout << met << " | " << fabs(dimuon.DeltaPhi(dijet)) << endl;
-    }
+    //if (nBJets > 0 && (nJets > 0 || nFwdJets > 0)) {
+    //    TLorentzVector dijet = bjetP4 + jetP4;
+    //    TLorentzVector dimuon = muons[0] + muons[1];
+    //    cout << met << " | " << fabs(dimuon.DeltaPhi(dijet)) << endl;
+    //}
 
 
     outTree->Fill();

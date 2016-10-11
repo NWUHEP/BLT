@@ -144,7 +144,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (unsigned i = 0; i < triggerNames.size(); ++i) {
         passTrigger |= trigger->pass(triggerNames[i], fInfo->triggerBits);
     }
-    if (!passTrigger)
+    if (!passTrigger && isRealData)
         return kTRUE;
 
     hTotalEvents->Fill(3);
@@ -159,7 +159,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
     nPU           = fInfo->nPU+1;
-    if (!isRealData) {
+    if (!isRealData || false) {
         eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
     }
 
@@ -421,7 +421,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoTrigger = muons_trigger[1];
         leptonTwoFlavor  = 1;
 
-        if (!isRealData) {
+        if (!isRealData || false) {
             eventWeight *= weights->GetMuonRecoEff(muons[0]);
             eventWeight *= weights->GetMuonRecoEff(muons[1]);
 
@@ -478,7 +478,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoTrigger = electrons_trigger[0];
         leptonTwoFlavor  = 1;
 
-        if (!isRealData) {
+        if (!isRealData || false) {
             eventWeight *= weights->GetMuonRecoEff(muons[0]);
 
             // trigger efficiency

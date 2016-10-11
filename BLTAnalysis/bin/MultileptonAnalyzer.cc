@@ -144,7 +144,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (unsigned i = 0; i < triggerNames.size(); ++i) {
         passTrigger |= trigger->pass(triggerNames[i], fInfo->triggerBits);
     }
-    if (!passTrigger && isRealData)
+    if (!passTrigger)
         return kTRUE;
 
     hTotalEvents->Fill(3);
@@ -234,6 +234,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         float qter = 1.;
         if (isRealData) {
             muonCorr->momcor_data(muonP4, muon->q, 0, qter);
+        }
         } else {
             muonCorr->momcor_mc(muonP4, muon->q, 0, qter);
         }
@@ -294,27 +295,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     std::sort(electrons.begin(), electrons.end(), P4SortCondition);
 
-    /* PHOTONS */
-    /* Don't need these just now
-    std::vector<TLorentzVector> photons;
-    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
-        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
-        assert(photon);
-
-        if (
-                photon->pt > 10 
-                && fabs(photon->eta) < 2.5
-                && particleSelector->PassPhotonID(photon, cuts->loosePhID)
-                && particleSelector->PassPhotonIso(photon, cuts->loosePhIso, cuts->EAPho)
-           ) {
-            TLorentzVector photonP4;
-            copy_p4(photon, 0., photonP4);
-            photons.push_back(photonP4);
-        }
-    }
-
-    std::sort(photons.begin(), photons.end(), P4SortCondition);
-    */
 
     /* JETS */
     TClonesArray* jetCollection;

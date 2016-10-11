@@ -327,12 +327,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         bool elOverlap = false;
-        for (const auto& el: electrons) {
-            if (vJet.DeltaR(el) < 0.5) {
-                elOverlap = true;
-                break;
-            }
-        }
+        //for (const auto& el: electrons) {
+        //    if (vJet.DeltaR(el) < 0.5) {
+        //        elOverlap = true;
+        //        break;
+        //    }
+        //}
 
         if (
                 jet->pt > 30 
@@ -380,7 +380,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0].Pt() < 25 && fabs(muons[0].Eta()) < 2.4)
+        if (muons[0].Pt() < 25 || fabs(muons[0].Eta()) > 2.1)
             return kTRUE;
         hTotalEvents->Fill(6);
 

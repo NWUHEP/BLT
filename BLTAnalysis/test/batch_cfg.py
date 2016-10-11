@@ -8,7 +8,7 @@ cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/04'
 #path       = '/eos/uscms/store/user/naodell/bacontuples'
 executable = 'execBatch.sh'
-selection  = 'emu'
+selection  = 'mumu'
 period     = '2012'
 
 ''' 
@@ -149,6 +149,11 @@ sigList.extend([
         path     = '{0}/Summer12_Bprime2Xb_X2mumu'.format(path),
         nJobs    = 5,
         suffix   = 'bprime_xb'
+       ),
+    cfg(data_name = 'FCNC_tcX',
+        path     = '{0}/fcnc_t2cX_X2ll_muonChannel_8TeV'.format(path),
+        nJobs    = 5,
+        suffix   = 'fcnc'
        ),
     ])
 

@@ -157,7 +157,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     evtNumber     = fInfo->evtNum;
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
-    nPU           = fInfo->nPU+1;
+    nPU           = fPVArr->GetEntries();
     if (!isRealData) {
         eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
     }

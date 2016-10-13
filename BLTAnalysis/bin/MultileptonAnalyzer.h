@@ -91,6 +91,7 @@ public:
     Int_t leptonOneQ, leptonTwoQ;
     Int_t leptonOneFlavor, leptonTwoFlavor;
     Bool_t leptonOneTrigger, leptonTwoTrigger;
+    UInt_t nMuons, nElectrons;
 
     UInt_t nJets, nFwdJets, nBJets;
     Float_t jetD0, bjetD0;

@@ -90,12 +90,15 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jetD0", &jetD0);
     outTree->Branch("jetTag", &jetTag);
-    outTree->Branch("nJets", &nJets);
-    outTree->Branch("nFwdJets", &nFwdJets);
 
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjetTag", &bjetTag);
     outTree->Branch("bjetD0", &bjetD0);
+
+    outTree->Branch("nMuons", &nMuons);
+    outTree->Branch("nElectrons", &nElectrons);
+    outTree->Branch("nJets", &nJets);
+    outTree->Branch("nFwdJets", &nFwdJets);
     outTree->Branch("nBJets", &nBJets);
 
     outTree->Branch("met", &met);
@@ -116,7 +119,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     hTotalEvents->Fill(1);
 
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
-    if (entry%10000==0)  std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+    if (entry%10000==0) { 
+        std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum 
+                  << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+    }
 
     const bool isRealData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isRealData);
@@ -148,7 +154,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     evtNumber     = fInfo->evtNum;
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
-    nPU           = fInfo->nPU+1;
+    nPU           = fPVArr->GetEntries();
     if (!isRealData) {
         eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
     }
@@ -233,10 +239,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if (muonP4.Pt() > 20)
                 veto_muons.push_back(muonP4);
 
-            if (muonP4.Pt() > 5 && fabs(muonP4.Eta()) < 2.4) {
+            if (muonP4.Pt() > 5) {
                 muons.push_back(muonP4);
                 muons_iso.push_back(muon->trkIso03);
                 muons_q.push_back(muon->q);
+                ++nMuons;
 
                 // trigger matching
                 bool triggered = false;
@@ -268,6 +275,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             electrons.push_back(electronP4);
             electrons_iso.push_back(0.);
             electrons_q.push_back(electron->q);
+            ++nElectrons;
 
             // trigger matching
             bool triggered = false;
@@ -279,28 +287,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     std::sort(electrons.begin(), electrons.end(), P4SortCondition);
-
-    /* PHOTONS */
-    /* Don't need these just now
-    std::vector<TLorentzVector> photons;
-    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
-        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
-        assert(photon);
-
-        if (
-                photon->pt > 10 
-                && fabs(photon->eta) < 2.5
-                && particleSelector->PassPhotonID(photon, cuts->loosePhID)
-                && particleSelector->PassPhotonIso(photon, cuts->loosePhIso, cuts->EAPho)
-           ) {
-            TLorentzVector photonP4;
-            copy_p4(photon, 0., photonP4);
-            photons.push_back(photonP4);
-        }
-    }
-
-    std::sort(photons.begin(), photons.end(), P4SortCondition);
-    */
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -342,8 +328,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
-                        jet->pt > 30 
-                        && particleSelector->PassJetPUID(jet, cuts->looseJetID)
+                        particleSelector->PassJetPUID(jet, cuts->looseJetID)
                         && !muOverlap 
                         && !elOverlap
                    ) { 
@@ -435,6 +420,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoQ       = electrons_q[1];
         leptonTwoTrigger = electrons_trigger[1];
         leptonOneFlavor  = 0;
+
     } else if (params->selection == "emu") {
         
         if (muons.size() != 1 || electrons.size() != 1)

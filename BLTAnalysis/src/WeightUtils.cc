@@ -9,28 +9,32 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     const std::string cmssw_base = getenv("CMSSW_BASE");
 
     // PU weights
-    std::string puFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/PUWeights_2012.root";
+    std::string puFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_BCD.root";
     TFile* puFile = new TFile(puFileName.c_str(), "OPEN");
-    puReweight = (TH1D*)puFile->Get("pileup");
+    _puReweight = (TGraph*)puFile->Get("pileup");
 
     // IsoMu24_eta2p1 efficiency ratios
-    std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/SingleMuonTriggerEfficiencies_eta2p1_Run2012ABCD_v5trees.root";
+    std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.root";
+    std::string filePath = "IsoMu22_OR_IsoTkMu22_PtEtaBins_Run273158_to_274093/efficienciesDATA/";
     TFile* triggerFile = new TFile(triggerFileName.c_str(), "OPEN");
-    _sf_IsoMu24_Eta2p1_data[0] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_TightID_PT_ABSETA_Barrel_0to0p9_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1_data[1] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_TightID_PT_ABSETA_Transition_0p9to1p2_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1_data[2] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_DATA_TightID_PT_ABSETA_Endcaps_1p2to2p1_pt25-500_2012ABCD");
-
-    _sf_IsoMu24_Eta2p1_mc[0] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_MC_TightID_PT_ABSETA_Barrel_0to0p9_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1_mc[1] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_MC_TightID_PT_ABSETA_Transition_0p9to1p2_pt25-500_2012ABCD");
-    _sf_IsoMu24_Eta2p1_mc[2] = (TGraphErrors*)triggerFile->Get("IsoMu24_eta2p1_MC_TightID_PT_ABSETA_Endcaps_1p2to2p1_pt25-500_2012ABCD");
+    _eff_IsoMu22_DATA[0] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin0_&_Tight2012_pass_&_tag_IsoMu22_pass_DATA").c_str());
+    _eff_IsoMu22_DATA[1] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin1_&_Tight2012_pass_&_tag_IsoMu22_pass_DATA").c_str());
+    _eff_IsoMu22_DATA[2] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin2_&_Tight2012_pass_&_tag_IsoMu22_pass_DATA").c_str());
+    _eff_IsoMu22_DATA[3] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_&_tag_IsoMu22_pass_DATA").c_str());
 
     // tight muon ID sf
-    TFile* f_muRecoSF2012_ID = new TFile("../data/MuonEfficiencies_Run2012ReReco_53X.root", "OPEN"); 
-    _muSF2012_ID[0] = (TGraphErrors*)f_muRecoSF2012_ID->Get("DATA_over_MC_Tight_pt_abseta<0.9");
-    _muSF2012_ID[1] = (TGraphErrors*)f_muRecoSF2012_ID->Get("DATA_over_MC_Tight_pt_abseta0.9-1.2");
-    _muSF2012_ID[2] = (TGraphErrors*)f_muRecoSF2012_ID->Get("DATA_over_MC_Tight_pt_abseta1.2-2.1");
-    _muSF2012_ID[3] = (TGraphErrors*)f_muRecoSF2012_ID->Get("DATA_over_MC_Tight_pt_abseta2.1-2.4");
+    TFile* f_muRecoSF2012_ID = new TFile("../data/MuonID_Z_RunBCD_prompt80X_7p65.root", "OPEN"); 
+    filePath = "MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1/efficienciesDATA/";
+    _muSF2012_ID_DATA[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin0_&_tag_IsoMu22_pass_DATA").c_str());
+    _muSF2012_ID_DATA[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin1_&_tag_IsoMu22_pass_DATA").c_str());
+    _muSF2012_ID_DATA[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin2_&_tag_IsoMu22_pass_DATA").c_str());
+    _muSF2012_ID_DATA[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin3_&_tag_IsoMu22_pass_DATA").c_str());
 
+    filePath = "MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1/efficienciesMC/";
+    _muSF2012_ID_MC[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin0_&_tag_IsoMu22_pass_MC").c_str());
+    _muSF2012_ID_MC[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin1_&_tag_IsoMu22_pass_MC").c_str());
+    _muSF2012_ID_MC[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin2_&_tag_IsoMu22_pass_MC").c_str());
+    _muSF2012_ID_MC[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin3_&_tag_IsoMu22_pass_MC").c_str());
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -50,14 +54,14 @@ void WeightUtils::SetSelection(string selection)
 
 float WeightUtils::GetPUWeight(float nPU)
 {
-    return puReweight->GetBinContent(puReweight->FindBin(nPU)); 
+    return _puReweight->Eval(nPU+0.5); 
 }
 
 std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
-    float binningEta[] = {0., 0.9, 1.2, 2.4};
+    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
     int etaBin = 0;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 4; ++i) {
         if (fabs(lepton.Eta()) > binningEta[i] && fabs(lepton.Eta()) <= binningEta[i+1]) {
             etaBin = i;
             break;
@@ -66,10 +70,9 @@ std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLor
     
     float effMC   = 1;
     float effData = 1;
-    if (triggerName == "HLT_IsoMu24_eta2p1_v*") {
-        if (lepton.Pt() < 300.) {
-            effMC   = _sf_IsoMu24_Eta2p1_data[etaBin]->Eval(lepton.Pt());
-            effData = _sf_IsoMu24_Eta2p1_mc[etaBin]->Eval(lepton.Pt());
+    if (triggerName == "HLT_IsoMu22_v*") {
+        if (lepton.Pt() < 500.) {
+            effData = _eff_IsoMu22_DATA[etaBin]->Eval(lepton.Pt());
         }
     }
 
@@ -88,8 +91,8 @@ float WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
     }
 
     float weight = 1;
-    if (muon.Pt() < 300.) {
-        weight   *= _muSF2012_ID[etaBin]->Eval(muon.Pt());
+    if (muon.Pt() < 200.) {
+        weight   *= _muSF2012_ID_DATA[etaBin]->Eval(muon.Pt())/_muSF2012_ID_MC[etaBin]->Eval(muon.Pt());
         //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(muonP4.Pt());
     }
     

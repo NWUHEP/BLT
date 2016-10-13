@@ -72,35 +72,35 @@ mc_list.extend([
     #    suffix   = 'ttbar_semilep'
     #   ),
     #cfg(data_name = 'T_s-channel',
-    #    path     = '{0}/Summer12_T_s-channel_TuneZ2star'.format(path),
+    #    path     = '{0}/'.format(path),
     #    nJobs    = 10,
     #    suffix   = 't_s'
     #   ),
     #cfg(data_name = 'Tbar_s-channel',
-    #    path     = '{0}/Summer12_Tbar_s-channel_TuneZ2star'.format(path),
+    #    path     = '{0}/'.format(path),
     #    nJobs    = 10,
     #    suffix   = 'tbar_s'
     #   ),
-    #cfg(data_name = 'T_t-channel',
-    #    path     = '{0}/Summer12_T_t-channel_TuneZ2star'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_t'
-    #   ),
-    #cfg(data_name = 'Tbar_t-channel',
-    #    path     = '{0}/Summer12_Tbar_t-channel_TuneZ2star'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_t'
-    #   ),
-    #cfg(data_name = 'T_tW-channel',
-    #    path     = '{0}/Summer12_T_tW-channel-DR_TuneZ2star'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_tw'
-    #   ),
-    #cfg(data_name = 'Tbar_tW-channel',
-    #    path     = '{0}/Summer12_Tbar_tW-channel-DR_TuneZ2star'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_tw'
-    #   ),
+    cfg(data_name = 'T_t-channel',
+        path     = '{0}/ST_t_channel_top_4f_inclusiveDecays_13TeV_powhegV2_madspin_pythia8_TuneCUETP8M1'.format(path),
+        nJobs    = 10,
+        suffix   = 't_t'
+       ),
+    cfg(data_name = 'Tbar_t-channel',
+        path     = '{0}/ST_t_channel_antitop_4f_inclusiveDecays_13TeV_powhegV2_madspin_pythia8_TuneCUETP8M1'.format(path),
+        nJobs    = 10,
+        suffix   = 'tbar_t'
+       ),
+    cfg(data_name = 'T_tW-channel',
+        path     = '{0}/ST_tW_top_5f_inclusiveDecays_13TeV_powheg_pythia8_TuneCUETP8M1'.format(path),
+        nJobs    = 10,
+        suffix   = 't_tw'
+       ),
+    cfg(data_name = 'Tbar_tW-channel',
+        path     = '{0}/ST_tW_antitop_5f_inclusiveDecays_13TeV_powheg_pythia8_TuneCUETP8M1'.format(path),
+        nJobs    = 10,
+        suffix   = 'tbar_tw'
+       ),
     #cfg(data_name = 'WW',
     #    path     = '{0}/Summer12_WW_TuneZ2star'.format(path),
     #    nJobs    = 10,

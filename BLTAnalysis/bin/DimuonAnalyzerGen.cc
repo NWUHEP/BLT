@@ -61,7 +61,6 @@ void DimuonAnalyzer::Begin(TTree *tree)
     outTree->Branch("GenBQuark", &GenBQuark);
     outTree->Branch("GenQPrime", &GenQPrime);
 
-
     // Histograms for muon difference variables
     //TH1F *muonDeltaPhi = new TH1F("muonDeltaPhi", "muonDeltaPhi", 20, 0., 5.);
     //TH1F *muonDeltaEta = new TH1F("muonDeltaEta", "muonDeltaEta", 20, 0., 5.);

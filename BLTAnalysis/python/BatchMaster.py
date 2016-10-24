@@ -99,7 +99,7 @@ class BatchMaster():
 
         print 'Running on {0}'.format(self._location)
         print 'Setting up stage directory...'
-        self._stage_dir  = '{0}/{1}'.format(self._stage_dir, get_current_time())
+        self._stage_dir  = '{0}/{1}_{2}_{3}'.format(self._stage_dir, self._selection, self._period, get_current_time())
         make_directory(self._stage_dir, clear=False)
 
         print 'Creating tarball of current workspace in {0}'.format(self._stage_dir)

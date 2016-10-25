@@ -86,17 +86,17 @@ public:
     Bool_t triggerStatus;
     Float_t eventWeight;
 
-    TLorentzVector leptonOneP4, leptonTwoP4, jetP4, bjetP4;
+    TLorentzVector leptonOneP4, leptonTwoP4, jetP4, bjetP4, genBJetP4;
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneQ, leptonTwoQ;
-    Int_t leptonOneFlavor, leptonTwoFlavor;
+    Int_t leptonOneFlavor, leptonTwoFlavor, genBJetFlavor;
     Bool_t leptonOneTrigger, leptonTwoTrigger;
 
-    UInt_t nJets, nFwdJets, nBJets;
     Float_t jetD0, bjetD0;
     Float_t bjetTag, jetTag;
     Float_t met, metPhi;
 
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
     //ClassDef(MultileptonAnalyzer,0);
 };
 

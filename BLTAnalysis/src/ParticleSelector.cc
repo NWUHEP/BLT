@@ -14,6 +14,8 @@ bool test_bits(unsigned int bits, unsigned int test) {
 ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cuts) {
     this->_parameters = parameters;
     this->_cuts = cuts;
+
+    _rng = new TRandom3(1337);
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
@@ -421,144 +423,81 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDC
     return pass;
 }
 
-bool ParticleSelector::FindGoodDiMuons(const std::vector<baconhep::TMuon*>& muons,
-        TLorentzVector& mu1, TLorentzVector& mu2, int& index1, int& index2) const {
-    bool goodZ = false;
-    TLorentzVector tmpZ;
-    index1 = -1;
-    index2 = -1;
+bool ParticleSelector::BTagModifier(TLorentzVector& jet, 
+                                    int jetFlavor, 
+                                    float bTag, 
+                                    string tagName)
+{
+    float jetPt     = jet.Pt();
+    float jetEta    = jet.Eta();
+    bool  isBTagged = false;
 
-    for (unsigned i=0; i<muons.size(); i++) {
-        const TMuon* imuon = muons.at(i);
-        if (imuon->pt > _cuts.leadMuPt) {
-            for (unsigned j=i+1; j<muons.size(); j++) {
-                const TMuon* jmuon = muons.at(j);
-                if (jmuon->pt > _cuts.trailMuPt && imuon->q != jmuon->q) {
-                    copy_p4(imuon, MUON_MASS, mu1);
-                    copy_p4(jmuon, MUON_MASS, mu2);
-                    index1 = i;
-                    index2 = j;
-                    tmpZ = mu1 + mu2;
+    // Get tag efficiency 
+    float bTagSF = 1.;
+    if (tagName == "CSVL") {
+        if (bTag > 0.244) isBTagged = true;
+        bTagSF = 0.981149*((1.+(-0.000713295*jetPt))/(1.+(-0.000703264*jetPt)));
+    } else if (tagName == "CSVM") {
+        if (bTag > 0.679) isBTagged = true;
+        bTagSF = 0.726981*((1.+(0.253238*jetPt))/(1.+(0.188389*jetPt)));
+    } else if (tagName == "CSVT") {
+        if (bTag > 1.) isBTagged = true;
+        bTagSF = 0.869965*((1.+(0.0335062*jetPt))/(1.+(0.0304598*jetPt)));
+    }
 
-                    if (0<tmpZ.M() && tmpZ.M()<999999)  // Not yet imposed Z mass cut
-                        goodZ = true;
-                }
-                if (goodZ)  break;
+    // Get mistag scale factor
+    float bMistagSF = 0.;
+    if(tagName == "CSVM") {
+        if (fabs(jetEta) < 0.8) 
+            bMistagSF = 1.07541 + 0.00231827*jetPt - 4.74249e-06*pow(jetPt,2) + 2.70862e-09*pow(jetPt, 3);
+        if (fabs(jetEta) > 0.8 && fabs(jetEta) < 1.6) 
+            bMistagSF = 1.05613 + 0.00114031*jetPt - 2.56066e-06*pow(jetPt,2) + 1.67792e-09*pow(jetPt,3);
+        if (fabs(jetEta) > 1.6 && fabs(jetEta) < 2.4) 
+            bMistagSF = 1.05625 + 0.00487231*jetPt - 2.22792e-06*pow(jetPt,2) + 1.70262e-09*pow(jetPt,3);
+    } else if( tagName == "CSVL") {
+        if (fabs(jetEta) < 0.5) 
+            bMistagSF = 1.01177 + 0.00231827*jetPt - 4.74249e-06*pow(jetPt,2) + 2.70862e-09*pow(jetPt, 3); // Need to update non-zeroth order terms
+        if (fabs(jetEta) > 0.5 && fabs(jetEta) < 1.) 
+            bMistagSF = 0.97596 + 0.00114031*jetPt - 2.56066e-06*pow(jetPt,2) + 1.67792e-09*pow(jetPt,3);
+        if (fabs(jetEta) > 1. && fabs(jetEta) < 1.5) 
+            bMistagSF = 0.93821 + 0.00114031*jetPt - 2.56066e-06*pow(jetPt,2) + 1.67792e-09*pow(jetPt,3);
+        if (fabs(jetEta) > 1.5 && fabs(jetEta) < 2.4) 
+            bMistagSF = 1.00022 + 0.00487231*jetPt - 2.22792e-06*pow(jetPt,2) + 1.70262e-09*pow(jetPt,3);
+    }
+
+    // Upgrade or downgrade jet
+     float rNumber = _rng->Uniform(1.);
+    if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
+        float bTagEff = 1.;
+        if (abs(jetFlavor) == 4) 
+            bTagEff = 1.; //_cTagEff->Eval(jetPt);
+        else if (abs(jetFlavor) == 5) 
+            bTagEff = 1.; //_bTagEff->Eval(jetPt);
+
+        if(bTagSF > 1){  // use this if SF>1
+            if (!isBTagged) {
+                //upgrade to tagged
+                float mistagRate = (1.0 - bTagSF) / (1.0 - (bTagSF/bTagEff) );
+                if(rNumber < mistagRate ) isBTagged = true;
             }
+        } else if (bTagSF < 1) {
+            //downgrade tagged to untagged
+            if( isBTagged && rNumber > bTagSF ) isBTagged = false;
         }
-        if (goodZ) break;
-    }
 
-    if (!goodZ) {
-        mu1 = TLorentzVector();
-        mu2 = TLorentzVector();
-        index1 = -1;
-        index2 = -1;
-    }
-    return goodZ;
-}
-
-bool ParticleSelector::FindGoodDiElectrons(const std::vector<baconhep::TElectron*>& electrons,
-        TLorentzVector& el1, TLorentzVector& el2, int& index1, int& index2) const {
-    bool goodZ = false;
-    TLorentzVector tmpZ;
-    index1 = -1;
-    index2 = -1;
-
-    for (unsigned i=0; i<electrons.size(); i++) {
-        const TElectron* ielectron = electrons.at(i);
-        if (ielectron->pt > _cuts.leadElPt) {
-            for (unsigned j=i+1; j<electrons.size(); j++) {
-                const TElectron* jelectron = electrons.at(j);
-                if (jelectron->pt > _cuts.trailElPt && ielectron->q != jelectron->q) {
-                    copy_p4(ielectron, ELE_MASS, el1);
-                    copy_p4(jelectron, ELE_MASS, el2);
-                    index1 = i;
-                    index2 = j;
-                    tmpZ = el1 + el2;
-
-                    if (0<tmpZ.M() && tmpZ.M()<999999)  // Not yet imposed Z mass cut
-                        goodZ = true;
-                }
-                if (goodZ)  break;
+    } else if (abs(jetFlavor) > 0) {
+        float mistagEff = 1.; //_misTagEff->Eval(jetPt);
+        if(bMistagSF > 1){  // use this if SF>1
+            if (!isBTagged) {
+                //upgrade to tagged
+                float mistagPercent = (1.0 - bMistagSF) / (1.0 - (bMistagSF/mistagEff));
+                if(rNumber < mistagPercent ) isBTagged = true;
             }
-        }
-        if (goodZ) break;
-    }
-
-    if (!goodZ) {
-        el1 = TLorentzVector();
-        el2 = TLorentzVector();
-        index1 = -1;
-        index2 = -1;
-    }
-    return goodZ;
-}
-
-bool ParticleSelector::FindGenZToLL(const TClonesArray* genParticles,
-        TLorentzVector& genZ, TLorentzVector& genLep1, TLorentzVector& genLep2,
-        int& indexZ, int& indexLep1, int& indexLep2) const {
-    bool goodZ = false;
-    indexZ = -1;
-    indexLep1 = -1;
-    indexLep2 = -1;
-
-    for (int i=0; i<genParticles->GetEntries(); i++) {
-        const TGenParticle* particle = (TGenParticle*) genParticles->At(i);
-        assert(particle);
-
-        if (std::abs(particle->pdgId) == Z_PDGID && particle->status == 22) {
-            goodZ = true;
-            indexZ = i;
-            copy_p4(particle, particle->mass, genZ);
-        }
-    }
-    if (!goodZ) {
-        indexZ = -1;
-        genZ = TLorentzVector();
-    }
-
-    bool goodZToLL = false;
-    for (int i=0; i<genParticles->GetEntries(); i++) {
-        const TGenParticle* particle = (TGenParticle*) genParticles->At(i);
-        assert(particle);
-
-        if (
-                (std::abs(particle->pdgId) == ELE_PDGID || std::abs(particle->pdgId) == MUON_PDGID)  // not including tau
-                && particle->status == 1
-           ) {
-            // Check parent
-            const TGenParticle* particleParent = 0;
-            if (particle->parent >= 0) {
-                particleParent = (TGenParticle*) genParticles->At(particle->parent);
-                while (particleParent->pdgId == particle->pdgId && particleParent->parent >= 0) {
-                    particleParent = (TGenParticle*) genParticles->At(particleParent->parent);
-                }
-            }
-
-            if (!particleParent || particleParent->pdgId != Z_PDGID)
-                continue;
-
-            if (indexLep1 == -1) {
-                indexLep1 = i;
-                copy_p4(particle, particle->mass, genLep1);
-            } else if (indexLep2 == -1) {
-                indexLep2 = i;
-                copy_p4(particle, particle->mass, genLep2);
-                goodZToLL = true;
-            } else {
-                // More than 2 leptons
-                goodZToLL = false;
-            }
+        } else if (bMistagSF < 1) {
+            //downgrade tagged to untagged
+            if( isBTagged && rNumber > bMistagSF ) isBTagged = false;
         }
     }
 
-    if (!goodZToLL) {
-        indexLep1 = -1;
-        indexLep2 = -1;
-        genLep1 = TLorentzVector();
-        genLep2 = TLorentzVector();
-    }
-
-    return goodZToLL;
+    return isBTagged;
 }

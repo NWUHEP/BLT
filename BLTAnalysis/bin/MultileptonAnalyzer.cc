@@ -492,6 +492,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         bjetD0   = 0.;
         bjetTag  = 0.;
+
+        genBJetP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        genBJetFlavor = 0;
     }
 
     if (fwdjets.size() > 0) {

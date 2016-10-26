@@ -94,8 +94,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetTag", &jetTag);
 
     outTree->Branch("bjetP4", &bjetP4);
-    outTree->Branch("bjetTag", &bjetTag);
     outTree->Branch("bjetD0", &bjetD0);
+    outTree->Branch("bjetTag", &bjetTag);
 
     outTree->Branch("genBJetP4", &genBJetP4);
     outTree->Branch("genBJetFlavor", &genBJetFlavor);

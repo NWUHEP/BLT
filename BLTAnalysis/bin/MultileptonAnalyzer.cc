@@ -69,6 +69,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outFile->cd();
     outTree = new TTree(outTreeName.c_str(), "bltTree");
 
+    // event data
     outTree->Branch("runNumber", &runNumber);
     outTree->Branch("evtNumber", &evtNumber, "eventNumber/l");
     outTree->Branch("lumiSection", &lumiSection);
@@ -76,6 +77,10 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("eventWeight", &eventWeight);
     outTree->Branch("nPU", &nPU);
 
+    outTree->Branch("met", &met);
+    outTree->Branch("metPhi", &metPhi);
+
+    // leptons
     outTree->Branch("leptonOneP4", &leptonOneP4);
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneQ", &leptonOneQ);
@@ -87,27 +92,29 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoTrigger", &leptonTwoTrigger);
 
+    // jets
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jetD0", &jetD0);
     outTree->Branch("jetTag", &jetTag);
-
+    outTree->Branch("jetFlavor", &jetFlavor);
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjetTag", &bjetTag);
+    outTree->Branch("bjetFlavor", &bjetFlavor);
     outTree->Branch("bjetD0", &bjetD0);
+    outTree->Branch("genBJetP4", &genBJetP4);
+    outTree->Branch("genBJetTag", &genBJetTag);
 
+    // object counters
     outTree->Branch("nMuons", &nMuons);
     outTree->Branch("nElectrons", &nElectrons);
     outTree->Branch("nJets", &nJets);
     outTree->Branch("nFwdJets", &nFwdJets);
     outTree->Branch("nBJets", &nBJets);
 
-    outTree->Branch("met", &met);
-    outTree->Branch("metPhi", &metPhi);
-
     // Event counter
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
-    
+
     ReportPostBegin();
 }
 
@@ -121,7 +128,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     //if (entry%1==0)  std::cout << "... Processing event: " << entry << "." << std::endl;
     if (entry%10000==0) { 
         std::cout << "... Processing event: " << entry << " Run: " << fInfo->runNum 
-                  << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
+            << " Lumi: " << fInfo->lumiSec << " Event: " << fInfo->evtNum << "." << std::endl;
     }
 
     const bool isRealData = (fInfo->runNum != 1);
@@ -295,6 +302,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;
     std::vector<TJet*> bjets;
+    std::vector<TJet*> genjets;
     nJets    = 0;
     nFwdJets = 0;
     nBJets   = 0;
@@ -320,11 +328,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //    }
         //}
 
+        if (abs(jet->mcFlavor) == 5) genjets.push_back(jet);
+
         if (
                 jet->pt > 30 
                 && fabs(jet->eta < 4.7)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
            ) {
+
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
@@ -332,7 +343,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         && !muOverlap 
                         && !elOverlap
                    ) { 
-                    if (jet->csv > 0.898) {
+                    if (
+                            (!isRealData && particleSelector->BTagModifier(jet, "CSVT")) 
+                            || (isRealData && jet->csv > 0.898)
+                       ) {
+                        cout << jet->csv << endl;
                         bjets.push_back(jet);
                         ++nBJets;
                     } else {
@@ -359,6 +374,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     ///////////////////////////////
     /* Apply analysis selections */
     ///////////////////////////////
+
+    nMuons     = muons.size();
+    nElectrons = electrons.size();
 
     if (params->selection == "mumu") {
         if (muons.size() < 2)
@@ -398,7 +416,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
     } else if (params->selection == "ee") {
-        
+
         if (electrons.size() != 2)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -422,7 +440,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneFlavor  = 0;
 
     } else if (params->selection == "emu") {
-        
+
         if (muons.size() != 1 || electrons.size() != 1)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -458,30 +476,60 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     ///////////////////
     // Fill jet info //
     ///////////////////
-    
+
     if (bjets.size() > 0) {
         bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
-        bjetD0   = bjets[0]->d0;
-        bjetTag  = bjets[0]->csv;
+        bjetD0     = bjets[0]->d0;
+        bjetTag    = bjets[0]->csv;
+
+        if (isRealData) {
+            bjetFlavor = 0.;
+        } else {
+            bjetFlavor = bjets[0]->mcFlavor;
+        }
+
     } else {
         bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        bjetD0   = 0.;
-        bjetTag  = 0.;
+        bjetD0     = 0.;
+        bjetTag    = 0.;
+        bjetFlavor = 0.;
     }
 
     if (fwdjets.size() > 0) {
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
-        jetD0   = fwdjets[0]->d0;
-        jetTag  = 0.;
+        jetD0     = fwdjets[0]->d0;
+        jetTag    = 0.;
+
+        if (isRealData) {
+            jetFlavor = 0.;
+        } else {
+            jetFlavor = fwdjets[0]->mcFlavor;
+        }
     } else if (jets.size() > 0) {
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
         jetD0  = jets[0]->d0;
         jetTag = jets[0]->csv;
+
+        if (isRealData) {
+            jetFlavor = 0.;
+        } else {
+            jetFlavor = jets[0]->mcFlavor;
+        }
     } else {
         jetP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        jetD0   = 0.;
-        jetTag  = 0.;
+        jetD0     = 0.;
+        jetTag    = 0.;
+        jetFlavor = 0.;
     } 
+
+    if (genjets.size() > 0) {
+        genBJetP4.SetPtEtaPhiM(genjets[0]->genpt, genjets[0]->geneta, genjets[0]->genphi, genjets[0]->genm);
+        genBJetTag = genjets[0]->csv;
+    } else {
+        genBJetP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        genBJetTag = 0;
+    }
+
 
     outTree->Fill();
     this->passedEvents++;

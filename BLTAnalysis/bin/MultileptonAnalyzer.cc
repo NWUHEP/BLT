@@ -328,7 +328,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //    }
         //}
 
-        if (abs(jet->mcFlavor) == 5) genjets.push_back(jet);
+        if (!isRealData && abs(jet->mcFlavor) == 5) genjets.push_back(jet);
 
         if (
                 jet->pt > 30 
@@ -343,16 +343,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         && !muOverlap 
                         && !elOverlap
                    ) { 
-                    if (
-                            (!isRealData && particleSelector->BTagModifier(jet, "CSVT")) 
-                            || (isRealData && jet->csv > 0.898)
-                       ) {
-                        cout << jet->csv << endl;
-                        bjets.push_back(jet);
-                        ++nBJets;
+                    if (isRealData) {
+                        if (jet->csv > 0.898) {
+                            bjets.push_back(jet);
+                            ++nBJets;
+                        } else {
+                            jets.push_back(jet);
+                            ++nJets;
+                        }
                     } else {
-                        jets.push_back(jet);
-                        ++nJets;
+                        if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                            bjets.push_back(jet);
+                            ++nBJets;
+                        } else {
+                            jets.push_back(jet);
+                            ++nJets;
+                        }
                     }
                 }
             } else {
@@ -529,7 +535,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         genBJetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         genBJetTag = 0;
     }
-
 
     outTree->Fill();
     this->passedEvents++;

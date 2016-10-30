@@ -54,7 +54,7 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
-    bool BTagModifier(TLorentzVector&, int, float, string);
+    bool BTagModifier(const baconhep::TJet* jet, string) const;
 
 private:
     Parameters _parameters;

@@ -431,42 +431,42 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
     int   jetFlavor = jet->hadronFlavor;
 
     // Get b tag efficiency and mistag scale factor
-    float bTagSF = 1.;
-    float bMistagSF = 1.;
-    if (false && tagName == "CSVT") {
-        if (bTag > 0.898) isBTagged = true;
-        bTagSF    = 0.927563 + 1.55479e-05*jetPt + -1.90666e-07*jetPt*jetPt;
-        bMistagSF = 1.00462 + 0.00325971*jetPt + -7.79184e-06*jetPt*jetPt + 5.22506e-09*jetPt*jetPt*jetPt;
+    float btagSF = 1.;
+    float mistagSF = 1.;
+    if (tagName == "CSVT") {
+        // These SF are provided by the b tag POG and are applicable for the ICHEP dataset (B,C,D)
+        if (bTag > 0.935) isBTagged = true;
+        btagSF   = 0.857294 + 3.75846e-05*jetPt; 
+        mistagSF = 0.688619 + 260.84/(jetPt*jetPt); 
     }
-
 
     // Upgrade or downgrade jet
     float rNumber = _rng->Uniform(1.);
-    if (false && abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
-        float bTagEff = 1.;
+    if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
+        float mcEff = 1.;
         if (abs(jetFlavor) == 4) 
-            bTagEff = 1.;//_cTagEff->Eval(jetPt);
+            mcEff = 1.;//_ctagEff->Eval(jetPt);
         else if (abs(jetFlavor) == 5) 
-            bTagEff = 1.;//_bTagEff->Eval(jetPt);
+            mcEff = 1.;//_btagEff->Eval(jetPt);
 
-        if(bTagSF > 1){  // use this if SF>1
+        if(btagSF >= 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagRate = (1.0 - bTagSF) / (1.0 - (bTagSF/bTagEff) );
+                float mistagRate = (1. - btagSF) / (1. - 1./mcEff);
                 if (rNumber < mistagRate) isBTagged = true;
             }
-        } else if (bTagSF < 1) { //downgrade tagged to untagged
-            if(isBTagged && rNumber > bTagSF) isBTagged = false;
+        } else if (btagSF < 1) { //downgrade tagged to untagged
+            if(isBTagged && rNumber > btagSF) isBTagged = false;
         }
 
-    } else if (abs(jetFlavor) > 0) {
-        float mistagEff = 0.;//_misTagEff->Eval(jetPt);
-        if(bMistagSF >= 1){  // use this if SF>1
+    } else {
+        float mcEff = 0.;//_misTagEff->Eval(jetPt);
+        if(mistagSF > 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagPercent = (1.0 - bMistagSF) / (1.0 - (bMistagSF/mistagEff));
+                float mistagPercent = (1. - mistagSF) / (1. - (1./mcEff));
                 if (rNumber < mistagPercent) isBTagged = true;
             }
-        } else if (bMistagSF < 1) { //downgrade tagged to untagged
-            if (isBTagged && rNumber > bMistagSF) isBTagged = false;
+        } else if (mistagSF < 1) { //downgrade tagged to untagged
+            if (isBTagged && rNumber > mistagSF) isBTagged = false;
         }
     }
 

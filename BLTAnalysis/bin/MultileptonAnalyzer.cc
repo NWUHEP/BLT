@@ -106,6 +106,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     outTree->Branch("genBJetP4", &genBJetP4);
     outTree->Branch("genBJetTag", &genBJetTag);
+    outTree->Branch("genJetP4", &genJetP4);
+    outTree->Branch("genJetTag", &genJetTag);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -308,6 +310,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     std::vector<TJet*> fwdjets;
     std::vector<TJet*> bjets;
+    std::vector<TJet*> genbjets;
     std::vector<TJet*> genjets;
     nJets    = 0;
     nFwdJets = 0;
@@ -344,7 +347,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     << particleSelector->PassJetID(jet, cuts->looseJetID) << endl;
         //cout << endl;
 
-        if (!isData && abs(jet->hadronFlavor) == 5) genjets.push_back(jet);
+        if (!isData) {
+            if (abs(jet->hadronFlavor) == 5) {
+                genbjets.push_back(jet);
+            } else {
+                genjets.push_back(jet);
+            }
+        }
 
         if (
                 jet->pt > 30 
@@ -390,6 +399,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(fwdjets.begin(), fwdjets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
+    std::sort(genjets.begin(), genjets.end(), sort_by_higher_pt<TJet>);
+    std::sort(genbjets.begin(), genbjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
     met    = fInfo->pfMET;
@@ -530,12 +541,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetFlavor = 0.;
     } 
 
-    if (genjets.size() > 0 && !isData) {
-        genBJetP4.SetPtEtaPhiM(genjets[0]->genpt, genjets[0]->geneta, genjets[0]->genphi, genjets[0]->genm);
-        genBJetTag = genjets[0]->csv;
+    if (genbjets.size() > 0 && !isData) {
+        genBJetP4.SetPtEtaPhiM(genbjets[0]->genpt, genbjets[0]->geneta, genbjets[0]->genphi, genbjets[0]->genm);
+        genBJetTag = genbjets[0]->csv;
     } else {
         genBJetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         genBJetTag = 0;
+    }
+
+    if (genjets.size() > 0 && !isData) {
+        genJetP4.SetPtEtaPhiM(genjets[0]->genpt, genjets[0]->geneta, genjets[0]->genphi, genjets[0]->genm);
+        genJetTag = genjets[0]->csv;
+    } else {
+        genJetP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        genJetTag = 0;
     }
 
     // Synchronization printout

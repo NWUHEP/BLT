@@ -81,7 +81,7 @@ public:
     std::vector<string> triggerNames;
 
     // Branches in the output file
-    UInt_t runNumber, lumiSection, nPU;
+    UInt_t runNumber, lumiSection, nPU, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight;

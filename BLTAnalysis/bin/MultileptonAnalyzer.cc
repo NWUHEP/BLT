@@ -76,6 +76,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("triggerStatus", &triggerStatus);
     outTree->Branch("eventWeight", &eventWeight);
     outTree->Branch("nPU", &nPU);
+    outTree->Branch("nPartons", &nPartons);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -164,6 +165,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nPU           = fPVArr->GetEntries();
     if (!isRealData) {
         eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+    }
+
+    ///////////////////////
+    // Generator objects //
+    ///////////////////////
+
+    if (!isRealData) {
+        unsigned count = 0;
+        for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
+            TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+            
+            if (particle->status == 3 
+                && (abs(particle->pdgId) < 6 || particle->pdgId == 21)) {
+                ++count;
+            }
+        }
+        nPartons = count-4; // This is saved for reweighting inclusive DY and combining it with parton binned DY
     }
 
     ///////////////////

@@ -395,7 +395,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector dimuon;
         dimuon = muons[0] + muons[1];
-        if (dimuon.M() > 70.)
+        if (dimuon.M() < 12 || dimuon.M() > 70.)
             return kTRUE;
         hTotalEvents->Fill(7);
 

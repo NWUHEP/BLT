@@ -431,11 +431,11 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
     int   jetFlavor = jet->mcFlavor;
 
     // Get b tag efficiency and mistag scale factor
-    float bTagSF = 1.;
+    float btagSF = 1.;
     float bMistagSF = 1.;
     if (tagName == "CSVT") {
         if (bTag > 0.898) isBTagged = true;
-        bTagSF    = 0.927563 + 1.55479e-05*jetPt + -1.90666e-07*jetPt*jetPt;
+        btagSF    = 0.927563 + 1.55479e-05*jetPt + -1.90666e-07*jetPt*jetPt;
         bMistagSF = 1.00462 + 0.00325971*jetPt + -7.79184e-06*jetPt*jetPt + 5.22506e-09*jetPt*jetPt*jetPt;
     }
     
@@ -443,26 +443,25 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
     // Upgrade or downgrade jet
     float rNumber = _rng->Uniform(1.);
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
-        float bTagEff = 1.;
+        float mcEff = 1.;
         if (abs(jetFlavor) == 4) 
-            bTagEff = _cTagEff->Eval(jetPt);
+            mcEff = 0.3; //_cTagEff->Eval(jetPt);
         else if (abs(jetFlavor) == 5) 
-            bTagEff = _bTagEff->Eval(jetPt);
+            mcEff = 0.55; //_bTagEff->Eval(jetPt);
 
-        if(bTagSF > 1){  // use this if SF>1
+        if(btagSF > 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagRate = (1.0 - bTagSF) / (1.0 - (bTagSF/bTagEff) );
+                float mistagRate = (1. - btagSF) / (1. - 1./mcEff);
                 if (rNumber < mistagRate) isBTagged = true;
             }
-        } else if (bTagSF < 1) { //downgrade tagged to untagged
-            if(isBTagged && rNumber > bTagSF) isBTagged = false;
+        } else if (btagSF < 1) { //downgrade tagged to untagged
+            if(isBTagged && rNumber > btagSF) isBTagged = false;
         }
-
     } else if (abs(jetFlavor) > 0) {
-        float mistagEff = _misTagEff->Eval(jetPt);
+        float mistagEff = 0.01; //_misTagEff->Eval(jetPt);
         if(bMistagSF >= 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagPercent = (1.0 - bMistagSF) / (1.0 - (bMistagSF/mistagEff));
+                float mistagPercent = (1. - bMistagSF) / (1. - 1./mistagEff);
                 if (rNumber < mistagPercent) isBTagged = true;
             }
         } else if (bMistagSF < 1) { //downgrade tagged to untagged

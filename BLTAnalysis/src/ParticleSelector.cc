@@ -445,9 +445,9 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
         float mcEff = 1.;
         if (abs(jetFlavor) == 4) 
-            mcEff = 1.;//_ctagEff->Eval(jetPt);
+            mcEff = 0.3;//_ctagEff->Eval(jetPt);
         else if (abs(jetFlavor) == 5) 
-            mcEff = 1.;//_btagEff->Eval(jetPt);
+            mcEff = 0.6;//_btagEff->Eval(jetPt);
 
         if(btagSF >= 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
@@ -459,7 +459,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
         }
 
     } else {
-        float mcEff = 0.;//_misTagEff->Eval(jetPt);
+        float mcEff = 0.003; //_misTagEff->Eval(jetPt);
         if(mistagSF > 1){  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
                 float mistagPercent = (1. - mistagSF) / (1. - (1./mcEff));

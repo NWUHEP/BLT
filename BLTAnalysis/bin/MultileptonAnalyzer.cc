@@ -167,7 +167,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     triggerStatus = passTrigger;
     nPU           = fPVArr->GetEntries();
     if (!isData) {
-        eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+        eventWeight *= 1.;//weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
     }
 
     ///////////////////
@@ -377,8 +377,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             ++nJets;
                         }
                     } else {
-                        //if (particleSelector->BTagModifier(jet, "CSVT")) { 
-                        if (jet->csv > 0.935) {
+                        if (particleSelector->BTagModifier(jet, "CSVT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {

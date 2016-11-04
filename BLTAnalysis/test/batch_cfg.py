@@ -73,7 +73,7 @@ mcList.extend([
         suffix   = 'zjets_m-50'
        ),
     cfg(data_name = 'DYJetsToLL_M-10to50',
-        path     = '{0}/Summer12_DYJetsToLL_M-10to50filter'.format(path),
+        path     = '{0}/Summer12_DYJetsToLL_M-10To50_TuneZ2Star'.format(path),
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
        ),

@@ -190,12 +190,12 @@ mcList.extend([
 sigList = []
 sigList.extend([
     cfg(data_name = 'Bprime2Xb_X2mumu',
-        path     = '{0}/Summer12_Bprime2Xb_X2mumu'.format(path),
+        path     = '{0}/Summer12_Bprime2Xb_X2mumu_Zprime'.format(path),
         nJobs    = 5,
         suffix   = 'bprime_xb'
        ),
     cfg(data_name = 'FCNC_tcX',
-        path     = '{0}/fcnc_t2cX_X2ll_muonChannel_8TeV'.format(path),
+        path     = '{0}/Summer12_FCNC_t2cX_X2mumu_SChannel_Zprime'.format(path),
         nJobs    = 5,
         suffix   = 'fcnc'
        ),

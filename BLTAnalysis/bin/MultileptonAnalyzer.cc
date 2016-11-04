@@ -182,6 +182,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         nPartons = count-4; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+    } else {
+        nPartons = 0;
     }
 
     ///////////////////
@@ -392,7 +394,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
 
     /* MET */
-    met    = fInfo->pfMET;
+    met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETphi;
 
     ///////////////////////////////
@@ -407,7 +409,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0].Pt() < 25 || fabs(muons[0].Eta()) > 2.1)
+        if (
+            muons[0].Pt() < 25 
+            || fabs(muons[0].Eta()) > 2.1
+            || muons[1].Pt() < 25 
+            || fabs(muons[1].Eta()) > 2.1
+           )
             return kTRUE;
         hTotalEvents->Fill(6);
 

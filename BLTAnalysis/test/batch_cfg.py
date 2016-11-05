@@ -2,19 +2,12 @@
 import BLT.BLTAnalysis.BatchMaster as bm
 import sys
 
-
-''' Specify parameters '''
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/04'
 #path       = '/eos/uscms/store/user/naodell/bacontuples'
 executable = 'execBatch.sh'
 selection  = 'mumu'
 period     = '2012'
-
-''' 
-    Set job configurations.  The order of arguments is: (Dataset, path to data,
-    number of jobs, arguments to pass to executable, output directory name)
-'''
 
 dataList = []
 if selection == 'mumu' or selection == 'emu':
@@ -77,6 +70,11 @@ mcList.extend([
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
        ),
+    cfg(data_name = 'DYJetsToLL_M-10to50filter',
+        path     = '{0}/Summer12_DYJetsToLL_M-10to50filter'.format(path),
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50filter'
+       ),
     cfg(data_name = 'DY1JetsToLL_M-50',
         path     = '{0}/Summer12_DY1JetsToLL_M-50'.format(path),
         nJobs    = 10,
@@ -112,11 +110,11 @@ mcList.extend([
         nJobs    = 10,
         suffix   = 'z4jets_m-50'
        ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Summer12_DY4JetsToLL_MLL-10To50_TuneZ2Star'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/Summer12_DY4JetsToLL_MLL-10To50_TuneZ2Star'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
 
     # top #
     cfg(data_name = 'ttbar_leptonic',

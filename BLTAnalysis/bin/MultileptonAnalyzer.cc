@@ -186,12 +186,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
             
-            if (particle->status == 3 
-                && (abs(particle->pdgId) < 6 || particle->pdgId == 21)) {
+            //cout << particle->status << ", "
+            //     << particle->pdgId  << ", "
+            //     << particle->parent
+            //     << endl;
+
+            if (particle->status == 3 && (abs(particle->pdgId) < 6 || particle->pdgId == 21)) {
                 ++count;
             }
         }
         nPartons = count-4; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+        //cout << nPartons << "\n" << endl;
     } else {
         nPartons = 0;
     }
@@ -391,12 +396,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
 
-    /* MET */
+    // MET //
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
     ///////////////////////////////
-    /* Apply analysis selections */
+    // Apply analysis selections //
     ///////////////////////////////
 
     nMuons     = muons.size();

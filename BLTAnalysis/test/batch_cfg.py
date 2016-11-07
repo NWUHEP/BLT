@@ -192,6 +192,11 @@ sigList.extend([
         nJobs    = 5,
         suffix   = 'bprime_xb'
        ),
+    cfg(data_name = 'Bprime2Xb_BB_semilep',
+        path     = '{0}/Summer12_Bprime2Xb_XLept_XHadr'.format(path),
+        nJobs    = 5,
+        suffix   = 'bprime_xbxb_semilep'
+       ),
     cfg(data_name = 'FCNC_tcX',
         path     = '{0}/Summer12_FCNC_t2cX_X2mumu_SChannel_Zprime'.format(path),
         nJobs    = 5,

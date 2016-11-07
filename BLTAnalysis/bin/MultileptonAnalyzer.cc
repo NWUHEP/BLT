@@ -323,7 +323,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector vJet; 
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
-        for (const auto& mu: muons) {
+        for (const auto& mu: veto_muons) {
             if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;
@@ -395,15 +395,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
 
-    std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
     std::sort(fwdjets.begin(), fwdjets.end(), sort_by_higher_pt<TJet>);
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
     std::sort(genjets.begin(), genjets.end(), sort_by_higher_pt<TJet>);
     std::sort(genbjets.begin(), genbjets.end(), sort_by_higher_pt<TJet>);
 
+    // Add additional b jets to the central jet collection
+    if (bjets.size() > 1) {
+        jets.insert(jets.end(), bjets.begin()+1, bjets.end());
+    }
+    std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+
     /* MET */
-    met    = fInfo->pfMET;
-    metPhi = fInfo->pfMETphi;
+    met    = fInfo->pfMETC;
+    metPhi = fInfo->pfMETCphi;
 
     ///////////////////////////////
     /* Apply analysis selections */
@@ -411,7 +416,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     nMuons     = muons.size();
     nElectrons = electrons.size();
-
 
     if (params->selection == "mumu") {
         if (muons.size() < 2)

@@ -190,17 +190,22 @@ sigList.extend([
     cfg(data_name = 'Bprime2Xb_X2mumu',
         path     = '{0}/Summer12_Bprime2Xb_X2mumu_Zprime'.format(path),
         nJobs    = 5,
-        suffix   = 'bprime_xb'
+        suffix   = 'bprime_t-channel'
        ),
     cfg(data_name = 'Bprime2Xb_BB_semilep',
         path     = '{0}/Summer12_Bprime2Xb_XLept_XHadr'.format(path),
         nJobs    = 5,
-        suffix   = 'bprime_xbxb_semilep'
+        suffix   = 'bprime_bb_semilep'
        ),
     cfg(data_name = 'FCNC_tcX',
         path     = '{0}/Summer12_FCNC_t2cX_X2mumu_SChannel_Zprime'.format(path),
         nJobs    = 5,
-        suffix   = 'fcnc'
+        suffix   = 'fcnc_s-channel'
+       ),
+    cfg(data_name = 'FCNC_tcX',
+        path     = '{0}/Summer12_FCNC_t2cX_X2mumu_Zprime'.format(path),
+        nJobs    = 5,
+        suffix   = 'fcnc_tt_semilep'
        ),
     ])
 

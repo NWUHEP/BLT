@@ -278,7 +278,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if (muonP4.Pt() > 20)
                 veto_muons.push_back(muonP4);
 
-            if (muonP4.Pt() > 25) {
+            if (muonP4.Pt() > 5) {
                 muon->pt  = muonP4.Pt();
                 muon->eta = muonP4.Eta();
                 muon->phi = muonP4.Phi();
@@ -366,16 +366,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
-                            jets.push_back(jet);
                             ++nJets;
+                            jets.push_back(jet);
                         }
                     } else {
                         if (particleSelector->BTagModifier(jet, "CSVT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
-                            jets.push_back(jet);
                             ++nJets;
+                            jets.push_back(jet);
                         }
                     }
                 }
@@ -430,8 +430,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (
             muonOneP4.Pt() < 25 
             || fabs(muonOneP4.Eta()) > 2.1
-            || muonTwoP4.Pt() < 25 
-            || fabs(muonTwoP4.Eta()) > 2.1
+            //|| muonTwoP4.Pt() < 25 
+            //|| fabs(muonTwoP4.Eta()) > 2.1
            )
             return kTRUE;
         hTotalEvents->Fill(6);

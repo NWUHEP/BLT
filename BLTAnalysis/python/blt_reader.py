@@ -55,8 +55,8 @@ if __name__ == '__main__':
     ### Configuration ###
     selection    = 'mumu'
     period       = 2012
-    infile       = 'data/bltuples/output_{0}_{1}.root'.format(selection, period)
-    output_path  = 'data/flatuples/{0}_{1}'.format(selection, period)
+    infile       = '/tthome/naodell/batch_output/output_{0}_{1}.root'.format(selection, period)
+    output_path  = '/tthome/share/noobs/flattuples/{0}_{1}'.format(selection, period)
 
     if period == 2016:
         dataset_list = [

@@ -195,7 +195,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 5 
+                muon->pt > 10 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -359,12 +359,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jet->pt > 30 
                 && fabs(jet->eta < 4.7)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
+                && particleSelector->PassJetPUID(jet)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
                         jet->pt > 30 
-                        //&& particleSelector->PassJetPUID(jet, cuts->looseJetID)
                         && !muOverlap 
                         && !elOverlap
                    ) { 
@@ -428,7 +428,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector dimuon;
         dimuon = muons[0] + muons[1];
-        if (dimuon.M() < 8. || dimuon.M() > 70.)
+        if (dimuon.M() < 12. || dimuon.M() > 70.)
             return kTRUE;
         hTotalEvents->Fill(7);
 

@@ -401,22 +401,21 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
     return jetPass;
 }
 
-bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
+bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     bool pass = false;
-    if (jet->mva > 4) pass = true;
-    //if (0    <= fabs(jet->eta) && fabs(jet->eta) < 2.5) {
-    //    if(jet->mva >= -0.63) 
-    //        pass = true;
-    //} else if(2.5  <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
-    //    if (jet->mva >= -0.60) 
-    //        pass = true;
-    //} else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
-    //    if (jet->mva >= -0.55) 
-    //        pass = true;
-    //} else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
-    //    if (jet->mva >= -0.45) 
-    //        pass = true;
-    //}
+    if (0 <= fabs(jet->eta) && fabs(jet->eta) < 2.5) {
+        if(jet->mva >= 0.86) 
+            pass = true;
+    } else if(2.5 <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
+        if (jet->mva >= -0.10) 
+            pass = true;
+    } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
+        if (jet->mva >= -0.05) 
+            pass = true;
+    } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
+        if (jet->mva >= -0.01) 
+            pass = true;
+    }
 
     return pass;
 }

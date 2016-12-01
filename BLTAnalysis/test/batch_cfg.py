@@ -52,13 +52,11 @@ elif selection == 'ee':
             nJobs    = 1,
             suffix   = 'electron_2016A'
            ),
-    data_list.extend([
         cfg(data_name = 'electron_2016B',
             path     = '{0}/SingleElectron_2016B-22Jan2013'.format(path),
             nJobs    = 1,
             suffix   = 'electron_2016B'
            ),
-    data_list.extend([
         cfg(data_name = 'electron_2016C',
             path     = '{0}/SingleElectron_2016C-22Jan2013'.format(path),
             nJobs    = 1,
@@ -85,7 +83,7 @@ mc_list.extend([
         suffix   = 'z1jets_m-50'
        ),
     cfg(data_name = 'DY1JetsToLL_M-10to50',
-        path     = '{0}/Spring16_DY1JetsToLL_MLL-10To50_madgraph'.format(path),
+        path     = '{0}/Spring16_DY1JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'z1jets_m-10to50'
        ),
@@ -95,7 +93,7 @@ mc_list.extend([
         suffix   = 'z2jets_m-50'
        ),
     cfg(data_name = 'DY2JetsToLL_M-10to50',
-        path     = '{0}/Spring16_DY2JetsToLL_MLL-10To50_madgraph'.format(path),
+        path     = '{0}/Spring16_DY2JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'z2jets_m-10to50'
        ),
@@ -105,7 +103,7 @@ mc_list.extend([
         suffix   = 'z3jets_m-50'
        ),
     cfg(data_name = 'DY3JetsToLL_M-10to50',
-        path     = '{0}/Spring16_DY3JetsToLL_MLL-10To50_madgraph'.format(path),
+        path     = '{0}/Spring16_DY3JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'z3jets_m-10to50'
        ),
@@ -115,7 +113,7 @@ mc_list.extend([
         suffix   = 'z4jets_m-50'
        ),
     #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Spring16_DY4JetsToLL_MLL-10To50_madgraph'.format(path),
+    #    path     = '{0}/Spring16_DY4JetsToLL_M-10to50_madgraph'.format(path),
     #    nJobs    = 10,
     #    suffix   = 'z4jets_m-10to50'
     #   ),

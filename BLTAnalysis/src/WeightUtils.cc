@@ -54,7 +54,7 @@ void WeightUtils::SetSelection(string selection)
 
 float WeightUtils::GetPUWeight(float nPU)
 {
-    return _puReweight->Eval(nPU+0.5); 
+    return _puReweight->Eval(nPU); 
 }
 
 std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const

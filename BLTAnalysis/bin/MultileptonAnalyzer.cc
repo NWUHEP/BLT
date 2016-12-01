@@ -76,7 +76,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
     outTree->Branch("eventWeight", &eventWeight);
+    outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
+    outTree->Branch("nPartons", &nPartons);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -165,9 +167,40 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     evtNumber     = fInfo->evtNum;
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
-    nPU           = fPVArr->GetEntries();
+    nPV           = fPVArr->GetEntries();
     if (!isData) {
-        eventWeight *= 1.;//weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+        nPU = fInfo->nPUmean;
+        eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+    } else {
+        nPU = 0;
+    }
+
+    ///////////////////////
+    // Generator objects //
+    ///////////////////////
+
+    if (!isData) {
+        unsigned count = 0;
+        for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
+            TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+            
+            //cout << particle->status << ", "
+            //     << particle->pdgId  << ", "
+            //     << particle->parent
+            //     << endl;
+
+            if (
+                particle->status == 23 
+                && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
+                && particle->parent != -2
+                ) {
+                ++count;
+            }
+        }
+        nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+        //cout << nPartons << "\n" << endl;
+    } else {
+        nPartons = 0;
     }
 
     ///////////////////
@@ -255,7 +288,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 veto_muons.push_back(muonP4);
             } 
 
-            if (muonP4.Pt() > 25) {
+            if (muonP4.Pt() > 10) {
                 muons.push_back(muonP4);
                 muons_iso.push_back(muon->trkIso);
                 muons_q.push_back(muon->q);
@@ -269,6 +302,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
     }
+    std::sort(muons.begin(), muons.end(), P4SortCondition);
 
     /* ELECTRONS */
     std::vector<TLorentzVector> electrons;
@@ -462,7 +496,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector dielectron;
         dielectron = electrons[0] + electrons[1];
-        if (dielectron.M() < 8. || dielectron.M() > 70.)
+        if (dielectron.M() < 12. || dielectron.M() > 70.)
             return kTRUE;
         hTotalEvents->Fill(6);
 

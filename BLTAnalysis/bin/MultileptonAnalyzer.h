@@ -81,10 +81,10 @@ public:
     std::vector<string> triggerNames;
 
     // Branches in the output file
-    UInt_t runNumber, lumiSection, nPU;
+    UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight;
+    Float_t eventWeight, nPU;
 
     TLorentzVector leptonOneP4, leptonTwoP4, jetP4, bjetP4, genJetP4, genBJetP4;
     Float_t leptonOneIso, leptonTwoIso;

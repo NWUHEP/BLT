@@ -34,16 +34,26 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016D'
            ),
-        #cfg(data_name = 'muon_2016E',
-        #    path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016E'
-        #   ),
-        #cfg(data_name = 'muon_2016F',
-        #    path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016F'
-        #   ),
+        cfg(data_name = 'muon_2016E',
+            path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016E'
+           ),
+        cfg(data_name = 'muon_2016F',
+            path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016F'
+           ),
+        cfg(data_name = 'muon_2016G',
+            path      = '{0}/SingleMuon_Run2016G-PromptReco-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016G'
+           ),
+        cfg(data_name = 'muon_2016H',
+            path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016H'
+           ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -112,11 +122,11 @@ mc_list.extend([
         nJobs    = 10,
         suffix   = 'z4jets_m-50'
        ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Spring16_DY4JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/Spring16_DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
 
     # top
     cfg(data_name = 'ttbar_leptonic',
@@ -193,21 +203,19 @@ mc_list.extend([
     #   ),
     ])
 
-'''
-sigList = []
-sigList.extend([
+sig_list = []
+sig_list.extend([
     cfg(data_name = 'Bprime2Xb_X2mumu',
-        path     = '{0}/Summer12_Bprime2Xb_X2mumu'.format(path),
+        path     = '{0}/Spring16_Bprime2Xb_X2mumu_tChannel'.format(path),
         nJobs    = 5,
         suffix   = 'bprime_xb'
        ),
     ])
-'''
 
 batch_list = []
 batch_list += data_list
 batch_list += mc_list 
-#batch_list += sig_list
+batch_list += sig_list
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
                        selection   = selection,

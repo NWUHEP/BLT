@@ -404,18 +404,22 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
 bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     bool pass = false;
     if (0 <= fabs(jet->eta) && fabs(jet->eta) < 2.5) {
-        if(jet->mva >= 0.86) 
+        if(jet->mva >= -0.89) 
             pass = true;
-    } else if(2.5 <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
-        if (jet->mva >= -0.10) 
+    } else {
+        pass = true;
+    }
+    
+    /*else if(2.5 <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
+        if (jet->mva >= -0.52) 
             pass = true;
     } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
-        if (jet->mva >= -0.05) 
+        if (jet->mva >= -0.38) 
             pass = true;
     } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
-        if (jet->mva >= -0.01) 
+        if (jet->mva >= -0.30) 
             pass = true;
-    }
+    }*/
 
     return pass;
 }

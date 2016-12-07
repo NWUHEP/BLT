@@ -13,7 +13,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* puFile = new TFile(puFileName.c_str(), "OPEN");
     _puReweight = (TGraph*)puFile->Get("pileup");
 
-    // IsoMu24_eta2p1 efficiency ratios
+    // IsoMu22 efficiency ratios
     std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.root";
     std::string filePath = "IsoMu22_OR_IsoTkMu22_PtEtaBins_Run273158_to_274093/efficienciesDATA/";
     TFile* triggerFile = new TFile(triggerFileName.c_str(), "OPEN");

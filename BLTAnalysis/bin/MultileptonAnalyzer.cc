@@ -107,9 +107,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jetD0", &jetD0);
     outTree->Branch("jetTag", &jetTag);
+    //outTree->Branch("jetPUID", &jetPUID);
     outTree->Branch("jetFlavor", &jetFlavor);
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjetTag", &bjetTag);
+    //outTree->Branch("bjetPUID", &bjetPUID);
     outTree->Branch("bjetFlavor", &bjetFlavor);
     outTree->Branch("bjetD0", &bjetD0);
     outTree->Branch("genBJetP4", &genBJetP4);
@@ -362,7 +364,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         && !elOverlap
                    ) { 
                     if (isRealData) {
-                        if (jet->csv > 0.898) {
+                        //if (jet->csv > 0.898) {
+                        if (jet->bmva > 0.783) {
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -534,6 +537,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetD0     = bjets[0]->d0;
         bjetTag    = bjets[0]->csv;
+        //bjetPUID   = bjets[0]->mva;
 
         if (isRealData) {
             bjetFlavor = 0.;
@@ -545,6 +549,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         bjetD0     = 0.;
         bjetTag    = 0.;
+        bjetPUID   = 0.;
         bjetFlavor = 0.;
     }
 
@@ -552,6 +557,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
         jetD0     = fwdjets[0]->d0;
         jetTag    = 0.;
+        //jetPUID   = fwdjets[0]->mva;
 
         if (isRealData) {
             jetFlavor = 0.;
@@ -562,6 +568,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
         jetD0  = jets[0]->d0;
         jetTag = jets[0]->csv;
+        //jetPUID   = fwdjets[0]->mva;
 
         if (isRealData) {
             jetFlavor = 0.;
@@ -573,6 +580,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetD0     = 0.;
         jetTag    = 0.;
         jetFlavor = 0.;
+        jetPUID   = 0.;
     } 
 
     if (genjets.size() > 0) {

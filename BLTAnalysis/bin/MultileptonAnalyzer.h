@@ -95,6 +95,7 @@ public:
 
     Float_t jetD0, bjetD0;
     Float_t bjetTag, jetTag, genBJetTag;
+    Float_t bjetPUID, jetPUID;
     Float_t bjetFlavor, jetFlavor;
     Float_t met, metPhi;
 

@@ -295,7 +295,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                  << ", " << muon->eta << ", " << muon->phi 
                  << endl;
 
-            if (muonP4.Pt() > 20) {
+            if (muonP4.Pt() > 20 and fabs(muonP4.Eta()) < 2.1) {
                 veto_muons.push_back(muonP4);
             } 
 

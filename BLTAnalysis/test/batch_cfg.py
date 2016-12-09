@@ -34,26 +34,26 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016D'
            ),
-        cfg(data_name = 'muon_2016E',
-            path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016E'
-           ),
-        cfg(data_name = 'muon_2016F',
-            path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016F'
-           ),
-        cfg(data_name = 'muon_2016G',
-            path      = '{0}/SingleMuon_Run2016G-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016G'
-           ),
-        cfg(data_name = 'muon_2016H',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
+        #cfg(data_name = 'muon_2016E',
+        #    path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016E'
+        #   ),
+        #cfg(data_name = 'muon_2016F',
+        #    path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016F'
+        #   ),
+        #cfg(data_name = 'muon_2016G',
+        #    path      = '{0}/SingleMuon_Run2016G-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016G'
+        #   ),
+        #cfg(data_name = 'muon_2016H',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -214,8 +214,8 @@ sig_list.extend([
 
 batch_list = []
 batch_list += data_list
-batch_list += mc_list 
-batch_list += sig_list
+#batch_list += mc_list 
+#batch_list += sig_list
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
                        selection   = selection,

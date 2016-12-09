@@ -101,11 +101,13 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetP4", &jetP4);
     outTree->Branch("jetD0", &jetD0);
     outTree->Branch("jetTag", &jetTag);
+    outTree->Branch("jetPUID", &jetPUID);
     outTree->Branch("jetFlavor", &jetFlavor);
 
     outTree->Branch("bjetP4", &bjetP4);
     outTree->Branch("bjetD0", &bjetD0);
     outTree->Branch("bjetTag", &bjetTag);
+    outTree->Branch("bjetPUID", &bjetPUID);
     outTree->Branch("bjetFlavor", &bjetFlavor);
 
     outTree->Branch("genBJetP4", &genBJetP4);
@@ -130,7 +132,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 {
 
-    GetEntry(entry+3110000, 1);  // load all branches
+    GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
 
@@ -141,8 +143,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                   << " Event: " << fInfo->evtNum 
                   << std::endl;
 
-    if (fInfo->runNum != 273302 || fInfo->evtNum != 260203369)
-        return kTRUE;
+    //if (fInfo->runNum != 273302 || fInfo->evtNum != 260203369)
+    //    return kTRUE;
 
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
@@ -289,9 +291,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Fill containers
         if (muon->trkIso/muonP4.Pt() < 0.1) {
             // For synchronization
-            cout << muonP4.Pt() << ", " << muon->pt 
-                 << ", " << muon->eta << ", " << muon->phi 
-                 << endl;
+            //cout << muonP4.Pt() << ", " << muon->pt 
+            //     << ", " << muon->eta << ", " << muon->phi 
+            //     << endl;
 
             if (muonP4.Pt() > 20) {
                 veto_muons.push_back(muonP4);
@@ -312,8 +314,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
-
-    cout << endl;
 
     /* ELECTRONS */
     std::vector<TLorentzVector> electrons;
@@ -386,12 +386,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     << jet->geneta << ", " << jet->genphi << ", " 
         //     << jet->partonFlavor << ", " << jet->hadronFlavor << ", " 
         //     << endl;
-        cout << jet->pt << ", " << jet->ptRaw << ", " 
-             << jet->eta << ", " << jet->phi << ", " 
-             << muOverlap << ", " << jet->csv << ", " 
-             << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
-             << jet->mva
-             << endl;
+        //cout << jet->pt << ", " << jet->ptRaw << ", " 
+        //     << jet->eta << ", " << jet->phi << ", " 
+        //     << muOverlap << ", " << jet->csv << ", " 
+        //     << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
+        //     << jet->mva
+        //     << endl;
 
         if (!isData) {
             if (abs(jet->hadronFlavor) == 5) {
@@ -405,12 +405,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jet->pt > 30 
                 && fabs(jet->eta < 4.7)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
-                && particleSelector->PassJetPUID(jet)
+                //&& particleSelector->PassJetPUID(jet)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
                         jet->pt > 30 
+                        //&& jet->mva >= -0.89
                         && !muOverlap 
                         && !elOverlap
                    ) { 
@@ -445,8 +446,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
     std::sort(genjets.begin(), genjets.end(), sort_by_higher_pt<TJet>);
     std::sort(genbjets.begin(), genbjets.end(), sort_by_higher_pt<TJet>);
-
-    cout << endl;
 
     // Add additional b jets to the central jet collection
     if (bjets.size() > 1) {
@@ -568,11 +567,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetD0     = bjets[0]->d0;
         bjetTag    = bjets[0]->csv;
+        bjetPUID   = bjets[0]->mva;
         bjetFlavor = bjets[0]->hadronFlavor;
     } else {
         bjetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         bjetD0     = 0.;
         bjetTag    = 0.;
+        bjetPUID   = 0.;
         bjetFlavor = 0.;
     }
 
@@ -580,16 +581,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetP4.SetPtEtaPhiM(fwdjets[0]->pt, fwdjets[0]->eta, fwdjets[0]->phi, fwdjets[0]->mass);
         jetD0     = fwdjets[0]->d0;
         jetTag    = 0.;
+        jetPUID   = fwdjets[0]->mva;
         jetFlavor = fwdjets[0]->hadronFlavor;
     } else if (jets.size() > 0) {
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
         jetD0     = jets[0]->d0;
         jetTag    = jets[0]->csv;
+        jetPUID   = jets[0]->mva;
         jetFlavor = jets[0]->hadronFlavor;
     } else {
         jetP4.SetPtEtaPhiM(0., 0., 0., 0.);
         jetD0     = 0.;
         jetTag    = 0.;
+        jetPUID   = 0.;
         jetFlavor = 0.;
     } 
 
@@ -610,7 +614,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     // Synchronization printout
-    if (nBJets == 1 && nJets == 1 && nFwdJets == 1 && met < 40 && muons.size() >= 2) {
+    /*if (nBJets == 1 && nJets == 1 && nFwdJets == 1 && met < 40 && muons.size() >= 2) {
         cout << "Run: " << fInfo->runNum  
             << " Lumi: " << fInfo->lumiSec 
             << " Event: " << fInfo->evtNum << endl;
@@ -630,7 +634,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector dijet = bjetP4 + jetP4;
         TLorentzVector dimuon = muons[0] + muons[1];
         cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
-    }
+    }*/
 
 
     outTree->Fill();

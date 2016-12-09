@@ -93,7 +93,7 @@ public:
     Bool_t leptonOneTrigger, leptonTwoTrigger;
 
     Float_t jetD0, bjetD0;
-    Float_t bjetTag, jetTag, genJetTag, genBJetTag;
+    Float_t bjetPUID, bjetTag, jetPUID, jetTag, genJetTag, genBJetTag;
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;

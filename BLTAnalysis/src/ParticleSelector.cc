@@ -381,15 +381,19 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
 
 bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
     bool jetPass = false;
-    if (fabs(jet->eta) <= 2.4) {
+    if (fabs(jet->eta) <= 2.7) {
         if (
                 jet->neuHadFrac       < 0.99
                 && jet->neuEmFrac     < 0.99
                 && jet->nParticles    > 1
-                && jet->chHadFrac     > 0
-                && jet->nCharged      > 0
-                && jet->chEmFrac      < 0.99
-           ) jetPass = true;
+           ) {
+            if (fabs(jet->eta) <= 2.4) {
+                if (jet->chHadFrac > 0 && jet->nCharged > 0 && jet->chEmFrac < 0.99) 
+                    jetPass = true;
+            } else {
+                jetPass = true;
+            }
+        }
     } else if (fabs(jet->eta) <= 3.0) { 
         if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 2) 
             jetPass = true;

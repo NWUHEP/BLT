@@ -143,8 +143,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                   << " Event: " << fInfo->evtNum 
                   << std::endl;
 
-    //if (fInfo->runNum != 273302 || fInfo->evtNum != 260203369)
-    //    return kTRUE;
+    if (fInfo->runNum != 274388 || fInfo->evtNum != 879858763)
+        return kTRUE;
 
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
@@ -291,9 +291,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Fill containers
         if (muon->trkIso/muonP4.Pt() < 0.1) {
             // For synchronization
-            //cout << muonP4.Pt() << ", " << muon->pt 
-            //     << ", " << muon->eta << ", " << muon->phi 
-            //     << endl;
+            cout << muonP4.Pt() << ", " << muon->pt 
+                 << ", " << muon->eta << ", " << muon->phi 
+                 << endl;
 
             if (muonP4.Pt() > 20) {
                 veto_muons.push_back(muonP4);
@@ -314,6 +314,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
+
+    cout << endl;
 
     /* ELECTRONS */
     std::vector<TLorentzVector> electrons;
@@ -369,7 +371,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (vJet.DeltaR(mu) < 0.5) {
+            if (vJet.DeltaR(mu) < 0.4) {
                 muOverlap = true;
                 break;
             }
@@ -386,12 +388,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     << jet->geneta << ", " << jet->genphi << ", " 
         //     << jet->partonFlavor << ", " << jet->hadronFlavor << ", " 
         //     << endl;
-        //cout << jet->pt << ", " << jet->ptRaw << ", " 
-        //     << jet->eta << ", " << jet->phi << ", " 
-        //     << muOverlap << ", " << jet->csv << ", " 
-        //     << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
-        //     << jet->mva
-        //     << endl;
+        cout << jet->pt << ", " << jet->ptRaw << ", " 
+             << jet->eta << ", " << jet->phi << ", " 
+             << muOverlap << ", " << jet->csv << ", " 
+             << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
+             << jet->mva
+             << endl;
 
         if (!isData) {
             if (abs(jet->hadronFlavor) == 5) {
@@ -457,6 +459,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
+    cout << "\n" 
+         << fInfo->pfMET << ", "
+         << fInfo->pfMETC << ", "
+         << endl;
+    
     ///////////////////////////////
     /* Apply analysis selections */
     ///////////////////////////////
@@ -614,7 +621,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     // Synchronization printout
-    /*if (nBJets == 1 && nJets == 1 && nFwdJets == 1 && met < 40 && muons.size() >= 2) {
+    if (nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
         cout << "Run: " << fInfo->runNum  
             << " Lumi: " << fInfo->lumiSec 
             << " Event: " << fInfo->evtNum << endl;
@@ -634,7 +641,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector dijet = bjetP4 + jetP4;
         TLorentzVector dimuon = muons[0] + muons[1];
         cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
-    }*/
+    }
 
 
     outTree->Fill();

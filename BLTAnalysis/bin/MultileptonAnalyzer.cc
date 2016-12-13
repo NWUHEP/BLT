@@ -433,8 +433,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (
             muonOneP4.Pt() < 25 
             || fabs(muonOneP4.Eta()) > 2.1
-            //|| muonTwoP4.Pt() < 25 
-            //|| fabs(muonTwoP4.Eta()) > 2.1
+            || muonTwoP4.Pt() < 25 
+            || fabs(muonTwoP4.Eta()) > 2.1
            )
             return kTRUE;
         hTotalEvents->Fill(6);
@@ -536,7 +536,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     if (bjets.size() > 0) {
         bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetD0     = bjets[0]->d0;
-        bjetTag    = bjets[0]->bmva;
+        if (isRealData)
+            bjetTag    = bjets[0]->bmva;
+        else
+            bjetTag    = bjets[0]->csv;
         //bjetTag    = bjets[0]->csv;
         //bjetPUID   = bjets[0]->mva;
 
@@ -568,7 +571,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     } else if (jets.size() > 0) {
         jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
         jetD0  = jets[0]->d0;
-        jetTag = jets[0]->bmva;
+        if (isRealData)
+            jetTag = jets[0]->bmva;
+        else
+            jetTag = jets[0]->csv;
+
         //jetTag = jets[0]->csv;
         //jetPUID   = fwdjets[0]->mva;
 

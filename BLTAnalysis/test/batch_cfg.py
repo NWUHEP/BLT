@@ -9,27 +9,28 @@ executable = 'execBatch.sh'
 selection  = 'mumu'
 period     = '2012'
 
+path_alt = '/tthome/share/noobs'
 dataList = []
 if selection == 'mumu' or selection == 'emu':
     dataList.extend([
         cfg(data_name = 'muon_2012A',
-            path     = '{0}/SingleMu_2012A-22Jan2013'.format(path),
-            nJobs    = 1,
+            path     = '{0}/SingleMu_2012A-22Jan2013'.format(path_alt),
+            nJobs    = 20,
             suffix   = 'muon_2012A'
            ),
         cfg(data_name = 'muon_2012B',
-            path     = '{0}/SingleMu_2012B-22Jan2013'.format(path),
-            nJobs    = 15,
+            path     = '{0}/SingleMu_2012B-22Jan2013'.format(path_alt),
+            nJobs    = 20,
             suffix   = 'muon_2012B'
            ),
         cfg(data_name = 'muon_2012C',
-            path     = '{0}/SingleMu_2012C-22Jan2013'.format(path),
-            nJobs    = 15,
+            path     = '{0}/SingleMu_2012C-22Jan2013'.format(path_alt),
+            nJobs    = 20,
             suffix   = 'muon_2012C'
            ),
         cfg(data_name = 'muon_2012D',
-            path     = '{0}/SingleMu_2012D-22Jan2013'.format(path),
-            nJobs    = 15,
+            path     = '{0}/SingleMu_2012D-22Jan2013'.format(path_alt),
+            nJobs    = 20,
             suffix   = 'muon_2012D'
            )
         ])
@@ -210,8 +211,8 @@ sigList.extend([
     ])
 
 batchList = []
-batchList += mcList 
 batchList += dataList
+batchList += mcList 
 batchList += sigList
 batch = bm.BatchMaster(config_list = batchList, 
                        stage_dir   = 'batch',

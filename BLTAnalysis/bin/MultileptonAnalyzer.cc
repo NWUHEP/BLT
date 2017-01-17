@@ -44,14 +44,14 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "mumu" || params->selection == "emu") {
-        //triggerNames.push_back("HLT_IsoMu22_v*");
-        //triggerNames.push_back("HLT_IsoTkMu22_v*");
-        //triggerNames.push_back("HLT_IsoMu24_v*");
-        //triggerNames.push_back("HLT_IsoTkMu24_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
+        triggerNames.push_back("HLT_IsoMu22_v*");
+        triggerNames.push_back("HLT_IsoTkMu22_v*");
+        triggerNames.push_back("HLT_IsoMu24_v*");
+        triggerNames.push_back("HLT_IsoTkMu24_v*");
+        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
+        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
+        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
+        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 
     } else if (params->selection == "ee") {
         triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
@@ -469,8 +469,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         //&& !elOverlap
                    ) { 
                     if (isData) {
-                        //if (jet->csv > 0.935) {
-                        if (jet->bmva > 0.875) {
+                        if (jet->csv > 0.935) {
+                        //if (jet->bmva > 0.875) {
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -478,8 +478,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             ++nJets;
                         }
                     } else {
-                        //if (particleSelector->BTagModifier(jet, "CSVT")) { 
-                        if (particleSelector->BTagModifier(jet, "MVAT")) { 
+                        if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                        //if (particleSelector->BTagModifier(jet, "MVAT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {

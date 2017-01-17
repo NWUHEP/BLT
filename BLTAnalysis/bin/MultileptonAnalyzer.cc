@@ -7,6 +7,8 @@
 using namespace baconhep;
 using namespace std;
 
+bool sync_print = false;
+
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
 MultileptonAnalyzer::MultileptonAnalyzer() : BLTSelector()
@@ -42,8 +44,15 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "mumu" || params->selection == "emu") {
-        triggerNames.push_back("HLT_IsoMu22_v*");
-        triggerNames.push_back("HLT_IsoTkMu22_v*");
+        //triggerNames.push_back("HLT_IsoMu22_v*");
+        //triggerNames.push_back("HLT_IsoTkMu22_v*");
+        //triggerNames.push_back("HLT_IsoMu24_v*");
+        //triggerNames.push_back("HLT_IsoTkMu24_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
+
     } else if (params->selection == "ee") {
         triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
     }
@@ -56,7 +65,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     lumiMask = RunLumiRangeMap();
     if (true) { // this will need to be turned off for MC
         string jsonFileName = cmssw_base + 
-            "/src/BLT/BLTAnalysis/data/Cert_271036-282092_13TeV_PromptReco_Collisions16_JSON.txt";
+            "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
+            //"/src/BLT/BLTAnalysis/data/Cert_271036-282092_13TeV_PromptReco_Collisions16_JSON.txt";
             //"/src/BLT/BLTAnalysis/data/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
     }
@@ -136,6 +146,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     this->totalEvents++;
     hTotalEvents->Fill(1);
 
+    if (
+            (fInfo->runNum == 274286 && fInfo->evtNum == 121098023)
+            || (fInfo->runNum == 274241 && fInfo->evtNum == 629248723)
+       )
+        return kTRUE;
+
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
                   << " Run: " << fInfo->runNum 
@@ -143,8 +159,28 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                   << " Event: " << fInfo->evtNum 
                   << std::endl;
 
-    //if (fInfo->runNum != 274388 || fInfo->evtNum != 879858763)
-    //    return kTRUE;
+    if (sync_print) {
+        if (
+                (fInfo->runNum == 276361 && fInfo->evtNum ==  481402048)
+                || (fInfo->runNum == 274344 && fInfo->evtNum ==  341125392)
+                || (fInfo->runNum == 274241 && fInfo->evtNum ==  629248723)
+                || (fInfo->runNum == 274345 && fInfo->evtNum ==  134743892)
+                || (fInfo->runNum == 275067 && fInfo->evtNum ==  341705230)
+                || (fInfo->runNum == 274388 && fInfo->evtNum ==  863887625)
+                || (fInfo->runNum == 275837 && fInfo->evtNum ==  719331150)
+                || (fInfo->runNum == 276244 && fInfo->evtNum ==  711325605)
+                || (fInfo->runNum == 275834 && fInfo->evtNum ==  118123263)
+                || (fInfo->runNum == 276525 && fInfo->evtNum == 2280211910)
+                ) {
+            cout << "Eureka! " << endl;
+            cout << "Run: " << fInfo->runNum 
+                 << " Lumi: " << fInfo->lumiSec 
+                 << " Event: " << fInfo->evtNum 
+                 << std::endl;
+        } else {
+            return kTRUE;
+        }
+    }
 
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
@@ -162,8 +198,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (unsigned i = 0; i < triggerNames.size(); ++i) {
         passTrigger |= trigger->pass(triggerNames[i], fInfo->triggerBits);
     }
+
     if (!passTrigger && isData)
         return kTRUE;
+    
+    if (sync_print) {
+        cout << "trigger status: " << passTrigger << endl;
+    }
 
     hTotalEvents->Fill(3);
 
@@ -204,6 +245,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && particle->parent != -2
                 ) {
                 ++count;
+
             }
         }
         nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
@@ -211,8 +253,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     } else {
         nPartons = 0;
     }
-
-    //cout << endl;
 
     ///////////////////
     // Select objects//
@@ -239,7 +279,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 10 
+                muon->pt > 20 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -289,17 +329,25 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         // Fill containers
-        if (muon->trkIso/muonP4.Pt() < 0.1) {
+        //if (muon->trkIso/muonP4.Pt() < 0.1) {
             // For synchronization
-            //cout << muonP4.Pt() << ", " << muon->pt 
-            //     << ", " << muon->eta << ", " << muon->phi 
-            //     << endl;
+            if (sync_print) {
+                cout << "(" << muonP4.Pt() << ", " << muon->pt 
+                     << ", " << muon->eta << ", " << muon->phi 
+                     << ") , " << muon->q 
+                     << ", " << muon->trkIso
+                     << endl;
+            }
 
-            if (muonP4.Pt() > 20 and fabs(muonP4.Eta()) < 2.1) {
+            if (
+                    muonP4.Pt() > 20 
+                    && fabs(muonP4.Eta()) < 2.1 
+                    && muon->trkIso/muonP4.Pt() < 0.1
+               ) {
                 veto_muons.push_back(muonP4);
             } 
 
-            if (muonP4.Pt() > 25) {
+            if (muonP4.Pt() > 25 && fabs(muonP4.Eta()) < 2.1) {
                 muons.push_back(muonP4);
                 muons_iso.push_back(muon->trkIso);
                 muons_q.push_back(muon->q);
@@ -311,11 +359,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 }
                 muons_trigger.push_back(triggered);
             }
-        }
+        //}
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
 
-    //cout << endl;
+    if (sync_print) cout << endl;
 
     /* ELECTRONS */
     std::vector<TLorentzVector> electrons;
@@ -371,12 +419,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (vJet.DeltaR(mu) < 0.4) {
+            if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;
             }
         }
-        bool elOverlap = false;
+        //bool elOverlap = false;
         //for (const auto& el: electrons) {
         //    if (vJet.DeltaR(el) < 0.5) {
         //        elOverlap = true;
@@ -388,12 +436,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     << jet->geneta << ", " << jet->genphi << ", " 
         //     << jet->partonFlavor << ", " << jet->hadronFlavor << ", " 
         //     << endl;
-        //cout << jet->pt << ", " << jet->ptRaw << ", " 
-        //     << jet->eta << ", " << jet->phi << ", " 
-        //     << muOverlap << ", " << jet->csv << ", " 
-        //     << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
-        //     << jet->mva
-        //     << endl;
+          
+        if (sync_print) {
+            cout << "(" << jet->pt << ", " << jet->ptRaw << ", " 
+                 << jet->eta << ", " << jet->phi << "), " 
+                 << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
+                 << muOverlap << ", " 
+                 << jet->csv << ", " << jet->bmva << ", "
+                 << jet->mva << ", " << jet->puid
+                 << endl;
+        }
 
         if (!isData) {
             if (abs(jet->hadronFlavor) == 5) {
@@ -407,18 +459,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jet->pt > 30 
                 && fabs(jet->eta < 4.7)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
-                //&& particleSelector->PassJetPUID(jet)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
                         jet->pt > 30 
-                        //&& jet->mva >= -0.89
+                        && jet->puid != 0
                         && !muOverlap 
-                        && !elOverlap
+                        //&& !elOverlap
                    ) { 
                     if (isData) {
-                        if (jet->csv > 0.935) {
+                        //if (jet->csv > 0.935) {
+                        if (jet->bmva > 0.875) {
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -426,7 +478,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             ++nJets;
                         }
                     } else {
-                        if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                        //if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                        if (particleSelector->BTagModifier(jet, "MVAT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -459,10 +512,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
-    //cout << "\n" 
-    //     << fInfo->pfMET << ", "
-    //     << fInfo->pfMETC << ", "
-    //     << endl;
+    if (sync_print) {
+        cout << "\n" 
+             << fInfo->pfMET << ", "
+             << fInfo->pfMETC << ", "
+             << endl << endl;
+    }
     
     ///////////////////////////////
     /* Apply analysis selections */
@@ -476,36 +531,50 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0].Pt() < 25 || fabs(muons[0].Eta()) > 2.1
-            || muons[1].Pt() < 25 || fabs(muons[1].Eta()) > 2.1)
+        // Find leading positive and negatively charged muons and convert to TLorentzVectors
+        TLorentzVector muonOneP4, muonTwoP4;
+        unsigned muonTwoIndex = 1;
+        muonOneP4 = muons[0];
+        for (unsigned i = 1; i < muons.size(); ++i) {
+            if (muons_q[0] != muons_q[i]) {
+                muonTwoP4 = muons[i];
+                muonTwoIndex = i;
+                break;
+            }
+        }
+
+        if (
+            !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1 && muons_iso[0]/muonOneP4.Pt() < 0.1)
+            || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1 && muons_iso[muonTwoIndex]/muonTwoP4.Pt() < 0.1)
+           )
             return kTRUE;
         hTotalEvents->Fill(6);
 
         TLorentzVector dimuon;
-        dimuon = muons[0] + muons[1];
+        dimuon = muonOneP4 + muonTwoP4;
         if (dimuon.M() < 12. || dimuon.M() > 70.)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        leptonOneP4      = muons[0];
+        leptonOneP4      = muonOneP4;
         leptonOneIso     = muons_iso[0];
         leptonOneQ       = muons_q[0];
         leptonOneTrigger = muons_trigger[0];
         leptonOneFlavor  = 1;
 
-        leptonTwoP4      = muons[1];
-        leptonTwoIso     = muons_iso[1];
-        leptonTwoQ       = muons_q[1];
-        leptonTwoTrigger = muons_trigger[1];
+        leptonTwoP4      = muonTwoP4;
+        leptonTwoIso     = muons_iso[muonTwoIndex];
+        leptonTwoQ       = muons_q[muonTwoIndex];
+        leptonTwoTrigger = muons_trigger[muonTwoIndex];
         leptonTwoFlavor  = 1;
 
         if (!isData) {
-            eventWeight *= weights->GetMuonRecoEff(muons[0]);
-            eventWeight *= weights->GetMuonRecoEff(muons[1]);
+            eventWeight *= weights->GetMuonRecoEff(muonOneP4);
+            eventWeight *= weights->GetMuonRecoEff(muonTwoP4);
 
             // trigger weight
-            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu22_v*", muons[0]);
-            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu22_v*", muons[1]);
+            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu22_v*", muonOneP4);
+            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu22_v*", muonTwoP4);
             eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
 

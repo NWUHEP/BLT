@@ -5,7 +5,7 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production/11'
+path       = '/tthome/share/bacon/production/11a'
 executable = 'execBatch.sh'
 selection  = 'mumu'
 period     = '2016'
@@ -20,55 +20,55 @@ data_list = []
 if selection == 'mumu' or selection == 'emu':
     data_list.extend([
         cfg(data_name = 'muon_2016B_v1',
-            path      = '{0}/SingleMuon_Run2016B-PromptReco-v1'.format(path),
+            path      = '{0}/SingleMuon_Run2016B-PromptReco-v1_new'.format(path),
             nJobs     = 20,
             suffix    = 'muon_2016B'
            ),
         cfg(data_name = 'muon_2016B_v2',
-            path      = '{0}/SingleMuon_Run2016B-PromptReco-v2'.format(path),
+            path      = '{0}/SingleMuon_Run2016B-PromptReco-v2_new'.format(path),
             nJobs     = 20,
             suffix    = 'muon_2016B'
            ),
         cfg(data_name = 'muon_2016C_v2',
-            path      = '{0}/SingleMuon_Run2016C-PromptReco-v2'.format(path),
+            path      = '{0}/SingleMuon_Run2016C-PromptReco-v2_new'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
         cfg(data_name = 'muon_2016D_v2',
-            path      = '{0}/SingleMuon_Run2016D-PromptReco-v2'.format(path),
+            path      = '{0}/SingleMuon_Run2016D-PromptReco-v2_new'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016D'
            ),
-        cfg(data_name = 'muon_2016E_v2',
-            path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016E'
-           ),
-        cfg(data_name = 'muon_2016F_v1',
-            path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016F'
-           ),
-        cfg(data_name = 'muon_2016G',
-            path      = '{0}/SingleMuon_Run2016G-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016G'
-           ),
-        cfg(data_name = 'muon_2016H_v1',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v2',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v3',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
+        #cfg(data_name = 'muon_2016E_v2',
+        #    path      = '{0}/SingleMuon_Run2016E-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016E'
+        #   ),
+        #cfg(data_name = 'muon_2016F_v1',
+        #    path      = '{0}/SingleMuon_Run2016F-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016F'
+        #   ),
+        #cfg(data_name = 'muon_2016G',
+        #    path      = '{0}/SingleMuon_Run2016G-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016G'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v1',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v2',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v3',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -223,7 +223,12 @@ sig_list.extend([
     cfg(data_name = 'Bprime2Xb_X2mumu',
         path     = '{0}/Spring16_Bprime2Xb_X2mumu_tChannel'.format(path),
         nJobs    = 5,
-        suffix   = 'bprime_xb'
+        suffix   = 'bprime_t-channel'
+       ),
+    cfg(data_name = 'BB2bbdimufatjet',
+        path     = '{0}/Spring16_BB2bbdimufatjet'.format(path),
+        nJobs    = 5,
+        suffix   = 'bprime_bb_semilep'
        ),
     ])
 

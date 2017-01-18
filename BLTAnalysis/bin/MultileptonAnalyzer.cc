@@ -65,7 +65,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     lumiMask = RunLumiRangeMap();
     if (true) { // this will need to be turned off for MC
         string jsonFileName = cmssw_base + 
-            "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
+            "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+            //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
             //"/src/BLT/BLTAnalysis/data/Cert_271036-282092_13TeV_PromptReco_Collisions16_JSON.txt";
             //"/src/BLT/BLTAnalysis/data/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
@@ -160,18 +161,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                   << std::endl;
 
     if (sync_print) {
-        if (
-                (fInfo->runNum == 276361 && fInfo->evtNum ==  481402048)
-                || (fInfo->runNum == 274344 && fInfo->evtNum ==  341125392)
-                || (fInfo->runNum == 274241 && fInfo->evtNum ==  629248723)
-                || (fInfo->runNum == 274345 && fInfo->evtNum ==  134743892)
-                || (fInfo->runNum == 275067 && fInfo->evtNum ==  341705230)
-                || (fInfo->runNum == 274388 && fInfo->evtNum ==  863887625)
-                || (fInfo->runNum == 275837 && fInfo->evtNum ==  719331150)
-                || (fInfo->runNum == 276244 && fInfo->evtNum ==  711325605)
-                || (fInfo->runNum == 275834 && fInfo->evtNum ==  118123263)
-                || (fInfo->runNum == 276525 && fInfo->evtNum == 2280211910)
-                ) {
+        if (true) {
             cout << "Eureka! " << endl;
             cout << "Run: " << fInfo->runNum 
                  << " Lumi: " << fInfo->lumiSec 
@@ -188,8 +178,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Apply lumi mask
     if (isData) {
         RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
-        if(!lumiMask.HasRunLumi(rl)) 
-            return kTRUE;
+        //if(!lumiMask.HasRunLumi(rl)) 
+        //    return kTRUE;
     }
     hTotalEvents->Fill(2);
 
@@ -443,7 +433,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                  << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
                  << muOverlap << ", " 
                  << jet->csv << ", " << jet->bmva << ", "
-                 << jet->mva << ", " << jet->puid
+                 << jet->mva 
                  << endl;
         }
 
@@ -464,12 +454,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if (fabs(jet->eta) <= 2.4) { 
                 if (
                         jet->pt > 30 
-                        && jet->puid != 0
+                        && jet->mva > -0.89
                         && !muOverlap 
                         //&& !elOverlap
                    ) { 
                     if (isData) {
-                        if (jet->csv > 0.935) {
+                        if (jet->csv > 0.9535) {
                         //if (jet->bmva > 0.875) {
                             bjets.push_back(jet);
                             ++nBJets;

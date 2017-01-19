@@ -325,6 +325,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     vector<float> muons_iso;
     vector<float> muons_q;
     vector<bool> muons_trigger;
+
+
+    cout << "(pt, pt_raw, eta, phi), q, trk_iso" << endl;
     for (unsigned i = 0; i < tmp_muons.size(); i++) {
         TMuon* muon = tmp_muons[i];
         TLorentzVector muonP4;
@@ -431,6 +434,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nJets    = 0;
     nFwdJets = 0;
     nBJets   = 0;
+
+    cout << "(pt, pt_raw, eta, phi), id, overlap, csv, bmva, puid_bdt" << endl;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
@@ -534,9 +539,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     metPhi = fInfo->pfMETCphi;
 
     if (sync_print) {
+        cout << "pfmet, pfmet_type1" << endl;
         cout << "\n" 
              << fInfo->pfMET << ", "
-             << fInfo->pfMETC << ", "
+             << fInfo->pfMETC <<
              << endl << endl;
     }
     

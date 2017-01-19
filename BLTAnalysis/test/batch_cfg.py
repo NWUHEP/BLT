@@ -5,7 +5,9 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production/12'
+path       = '/tthome/share/bacon/production/11'
+path_11a   = '/tthome/share/bacon/production/11a'
+path_12    = '/tthome/share/bacon/production/12'
 executable = 'execBatch.sh'
 selection  = 'mumu'
 period     = '2016'
@@ -19,51 +21,67 @@ data_list = []
 
 if selection == 'mumu' or selection == 'emu':
     data_list.extend([
-        cfg(data_name = 'muon_2016B_v1',
-            path      = '{0}/SingleMuon_Run2016B-23Sep2016-v1'.format(path),
-            nJobs     = 20,
-            suffix    = 'muon_2016B'
-           ),
-        cfg(data_name = 'muon_2016C_v1',
-            path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path),
+        cfg(data_name = 'muon_2016C_prompt',
+            path      = '{0}/SingleMuon_Run2016C-PromptReco-v2'.format(path_11a),
             nJobs     = 30,
-            suffix    = 'muon_2016C'
+            suffix    = 'muon_2016C_prompt'
            ),
-        cfg(data_name = 'muon_2016D_v1',
-            path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
+        cfg(data_name = 'muon_2016C_rereco',
+            path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path_12),
             nJobs     = 30,
-            suffix    = 'muon_2016D'
+            suffix    = 'muon_2016C_rereco'
            ),
-        cfg(data_name = 'muon_2016E_v1',
-            path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016E'
-           ),
-        cfg(data_name = 'muon_2016F_v1',
-            path      = '{0}/SingleMuon_Run2016F-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016F'
-           ),
-        cfg(data_name = 'muon_2016G',
-            path      = '{0}/SingleMuon_Run2016G-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016G'
-           ),
-        cfg(data_name = 'muon_2016H_v1',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v2',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v3',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
+
+        #cfg(data_name = 'muon_2016C_v1',
+        #    path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path_12),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016C'
+        #   ),
+        #cfg(data_name = 'muon_2016B_v1',
+        #    path      = '{0}/SingleMuon_Run2016B-23Sep2016-v1'.format(path),
+        #    nJobs     = 20,
+        #    suffix    = 'muon_2016B'
+        #   ),
+        #cfg(data_name = 'muon_2016C_v1',
+        #    path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016C'
+        #   ),
+        #cfg(data_name = 'muon_2016D_v1',
+        #    path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016D'
+        #   ),
+        #cfg(data_name = 'muon_2016E_v1',
+        #    path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016E'
+        #   ),
+        #cfg(data_name = 'muon_2016F_v1',
+        #    path      = '{0}/SingleMuon_Run2016F-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016F'
+        #   ),
+        #cfg(data_name = 'muon_2016G',
+        #    path      = '{0}/SingleMuon_Run2016G-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016G'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v1',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v2',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v3',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -231,6 +249,7 @@ batch_list = []
 batch_list += data_list
 #batch_list += mc_list 
 #batch_list += sig_list
+
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
                        selection   = selection,

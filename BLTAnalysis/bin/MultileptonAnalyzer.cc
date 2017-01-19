@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = false;
+bool sync_print = true;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -161,7 +161,38 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                   << std::endl;
 
     if (sync_print) {
-        if (true) {
+        if (
+            // 1b1f prompt only
+            (fInfo->runNum == 276282 && fInfo->evtNum == 962961373 )
+            || (fInfo->runNum == 275658 && fInfo->evtNum == 421983010 )
+            || (fInfo->runNum == 275761 && fInfo->evtNum == 8841088   )
+            || (fInfo->runNum == 275763 && fInfo->evtNum == 2205404   )
+            || (fInfo->runNum == 275774 && fInfo->evtNum == 345414990 )
+            || (fInfo->runNum == 275920 && fInfo->evtNum == 324833625 )
+            || (fInfo->runNum == 275832 && fInfo->evtNum == 372892658 )
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 250953678 )
+            || (fInfo->runNum == 275912 && fInfo->evtNum == 60530332  )
+            || (fInfo->runNum == 275913 && fInfo->evtNum == 36563749  )
+            || (fInfo->runNum == 275782 && fInfo->evtNum == 618342542 )
+            || (fInfo->runNum == 275890 && fInfo->evtNum == 1826173906)
+            || (fInfo->runNum == 275890 && fInfo->evtNum == 533847809 )
+            || (fInfo->runNum == 275920 && fInfo->evtNum == 248509574 )
+            || (fInfo->runNum == 275658 && fInfo->evtNum == 445475035 )
+            || (fInfo->runNum == 275777 && fInfo->evtNum == 516849018 )
+            || (fInfo->runNum == 275833 && fInfo->evtNum == 292583281 )
+            || (fInfo->runNum == 276283 && fInfo->evtNum == 617653743 )
+            || (fInfo->runNum == 276242 && fInfo->evtNum == 1204881479)
+            || (fInfo->runNum == 276283 && fInfo->evtNum == 287620804 )
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 2142810735)
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 448671337 )
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 1447390068)
+            || (fInfo->runNum == 275833 && fInfo->evtNum == 11719885  )
+            || (fInfo->runNum == 275832 && fInfo->evtNum == 103468133 )
+            || (fInfo->runNum == 275920 && fInfo->evtNum == 459472053 )
+            || (fInfo->runNum == 275776 && fInfo->evtNum == 20982532  )
+            || (fInfo->runNum == 275767 && fInfo->evtNum == 4464767   )
+            || (fInfo->runNum == 275774 && fInfo->evtNum == 417876576 )
+           ) {
             cout << "Eureka! " << endl;
             cout << "Run: " << fInfo->runNum 
                  << " Lumi: " << fInfo->lumiSec 
@@ -447,14 +478,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         if (
                 jet->pt > 30 
-                && fabs(jet->eta < 4.7)
+                && fabs(jet->eta) < 4.7
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
                         jet->pt > 30 
-                        && jet->mva > -0.89
+                        //&& jet->mva > -0.89
                         && !muOverlap 
                         //&& !elOverlap
                    ) { 

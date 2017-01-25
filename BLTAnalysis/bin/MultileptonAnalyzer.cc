@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = true;
+bool sync_print = false;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -163,35 +163,80 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     if (sync_print) {
         if (
             // 1b1f prompt only
-            (fInfo->runNum == 276282 && fInfo->evtNum == 962961373 )
-            || (fInfo->runNum == 275658 && fInfo->evtNum == 421983010 )
-            || (fInfo->runNum == 275761 && fInfo->evtNum == 8841088   )
-            || (fInfo->runNum == 275763 && fInfo->evtNum == 2205404   )
-            || (fInfo->runNum == 275774 && fInfo->evtNum == 345414990 )
-            || (fInfo->runNum == 275920 && fInfo->evtNum == 324833625 )
-            || (fInfo->runNum == 275832 && fInfo->evtNum == 372892658 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 250953678 )
-            || (fInfo->runNum == 275912 && fInfo->evtNum == 60530332  )
-            || (fInfo->runNum == 275913 && fInfo->evtNum == 36563749  )
-            || (fInfo->runNum == 275782 && fInfo->evtNum == 618342542 )
-            || (fInfo->runNum == 275890 && fInfo->evtNum == 1826173906)
-            || (fInfo->runNum == 275890 && fInfo->evtNum == 533847809 )
-            || (fInfo->runNum == 275920 && fInfo->evtNum == 248509574 )
-            || (fInfo->runNum == 275658 && fInfo->evtNum == 445475035 )
-            || (fInfo->runNum == 275777 && fInfo->evtNum == 516849018 )
-            || (fInfo->runNum == 275833 && fInfo->evtNum == 292583281 )
-            || (fInfo->runNum == 276283 && fInfo->evtNum == 617653743 )
-            || (fInfo->runNum == 276242 && fInfo->evtNum == 1204881479)
-            || (fInfo->runNum == 276283 && fInfo->evtNum == 287620804 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 2142810735)
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 448671337 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 1447390068)
-            || (fInfo->runNum == 275833 && fInfo->evtNum == 11719885  )
-            || (fInfo->runNum == 275832 && fInfo->evtNum == 103468133 )
-            || (fInfo->runNum == 275920 && fInfo->evtNum == 459472053 )
-            || (fInfo->runNum == 275776 && fInfo->evtNum == 20982532  )
-            || (fInfo->runNum == 275767 && fInfo->evtNum == 4464767   )
-            || (fInfo->runNum == 275774 && fInfo->evtNum == 417876576 )
+            //(fInfo->runNum == 276282 && fInfo->evtNum == 962961373 )
+            //|| (fInfo->runNum == 275658 && fInfo->evtNum == 421983010 )
+            //|| (fInfo->runNum == 275761 && fInfo->evtNum == 8841088   )
+            //|| (fInfo->runNum == 275763 && fInfo->evtNum == 2205404   )
+            //|| (fInfo->runNum == 275774 && fInfo->evtNum == 345414990 )
+            //|| (fInfo->runNum == 275920 && fInfo->evtNum == 324833625 )
+            //|| (fInfo->runNum == 275832 && fInfo->evtNum == 372892658 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 250953678 )
+            //|| (fInfo->runNum == 275912 && fInfo->evtNum == 60530332  )
+            //|| (fInfo->runNum == 275913 && fInfo->evtNum == 36563749  )
+            //|| (fInfo->runNum == 275782 && fInfo->evtNum == 618342542 )
+            //|| (fInfo->runNum == 275890 && fInfo->evtNum == 1826173906)
+            //|| (fInfo->runNum == 275890 && fInfo->evtNum == 533847809 )
+            //|| (fInfo->runNum == 275920 && fInfo->evtNum == 248509574 )
+            //|| (fInfo->runNum == 275658 && fInfo->evtNum == 445475035 )
+            //|| (fInfo->runNum == 275777 && fInfo->evtNum == 516849018 )
+            //|| (fInfo->runNum == 275833 && fInfo->evtNum == 292583281 )
+            //|| (fInfo->runNum == 276283 && fInfo->evtNum == 617653743 )
+            //|| (fInfo->runNum == 276242 && fInfo->evtNum == 1204881479)
+            //|| (fInfo->runNum == 276283 && fInfo->evtNum == 287620804 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 2142810735)
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 448671337 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 1447390068)
+            //|| (fInfo->runNum == 275833 && fInfo->evtNum == 11719885  )
+            //|| (fInfo->runNum == 275832 && fInfo->evtNum == 103468133 )
+            //|| (fInfo->runNum == 275920 && fInfo->evtNum == 459472053 )
+            //|| (fInfo->runNum == 275776 && fInfo->evtNum == 20982532  )
+            //|| (fInfo->runNum == 275767 && fInfo->evtNum == 4464767   )
+            //|| (fInfo->runNum == 275774 && fInfo->evtNum == 417876576 )
+
+            // 1b1f rereco only
+               (fInfo->runNum == 276282 && fInfo->evtNum == 1675201187)
+            || (fInfo->runNum == 276283 && fInfo->evtNum == 861651588 )
+            || (fInfo->runNum == 276283 && fInfo->evtNum == 1511132428)
+            || (fInfo->runNum == 276282 && fInfo->evtNum == 1454695836)
+            || (fInfo->runNum == 275834 && fInfo->evtNum == 227081827 )
+            || (fInfo->runNum == 275911 && fInfo->evtNum == 464027159 )
+            || (fInfo->runNum == 275658 && fInfo->evtNum == 148194726 )
+            || (fInfo->runNum == 275886 && fInfo->evtNum == 40795923  )
+            || (fInfo->runNum == 275834 && fInfo->evtNum == 289697805 )
+            || (fInfo->runNum == 275832 && fInfo->evtNum == 164639704 )
+            || (fInfo->runNum == 275834 && fInfo->evtNum == 37285563  )
+            || (fInfo->runNum == 276282 && fInfo->evtNum == 424869964 )
+            || (fInfo->runNum == 276097 && fInfo->evtNum == 782916742 )
+            || (fInfo->runNum == 275658 && fInfo->evtNum == 586726448 )
+            || (fInfo->runNum == 275837 && fInfo->evtNum == 389527228 )
+            || (fInfo->runNum == 275837 && fInfo->evtNum == 788521881 )
+            || (fInfo->runNum == 275833 && fInfo->evtNum == 364873040 )
+            || (fInfo->runNum == 275837 && fInfo->evtNum == 488136780 )
+            || (fInfo->runNum == 276282 && fInfo->evtNum == 852439675 )
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 33002592  )
+            || (fInfo->runNum == 275847 && fInfo->evtNum == 1884931699)
+
+            // 1b1c rereco only
+            //(fInfo->runNum == 276244 && fInfo->evtNum == 386902302 )
+            //|| (fInfo->runNum == 276283 && fInfo->evtNum == 86330277  )
+            //|| (fInfo->runNum == 276283 && fInfo->evtNum == 626253202 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 982739022 )
+            //|| (fInfo->runNum == 275836 && fInfo->evtNum == 546679374 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 347302964 )
+            //|| (fInfo->runNum == 275833 && fInfo->evtNum == 443277179 )
+            //|| (fInfo->runNum == 275913 && fInfo->evtNum == 358290279 )
+            //|| (fInfo->runNum == 275836 && fInfo->evtNum == 608726315 )
+            //|| (fInfo->runNum == 275913 && fInfo->evtNum == 263856411 )
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 541111649 )
+            //|| (fInfo->runNum == 276282 && fInfo->evtNum == 1023019531)
+            //|| (fInfo->runNum == 275767 && fInfo->evtNum == 4077465   )
+            //|| (fInfo->runNum == 275837 && fInfo->evtNum == 220207827 )
+            //|| (fInfo->runNum == 275834 && fInfo->evtNum == 49198840  )
+            //|| (fInfo->runNum == 276282 && fInfo->evtNum == 1670149490)
+            //|| (fInfo->runNum == 275847 && fInfo->evtNum == 1672053311)
+            //|| (fInfo->runNum == 275658 && fInfo->evtNum == 158369237 )
+            //|| (fInfo->runNum == 275658 && fInfo->evtNum == 479865516 )
+
            ) {
             cout << "Eureka! " << endl;
             cout << "Run: " << fInfo->runNum 
@@ -224,7 +269,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         return kTRUE;
     
     if (sync_print) {
-        cout << "trigger status: " << passTrigger << endl;
+        cout << "trigger status: " << passTrigger << "\n" << endl;
     }
 
     hTotalEvents->Fill(3);
@@ -354,7 +399,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         // Fill containers
-        //if (muon->trkIso/muonP4.Pt() < 0.1) {
+        if (muon->trkIso/muonP4.Pt() < 0.1) {
             // For synchronization
             if (sync_print) {
                 cout << "(" << muonP4.Pt() << ", " << muon->pt 
@@ -364,11 +409,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                      << endl;
             }
 
-            if (
-                    muonP4.Pt() > 20 
-                    && fabs(muonP4.Eta()) < 2.1 
-                    && muon->trkIso/muonP4.Pt() < 0.1
-               ) {
+            if (muonP4.Pt() > 20 && fabs(muonP4.Eta()) < 2.1) {
                 veto_muons.push_back(muonP4);
             } 
 
@@ -384,7 +425,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 }
                 muons_trigger.push_back(triggered);
             }
-        //}
+        }
     }
     std::sort(muons.begin(), muons.end(), P4SortCondition);
 
@@ -498,8 +539,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         //&& !elOverlap
                    ) { 
                     if (isData) {
-                        if (jet->csv > 0.9535) {
-                        //if (jet->bmva > 0.875) {
+                        //if (jet->csv > 0.9535) {
+                        if (jet->bmva > 0.9432) {
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -507,8 +548,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             ++nJets;
                         }
                     } else {
-                        if (particleSelector->BTagModifier(jet, "CSVT")) { 
-                        //if (particleSelector->BTagModifier(jet, "MVAT")) { 
+                        //if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                        if (particleSelector->BTagModifier(jet, "MVAT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -542,11 +583,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     metPhi = fInfo->pfMETCphi;
 
     if (sync_print) {
-        cout << "pfmet, pfmet_type1" << endl;
-        cout << "\n" 
-             << fInfo->pfMET << ", "
+        cout << "\npfmet, pfmet_type1" << endl;
+        cout << fInfo->pfMET << ", "
              << fInfo->pfMETC
-             << endl;
+             << "\n" << endl;
     }
     
     ///////////////////////////////
@@ -574,8 +614,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if (
-            !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1 && muons_iso[0]/muonOneP4.Pt() < 0.1)
-            || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1 && muons_iso[muonTwoIndex]/muonTwoP4.Pt() < 0.1)
+               !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1) 
+            || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1)
            )
             return kTRUE;
         hTotalEvents->Fill(6);

@@ -58,7 +58,7 @@ cd BaconAna && git checkout master && git fetch upstream && git merge upstream/m
 
 There are two example analyzers included in the BLT repository.  These produce a set of skimmed ntuples...
 
-7 input arguments are mandatory: [input file] [no of events] [selection] [dataset] [datasetgroup] [period] [jobid]
+7 input arguments are mandatory: [input file] [no of events] [dataset] [datasetgroup] [selection] [period] [jobid]
 
 ```
 cd BLT/BLTAnalysis/test

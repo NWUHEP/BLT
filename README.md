@@ -28,11 +28,11 @@ git clone git@github.com:NWUHEP/BaconAna.git
 
 Depending on which branch of BLT you are working with you will need to check out a specific tag of BaconAna.  These are listed in the following table:
 
-| BLT branch | BaconAna tag |
+| BLT branch | BaconAna tag/branch |
 |:---:|:---:|
 | master    | -- |
 | amumu_2012 | 04 |
-| amumu_2016 | 10 |
+| amumu_2016 | master |
 
 To check out a tag do the following from the top of the BaconAna repository,
 
@@ -58,7 +58,7 @@ cd BaconAna && git checkout master && git fetch upstream && git merge upstream/m
 
 There are two example analyzers included in the BLT repository.  These produce a set of skimmed ntuples...
 
-7 input arguments are mandatory: [input file] [no of events] [dataset] [datasetgroup] [selection] [period] [jobid]
+7 input arguments are mandatory: [input file] [no of events] [selection] [dataset] [datasetgroup] [period] [jobid]
 
 ```
 cd BLT/BLTAnalysis/test

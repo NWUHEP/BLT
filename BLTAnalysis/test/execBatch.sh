@@ -31,10 +31,16 @@ source /software/tier3/osg/cmsset_default.sh
 #cp $TOPDIR/source.tar.gz .
 tar -xzf source.tar.gz
 cd $CMSSW_VERSION/src/
+scramv1 b ProjectRename
 cmsenv
+scram b
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
+echo $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+echo $PATH
+pwd
+cat input.txt
 ### Run the analyzer
 #DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT

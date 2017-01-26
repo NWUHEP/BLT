@@ -35,41 +35,41 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        cfg(data_name = 'muon_2016D_v1',
-            path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016D'
-           ),
-        cfg(data_name = 'muon_2016E_v1',
-            path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016E'
-           ),
-        cfg(data_name = 'muon_2016F_v1',
-            path      = '{0}/SingleMuon_Run2016F-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016F'
-           ),
-        cfg(data_name = 'muon_2016G',
-            path      = '{0}/SingleMuon_Run2016G-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016G'
-           ),
-        cfg(data_name = 'muon_2016H_v1',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v2',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v3',
-            path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
+        #cfg(data_name = 'muon_2016D_v1',
+        #    path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016D'
+        #   ),
+        #cfg(data_name = 'muon_2016E_v1',
+        #    path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016E'
+        #   ),
+        #cfg(data_name = 'muon_2016F_v1',
+        #    path      = '{0}/SingleMuon_Run2016F-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016F'
+        #   ),
+        #cfg(data_name = 'muon_2016G',
+        #    path      = '{0}/SingleMuon_Run2016G-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016G'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v1',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v2',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
+        #cfg(data_name = 'muon_2016H_v3',
+        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016H'
+        #   ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -99,7 +99,7 @@ mc_list.extend([
     #    suffix   = 'zjets_m-50'
     #   ),
     cfg(data_name = 'DYJetsToLL_M-10to50',
-        path     = '{0}/Summer16_DYJetsToLL_M-10to50_amcatnlo'.format(path),
+        path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
        ),
@@ -146,7 +146,7 @@ mc_list.extend([
 
     # top
     cfg(data_name = 'ttbar_leptonic',
-        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+        path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_lep'
        ),
@@ -166,7 +166,7 @@ mc_list.extend([
     #    suffix   = 'tbar_s'
     #   ),
     cfg(data_name = 'T_t-channel',
-        path     = '{0}/Summer16_ST_t-channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+        path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
         nJobs    = 10,
         suffix   = 't_t'
        ),

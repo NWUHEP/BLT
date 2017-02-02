@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = true;
+bool sync_print = false;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -58,9 +58,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     }
 
     // Weight utility class
-    weights.reset(new WeightUtils(params->period, params->selection, false));
-
-    // Lumi mask
+    weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
     if (true) { // this will need to be turned off for MC
@@ -141,7 +139,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 {
 
-    GetEntry(entry+3040000, 1);  // load all branches
+    GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
 
@@ -474,8 +472,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                    ) { 
                     if (isData) {
                         //if (jet->csv > 0.9535) {
-                        if (jet->bmva > 0.9432) {
                         //if (jet->bmva > 0.875) {
+                        if (jet->bmva > 0.9432) {
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -699,7 +697,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     // Synchronization printout
-    if (nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
+    if (sync_print && nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
         cout << "Run: " << fInfo->runNum  
             << " Lumi: " << fInfo->lumiSec 
             << " Event: " << fInfo->evtNum << endl;

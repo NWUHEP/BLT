@@ -395,7 +395,7 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
             }
         }
     } else if (fabs(jet->eta) <= 3.0) { 
-        if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 2) 
+        if (jet->neuEmFrac > 0.01 && jet->neuHadFrac < 0.98 && jet->nNeutrals > 2) 
             jetPass = true;
     } else {
         if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 

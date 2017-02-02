@@ -6,6 +6,7 @@ import sys
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12'
+path_11a   = '/tthome/share/bacon/production/11a'
 executable = 'execBatch.sh'
 selection  = 'mumu'
 period     = '2016'
@@ -19,27 +20,37 @@ data_list = []
 
 if selection == 'mumu' or selection == 'emu':
     data_list.extend([
-        #cfg(data_name = 'muon_2016C_prompt',
+        #cfg(data_name = 'muon_2016B',
+        #    path      = '{0}/SingleMuon_Run2016B-PromptReco-v2'.format(path_11a),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_prompt_2016B'
+        #   ),
+        #cfg(data_name = 'muon_2016C',
         #    path      = '{0}/SingleMuon_Run2016C-PromptReco-v2'.format(path_11a),
         #    nJobs     = 30,
-        #    suffix    = 'muon_2016C_prompt'
+        #    suffix    = 'muon_prompt_2016C'
         #   ),
-        #cfg(data_name = 'muon_2016C_rereco',
-        #    path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path_12),
+        #cfg(data_name = 'muon_2016D',
+        #    path      = '{0}/SingleMuon_Run2016D-PromptReco-v2'.format(path_11a),
         #    nJobs     = 30,
-        #    suffix    = 'muon_2016C_rereco'
+        #    suffix    = 'muon_prompt_2016D'
         #   ),
 
+        cfg(data_name = 'muon_2016B_v3',
+            path      = '{0}/SingleMuon_Run2016B-23Sep2016-v3'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016B'
+           ),
         cfg(data_name = 'muon_2016C_v1',
             path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        #cfg(data_name = 'muon_2016D_v1',
-        #    path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016D'
-        #   ),
+        cfg(data_name = 'muon_2016D_v1',
+            path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016D'
+           ),
         #cfg(data_name = 'muon_2016E_v1',
         #    path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
         #    nJobs     = 30,
@@ -93,21 +104,21 @@ elif selection == 'ee':
 mc_list = []
 mc_list.extend([
     # Drell-Yan
-    #cfg(data_name = 'DYJetsToLL_M-50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-50_amcatnlo'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'zjets_m-50'
-    #   ),
+    cfg(data_name = 'DYJetsToLL_M-50',
+        path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'zjets_m-50'
+       ),
     cfg(data_name = 'DYJetsToLL_M-10to50',
         path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
        ),
-    #cfg(data_name = 'DY1JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-50'
-    #   ),
+    cfg(data_name = 'DY1JetsToLL_M-50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50'
+       ),
     cfg(data_name = 'DY1JetsToLL_M-10to50',
         path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,

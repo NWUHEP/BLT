@@ -33,7 +33,6 @@ tar -xzf source.tar.gz
 cd $CMSSW_VERSION/src/
 scramv1 b ProjectRename
 cmsenv
-scram b
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 

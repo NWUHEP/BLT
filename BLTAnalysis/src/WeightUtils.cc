@@ -98,3 +98,23 @@ float WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
     
     return weight;
 }
+
+//float WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
+//{
+//    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
+//    int etaBin = 0;
+//    for (int i = 0; i < 4; ++i) {
+//        if (fabs(electron.Eta()) > binningEta[i] && fabs(electron.Eta()) <= binningEta[i+1]) {
+//            etaBin = i;
+//            break;
+//        }
+//    }
+//
+//    float weight = 1;
+//    if (electron.Pt() < 200.) {
+//        weight   *= _muSF2012_ID_DATA[etaBin]->Eval(electron.Pt())/_muSF2012_ID_MC[etaBin]->Eval(electron.Pt());
+//        //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(electronP4.Pt());
+//    }
+//    
+//    return weight;
+//}

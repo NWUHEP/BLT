@@ -5,7 +5,7 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production/12'
+path       = '/tthome/share/bacon/production/12a'
 path_11a   = '/tthome/share/bacon/production/11a'
 executable = 'execBatch.sh'
 selection  = 'mumu'
@@ -36,21 +36,21 @@ if selection == 'mumu' or selection == 'emu':
         #    suffix    = 'muon_prompt_2016D'
         #   ),
 
-        cfg(data_name = 'muon_2016B_v3',
-            path      = '{0}/SingleMuon_Run2016B-23Sep2016-v3'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016B'
-           ),
+        #cfg(data_name = 'muon_2016B_v3',
+        #    path      = '{0}/SingleMuon_Run2016B-23Sep2016-v3'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016B'
+        #   ),
         cfg(data_name = 'muon_2016C_v1',
             path      = '{0}/SingleMuon_Run2016C-23Sep2016-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        cfg(data_name = 'muon_2016D_v1',
-            path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016D'
-           ),
+        #cfg(data_name = 'muon_2016D_v1',
+        #    path      = '{0}/SingleMuon_Run2016D-23Sep2016-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016D'
+        #   ),
         #cfg(data_name = 'muon_2016E_v1',
         #    path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
         #    nJobs     = 30,

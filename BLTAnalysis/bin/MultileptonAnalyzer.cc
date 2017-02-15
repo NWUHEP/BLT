@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = false;
+bool sync_print = true;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -64,12 +64,12 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     if (true) { // this will need to be turned off for MC
         string jsonFileName = cmssw_base + 
             "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
-            //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
+        //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
     }
 
     // muon momentum corrections
-    muonCorr = new rochcor2016();
+    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
@@ -143,40 +143,53 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     this->totalEvents++;
     hTotalEvents->Fill(1);
 
-    if (
-            (fInfo->runNum == 274286 && fInfo->evtNum == 121098023)
-            || (fInfo->runNum == 274241 && fInfo->evtNum == 629248723)
-       )
-        return kTRUE;
-
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
-                  << " Run: " << fInfo->runNum 
-                  << " Lumi: " << fInfo->lumiSec 
-                  << " Event: " << fInfo->evtNum 
-                  << std::endl;
+            << " Run: " << fInfo->runNum 
+            << " Lumi: " << fInfo->lumiSec 
+            << " Event: " << fInfo->evtNum 
+            << std::endl;
 
     if (sync_print) {
         if (
-            (fInfo->runNum == 274968 && fInfo->evtNum ==  660666542)
-            || (fInfo->runNum == 274160 && fInfo->evtNum ==  288247765)
-            || (fInfo->runNum == 274286 && fInfo->evtNum ==  121098023)
-            || (fInfo->runNum == 274286 && fInfo->evtNum ==   51031337)
-            || (fInfo->runNum == 275832 && fInfo->evtNum ==  106675759)
-            || (fInfo->runNum == 276586 && fInfo->evtNum ==  236234148)
-            || (fInfo->runNum == 276361 && fInfo->evtNum ==  975035622)
-            || (fInfo->runNum == 276437 && fInfo->evtNum == 3138070341)
-            || (fInfo->runNum == 276653 && fInfo->evtNum ==  676812828)
+                // Olga only 1b1f
+                (fInfo->runNum == 275847 && fInfo->evtNum == 8856946 )
+                || (fInfo->runNum == 275837 && fInfo->evtNum ==  719331150 )
+                || (fInfo->runNum == 276282 && fInfo->evtNum == 1803165235 )
+                || (fInfo->runNum == 276283 && fInfo->evtNum ==  626253202 )
+                || (fInfo->runNum == 276244 && fInfo->evtNum ==  711325605 )
+                || (fInfo->runNum == 276282 && fInfo->evtNum ==  805060289 )
+                || (fInfo->runNum == 275772 && fInfo->evtNum ==   96615783 )
+                || (fInfo->runNum == 275836 && fInfo->evtNum ==  691017315 )
+                || (fInfo->runNum == 275931 && fInfo->evtNum ==   31801986 )
+                || (fInfo->runNum == 276244 && fInfo->evtNum ==  891016526 )
+                || (fInfo->runNum == 275836 && fInfo->evtNum ==  546679374 )
+                || (fInfo->runNum == 275836 && fInfo->evtNum ==  425783197 )
 
+                || (fInfo->runNum == 275832 && fInfo->evtNum == 42185813 )
+                || (fInfo->runNum == 275832 && fInfo->evtNum ==   79764915 )
+                || (fInfo->runNum == 275832 && fInfo->evtNum ==  464058579 )
+                || (fInfo->runNum == 275912 && fInfo->evtNum ==   23923333 )
+                || (fInfo->runNum == 275836 && fInfo->evtNum ==  293656768 )
+                || (fInfo->runNum == 275890 && fInfo->evtNum ==  395412741 )
+                || (fInfo->runNum == 275911 && fInfo->evtNum ==  294738026 )
+                || (fInfo->runNum == 276242 && fInfo->evtNum == 1177366051 )
+                || (fInfo->runNum == 276283 && fInfo->evtNum ==  258667291 )
+                || (fInfo->runNum == 276282 && fInfo->evtNum ==  713238258 )
+                || (fInfo->runNum == 276283 && fInfo->evtNum ==   74924237 )
+                || (fInfo->runNum == 275776 && fInfo->evtNum ==  104936389 )
                 ) {
-            cout << "Eureka! " << endl;
-            cout << "Run: " << fInfo->runNum 
-                 << " Lumi: " << fInfo->lumiSec 
-                 << " Event: " << fInfo->evtNum 
-                 << std::endl;
-        } else {
-            return kTRUE;
-        }
+                    cout << "START!" << endl;
+
+                    cout << "===========================" << endl;
+                    cout << "Run: " << fInfo->runNum 
+                        << " Lumi: " << fInfo->lumiSec 
+                        << " Event: " << fInfo->evtNum 
+                        << std::endl;
+                    cout << "===========================\n" << endl;
+                } else {
+                    return kTRUE;
+                }
     }
 
     const bool isData = (fInfo->runNum != 1);
@@ -198,7 +211,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     if (!passTrigger && isData)
         return kTRUE;
-    
+
     if (sync_print) {
         cout << "trigger status: " << passTrigger << "\n" << endl;
     }
@@ -230,17 +243,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-            
+
             //cout << particle->status << ", "
             //     << particle->pdgId  << ", "
             //     << particle->parent
             //     << endl;
 
             if (
-                particle->status == 23 
-                && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
-                && particle->parent != -2
-                ) {
+                    particle->status == 23 
+                    && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
+                    && particle->parent != -2
+               ) {
                 ++count;
 
             }
@@ -276,7 +289,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 20 
+                muon->pt > 10 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -334,10 +347,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // For synchronization
             if (sync_print) {
                 cout << "(" << muonP4.Pt() << ", " << muon->pt 
-                     << ", " << muon->eta << ", " << muon->phi 
-                     << ") , " << muon->q 
-                     << ", " << muon->trkIso
-                     << endl;
+                    << ", " << muon->eta << ", " << muon->phi 
+                    << ") , " << muon->q 
+                    << ", " << muon->trkIso
+                    << endl;
             }
 
             if (muonP4.Pt() > 20 && fabs(muonP4.Eta()) < 2.1) {
@@ -438,15 +451,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     << jet->geneta << ", " << jet->genphi << ", " 
         //     << jet->partonFlavor << ", " << jet->hadronFlavor << ", " 
         //     << endl;
-          
+
         if (sync_print) {
             cout << "(" << jet->pt << ", " << jet->ptRaw << ", " 
-                 << jet->eta << ", " << jet->phi << "), " 
-                 << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
-                 << muOverlap << ", " 
-                 << jet->csv << ", " << jet->bmva << ", "
-                 << jet->mva 
-                 << endl;
+                << jet->eta << ", " << jet->phi << "), " 
+                << particleSelector->PassJetID(jet, cuts->looseJetID) << ", " 
+                << muOverlap << ", " 
+                << jet->csv << ", " << jet->bmva << ", "
+                << jet->mva 
+                << endl;
         }
 
         if (!isData) {
@@ -471,9 +484,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         //&& !elOverlap
                    ) { 
                     if (isData) {
-                        //if (jet->csv > 0.9535) {
-                        //if (jet->bmva > 0.875) {
-                        if (jet->bmva > 0.9432) {
+                        if (jet->bmva > 0.9432) { 
                             bjets.push_back(jet);
                             ++nBJets;
                         } else {
@@ -481,7 +492,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             ++nJets;
                         }
                     } else {
-                        //if (particleSelector->BTagModifier(jet, "CSVT")) { 
                         if (particleSelector->BTagModifier(jet, "MVAT")) { 
                             bjets.push_back(jet);
                             ++nBJets;
@@ -518,10 +528,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     if (sync_print) {
         cout << "\npfmet, pfmet_type1" << endl;
         cout << fInfo->pfMET << ", "
-             << fInfo->pfMETC
-             << "\n" << endl;
+            << fInfo->pfMETC
+            << "\n" << endl;
     }
-    
+
     ///////////////////////////////
     /* Apply analysis selections */
     ///////////////////////////////
@@ -547,8 +557,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if (
-               !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1) 
-            || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1)
+                !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1) 
+                || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1)
            )
             return kTRUE;
         hTotalEvents->Fill(6);
@@ -614,11 +624,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
+        if (muons[0].Pt() < 25 || fabs(muons[0].Eta()) > 2.1)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+
         TLorentzVector dilepton;
         dilepton = muons[0] + electrons[0];
         if (dilepton.M() < 12 || dilepton.M() > 70)
             return kTRUE;
-        hTotalEvents->Fill(6);
+        hTotalEvents->Fill(7);
 
         leptonOneP4      = muons[0];
         leptonOneIso     = muons_iso[0];
@@ -636,8 +650,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= weights->GetMuonRecoEff(muons[0]);
 
             // trigger efficiency
-            pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_eta2p1_v*", muons[0]);
-            eventWeight *= trigEff.first/trigEff.second;
+            pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu22_v*", muons[0]);
+            eventWeight *= trigEff.first;
         }
     } 
 
@@ -698,26 +712,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     // Synchronization printout
     if (sync_print && nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
-        cout << "Run: " << fInfo->runNum  
-            << " Lumi: " << fInfo->lumiSec 
-            << " Event: " << fInfo->evtNum << endl;
-
-        cout << nBJets << ", " << nJets << ", " << nFwdJets << endl;
-
-        cout << muons[0].Pt() << ", " << muons[0].Eta() << ", " << muons[0].Phi() << endl; 
-        cout << muons[1].Pt() << ", " << muons[1].Eta() << ", " << muons[1].Phi() << endl; 
-
-        cout << jetP4.Pt() << ", " << ", " << jetP4.Eta() << ", " 
-            << jetP4.Phi() << ", " << jetTag << endl; 
-        cout << bjetP4.Pt() << ", " << ", " << bjetP4.Eta() << ", " 
-            << jetP4.Phi() << ", " << jetTag << endl; 
-
-        cout << met << endl;
 
         TLorentzVector dijet = bjetP4 + jetP4;
         TLorentzVector dimuon = muons[0] + muons[1];
+        cout << "phi_mumu, phi_jj, dphi_mumujj" << endl;
         cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
     }
+    cout << "STOP!" << endl;
 
 
     outTree->Fill();

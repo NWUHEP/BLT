@@ -68,14 +68,14 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
     if (fabs(el->scEta) < 1.479) 
     { // barrel
         if (
-                fabs(el->dEtaIn)    < cutLevel.dEtaIn[0]
-                && fabs(el->dPhiIn) < cutLevel.dPhiIn[0]
-                && el->sieie        < cutLevel.sigmaIetaIeta[0]
-                && el->hovere       < cutLevel.HadOverEm[0]
-                && fabs(el->d0)     < cutLevel.dxy[0]
-                && fabs(el->dz)     < cutLevel.dz[0]
-                && energyInverse   < cutLevel.fabsEPDiff[0]
-                && el->nMissingHits <= cutLevel.ConversionMissHits[0]
+                el->sieie           < 0.00998
+                && fabs(el->dEtaIn) < 0.00308
+                && fabs(el->dPhiIn) < 0.0816
+                && el->hovere       < 0.0414
+                && fabs(el->d0)     < 1.
+                && fabs(el->dz)     < 1.
+                && energyInverse    < 0.0129
+                && el->nMissingHits <= 1
                 && !el->isConv
            ) elPass = true;
     } 
@@ -86,14 +86,14 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
     else if (fabs(el->scEta) > 1.566) 
     { // endcap
         if (
-                fabs(el->dEtaIn)    < cutLevel.dEtaIn[1]
-                && fabs(el->dPhiIn) < cutLevel.dPhiIn[1]
-                && el->sieie        < cutLevel.sigmaIetaIeta[1]
-                && el->hovere       < cutLevel.HadOverEm[1]
-                && fabs(el->d0)     < cutLevel.dxy[1]
-                && fabs(el->dz)     < cutLevel.dz[1]
-                && energyInverse   < cutLevel.fabsEPDiff[1]
-                && el->nMissingHits <= cutLevel.ConversionMissHits[1]
+                fabs(el->dEtaIn)    < 0.0292
+                && fabs(el->dPhiIn) < 0.00605
+                && el->sieie        < 0.0394
+                && el->hovere       < 0.0641
+                && fabs(el->d0)     < 1.
+                && fabs(el->dz)     < 1.
+                && energyInverse    < 0.0129
+                && el->nMissingHits <= 1
                 && !el->isConv    
            ) elPass = true;
     }    
@@ -215,6 +215,7 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
 {
     int iEta = 0;
     float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
     for (unsigned i = 0; i < 8; ++i) {
         if (fabs(el->scEta) > etaBins[i] && fabs(el->scEta) < etaBins[i+1]) {
             iEta = i;
@@ -225,19 +226,15 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
     float combIso = el->chHadIso
                     + std::max(0.,(double)el->neuHadIso 
                     + el->gammaIso 
-                    - _rhoFactor*EAEl[iEta]);
+                    - _rhoFactor*effArea[iEta]);
 
     bool isoPass = false;
-    if (cutLevel.cutName == "mediumElIso") {
-        if (el->pt < 20) {
-            if (combIso/el->pt < 0.10) isoPass = true;
-        } else {
-            if (combIso/el->pt < 0.15) isoPass = true;
-        }
-
+    if (fabs(el->scEta) <= 1.479) {
+        if (combIso/el->pt < 0.0588) isoPass = true;
     } else {
-        if (combIso/el->pt < cutLevel.relCombIso) isoPass = true;
+        if (combIso/el->pt < 0.0571) isoPass = true;
     }
+
     return isoPass;
 }
 

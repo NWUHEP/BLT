@@ -26,7 +26,6 @@
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
 
 #include "BLT/BLTAnalysis/interface/RoccoR.h"
-#include "BLT/BLTAnalysis/interface/rochcor2016.h"
 
 // BaconAna class definitions (might need to add more)
 #include "BaconAna/Utils/interface/TTrigger.hh"
@@ -67,7 +66,7 @@ public:
     RunLumiRangeMap lumiMask;
 
     // rochester muon corrections
-    rochcor2016 *muonCorr;
+    RoccoR *muonCorr;
 
     // Params and cuts
     std::unique_ptr<Parameters>         params;

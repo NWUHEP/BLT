@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-//FIXME: implement these
-
 using namespace baconhep;
 using namespace std;
 
@@ -16,6 +14,24 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     this->_cuts = cuts;
 
     _rng = new TRandom3(1337);
+
+
+    // offline jet corrections on-the-fly
+    const std::string cmssw_base = getenv("CMSSW_BASE");
+    std::string jecdir = cmssw_base + "/src/BLT/BLTAnalysis/data/JEC_2016BCD_data_v4/";
+    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecdir + "Summer16_23Sep2016BCDV4_DATA_L2L3Residual_AK4PFchs.txt"); 
+    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecdir + "Summer16_23Sep2016BCDV4_DATA_L3Absolute_AK4PFchs.txt");
+    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecdir + "Summer16_23Sep2016BCDV4_DATA_L2Relative_AK4PFchs.txt");
+    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(jecdir + "Summer16_23Sep2016BCDV4_DATA_L1FastJet_AK4PFchs.txt");
+
+    vector<JetCorrectorParameters> vPar;
+    vPar.push_back(*L1JetPar);
+    vPar.push_back(*L2JetPar);
+    vPar.push_back(*L3JetPar);
+    vPar.push_back(*ResJetPar);
+
+    _jetCorrector = new FactorizedJetCorrector(vPar);
+
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
@@ -224,9 +240,9 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
     }
 
     float combIso = el->chHadIso
-                    + std::max(0.,(double)el->neuHadIso 
-                    + el->gammaIso 
-                    - _rhoFactor*effArea[iEta]);
+        + std::max(0.,(double)el->neuHadIso 
+                + el->gammaIso 
+                - _rhoFactor*effArea[iEta]);
 
     bool isoPass = false;
     if (fabs(el->scEta) <= 1.479) {
@@ -410,17 +426,17 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     } else {
         pass = true;
     }
-    
+
     /*else if(2.5 <= fabs(jet->eta) && fabs(jet->eta) < 2.75) {
-        if (jet->mva >= -0.52) 
-            pass = true;
-    } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
-        if (jet->mva >= -0.38) 
-            pass = true;
-    } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
-        if (jet->mva >= -0.30) 
-            pass = true;
-    }*/
+      if (jet->mva >= -0.52) 
+      pass = true;
+      } else if(2.75 <= fabs(jet->eta) && fabs(jet->eta) < 3) {
+      if (jet->mva >= -0.38) 
+      pass = true;
+      } else if(3 <= fabs(jet->eta) && fabs(jet->eta) < 4.7) {
+      if (jet->mva >= -0.30) 
+      pass = true;
+      }*/
 
     return pass;
 }
@@ -484,4 +500,16 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
     }
 
     return isBTagged;
+}
+
+double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName) const
+{
+    _jetCorrector->setJetEta(jet->eta);
+    _jetCorrector->setJetPt(jet->ptRaw);
+    _jetCorrector->setJetA(jet->area);
+    _jetCorrector->setRho(_rhoFactor); 
+
+    double correction = _jetCorrector->getCorrection();
+
+    return correction;
 }

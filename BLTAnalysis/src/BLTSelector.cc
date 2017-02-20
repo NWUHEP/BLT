@@ -122,6 +122,8 @@ Int_t BLTSelector::MakeMeSandwich(int argc, char **argv) {
     TStopwatch timer;
 
     gROOT->SetBatch();
+    //gSystem->Load("libFWCoreFWLite.so");
+    //AutoLibraryLoader::enable();
 
     // _________________________________________________________________________
     // Get arguments

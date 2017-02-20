@@ -23,6 +23,10 @@
 #include <memory>
 #include <cassert>
 
+//CMSSW libraries
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+
 using namespace std;
 
 class ParticleSelector {
@@ -55,6 +59,7 @@ public:
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
     bool BTagModifier(const baconhep::TJet* jet, string) const;
+    double JetCorrector(const baconhep::TJet* jet, string) const;
 
 private:
     Parameters _parameters;
@@ -64,6 +69,9 @@ private:
     int        _npv;
     float      _rhoFactor;
     TRandom3*  _rng;
+
+    // For offline jet corrections
+    FactorizedJetCorrector* _jetCorrector;
 };
 
 #endif  // PARTICLESELECTOR_HH

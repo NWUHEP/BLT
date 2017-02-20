@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = true;
+bool sync_print = false;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -153,31 +153,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     if (sync_print) {
         if (
                 // Olga only 1b1f
-                (fInfo->runNum == 275847 && fInfo->evtNum == 8856946 )
-                || (fInfo->runNum == 275837 && fInfo->evtNum ==  719331150 )
-                || (fInfo->runNum == 276282 && fInfo->evtNum == 1803165235 )
-                || (fInfo->runNum == 276283 && fInfo->evtNum ==  626253202 )
-                || (fInfo->runNum == 276244 && fInfo->evtNum ==  711325605 )
-                || (fInfo->runNum == 276282 && fInfo->evtNum ==  805060289 )
-                || (fInfo->runNum == 275772 && fInfo->evtNum ==   96615783 )
-                || (fInfo->runNum == 275836 && fInfo->evtNum ==  691017315 )
-                || (fInfo->runNum == 275931 && fInfo->evtNum ==   31801986 )
-                || (fInfo->runNum == 276244 && fInfo->evtNum ==  891016526 )
-                || (fInfo->runNum == 275836 && fInfo->evtNum ==  546679374 )
-                || (fInfo->runNum == 275836 && fInfo->evtNum ==  425783197 )
-
-                || (fInfo->runNum == 275832 && fInfo->evtNum == 42185813 )
-                || (fInfo->runNum == 275832 && fInfo->evtNum ==   79764915 )
-                || (fInfo->runNum == 275832 && fInfo->evtNum ==  464058579 )
-                || (fInfo->runNum == 275912 && fInfo->evtNum ==   23923333 )
-                || (fInfo->runNum == 275836 && fInfo->evtNum ==  293656768 )
-                || (fInfo->runNum == 275890 && fInfo->evtNum ==  395412741 )
-                || (fInfo->runNum == 275911 && fInfo->evtNum ==  294738026 )
-                || (fInfo->runNum == 276242 && fInfo->evtNum == 1177366051 )
-                || (fInfo->runNum == 276283 && fInfo->evtNum ==  258667291 )
-                || (fInfo->runNum == 276282 && fInfo->evtNum ==  713238258 )
-                || (fInfo->runNum == 276283 && fInfo->evtNum ==   74924237 )
-                || (fInfo->runNum == 275776 && fInfo->evtNum ==  104936389 )
+                (fInfo->runNum == 276282 && fInfo->evtNum == 805060289 )
+                || (fInfo->runNum == 275837 && fInfo->evtNum == 719331150 )
+                || (fInfo->runNum == 276244 && fInfo->evtNum == 711325605 )
+                || (fInfo->runNum == 275836 && fInfo->evtNum == 1205979732 )
+                || (fInfo->runNum == 276097 && fInfo->evtNum ==  845305634 )
                 ) {
                     cout << "START!" << endl;
 
@@ -428,6 +408,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
+
+        double jec = particleSelector->JetCorrector(jet, "NONE");
+        jet->pt = jet->ptRaw*jec;
 
         // Prevent overlap of muons and jets
         TLorentzVector vJet; 
@@ -711,15 +694,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     // Synchronization printout
-    if (sync_print && nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
+    if (sync_print) {
+        if (nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
 
-        TLorentzVector dijet = bjetP4 + jetP4;
-        TLorentzVector dimuon = muons[0] + muons[1];
-        cout << "phi_mumu, phi_jj, dphi_mumujj" << endl;
-        cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
+            TLorentzVector dijet = bjetP4 + jetP4;
+            TLorentzVector dimuon = muons[0] + muons[1];
+            cout << "phi_mumu, phi_jj, dphi_mumujj" << endl;
+            cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
+        }
+        cout << "STOP!" << endl;
     }
-    cout << "STOP!" << endl;
-
 
     outTree->Fill();
     this->passedEvents++;

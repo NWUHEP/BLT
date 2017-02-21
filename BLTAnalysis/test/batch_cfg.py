@@ -35,41 +35,41 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        cfg(data_name = 'muon_2016D_v1',
-            path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
+        #cfg(data_name = 'muon_2016D_v1',
+        #    path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
+        #    nJobs     = 30,
+        #    suffix    = 'muon_2016D'
+        #   ),
+        cfg(data_name = 'muon_2016E_v1',
+            path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
             nJobs     = 30,
-            suffix    = 'muon_2016D'
+            suffix    = 'muon_2016E'
            ),
-        #cfg(data_name = 'muon_2016E_v1',
-        #    path      = '{0}/SingleMuon_Run2016E-23Sep2016-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016E'
-        #   ),
-        #cfg(data_name = 'muon_2016F_v1',
-        #    path      = '{0}/SingleMuon_Run2016F-23Sep2016-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016F'
-        #   ),
-        #cfg(data_name = 'muon_2016G',
-        #    path      = '{0}/SingleMuon_Run2016G-23Sep2016-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016G'
-        #   ),
+        cfg(data_name = 'muon_2016F_v1',
+            path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016F'
+           ),
+        cfg(data_name = 'muon_2016G',
+            path      = '{0}/SingleMuon_Run2016G-03Feb2017-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016G'
+           ),
         #cfg(data_name = 'muon_2016H_v1',
         #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
         #    nJobs     = 30,
         #    suffix    = 'muon_2016H'
         #   ),
-        #cfg(data_name = 'muon_2016H_v2',
-        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v2'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016H'
-        #   ),
-        #cfg(data_name = 'muon_2016H_v3',
-        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v3'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016H'
-        #   ),
+        cfg(data_name = 'muon_2016H_v2',
+            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016H'
+           ),
+        cfg(data_name = 'muon_2016H_v3',
+            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016H'
+           ),
         ])
 elif selection == 'ee':
     data_list.extend([
@@ -90,6 +90,7 @@ elif selection == 'ee':
            ),
         ])
 
+path       = '/tthome/share/bacon/production/12'
 mc_list = []
 mc_list.extend([
     # Drell-Yan
@@ -109,7 +110,7 @@ mc_list.extend([
         suffix   = 'z1jets_m-50'
        ),
     cfg(data_name = 'DY1JetsToLL_M-10to50',
-        path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph'.format(path),
+        path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph_concat'.format(path),
         nJobs    = 10,
         suffix   = 'z1jets_m-10to50'
        ),
@@ -119,7 +120,7 @@ mc_list.extend([
         suffix   = 'z2jets_m-50'
        ),
     cfg(data_name = 'DY2JetsToLL_M-10to50',
-        path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph'.format(path),
+        path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph_concat'.format(path),
         nJobs    = 10,
         suffix   = 'z2jets_m-10to50'
        ),
@@ -129,7 +130,7 @@ mc_list.extend([
         suffix   = 'z3jets_m-50'
        ),
     cfg(data_name = 'DY3JetsToLL_M-10to50',
-        path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph'.format(path),
+        path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph_concat'.format(path),
         nJobs    = 10,
         suffix   = 'z3jets_m-10to50'
        ),
@@ -138,22 +139,27 @@ mc_list.extend([
         nJobs    = 10,
         suffix   = 'z4jets_m-50'
        ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
 
     # top
     cfg(data_name = 'ttbar_leptonic',
-        path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
+        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_lep'
        ),
-    #cfg(data_name = 'ttbar_semileptonic',
-    #    path     = '{0}/Summer16_TTToSemiLeptonic_powheg'.format(path),
+    cfg(data_name = 'ttbar_semileptonic',
+        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_semilep'
+       ),
+    #cfg(data_name = 'ttbar_leptonic',
+    #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
     #    nJobs    = 50,
-    #    suffix   = 'ttbar_semilep'
+    #    suffix   = 'ttbar_lep'
     #   ),
     #cfg(data_name = 'T_s-channel',
     #    path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
@@ -202,11 +208,11 @@ mc_list.extend([
         nJobs    = 10,
         suffix   = 'wz_3lnu'
        ),
-    #cfg(data_name = 'ZZJetsTo2L2Nu',
-    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2nu'
-    #   ),
+    cfg(data_name = 'ZZJetsTo2L2Nu',
+        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_2l2nu'
+       ),
     cfg(data_name = 'ZZJetsTo2L2Q',
         path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
         nJobs    = 10,

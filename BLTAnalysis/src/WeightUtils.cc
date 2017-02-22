@@ -9,9 +9,9 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     const std::string cmssw_base = getenv("CMSSW_BASE");
 
     // PU weights
-    std::string puFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_BCD.root";
+    std::string puFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
     TFile* puFile = new TFile(puFileName.c_str(), "OPEN");
-    _puReweight = (TGraph*)puFile->Get("pileup");
+    _puReweight = (TGraph*)puFile->Get("pileup_sf");
 
     // trigger efficiencies 
     std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_BCDEF.root";

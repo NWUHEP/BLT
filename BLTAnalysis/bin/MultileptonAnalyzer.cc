@@ -7,7 +7,7 @@
 using namespace baconhep;
 using namespace std;
 
-bool sync_print = true;
+bool sync_print = false;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
@@ -272,7 +272,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nPV           = fPVArr->GetEntries();
     if (!isData) {
         nPU = fInfo->nPUmean;
-        eventWeight *= 1.;//weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+        eventWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
     } else {
         nPU = 0;
     }
@@ -616,8 +616,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             cout << dimuon.M() << endl;
         }
 
-        if (dimuon.M() < 12. || dimuon.M() > 70.)
-            return kTRUE;
+        //if (dimuon.M() < 12. || dimuon.M() > 70.)
+        //    return kTRUE;
         hTotalEvents->Fill(7);
 
         leptonOneP4      = muonOneP4;
@@ -703,6 +703,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= trigEff.first;
         }
     } 
+        
 
 
     ///////////////////

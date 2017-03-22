@@ -104,6 +104,16 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoQ", &leptonTwoQ);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoTrigger", &leptonTwoTrigger);
+    outTree->Branch("leptonThreeP4", &leptonThreeP4);
+    outTree->Branch("leptonThreeIso", &leptonThreeIso);
+    outTree->Branch("leptonThreeQ", &leptonThreeQ);
+    outTree->Branch("leptonThreeFlavor", &leptonThreeFlavor);
+    outTree->Branch("leptonThreeTrigger", &leptonThreeTrigger);
+    outTree->Branch("leptonFourP4", &leptonFourP4);
+    outTree->Branch("leptonFourIso", &leptonFourIso);
+    outTree->Branch("leptonFourQ", &leptonFourQ);
+    outTree->Branch("leptonFourFlavor", &leptonFourFlavor);
+    outTree->Branch("leptonFourTrigger", &leptonFourTrigger);
 
     // jets
     outTree->Branch("jetP4", &jetP4);

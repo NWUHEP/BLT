@@ -44,8 +44,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "mumu" || params->selection == "emu") {
-        triggerNames.push_back("HLT_IsoMu22_v*");
-        triggerNames.push_back("HLT_IsoTkMu22_v*");
+        //triggerNames.push_back("HLT_IsoMu22_v*");
+        //triggerNames.push_back("HLT_IsoTkMu22_v*");
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
         //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
@@ -70,6 +70,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // muon momentum corrections
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
+    rng = new TRandom3();
 
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
@@ -151,84 +152,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             << std::endl;
 
     if (sync_print) {
-        if ( true
-            // Olga only 1b1f
-            || (fInfo->runNum == 275376 && fInfo->evtNum == 1319745067 )
-            || (fInfo->runNum == 274422 && fInfo->evtNum == 2347462519 )
-            || (fInfo->runNum == 274971 && fInfo->evtNum == 1011791336 )
-            || (fInfo->runNum == 275310 && fInfo->evtNum == 1937824132 )
-            || (fInfo->runNum == 273725 && fInfo->evtNum == 3468749769 )
-            || (fInfo->runNum == 274161 && fInfo->evtNum ==   84849648 )
-            || (fInfo->runNum == 274286 && fInfo->evtNum ==   51031337 )
-            || (fInfo->runNum == 274442 && fInfo->evtNum ==  145850373 )
-            || (fInfo->runNum == 274388 && fInfo->evtNum ==  562400720 )
-            || (fInfo->runNum == 275834 && fInfo->evtNum ==  227081827 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 1353364545 )
-            || (fInfo->runNum == 276242 && fInfo->evtNum == 2221883957 )
-            || (fInfo->runNum == 277096 && fInfo->evtNum == 3315244484 )
-            || (fInfo->runNum == 277076 && fInfo->evtNum == 1439149211 )
-            || (fInfo->runNum == 277096 && fInfo->evtNum == 2810708547 )
-            || (fInfo->runNum == 277194 && fInfo->evtNum == 1355501782 )
-            || (fInfo->runNum == 277194 && fInfo->evtNum == 1801900815 )
-            || (fInfo->runNum == 278167 && fInfo->evtNum ==  206415600 )
-            
-            // 1b1c
-            || (fInfo->runNum == 274998 && fInfo->evtNum ==  643726611 )
-            || (fInfo->runNum == 274422 && fInfo->evtNum ==  286719540 )
-            || (fInfo->runNum == 274441 && fInfo->evtNum ==  546519702 )
-            || (fInfo->runNum == 275001 && fInfo->evtNum == 2525863031 )
-            || (fInfo->runNum == 275001 && fInfo->evtNum ==  706829911 )
-            || (fInfo->runNum == 274999 && fInfo->evtNum ==  123480123 )
-            || (fInfo->runNum == 274999 && fInfo->evtNum ==   17384976 )
-            || (fInfo->runNum == 275375 && fInfo->evtNum == 1641641930 )
-            || (fInfo->runNum == 275125 && fInfo->evtNum == 1022731095 )
-            || (fInfo->runNum == 275310 && fInfo->evtNum ==  225973294 )
-            || (fInfo->runNum == 275337 && fInfo->evtNum ==  605598535 )
-            || (fInfo->runNum == 275375 && fInfo->evtNum ==  900822694 )
-            || (fInfo->runNum == 273554 && fInfo->evtNum ==   69929312 )
-            || (fInfo->runNum == 275310 && fInfo->evtNum == 2685030788 )
-            || (fInfo->runNum == 274335 && fInfo->evtNum == 1530334094 )
-            || (fInfo->runNum == 274388 && fInfo->evtNum ==  494006678 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum == 1877789321 )
-            || (fInfo->runNum == 275847 && fInfo->evtNum ==    5796673 )
-            || (fInfo->runNum == 275836 && fInfo->evtNum ==  293656768 )
-            || (fInfo->runNum == 275836 && fInfo->evtNum == 1205979732 )
-            || (fInfo->runNum == 276097 && fInfo->evtNum ==  845305634 )
-            || (fInfo->runNum == 276282 && fInfo->evtNum ==  805060289 )
-            || (fInfo->runNum == 276283 && fInfo->evtNum ==   74924237 )
-            || (fInfo->runNum == 277127 && fInfo->evtNum == 1468561360 )
-            || (fInfo->runNum == 276831 && fInfo->evtNum == 4111899844 )
-            || (fInfo->runNum == 276831 && fInfo->evtNum ==  128082066 )
-            || (fInfo->runNum == 277168 && fInfo->evtNum == 3517296734 )
-            || (fInfo->runNum == 277194 && fInfo->evtNum == 2852546513 )
-            || (fInfo->runNum == 276870 && fInfo->evtNum ==  592189974 )
-            || (fInfo->runNum == 277194 && fInfo->evtNum == 1126988497 )
-            || (fInfo->runNum == 276950 && fInfo->evtNum ==  766494472 )
-            || (fInfo->runNum == 277071 && fInfo->evtNum ==   62236068 )
-            || (fInfo->runNum == 276870 && fInfo->evtNum == 1211878057 )
-            || (fInfo->runNum == 277166 && fInfo->evtNum ==  131193743 )
-            || (fInfo->runNum == 277305 && fInfo->evtNum ==  845008927 )
-            || (fInfo->runNum == 277420 && fInfo->evtNum ==  483664939 )
-            || (fInfo->runNum == 277992 && fInfo->evtNum ==  116775062 )
-            || (fInfo->runNum == 278167 && fInfo->evtNum == 1833126457 )
-            || (fInfo->runNum == 278808 && fInfo->evtNum == 1917521649 )
-            || (fInfo->runNum == 278808 && fInfo->evtNum == 1379538368 )
-            || (fInfo->runNum == 278808 && fInfo->evtNum ==  906869801 )
-            || (fInfo->runNum == 278406 && fInfo->evtNum ==  449180281 )
-            || (fInfo->runNum == 278018 && fInfo->evtNum == 1025452035 )
-            || (fInfo->runNum == 278345 && fInfo->evtNum == 1001314332 )
-            || (fInfo->runNum == 280249 && fInfo->evtNum == 1240615147 )
-            || (fInfo->runNum == 283885 && fInfo->evtNum ==  234756876 )
-            || (fInfo->runNum == 284042 && fInfo->evtNum ==  141822299 )
+        if (
+            (fInfo->runNum == 275311 && fInfo->evtNum == 560373421  )
            ) {
                     cout << "START!" << endl;
 
-                    cout << "===========================" << endl;
+                    cout << "========================================" << endl;
                     cout << "Run: " << fInfo->runNum 
                         << " Lumi: " << fInfo->lumiSec 
                         << " Event: " << fInfo->evtNum 
                         << std::endl;
-                    cout << "===========================\n" << endl;
+                    cout << "========================================\n" << endl;
                 } else {
                     return kTRUE;
                 }
@@ -377,23 +311,26 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         // Apply rochester muon momentum corrections
-        //float qter = 1.;
-        //if (isData) {
-        //    muonCorr->momcor_data(muonP4, muon->q, 0, qter);
-        //} else {
-        //    muonCorr->momcor_mc(muonP4, muon->q, 0, qter);
-        //}
+        double muonSF = 1.;
+        if (isData) {
+            muonSF = muonCorr->kScaleDT(muon->q, muon->pt, muon->eta, muon->phi, 0, 0);
+        } else {
+            muonSF = muonCorr->kScaleAndSmearMC(muon->q, muon->pt, muon->eta, muon->phi,
+                                                muon->nTkLayers, rng->Rndm(), rng->Rndm(), 
+                                                0, 0);
+        }
+        muonP4.SetPtEtaPhiM(muonSF*muon->pt, muon->eta, muon->phi, MUON_MASS);
+
+        if (sync_print) {
+            cout << "(" << muonP4.Pt() << ", " << muon->pt 
+                << ", " << muon->eta << ", " << muon->phi 
+                << ") , " << muon->q 
+                << ", " << muon->trkIso
+                << endl;
+        }
 
         // Fill containers
-        if (muon->trkIso/muonP4.Pt() < 0.1) {
-            // For synchronization
-            if (sync_print) {
-                cout << "(" << muonP4.Pt() << ", " << muon->pt 
-                    << ", " << muon->eta << ", " << muon->phi 
-                    << ") , " << muon->q 
-                    << ", " << muon->trkIso
-                    << endl;
-            }
+        if (muon->trkIso/muon->pt < 0.1) {
 
             if (muonP4.Pt() > 20 && fabs(muonP4.Eta()) < 2.1) {
                 veto_muons.push_back(muonP4);
@@ -549,7 +486,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     }
                 }
             } else {
-                if (jet->pt > 30) {
+                if ((fabs(jet->eta) < 2.5 && jet->mva > -0.89) || fabs(jet->eta) > 2.5) {
                     fwdjets.push_back(jet);
                     ++nFwdJets;
                 }
@@ -572,6 +509,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
+    if (!isData) {
+        //met = MetKluge(met)*met;
+        met = 0.96*met;
+    }
+
     if (sync_print) {
         cout << "\npfmet, pfmet_type1" << endl;
         cout << fInfo->pfMET << ", "
@@ -586,7 +528,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
 
-    if (params->selection == "mumu") {
+    // Synchronization printout
+    if (sync_print) {
+        if (nBJets >= 1 && nJets >= 1 && met < 40 && muons.size() >= 2) {
+
+            jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+
+            TLorentzVector dijet = bjetP4 + jetP4;
+            TLorentzVector dimuon = muons[0] + muons[1];
+            cout << "phi_mumu, phi_jj, dphi_mumujj" << endl;
+            cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
+        }
+        cout << "STOP!" << endl;
+        return kTRUE;
+
+    } else if (params->selection == "mumu") {
         if (muons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -616,9 +573,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             cout << dimuon.M() << endl;
         }
 
-        //if (dimuon.M() < 12. || dimuon.M() > 70.)
-        //    return kTRUE;
+        if (dimuon.M() < 12. || dimuon.M() > 110.)
+            return kTRUE;
         hTotalEvents->Fill(7);
+
+        if (nBJets == 0 || (nBJets + nJets < 2 && nFwdJets == 0)) 
+            return kTRUE;
+        hTotalEvents->Fill(8);
 
         leptonOneP4      = muonOneP4;
         leptonOneIso     = muons_iso[0];
@@ -643,6 +604,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
             eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
+
 
     } else if (params->selection == "ee") {
 
@@ -760,18 +722,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         genJetTag = 0;
     }
 
-    // Synchronization printout
-    if (sync_print) {
-        if (nBJets >= 1 && (nFwdJets >= 1 || (nJets >= 1 && met < 40 && muons.size() >= 2))) {
-
-            TLorentzVector dijet = bjetP4 + jetP4;
-            TLorentzVector dimuon = muons[0] + muons[1];
-            cout << "phi_mumu, phi_jj, dphi_mumujj" << endl;
-            cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
-        }
-        cout << "STOP!" << endl;
-    }
-
     outTree->Fill();
     this->passedEvents++;
     return kTRUE;
@@ -820,4 +770,24 @@ int main(int argc, char **argv)
     }
 
     return EXIT_SUCCESS;
+}
+
+float MultileptonAnalyzer::MetKluge(float met)
+{
+    if (met > 500) {
+        return 1.;
+    }
+
+    float bins[]        = {0., 10., 20., 30., 40., 50., 60., 70., 80., 90., 100., 250., 500.};
+    float corrections[] = {1., 0.99, 0.96, 0.95, 0.948, 0.947, 0.95, 0.957, 0.966, 0.97, 0.971, 0.98};
+
+    int bin = 0;
+    for (int i = 0; i < 12; ++i) {
+        if (met > bins[i] && met <= bins[i+1]) {
+            bin = i;
+            break;
+        }
+    }
+    
+    return corrections[bin];
 }

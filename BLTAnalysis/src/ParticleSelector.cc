@@ -18,14 +18,14 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     // offline jet corrections on-the-fly
     std::string runPeriod = "H";
     if (
-        parameters.dataset == "muon_2016B" 
-        || parameters.dataset == "muon_2016C" 
-        || parameters.dataset == "muon_2016D"
+        parameters.datasetgroup == "muon_2016B" 
+        || parameters.datasetgroup == "muon_2016C" 
+        || parameters.datasetgroup == "muon_2016D"
        ) {
         runPeriod = "BCD";
-    } else if (parameters.dataset == "muon_2016E" || parameters.dataset == "muon_2016F") {
+    } else if (parameters.datasetgroup == "muon_2016E" || parameters.datasetgroup == "muon_2016F") {
         runPeriod = "EF";
-    } else if (parameters.dataset == "muon_2016G") {
+    } else if (parameters.datasetgroup == "muon_2016G") {
         runPeriod = "G";
     } else {
         runPeriod = "H";
@@ -33,6 +33,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
     std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
+    std::cout << jecPath << std::endl;
     JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
     JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
     JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecPath + "_L2Relative_AK4PFchs.txt");

@@ -35,11 +35,11 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        #cfg(data_name = 'muon_2016D_v1',
-        #    path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016D'
-        #   ),
+        cfg(data_name = 'muon_2016D_v1',
+            path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
+            nJobs     = 30,
+            suffix    = 'muon_2016D'
+           ),
         cfg(data_name = 'muon_2016E_v1',
             path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
             nJobs     = 30,
@@ -55,11 +55,6 @@ if selection == 'mumu' or selection == 'emu':
             nJobs     = 30,
             suffix    = 'muon_2016G'
            ),
-        #cfg(data_name = 'muon_2016H_v1',
-        #    path      = '{0}/SingleMuon_Run2016H-PromptReco-v1'.format(path),
-        #    nJobs     = 30,
-        #    suffix    = 'muon_2016H'
-        #   ),
         cfg(data_name = 'muon_2016H_v2',
             path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
             nJobs     = 30,
@@ -94,11 +89,11 @@ path       = '/tthome/share/bacon/production/12'
 mc_list = []
 mc_list.extend([
     # Drell-Yan
-    cfg(data_name = 'DYJetsToLL_M-50',
-        path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 50,
-        suffix   = 'zjets_m-50'
-       ),
+    #cfg(data_name = 'DYJetsToLL_M-50',
+    #    path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-50'
+    #   ),
     #cfg(data_name = 'DYJetsToLL_M-10to50',
     #    path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
     #    nJobs    = 10,
@@ -145,79 +140,79 @@ mc_list.extend([
     #    suffix   = 'z4jets_m-10to50'
     #   ),
 
-    ## top
-    #cfg(data_name = 'ttbar_leptonic',
-    #    path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_lep'
-    #   ),
-    #cfg(data_name = 'ttbar_semileptonic',
-    #    path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_semilep'
-    #   ),
-    ##cfg(data_name = 'ttbar_leptonic',
-    ##    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
-    ##    nJobs    = 50,
-    ##    suffix   = 'ttbar_lep'
-    ##   ),
-    ##cfg(data_name = 'T_s-channel',
-    ##    path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
-    ##    nJobs    = 10,
-    ##    suffix   = 't_s'
-    ##   ),
-    ##cfg(data_name = 'Tbar_s-channel',
-    ##    path     = '{0}/'.format(path),
-    ##    nJobs    = 10,
-    ##    suffix   = 'tbar_s'
-    ##   ),
-    #cfg(data_name = 'T_t-channel',
-    #    path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_t'
-    #   ),
-    #cfg(data_name = 'Tbar_t-channel',
-    #    path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_t'
-    #   ),
-    #cfg(data_name = 'T_tW-channel',
-    #    path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_tw'
-    #   ),
-    #cfg(data_name = 'Tbar_tW-channel',
-    #    path     = '{0}/Summer16_ST_tW_antitop_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_tw'
-    #   ),
-
-    ## Diboson
-    #cfg(data_name = 'WW',
-    #    path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'ww'
-    #   ),
-    #cfg(data_name = 'WZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_2l2q'
-    #   ),
-    #cfg(data_name = 'WZJetsTo3LNu',
-    #    path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_3lnu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Nu',
-    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2nu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2q'
-    #   ),
+    # top
+#    cfg(data_name = 'ttbar_leptonic',
+#        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+#        nJobs    = 50,
+#        suffix   = 'ttbar_lep'
+#       ),
+#    cfg(data_name = 'ttbar_semileptonic',
+#        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+#        nJobs    = 50,
+#        suffix   = 'ttbar_semilep'
+#       ),
+     #cfg(data_name = 'ttbar_leptonic',
+     #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
+     #    nJobs    = 50,
+     #    suffix   = 'ttbar_lep'
+     #   ),
+#    #cfg(data_name = 'T_s-channel',
+#    #    path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
+#    #    nJobs    = 10,
+#    #    suffix   = 't_s'
+#    #   ),
+#    #cfg(data_name = 'Tbar_s-channel',
+#    #    path     = '{0}/'.format(path),
+#    #    nJobs    = 10,
+#    #    suffix   = 'tbar_s'
+#    #   ),
+#    cfg(data_name = 'T_t-channel',
+#        path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+#        nJobs    = 10,
+#        suffix   = 't_t'
+#       ),
+#    cfg(data_name = 'Tbar_t-channel',
+#        path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'tbar_t'
+#       ),
+#    cfg(data_name = 'T_tW-channel',
+#        path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+#        nJobs    = 10,
+#        suffix   = 't_tw'
+#       ),
+#    cfg(data_name = 'Tbar_tW-channel',
+#        path     = '{0}/Summer16_ST_tW_antitop_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'tbar_tw'
+#       ),
+#
+#    # Diboson
+#    cfg(data_name = 'WW',
+#        path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'ww'
+#       ),
+#    cfg(data_name = 'WZJetsTo2L2Q',
+#        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'wz_2l2q'
+#       ),
+#    cfg(data_name = 'WZJetsTo3LNu',
+#        path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'wz_3lnu'
+#       ),
+#    cfg(data_name = 'ZZJetsTo2L2Nu',
+#        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'zz_2l2nu'
+#       ),
+#    cfg(data_name = 'ZZJetsTo2L2Q',
+#        path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
+#        nJobs    = 10,
+#        suffix   = 'zz_2l2q'
+#       ),
     ])
 
 path = '/tthome/share/bacon/production/11'

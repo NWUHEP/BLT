@@ -33,6 +33,7 @@
 // ROOT headers
 #include <TLorentzVector.h>
 #include <TVector3.h>
+#include <TRandom3.h>
 
 // C++ headers
 #include <string>
@@ -67,6 +68,7 @@ public:
 
     // rochester muon corrections
     RoccoR *muonCorr;
+    TRandom3 *rng;
 
     // Params and cuts
     std::unique_ptr<Parameters>         params;
@@ -96,6 +98,10 @@ public:
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
+
+    // MET kluge 
+    float MetKluge(float);
+
     //ClassDef(MultileptonAnalyzer,0);
 };
 

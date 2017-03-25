@@ -7,7 +7,7 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'mumu'
+selection  = '4l'
 period     = '2016'
 
 ''' 
@@ -17,7 +17,7 @@ period     = '2016'
 
 data_list = []
 
-if selection == 'mumu' or selection == 'emu':
+if selection in ['mumu', 'emu', '4l']:
     data_list.extend([
 
         cfg(data_name = 'muon_2016B_v1',
@@ -231,8 +231,8 @@ sig_list.extend([
     ])
 
 batch_list = []
-#batch_list += data_list
-batch_list += mc_list 
+batch_list += data_list
+#batch_list += mc_list 
 #batch_list += sig_list
 
 batch = bm.BatchMaster(config_list = batch_list, 

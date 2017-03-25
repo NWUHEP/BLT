@@ -275,7 +275,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 10 
+                muon->pt > 5 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -342,21 +342,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Fill containers
         if (muon->trkIso/muon->pt < 0.1) {
 
-            if (muonP4.Pt() > 20 && fabs(muonP4.Eta()) < 2.1) {
+            muons.push_back(muonP4);
+            muons_iso.push_back(muon->trkIso);
+            muons_q.push_back(muon->q);
+
+            // trigger matching
+            bool triggered = false;
+            for (unsigned i = 0; i < triggerNames.size(); ++i) {
+                triggered |= trigger->passObj(triggerNames[i], 1, muon->hltMatchBits);
+            }
+            muons_trigger.push_back(triggered);
+
+            // muons for jet veto
+            if (muonP4.Pt() > 20) {
                 veto_muons.push_back(muonP4);
-
-                if (muonP4.Pt() > 25) {
-                    muons.push_back(muonP4);
-                    muons_iso.push_back(muon->trkIso);
-                    muons_q.push_back(muon->q);
-
-                    // trigger matching
-                    bool triggered = false;
-                    for (unsigned i = 0; i < triggerNames.size(); ++i) {
-                        triggered |= trigger->passObj(triggerNames[i], 1, muon->hltMatchBits);
-                    }
-                    muons_trigger.push_back(triggered);
-                }
             }
         }
     }
@@ -570,10 +569,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
 
-        if (
-                !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1) 
-                || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1)
-           )
+        if (muonOneP4.Pt() < 25)
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -583,13 +579,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             cout << dimuon.M() << endl;
         }
 
-        if (dimuon.M() < 12. || dimuon.M() > 110.)
+        if (dimuon.M() > 20.)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (nBJets == 0 || (nBJets + nJets < 2 && nFwdJets == 0)) 
-            return kTRUE;
-        hTotalEvents->Fill(8);
+        //if (nBJets == 0 || (nBJets + nJets < 2 && nFwdJets == 0)) 
+        //    return kTRUE;
+        //hTotalEvents->Fill(8);
 
         leptonOneP4      = muonOneP4;
         leptonOneIso     = muons_iso[0];
@@ -674,8 +670,67 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muons[0]);
             eventWeight *= trigEff.first;
         }
-    } 
+    } else if (params->selection == "4l") {
+
+        if (muons.size() >= 4) { 
+
+            if (muons[0].Pt() < 25)
+                return kTRUE;
+            hTotalEvents->Fill(6);
+
+            leptonOneP4        = muons[0];
+            leptonOneIso       = muons_iso[0];
+            leptonOneQ         = muons_q[0];
+            leptonOneTrigger   = muons_trigger[0];
+            leptonOneFlavor    = 0;
+            leptonTwoP4        = muons[1];
+            leptonTwoIso       = muons_iso[1];
+            leptonTwoQ         = muons_q[1];
+            leptonTwoTrigger   = muons_trigger[1];
+            leptonTwoFlavor    = 0;
+            leptonThreeP4      = muons[2];
+            leptonThreeIso     = muons_iso[2];
+            leptonThreeQ       = muons_q[2];
+            leptonThreeTrigger = muons_trigger[2];
+            leptonThreeFlavor  = 0;
+            leptonFourP4       = muons[3];
+            leptonFourIso      = muons_iso[3];
+            leptonFourQ        = muons_q[3];
+            leptonFourTrigger  = muons_trigger[3];
+            leptonFourFlavor   = 0;
+
+        } else if (muons.size() >= 2 and electrons.size() >= 2) {
+
+            if (muons[0].Pt() < 25)
+                return kTRUE;
+            hTotalEvents->Fill(6);
         
+            leptonOneP4      = muons[0];
+            leptonOneIso     = muons_iso[0];
+            leptonOneQ       = muons_q[0];
+            leptonOneTrigger = muons_trigger[0];
+            leptonOneFlavor  = 0;
+            leptonTwoP4      = muons[1];
+            leptonTwoIso     = muons_iso[1];
+            leptonTwoQ       = muons_q[1];
+            leptonTwoTrigger = muons_trigger[1];
+            leptonTwoFlavor  = 0;
+
+            leptonThreeP4      = electrons[0];
+            leptonThreeIso     = electrons_iso[0];
+            leptonThreeQ       = electrons_q[0];
+            leptonThreeTrigger = electrons_trigger[0];
+            leptonThreeFlavor  = 1;
+            leptonFourP4       = electrons[1];
+            leptonFourIso      = electrons_iso[1];
+            leptonFourQ        = electrons_q[1];
+            leptonFourTrigger  = electrons_trigger[1];
+            leptonFourFlavor   = 1;
+        } else {
+            hTotalEvents->Fill(5);
+            return kTRUE;
+        }
+    }
 
 
     ///////////////////

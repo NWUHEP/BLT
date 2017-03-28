@@ -44,8 +44,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "mumu" || params->selection == "emu") {
-        //triggerNames.push_back("HLT_IsoMu22_v*");
-        //triggerNames.push_back("HLT_IsoTkMu22_v*");
+        triggerNames.push_back("HLT_IsoMu22_v*");
+        triggerNames.push_back("HLT_IsoTkMu22_v*");
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
         //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
@@ -64,7 +64,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     if (true) { // this will need to be turned off for MC
         string jsonFileName = cmssw_base + 
             "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
-        //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
     }
 
@@ -98,22 +97,18 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneQ", &leptonOneQ);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
-    outTree->Branch("leptonOneTrigger", &leptonOneTrigger);
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonTwoQ", &leptonTwoQ);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
-    outTree->Branch("leptonTwoTrigger", &leptonTwoTrigger);
     outTree->Branch("leptonThreeP4", &leptonThreeP4);
     outTree->Branch("leptonThreeIso", &leptonThreeIso);
     outTree->Branch("leptonThreeQ", &leptonThreeQ);
     outTree->Branch("leptonThreeFlavor", &leptonThreeFlavor);
-    outTree->Branch("leptonThreeTrigger", &leptonThreeTrigger);
     outTree->Branch("leptonFourP4", &leptonFourP4);
     outTree->Branch("leptonFourIso", &leptonFourIso);
     outTree->Branch("leptonFourQ", &leptonFourQ);
     outTree->Branch("leptonFourFlavor", &leptonFourFlavor);
-    outTree->Branch("leptonFourTrigger", &leptonFourTrigger);
 
     // jets
     outTree->Branch("jetP4", &jetP4);
@@ -195,8 +190,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         passTrigger |= trigger->pass(triggerNames[i], fInfo->triggerBits);
     }
 
-    if (!passTrigger && isData)
-        return kTRUE;
+    //if (!passTrigger && isData)
+    //    return kTRUE;
 
     if (sync_print) {
         cout << "trigger status: " << passTrigger << "\n" << endl;
@@ -590,13 +585,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneP4      = muonOneP4;
         leptonOneIso     = muons_iso[0];
         leptonOneQ       = muons_q[0];
-        leptonOneTrigger = muons_trigger[0];
         leptonOneFlavor  = 1;
 
         leptonTwoP4      = muonTwoP4;
         leptonTwoIso     = muons_iso[muonTwoIndex];
         leptonTwoQ       = muons_q[muonTwoIndex];
-        leptonTwoTrigger = muons_trigger[muonTwoIndex];
         leptonTwoFlavor  = 1;
 
         if (!isData) {
@@ -627,13 +620,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneP4      = electrons[0];
         leptonOneIso     = electrons_iso[0];
         leptonOneQ       = electrons_q[0];
-        leptonOneTrigger = electrons_trigger[0];
         leptonOneFlavor  = 0;
 
         leptonTwoP4      = electrons[1];
         leptonTwoIso     = electrons_iso[1];
         leptonTwoQ       = electrons_q[1];
-        leptonTwoTrigger = electrons_trigger[1];
         leptonTwoFlavor  = 0;
     } else if (params->selection == "emu") {
 
@@ -654,13 +645,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneP4      = muons[0];
         leptonOneIso     = muons_iso[0];
         leptonOneQ       = muons_q[0];
-        leptonOneTrigger = muons_trigger[0];
         leptonOneFlavor  = 0;
 
         leptonTwoP4      = electrons[0];
         leptonTwoIso     = electrons_iso[0];
         leptonTwoQ       = electrons_q[0];
-        leptonTwoTrigger = electrons_trigger[0];
         leptonTwoFlavor  = 1;
 
         if (!isData && false) {
@@ -673,6 +662,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     } else if (params->selection == "4l") {
 
         if (muons.size() >= 4) { 
+            hTotalEvents->Fill(5);
 
             if (muons[0].Pt() < 25)
                 return kTRUE;
@@ -681,25 +671,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneP4        = muons[0];
             leptonOneIso       = muons_iso[0];
             leptonOneQ         = muons_q[0];
-            leptonOneTrigger   = muons_trigger[0];
             leptonOneFlavor    = 0;
             leptonTwoP4        = muons[1];
             leptonTwoIso       = muons_iso[1];
             leptonTwoQ         = muons_q[1];
-            leptonTwoTrigger   = muons_trigger[1];
             leptonTwoFlavor    = 0;
             leptonThreeP4      = muons[2];
             leptonThreeIso     = muons_iso[2];
             leptonThreeQ       = muons_q[2];
-            leptonThreeTrigger = muons_trigger[2];
             leptonThreeFlavor  = 0;
             leptonFourP4       = muons[3];
             leptonFourIso      = muons_iso[3];
             leptonFourQ        = muons_q[3];
-            leptonFourTrigger  = muons_trigger[3];
             leptonFourFlavor   = 0;
 
         } else if (muons.size() >= 2 and electrons.size() >= 2) {
+            hTotalEvents->Fill(5);
 
             if (muons[0].Pt() < 25)
                 return kTRUE;
@@ -708,26 +695,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneP4      = muons[0];
             leptonOneIso     = muons_iso[0];
             leptonOneQ       = muons_q[0];
-            leptonOneTrigger = muons_trigger[0];
             leptonOneFlavor  = 0;
             leptonTwoP4      = muons[1];
             leptonTwoIso     = muons_iso[1];
             leptonTwoQ       = muons_q[1];
-            leptonTwoTrigger = muons_trigger[1];
             leptonTwoFlavor  = 0;
 
             leptonThreeP4      = electrons[0];
             leptonThreeIso     = electrons_iso[0];
             leptonThreeQ       = electrons_q[0];
-            leptonThreeTrigger = electrons_trigger[0];
             leptonThreeFlavor  = 1;
             leptonFourP4       = electrons[1];
             leptonFourIso      = electrons_iso[1];
             leptonFourQ        = electrons_q[1];
-            leptonFourTrigger  = electrons_trigger[1];
             leptonFourFlavor   = 1;
         } else {
-            hTotalEvents->Fill(5);
             return kTRUE;
         }
     }

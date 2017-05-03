@@ -86,12 +86,16 @@ public:
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight, nPU;
+    TVector3 rPV;
+    TVector3 rDimuon;
 
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4;
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
     Int_t leptonOneQ, leptonTwoQ, leptonThreeQ, leptonFourQ;
     Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor, jetFlavor, bjetFlavor;
     Bool_t leptonOneTrigger, leptonTwoTrigger, leptonThreeTrigger, leptonFourTrigger;
+    Float_t leptonOneD0, leptonTwoD0;
+    Float_t leptonOneDZ, leptonTwoDZ;
 
     Float_t jetD0, bjetD0;
     Float_t bjetPUID, bjetTag, jetPUID, jetTag, genJetTag, genBJetTag;

@@ -2,3 +2,5 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
+<bin file="jpsiGenAnalyzer.cc" name="jpsiGenAnalyzer"></bin>
+<bin file="zjpsiAnalyzer.cc" name="zjpsiAnalyzer"></bin>

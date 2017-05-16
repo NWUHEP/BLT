@@ -282,7 +282,7 @@ Bool_t zjpsiAnalyzer::Process(Long64_t entry)
         /* Type 1 Muons */
         if (
                 muon->pt > 20
-                && fabs(muon->eta) < 2.1
+                && fabs(muon->eta) < 2.4
                 
                 // tight muon ID
                 && (muon->typeBits & baconhep::kPFMuon) 
@@ -304,7 +304,7 @@ Bool_t zjpsiAnalyzer::Process(Long64_t entry)
         /* Type 2 Muons */
         else if (
                     muon->pt > 4
-                    && fabs(muon->eta) < 2.1 
+                    && fabs(muon->eta) < 2.4
 
                     // loose muon ID
                     && (muon->typeBits & baconhep::kPFMuon)
@@ -319,7 +319,7 @@ Bool_t zjpsiAnalyzer::Process(Long64_t entry)
         /* Type 3 Muons */
         else if (
                     muon->pt > 3
-                    && fabs(muon->eta) < 2.1
+                    && fabs(muon->eta) < 2.4
 
                     // loose muon ID
                     && (muon->typeBits & baconhep::kPFMuon)

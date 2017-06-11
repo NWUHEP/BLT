@@ -86,16 +86,25 @@ public:
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight, nPU;
+
     TVector3 rPV;
     TVector3 rDimuon;
     TVector3 rZCand;
     TVector3 rJpsiCand;
 
-    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4;
+    TVector3 rPVErr;
+    TVector3 rDimuonErr;
+
+    Float_t rPVChi2, rPVNdof;
+    Float_t rDimuonChi2, rDimuonNdof;
+
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4, photonOneP4;
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
     Int_t leptonOneQ, leptonTwoQ, leptonThreeQ, leptonFourQ;
     Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor, jetFlavor, bjetFlavor;
     Bool_t leptonOneTrigger, leptonTwoTrigger, leptonThreeTrigger, leptonFourTrigger;
+    Bool_t leptonOneIsTight, leptonTwoIsTight, leptonThreeIsTight, leptonFourIsTight;
+
     Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
 
@@ -103,8 +112,7 @@ public:
     Float_t bjetPUID, bjetTag, jetPUID, jetTag, genJetTag, genBJetTag;
     Float_t met, metPhi;
 
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
-    UInt_t nMuonsT1, nMuonsT2, nMuonsT3;
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nPhotons;
 
     // MET kluge 
     float MetKluge(float);

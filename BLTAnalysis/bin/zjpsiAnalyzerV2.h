@@ -94,9 +94,14 @@ public:
 
     TVector3 rPVErr;
     TVector3 rDimuonErr;
+    TVector3 rZCandErr;
+    TVector3 rJpsiCandErr;
+    
 
     Float_t rPVChi2, rPVNdof;
     Float_t rDimuonChi2, rDimuonNdof;
+    Float_t rZCandChi2, rZCandNdof;
+    Float_t rJpsiCandChi2, rJpsiCandNdof;
 
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4, photonOneP4;
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;

@@ -5,9 +5,9 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production/12a'
+path       = '/tthome/share/bacon/production/12'
 executable = 'execBatch.sh'
-selection  = '4l'
+selection  = 'mc'
 period     = '2016'
 
 ''' 
@@ -89,16 +89,16 @@ path       = '/tthome/share/bacon/production/12'
 mc_list = []
 mc_list.extend([
     # Drell-Yan
-    #cfg(data_name = 'DYJetsToLL_M-50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'zjets_m-50'
-    #   ),
-    #cfg(data_name = 'DYJetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zjets_m-10to50'
-    #   ),
+    cfg(data_name = 'DYJetsToLL_M-50',
+        path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'zjets_m-50'
+       ),
+    cfg(data_name = 'DYJetsToLL_M-10to50',
+        path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50'
+       ),
     #cfg(data_name = 'DY1JetsToLL_M-50',
     #    path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
     #    nJobs    = 10,
@@ -141,6 +141,11 @@ mc_list.extend([
     #   ),
 
     # top
+     cfg(data_name = 'ttbar',
+         path     = '{0}/Summer16_TTJets_amcatnlo'.format(path),
+         nJobs    = 50,
+         suffix   = 'ttbar'
+        ),
 #    cfg(data_name = 'ttbar_leptonic',
 #        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
 #        nJobs    = 50,
@@ -151,11 +156,11 @@ mc_list.extend([
 #        nJobs    = 50,
 #        suffix   = 'ttbar_semilep'
 #       ),
-     #cfg(data_name = 'ttbar_leptonic',
-     #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
-     #    nJobs    = 50,
-     #    suffix   = 'ttbar_lep'
-     #   ),
+#     cfg(data_name = 'ttbar_leptonic',
+#         path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
+#         nJobs    = 50,
+#         suffix   = 'ttbar_lep'
+#        ),
 #    #cfg(data_name = 'T_s-channel',
 #    #    path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
 #    #    nJobs    = 10,
@@ -231,8 +236,8 @@ sig_list.extend([
     ])
 
 batch_list = []
-batch_list += data_list
-#batch_list += mc_list 
+#batch_list += data_list
+batch_list += mc_list 
 #batch_list += sig_list
 
 batch = bm.BatchMaster(config_list = batch_list, 

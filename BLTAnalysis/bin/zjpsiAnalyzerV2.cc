@@ -44,12 +44,12 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     if (params->selection == "mumu" || params->selection == "emu" || params->selection == "4l" || params->selection == "4mu") {
         //triggerNames.push_back("HLT_IsoMu22_v*");
         //triggerNames.push_back("HLT_IsoTkMu22_v*");
-        triggerNames.push_back("HLT_IsoMu24_v*");
-        triggerNames.push_back("HLT_IsoTkMu24_v*");
-        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
-        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
-        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
-        //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
+        //triggerNames.push_back("HLT_IsoMu24_v*");
+        //triggerNames.push_back("HLT_IsoTkMu24_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
+        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 
     } else if (params->selection == "ee") {
         triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
@@ -330,7 +330,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
                     // loose muon ID
                     && (muon->typeBits & baconhep::kPFMuon)
-                    && ((muon->typeBits & baconhep::kGlobal) || (muon->typeBits & baconhep::kTracker))
+                    && ((muon->typeBits & baconhep::kGlobal) || (muon->selectorBits & baconhep::kTrackerMuonArbitrated))
+                    && fabs(muon->d0) < 0.5
+                    && fabs(muon->dz) < 1.0
                 ){
                     muons.push_back(muon);
         }

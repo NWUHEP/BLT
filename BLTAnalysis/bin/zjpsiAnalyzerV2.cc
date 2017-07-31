@@ -113,7 +113,10 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
 
     // leptons
     outTree->Branch("leptonOneP4", &leptonOneP4);
-    outTree->Branch("leptonOneIso", &leptonOneIso);
+    //outTree->Branch("leptonOneIso", &leptonOneIso);
+    outTree->Branch("leptonOneTkIsoNR", &leptonOneTkIsoNR);
+    outTree->Branch("leptonOneTkIso", &leptonOneTkIso);
+    outTree->Branch("leptonOnePFIso", &leptonOnePFIso);
     outTree->Branch("leptonOneQ", &leptonOneQ);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
     outTree->Branch("leptonOneTrigger", &leptonOneTrigger);
@@ -123,7 +126,10 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("leptonOneDZ", &leptonOneDZ);
 
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
-    outTree->Branch("leptonTwoIso", &leptonTwoIso);
+    //outTree->Branch("leptonTwoIso", &leptonTwoIso);
+    outTree->Branch("leptonTwoTkIsoNR", &leptonTwoTkIsoNR);
+    outTree->Branch("leptonTwoTkIso", &leptonTwoTkIso);
+    outTree->Branch("leptonTwoPFIso", &leptonTwoPFIso);
     outTree->Branch("leptonTwoQ", &leptonTwoQ);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoTrigger", &leptonTwoTrigger);
@@ -133,7 +139,10 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     
     outTree->Branch("leptonThreeP4", &leptonThreeP4);
-    outTree->Branch("leptonThreeIso", &leptonThreeIso);
+    //outTree->Branch("leptonThreeIso", &leptonThreeIso);
+    outTree->Branch("leptonThreeTkIsoNR", &leptonThreeTkIsoNR);
+    outTree->Branch("leptonThreeTkIso", &leptonThreeTkIso);
+    outTree->Branch("leptonThreePFIso", &leptonThreePFIso);
     outTree->Branch("leptonThreeQ", &leptonThreeQ);
     outTree->Branch("leptonThreeFlavor", &leptonThreeFlavor);
     outTree->Branch("leptonThreeTrigger", &leptonThreeTrigger);
@@ -143,7 +152,10 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("leptonThreeDZ", &leptonThreeDZ);
 
     outTree->Branch("leptonFourP4", &leptonFourP4);
-    outTree->Branch("leptonFourIso", &leptonFourIso);
+    //outTree->Branch("leptonFourIso", &leptonFourIso);
+    outTree->Branch("leptonFourTkIsoNR", &leptonFourTkIsoNR);
+    outTree->Branch("leptonFourTkIso", &leptonFourTkIso);
+    outTree->Branch("leptonFourPFIso", &leptonFourPFIso);
     outTree->Branch("leptonFourQ", &leptonFourQ);
     outTree->Branch("leptonFourFlavor", &leptonFourFlavor);
     outTree->Branch("leptonFourTrigger", &leptonFourTrigger);
@@ -329,7 +341,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
     // Getting muon info
     vector<TLorentzVector> muons_P4;
-    vector<float> muons_iso;
+    //vector<float> muons_iso;
+    vector<float> muons_TkIsoNR;
+    vector<float> muons_TkIso;
+    vector<float> muons_PFIso;
     vector<bool> muons_isTight;
     vector<float> muons_q;
     vector<bool> muons_trigger;
@@ -372,7 +387,26 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             muons_isTight.push_back(false);
 
         float pfiso = muon->chHadIso + max(0., muon->neuHadIso + muon->gammaIso -0.5*(muon->puIso));
-        muons_iso.push_back(pfiso); 
+        //muons_iso.push_back(pfiso); 
+        muons_PFIso.push_back(pfiso);
+        muons_TkIsoNR.push_back(muon->trkIso);
+
+        // Tracker isolation Pt removal 
+        // Remove muon track pt from muon track isolation variable
+        //for (unsigned j = i+1; j < muons.size(); j++) {
+        for (unsigned j = 0; j < muons.size(); j++) {
+            if (i!=j) {
+                TLorentzVector muon_j;
+                copy_p4(muons[j], MUON_MASS, muon_j);
+
+                if (muonP4.DeltaR(muon_j) < 0.3) {
+                    muon->trkIso = max(0., muon->trkIso - muon_j.Pt());
+                    //muons[j]->trkIso = max(0., muons[j]->trkIso - muonP4.Pt());
+                }
+            }
+        }
+
+        muons_TkIso.push_back(muon->trkIso);
 
         // trigger matching
         bool triggered = false;
@@ -389,6 +423,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
     vector<float> electrons_iso;
     vector<float> electrons_q;
     vector<bool> electrons_trigger;
+    vector<float> electrons_d0;
+    vector<float> electrons_dz;
+    vector<unsigned int> electrons_index;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -404,6 +441,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             electrons.push_back(electronP4);
             electrons_iso.push_back(0.);
             electrons_q.push_back(electron->q);
+            electrons_d0.push_back(electron->d0);
+            electrons_dz.push_back(electron->dz);
+            electrons_index.push_back(electron->eleIndex);
 
             // trigger matching
             bool triggered = false;
@@ -573,9 +613,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         bool validMuon1 = false;
         for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
             if (
-                    muons_isTight[i] 
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    && muons_P4[i].Pt() > 25.0
+                    //muons_isTight[i] 
+                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    /*&& */muons_P4[i].Pt() > 4.0
                 )
             {
                 muonOneP4 = muons_P4[i];
@@ -596,9 +636,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
             if (
                     muons_q[muonOneIndex] != muons_q[i]
-                    && muons_isTight[i]
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    && muons_P4[i].Pt() > 20.0
+                    //&& muons_isTight[i]
+                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    && muons_P4[i].Pt() > 4.0
                )
             {
                 muonTwoP4 = muons_P4[i];
@@ -614,7 +654,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(7);
 
         leptonOneP4      = muonOneP4;
-        leptonOneIso     = muons_iso[muonOneIndex];
+        //leptonOneIso     = muons_iso[muonOneIndex];
         leptonOneQ       = muons_q[muonOneIndex];
         leptonOneTrigger = muons_trigger[muonOneIndex];
         leptonOneIsTight = muons_isTight[muonOneIndex];
@@ -622,7 +662,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         leptonOneD0        = muons_d0[muonOneIndex];
         leptonTwoP4      = muonTwoP4;
-        leptonTwoIso     = muons_iso[muonTwoIndex];
+        //leptonTwoIso     = muons_iso[muonTwoIndex];
         leptonTwoQ       = muons_q[muonTwoIndex];
         leptonTwoTrigger = muons_trigger[muonTwoIndex];
         leptonTwoIsTight = muons_isTight[muonTwoIndex];
@@ -690,9 +730,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         bool validMuon1 = false;
         for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
             if (
-                    muons_isTight[i] 
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    && muons_P4[i].Pt() > 25.0
+                    //muons_isTight[i] 
+                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    /*&&*/ muons_P4[i].Pt() > 25.0
                 )
             {
                 muonOneP4 = muons_P4[i];
@@ -714,8 +754,8 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
             if (
                     muons_q[muonOneIndex] != muons_q[i]
-                    && muons_isTight[i]
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    //&& muons_isTight[i]
+                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
                     && muons_P4[i].Pt() > 20.0
                )
             {
@@ -732,7 +772,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(7);
 
         leptonOneP4      = muonOneP4;
-        leptonOneIso     = muons_iso[muonOneIndex];
+        //leptonOneIso     = muons_iso[muonOneIndex];
+        leptonOneTkIsoNR     = muons_TkIsoNR[muonOneIndex];
+        leptonOneTkIso     = muons_TkIso[muonOneIndex];
+        leptonOnePFIso     = muons_PFIso[muonOneIndex];
         leptonOneQ       = muons_q[muonOneIndex];
         leptonOneTrigger = muons_trigger[muonOneIndex];
         leptonOneIsTight = muons_isTight[muonOneIndex];
@@ -740,7 +783,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         leptonOneD0        = muons_d0[muonOneIndex];
         leptonTwoP4      = muonTwoP4;
-        leptonTwoIso     = muons_iso[muonTwoIndex];
+        //leptonTwoIso     = muons_iso[muonTwoIndex];
+        leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
+        leptonTwoTkIso     = muons_TkIso[muonTwoIndex];
+        leptonTwoPFIso     = muons_PFIso[muonTwoIndex];
         leptonTwoQ       = muons_q[muonTwoIndex];
         leptonTwoTrigger = muons_trigger[muonTwoIndex];
         leptonTwoIsTight = muons_isTight[muonTwoIndex];
@@ -788,7 +834,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             if (
                     i != muonOneIndex 
                     && i != muonTwoIndex
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.25
                     && muons_P4[i].Pt() > 4.0
                 )
             {
@@ -828,7 +874,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(10);
         
         leptonThreeP4      = muonThreeP4;
-        leptonThreeIso     = muons_iso[muonThreeIndex];
+        //leptonThreeIso     = muons_iso[muonThreeIndex];
+        leptonThreeTkIsoNR     = muons_TkIsoNR[muonThreeIndex];
+        leptonThreeTkIso     = muons_TkIso[muonThreeIndex];
+        leptonThreePFIso     = muons_PFIso[muonThreeIndex];
         leptonThreeQ       = muons_q[muonThreeIndex];
         leptonThreeTrigger = muons_trigger[muonThreeIndex];
         leptonThreeIsTight = muons_isTight[muonThreeIndex];
@@ -838,7 +887,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonThreeDZ        = muons_dz[muonThreeIndex];
 
         leptonFourP4      = muonFourP4;
-        leptonFourIso     = muons_iso[muonFourIndex];
+        //leptonFourIso     = muons_iso[muonFourIndex];
+        leptonFourTkIsoNR     = muons_TkIsoNR[muonFourIndex];
+        leptonFourTkIso     = muons_TkIso[muonFourIndex];
+        leptonFourPFIso     = muons_PFIso[muonFourIndex];
         leptonFourQ       = muons_q[muonFourIndex];
         leptonFourTrigger = muons_trigger[muonFourIndex];
         leptonFourIsTight = muons_isTight[muonFourIndex];
@@ -850,6 +902,197 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         // Check for dimuon vertex 
         unsigned int leptonThreeIndex = muons_index[muonOneIndex];
         unsigned int leptonFourIndex = muons_index[muonTwoIndex];
+
+        bool hasValidJpsiVertex = false;
+         
+        for (int i = 0; i < fDimuonVertexArr->GetEntries(); ++i) {
+            TVertex* dimuonVert = (TVertex*) fDimuonVertexArr->At(i);
+            if (
+                    ((dimuonVert->index1 == leptonThreeIndex && dimuonVert->index2 == leptonFourIndex) ||
+                    (dimuonVert->index1 == leptonFourIndex && dimuonVert->index2 == leptonThreeIndex)) &&
+                    (dimuonVert->isValid)
+               ) {
+                    TVector3 vertPos;
+                    TVector3 vertErr;  
+                    vertPos.SetXYZ(dimuonVert->x, dimuonVert->y, dimuonVert->z);
+                    vertErr.SetXYZ(dimuonVert->xerr, dimuonVert->yerr, dimuonVert->zerr);
+                    rJpsiCand = vertPos; 
+                    rJpsiCandErr = vertErr;
+                    rJpsiCandChi2 = dimuonVert->chi2;
+                    rJpsiCandNdof = dimuonVert->ndof;
+                    hasValidJpsiVertex = true; 
+                    break;
+            }
+        }
+        
+        if (!hasValidJpsiVertex)
+            return kTRUE;
+ 
+        hTotalEvents->Fill(11);
+        
+        if (photons.size() > 0)
+            photonOneP4 = photons[0];
+    }
+    
+    else if (params->selection == "2e2mu") {
+        if ((muons_P4.size() < 2) || (electrons.size() < 2))
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        
+        // Select the leading electron
+        TLorentzVector electronOneP4;
+        unsigned electronOneIndex = 0;
+        bool validElectron1 = false;
+        for (unsigned i = 0; i < (electrons.size() - 1); ++i) {
+            if ( electrons[i].Pt() > 25.0 )
+            {
+                electronOneP4 = electrons[i];
+                electronOneIndex = i;
+                validElectron1 = true;
+                break;
+            }
+        }
+
+        if (!validElectron1)
+            return kTRUE;
+
+        hTotalEvents->Fill(6);
+
+        // Select the oppositely charged second muon
+        TLorentzVector electronTwoP4;
+        unsigned electronTwoIndex = electronOneIndex + 1;
+        bool validElectron2 = false;
+        for (unsigned i = electronOneIndex+1; i < electrons.size(); ++i) {
+            if (
+                    electrons_q[electronOneIndex] != electrons_q[i]
+                    && electrons[i].Pt() > 20.0
+               )
+            {
+                electronTwoP4 = electrons[i];
+                electronTwoIndex = i;
+                validElectron2 = true;
+                break;
+            }
+        }
+
+        if (!validElectron2)
+            return kTRUE;
+
+        hTotalEvents->Fill(7);
+
+        leptonOneP4      = electronOneP4;
+        //leptonOneIso     = electrons_iso[electronOneIndex];
+        leptonOneQ       = electrons_q[electronOneIndex];
+        leptonOneTrigger = electrons_trigger[electronOneIndex];
+        leptonOneFlavor  = 1;
+
+        leptonOneD0        = electrons_d0[electronOneIndex];
+        leptonTwoP4      = electronTwoP4;
+        //leptonTwoIso     = electrons_iso[electronTwoIndex];
+        leptonTwoQ       = electrons_q[electronTwoIndex];
+        leptonTwoTrigger = electrons_trigger[electronTwoIndex];
+        leptonTwoFlavor  = 1;
+            
+        leptonTwoD0        = electrons_d0[electronTwoIndex];
+        leptonTwoDZ        = electrons_dz[electronTwoIndex];
+    
+        // Check for dielectron vertex 
+        unsigned int leptonOneIndex = electrons_index[electronOneIndex];
+        unsigned int leptonTwoIndex = electrons_index[electronTwoIndex];
+
+        bool hasValidZVertex = false;
+         
+        for (int i = 0; i < fDielectronVertexArr->GetEntries(); ++i) {
+            TVertex* dielectronVert = (TVertex*) fDielectronVertexArr->At(i);
+            if (
+                    ((dielectronVert->index1 == leptonOneIndex && dielectronVert->index2 == leptonTwoIndex) ||
+                    (dielectronVert->index1 == leptonTwoIndex && dielectronVert->index2 == leptonOneIndex)) &&
+                    (dielectronVert->isValid)
+               ) {
+                    TVector3 vertPos;
+                    TVector3 vertErr;  
+                    vertPos.SetXYZ(dielectronVert->x, dielectronVert->y, dielectronVert->z);
+                    vertErr.SetXYZ(dielectronVert->xerr, dielectronVert->yerr, dielectronVert->zerr);
+                    rZCand = vertPos; 
+                    rZCandErr = vertErr;
+                    rZCandChi2 = dielectronVert->chi2;
+                    rZCandNdof = dielectronVert->ndof;
+                    hasValidZVertex = true; 
+                    break;
+            }
+        }
+        
+        if (!hasValidZVertex)
+            return kTRUE; 
+        
+        hTotalEvents->Fill(8);
+
+        // Select the J/Psi candidate leading muon
+        TLorentzVector muonThreeP4;
+        unsigned muonThreeIndex = 0;
+        bool validMuon3 = false;
+        for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
+            if (
+                    //(muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                    /*&&*/ muons_P4[i].Pt() > 4.0
+                )
+            {
+                muonThreeP4 = muons_P4[i];
+                muonThreeIndex = i;
+                validMuon3 = true;
+                break;
+            }
+        }
+        
+        if (!validMuon3)
+            return kTRUE;
+       
+        hTotalEvents->Fill(9);
+
+        // Select the J/Psi candidate subleading muon
+        TLorentzVector muonFourP4;
+        unsigned muonFourIndex = muonThreeIndex + 1;
+        bool validMuon4 = false;
+        for (unsigned i = muonThreeIndex+1; i < muons_P4.size(); ++i) {
+            if (
+                    muons_q[muonThreeIndex] != muons_q[i]
+               )
+            {
+                muonFourP4 = muons_P4[i];
+                muonFourIndex = i;
+                validMuon4 = true;
+                break;
+            }
+        }
+        
+        if (!validMuon4)
+            return kTRUE;
+
+        hTotalEvents->Fill(10);
+        
+        leptonThreeP4      = muonThreeP4;
+        //leptonThreeIso     = muons_iso[muonThreeIndex];
+        leptonThreeQ       = muons_q[muonThreeIndex];
+        leptonThreeTrigger = muons_trigger[muonThreeIndex];
+        leptonThreeIsTight = muons_isTight[muonThreeIndex];
+        leptonThreeFlavor  = 1;
+
+        leptonThreeD0        = muons_d0[muonThreeIndex];
+        leptonThreeDZ        = muons_dz[muonThreeIndex];
+
+        leptonFourP4      = muonFourP4;
+        //leptonFourIso     = muons_iso[muonFourIndex];
+        leptonFourQ       = muons_q[muonFourIndex];
+        leptonFourTrigger = muons_trigger[muonFourIndex];
+        leptonFourIsTight = muons_isTight[muonFourIndex];
+        leptonFourFlavor  = 1;
+            
+        leptonFourD0        = muons_d0[muonFourIndex];
+        leptonFourDZ        = muons_dz[muonFourIndex];
+       
+        // Check for dimuon vertex 
+        unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
+        unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
          
@@ -895,13 +1138,13 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(6);
 
         leptonOneP4      = electrons[0];
-        leptonOneIso     = electrons_iso[0];
+        //leptonOneIso     = electrons_iso[0];
         leptonOneQ       = electrons_q[0];
         leptonOneTrigger = electrons_trigger[0];
         leptonOneFlavor  = 0;
 
         leptonTwoP4      = electrons[1];
-        leptonTwoIso     = electrons_iso[1];
+        //leptonTwoIso     = electrons_iso[1];
         leptonTwoQ       = electrons_q[1];
         leptonTwoTrigger = electrons_trigger[1];
         leptonTwoFlavor  = 0;

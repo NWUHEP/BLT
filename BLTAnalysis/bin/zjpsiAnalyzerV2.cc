@@ -732,9 +732,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         bool validMuon1 = false;
         for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
             if (
-                    //muons_isTight[i] 
-                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    /*&&*/ muons_P4[i].Pt() > 25.0
+                    muons_isTight[i] 
+                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    muons_P4[i].Pt() > 25.0
                 )
             {
                 muonOneP4 = muons_P4[i];
@@ -756,8 +756,8 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
             if (
                     muons_q[muonOneIndex] != muons_q[i]
-                    //&& muons_isTight[i]
-                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                    && muons_isTight[i]
+                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
                     && muons_P4[i].Pt() > 20.0
                )
             {
@@ -836,7 +836,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             if (
                     i != muonOneIndex 
                     && i != muonTwoIndex
-                    //&& (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
                     && muons_P4[i].Pt() > 4.0
                 )
             {
@@ -902,8 +902,8 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonFourDZ        = muons_dz[muonFourIndex];
        
         // Check for dimuon vertex 
-        unsigned int leptonThreeIndex = muons_index[muonOneIndex];
-        unsigned int leptonFourIndex = muons_index[muonTwoIndex];
+        unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
+        unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
          

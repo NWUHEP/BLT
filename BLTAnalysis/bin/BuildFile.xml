@@ -2,4 +2,3 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
-<bin file="MuonTagAndProbe.cc" name="MuonTagAndProbe"></bin>

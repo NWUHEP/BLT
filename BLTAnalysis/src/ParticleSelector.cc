@@ -18,9 +18,9 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     // offline jet corrections on-the-fly
     std::string runPeriod = "H";
     if (
-        parameters.datasetgroup == "muon_2016B" 
-        || parameters.datasetgroup == "muon_2016C" 
-        || parameters.datasetgroup == "muon_2016D"
+            parameters.datasetgroup == "muon_2016B" 
+            || parameters.datasetgroup == "muon_2016C" 
+            || parameters.datasetgroup == "muon_2016D"
        ) {
         runPeriod = "BCD";
     } else if (parameters.datasetgroup == "muon_2016E" || parameters.datasetgroup == "muon_2016F") {
@@ -52,20 +52,18 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
     bool muPass = false;
     if (cutLevel.cutName == "tightMuID") {
-        if (this->_parameters.period == "2012") {
-            if (
-                    mu->muNchi2       < cutLevel.NormalizedChi2
-                    && mu->nValidHits > cutLevel.NumberOfValidMuonHits
-                    && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
-                    && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
-                    && mu->nTkLayers  > cutLevel.TrackLayersWithMeasurement
-                    && fabs(mu->d0)   < cutLevel.dxy
-                    && fabs(mu->dz)   < cutLevel.dz
-                    && test_bits(mu->typeBits, baconhep::kPFMuon) == cutLevel.IsPF
-                    && test_bits(mu->typeBits, baconhep::kGlobal) == cutLevel.IsGLB
-               ) muPass = true;
+        if (
+                mu->muNchi2       < cutLevel.NormalizedChi2
+                && mu->nValidHits > cutLevel.NumberOfValidMuonHits
+                && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
+                && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
+                && mu->nTkLayers  > cutLevel.TrackLayersWithMeasurement
+                && fabs(mu->d0)   < cutLevel.dxy
+                && fabs(mu->dz)   < cutLevel.dz
+                && test_bits(mu->typeBits, baconhep::kPFMuon) == cutLevel.IsPF
+                && test_bits(mu->typeBits, baconhep::kGlobal) == cutLevel.IsGLB
+           ) muPass = true;
 
-        }     
     }
     return muPass;
 }

@@ -5,7 +5,7 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/tthome/share/bacon/production/12'
+path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
 selection  = 'mc'
 period     = '2016'
@@ -19,9 +19,9 @@ data_list = []
 
 if selection in ['mumu', 'emu', '4l']:
     data_list.extend([
-
         cfg(data_name = 'muon_2016B_v1',
             path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
+
             nJobs     = 30,
             suffix    = 'muon_2016B'
            ),
@@ -89,11 +89,11 @@ path       = '/tthome/share/bacon/production/12'
 mc_list = []
 mc_list.extend([
     # Drell-Yan
-    cfg(data_name = 'DYJetsToLL_M-50',
-        path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 50,
-        suffix   = 'zjets_m-50'
-       ),
+    #cfg(data_name = 'DYJetsToLL_M-50',
+    #    path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-50'
+    #   ),
     cfg(data_name = 'DYJetsToLL_M-10to50',
         path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
@@ -141,21 +141,26 @@ mc_list.extend([
     #   ),
 
     # top
-     cfg(data_name = 'ttbar',
-         path     = '{0}/Summer16_TTJets_amcatnlo'.format(path),
-         nJobs    = 50,
-         suffix   = 'ttbar'
-        ),
+#    cfg(data_name = 'ttbar',
+#        path     = '{0}/Summer16_TTJets_amcatnlo'.format(path),
+#        nJobs    = 50,
+#        suffix   = 'ttbar'
+#       ),
 #    cfg(data_name = 'ttbar_leptonic',
 #        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
 #        nJobs    = 50,
 #        suffix   = 'ttbar_lep'
 #       ),
-#    cfg(data_name = 'ttbar_semileptonic',
-#        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'ttbar_semilep'
-#       ),
+    #cfg(data_name = 'ttbar_semileptonic_plus',
+    #    path     = '{0}/Summer16_TTJets_SingleLeptFromT_amcatnlo'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_semilep'
+    #   ),
+    #cfg(data_name = 'ttbar_semileptonic_minus',
+    #    path     = '{0}/Summer16_TTJets_SingleLeptFromTbar_amcatnlo'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_semilep'
+    #   ),
 #     cfg(data_name = 'ttbar_leptonic',
 #         path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
 #         nJobs    = 50,

@@ -41,8 +41,7 @@ echo $PATH
 pwd
 cat input.txt
 ### Run the analyzer
-#DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-MuonTagAndProbe input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
 cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

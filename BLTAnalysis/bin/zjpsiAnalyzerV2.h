@@ -104,7 +104,7 @@ public:
     Float_t rJpsiCandChi2, rJpsiCandNdof;
 
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4, photonOneP4;
-    //Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
+    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
     Float_t leptonOneTkIsoNR, leptonTwoTkIsoNR, leptonThreeTkIsoNR, leptonFourTkIsoNR;
     Float_t leptonOneTkIso, leptonTwoTkIso, leptonThreeTkIso, leptonFourTkIso;
     Float_t leptonOnePFIso, leptonTwoPFIso, leptonThreePFIso, leptonFourPFIso;

@@ -87,7 +87,9 @@ public:
     Bool_t triggerStatus;
     Float_t eventWeight, nPU;
     TVector3 rPV;
-    TVector3 rDimuon;
+    TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
+    Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
+    Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
 
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4;
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;

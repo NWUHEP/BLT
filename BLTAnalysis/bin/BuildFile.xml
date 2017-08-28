@@ -1,7 +1,6 @@
 <use name="BLT/BLTAnalysis"/>
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
-<!--<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>-->
-<bin file="jpsiGenAnalyzer.cc" name="jpsiGenAnalyzer"></bin>
+<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
 <!--<bin file="zjpsiAnalyzer.cc" name="zjpsiAnalyzer"></bin>-->
 <bin file="zjpsiAnalyzerV2.cc" name="zjpsiAnalyzerV2"></bin>

@@ -139,11 +139,12 @@ mc_list.extend([
     #   ),
 
     # top
-#    cfg(data_name = 'ttbar',
-#        path     = '{0}/Summer16_TTJets_amcatnlo'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'ttbar'
-#       ),
+    # top: ttbar
+    #cfg(data_name = 'ttbar',
+    #   path     = '{0}/Summer16_TTJets_amcatnlo'.format(path),
+    #   nJobs    = 50,
+    #   suffix   = 'ttbar'
+    #  ),
     cfg(data_name = 'ttbar_leptonic',
         path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
         nJobs    = 50,
@@ -159,6 +160,7 @@ mc_list.extend([
     #    nJobs    = 50,
     #    suffix   = 'ttbar_semilep'
     #   ),
+<<<<<<< HEAD
 #     cfg(data_name = 'ttbar_leptonic',
 #         path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
 #         nJobs    = 50,
@@ -174,6 +176,26 @@ mc_list.extend([
 #    #    nJobs    = 10,
 #    #    suffix   = 'tbar_s'
 #    #   ),
+=======
+    #cfg(data_name = 'ttbar_leptonic',
+    #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_lep'
+    #   ),
+
+    # top: single t
+    #cfg(data_name = 'T_s-channel',
+    #    path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 't_s'
+    #   ),
+    #cfg(data_name = 'Tbar_s-channel',
+    #    path     = '{0}/'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'tbar_s'
+    #   ),
+
+>>>>>>> 2a00bab7df433a141a847a8dbc9b0f3c829ce3c1
     cfg(data_name = 'T_t-channel',
         path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
         nJobs    = 10,
@@ -195,7 +217,11 @@ mc_list.extend([
         suffix   = 'tbar_tw'
        ),
 
+<<<<<<< HEAD
 #    # Diboson
+=======
+    # Diboson
+>>>>>>> 2a00bab7df433a141a847a8dbc9b0f3c829ce3c1
     cfg(data_name = 'WW',
         path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
         nJobs    = 10,
@@ -240,7 +266,7 @@ sig_list.extend([
 
 batch_list = []
 batch_list += data_list
-#batch_list += mc_list 
+batch_list += mc_list 
 #batch_list += sig_list
 
 batch = bm.BatchMaster(config_list = batch_list, 

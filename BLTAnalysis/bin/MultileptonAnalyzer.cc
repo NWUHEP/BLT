@@ -280,7 +280,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     std::vector<TJet*> bjets;
     nJets    = 0;
-    nFwdJets = 0;
     nBJets   = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);

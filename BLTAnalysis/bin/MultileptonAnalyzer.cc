@@ -344,8 +344,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        //if (muons[0]->q != muons[1]->q) // remove opposite sign muons
-        if (muons[0]->q == muons[1]->q)  // remove same sign muons
+        if (muons[0]->q != muons[1]->q) // remove opposite sign muons
+        //if (muons[0]->q == muons[1]->q)  // remove same sign muons
             return kTRUE;
         hTotalEvents->Fill(7);
 

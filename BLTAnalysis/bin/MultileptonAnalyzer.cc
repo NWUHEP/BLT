@@ -341,7 +341,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0]->pt > 25)
+        if (muons[0]->pt < 25)
             return kTRUE;
         hTotalEvents->Fill(6);
 

@@ -344,11 +344,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        if (muons[0]->q == muons[1]->q)
+        //if (muons[0]->q != muons[1]->q) // remove opposite sign muons
+        if (muons[0]->q == muons[1]->q)  // remove same sign muons
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (nBJets < 2)
+        if (bjets.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(8);
 
@@ -377,7 +378,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
 
     outTree->Fill();
-    this->passedEvents++;
+    this->passedEvents++; // controller variables
     return kTRUE;
 }
 

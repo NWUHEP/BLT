@@ -380,8 +380,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(6);
 
         TLorentzVector electronOneP4, electronTwoP4;
-        copy_p4(electrons[0], ELECTRON_MASS, electronOneP4);
-        copy_p4(electrons[1], ELECTRON_MASS, electronTwoP4);
+        copy_p4(electrons[0], ELE_MASS, electronOneP4);
+        copy_p4(electrons[1], ELE_MASS, electronTwoP4);
         leptonOneP4 = electronOneP4;
         leptonTwoP4 = electronTwoP4;
         // fill b jets

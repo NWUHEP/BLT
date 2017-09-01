@@ -95,6 +95,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // leptons
     outTree->Branch("leptonOneP4", &leptonOneP4);
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
+    outTree->Branch("leptonOneQ", &leptonOneQ);
+    outTree->Branch("leptonTwoQ", &leptonTwoQ);
 
     // jets
     outTree->Branch("bjetOneP4", &bjetOneP4);
@@ -353,6 +355,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         copy_p4(muons[1], MUON_MASS, muonTwoP4);
         leptonOneP4 = muonOneP4;
         leptonTwoP4 = muonTwoP4;
+        leptonOneQ = muons[0]->q;
+        leptonTwoQ = muons[1]->q;
 
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
@@ -375,15 +379,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (bjets.size() < 2)
+        if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
             return kTRUE;
         hTotalEvents->Fill(6);
+
+        if (bjets.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(7);
 
         TLorentzVector electronOneP4, electronTwoP4;
         copy_p4(electrons[0], ELE_MASS, electronOneP4);
         copy_p4(electrons[1], ELE_MASS, electronTwoP4);
         leptonOneP4 = electronOneP4;
         leptonTwoP4 = electronTwoP4;
+        leptonOneQ = electrons[0]->q;
+        leptonTwoQ = electrons[1]->q;
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);

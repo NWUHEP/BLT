@@ -88,6 +88,7 @@ public:
     Float_t eventWeight, nPU;
 
     TLorentzVector leptonOneP4, leptonTwoP4, bjetOneP4, bjetTwoP4;
+    Float_t leptonOneQ,leptonTwoQ;
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;

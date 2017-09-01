@@ -379,8 +379,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        leptonOneP4      = electrons[0];
-        leptonTwoP4      = electrons[1];
+        TLorentzVector electronOneP4, electronTwoP4;
+        copy_p4(electrons[0], ELECTRON_MASS, electronOneP4);
+        copy_p4(electrons[1], ELECTRON_MASS, electronTwoP4);
+        leptonOneP4 = electronOneP4;
+        leptonTwoP4 = electronTwoP4;
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);

@@ -179,11 +179,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
 
-            //cout << particle->status << ", "
-            //     << particle->pdgId  << ", "
-            //     << particle->parent
-            //     << endl;
-
             if (
                     particle->status == 23 
                     && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
@@ -203,7 +198,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Select objects//
     ///////////////////
 
-    /* Vertices */
+    /* 0. Vertices */
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
         TVector3 pv;
@@ -216,7 +211,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
 
-    /* MUONS */
+    /* 1. MUONS */
     vector<TMuon*> muons;
     vector<TLorentzVector> veto_muons; // for vetoing jets that overlap with muons (not saved!!!)
     for (int i=0; i < fMuonArr->GetEntries(); i++) {
@@ -254,7 +249,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
 
-    /* ELECTRONS */
+    /* 2. ELECTRONS */
     std::vector<TElectron*> electrons;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
@@ -273,7 +268,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
 
-    /* JETS */
+    /* 3.JETS */
     TClonesArray* jetCollection;
     jetCollection = fAK4CHSArr;
 
@@ -324,7 +319,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(bjets.begin(), bjets.end(), sort_by_higher_pt<TJet>);
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
 
-    /* MET */
+    /* 4.MET */
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
@@ -374,6 +369,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
             eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
+    } 
+    if (params->selection == "ee") {
+        if (electrons.size() != 2)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+
+        if (bjets.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+
+        leptonOneP4      = electrons[0];
+        leptonTwoP4      = electrons[1];
+        // fill b jets
+        bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+        bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
     } 
 
 

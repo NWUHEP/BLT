@@ -53,7 +53,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 
     } else if (params->selection == "ee") {
-        triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
     }
 
     // Weight utility class
@@ -341,9 +341,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(6);
 
-        if (muons[0]->q != muons[1]->q) // remove opposite sign muons
+        //if (muons[0]->q != muons[1]->q) // remove opposite sign muons
         //if (muons[0]->q == muons[1]->q)  // remove same sign muons
-            return kTRUE;
+        //    return kTRUE;
         hTotalEvents->Fill(7);
 
         if (bjets.size() < 2)
@@ -379,8 +379,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
-            return kTRUE;
+        //if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
+        //    return kTRUE;
         hTotalEvents->Fill(6);
 
         if (bjets.size() < 2)

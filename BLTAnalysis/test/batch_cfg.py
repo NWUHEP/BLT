@@ -67,53 +67,54 @@ if selection in ['mumu', 'emu', '4l']:
 elif selection == 'ee':
     data_list.extend([
         cfg(data_name = 'electron_2016B_v1',
-            path      = '{0}/SingleElectron_Run2016B-03Feb2017_ver1-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016B-03Feb2017_ver1-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016B'
            ),
         cfg(data_name = 'electron_2016B_v2',
-            path      = '{0}/SingleElectron_Run2016B-03Feb2017_ver2-v2'.format(path),
+            path      = '{0}/DoubleEG_Run2016B-03Feb2017_ver2-v2'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016B'
            ),
         cfg(data_name = 'electron_2016C_v1',
-            path      = '{0}/SingleElectron_Run2016C-03Feb2017-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016C-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016C'
            ),
         cfg(data_name = 'electron_2016D_v1',
-            path      = '{0}/SingleElectron_Run2016D-03Feb2017-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016D-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016D'
            ),
         cfg(data_name = 'electron_2016E_v1',
-            path      = '{0}/SingleElectron_Run2016E-03Feb2017-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016E-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016E'
            ),
         cfg(data_name = 'electron_2016F_v1',
-            path      = '{0}/SingleElectron_Run2016F-03Feb2017-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016F-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016F'
            ),
         cfg(data_name = 'electron_2016G',
-            path      = '{0}/SingleElectron_Run2016G-03Feb2017-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016G-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016G'
            ),
         cfg(data_name = 'electron_2016H_v2',
-            path      = '{0}/SingleElectron_Run2016H-03Feb2017_ver2-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016H-03Feb2017_ver2-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016H'
            ),
         cfg(data_name = 'electron_2016H_v3',
-            path      = '{0}/SingleElectron_Run2016H-03Feb2017_ver3-v1'.format(path),
+            path      = '{0}/DoubleEG_Run2016H-03Feb2017_ver3-v1'.format(path),
             nJobs     = 30,
             suffix    = 'electron_2016H'
           ),
         ])
 
 path       = '/tthome/share/bacon/production/12'
+
 mc_list = []
 mc_list.extend([
     # Drell-Yan

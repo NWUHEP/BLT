@@ -373,7 +373,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } 
     if (params->selection == "ee") {
-        if (electrons.size() != 2)
+        if (electrons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
 

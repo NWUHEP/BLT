@@ -243,7 +243,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             muons.push_back(muon);
             //muons for jet veto
             //if (muonP4.Pt() > 20) {
-            //    veto_muons.push_back(muonP4);
+            veto_muons.push_back(muonP4);
             //}   
         }
     }
@@ -284,7 +284,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector vJet; 
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
-        for (const auto& mu: muons) {
+        for (const auto& mu: veto_muons) {
             if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;

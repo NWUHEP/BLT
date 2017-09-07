@@ -240,11 +240,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && particleSelector->PassMuonID(muon, cuts->tightMuID)
                 && muon->trkIso/muon->pt < 0.1
             ) {
-                muons.push_back(muon);
-                // muons for jet veto
-                //if (muonP4.Pt() > 20) {
-                //    veto_muons.push_back(muonP4);
-            }   
+            muons.push_back(muon);
+            //muons for jet veto
+            //if (muonP4.Pt() > 20) {
+            //    veto_muons.push_back(muonP4);
+            //}   
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);

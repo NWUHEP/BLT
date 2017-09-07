@@ -240,13 +240,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && particleSelector->PassMuonID(muon, cuts->tightMuID)
                 && muon->trkIso/muon->pt < 0.1
             ) {
-
-            muons.push_back(muon);
-
-            // muons for jet veto
-            if (muonP4.Pt() > 20) {
-                veto_muons.push_back(muonP4);
-            }
+                muons.push_back(muon);
+                // muons for jet veto
+                //if (muonP4.Pt() > 20) {
+                //    veto_muons.push_back(muonP4);
+            }   
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -286,7 +284,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector vJet; 
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
-        for (const auto& mu: veto_muons) {
+        for (const auto& mu: muons) {
             if (vJet.DeltaR(mu) < 0.5) {
                 muOverlap = true;
                 break;
@@ -333,11 +331,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nElectrons = electrons.size();
 
     if (params->selection == "mumu") {
-        if (muons.size() != 2)
+        if (muons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0]->pt < 25)
+        if (muons[0]->pt < 25 || muons[1]->pt < 20)
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -379,13 +377,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
+        if (electrons[0]->pt < 25 || electrons[1]->pt < 20)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+
         //if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
         //    return kTRUE;
-        hTotalEvents->Fill(6);
+        hTotalEvents->Fill(7);
 
         if (bjets.size() < 2)
             return kTRUE;
-        hTotalEvents->Fill(7);
+        hTotalEvents->Fill(8);
 
         TLorentzVector electronOneP4, electronTwoP4;
         copy_p4(electrons[0], ELE_MASS, electronOneP4);

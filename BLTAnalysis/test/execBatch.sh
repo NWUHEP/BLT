@@ -14,14 +14,14 @@ PERIOD=$5
 TOPDIR=$PWD
 
 # lpc
-export SCRAM_ARCH=slc6_amd64_gcc530
-export CMSSW_VERSION=CMSSW_8_0_24_patch1
-source /cvmfs/cms.cern.ch/cmsset_default.sh
-
-# nut3
 #export SCRAM_ARCH=slc6_amd64_gcc530
 #export CMSSW_VERSION=CMSSW_8_0_24_patch1
-#source /software/tier3/osg/cmsset_default.sh 
+#source /cvmfs/cms.cern.ch/cmsset_default.sh
+
+# nut3
+export SCRAM_ARCH=slc6_amd64_gcc530
+export CMSSW_VERSION=CMSSW_7_4_12
+source /software/tier3/osg/cmsset_default.sh 
 
 # Setup CMSSW environment
 #scram project CMSSW $CMSSW_VERSION
@@ -41,9 +41,7 @@ echo $PATH
 pwd
 cat input.txt
 ### Run the analyzer
-#DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-#MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-zjpsiAnalyzerV2 input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
 cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

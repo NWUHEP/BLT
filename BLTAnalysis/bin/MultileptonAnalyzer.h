@@ -82,31 +82,40 @@ public:
     std::vector<string> triggerNames;
 
     // Branches in the output file
+    // event data
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight, nPU;
     TVector3 rPV;
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
+
+    // physics object Lorentz vectors
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
+
+    // Additional lepton data
+    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
+    Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
+    Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
+    Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
+
+    // dimuon vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
     Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
     Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
 
-    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, jetP4, bjetP4, genJetP4, genBJetP4;
-    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
-    Int_t leptonOneQ, leptonTwoQ, leptonThreeQ, leptonFourQ;
-    Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor, jetFlavor, bjetFlavor;
-    Bool_t leptonOneTrigger, leptonTwoTrigger, leptonThreeTrigger, leptonFourTrigger;
-    Float_t leptonOneD0, leptonTwoD0;
-    Float_t leptonOneDZ, leptonTwoDZ;
+    // jet data
+    TLorentzVector jetOneP4, jetTwoP4;
+    Float_t jetOneTag, jetTwoTag;
+    Float_t met, metPhi, ht, htPhi;
 
-    Float_t jetD0, bjetD0;
-    Float_t bjetPUID, bjetTag, jetPUID, jetTag, genJetTag, genBJetTag;
-    Float_t met, metPhi;
-
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
+    // generator level data
+    TLorentzVector gnuOneP4, gnuTwoP4;
 
     // MET kluge 
     float MetKluge(float);
+    float GetMuonIsolation(const baconhep::TMuon*);
+    float GetElectronIsolation(const baconhep::TElectron*, float);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

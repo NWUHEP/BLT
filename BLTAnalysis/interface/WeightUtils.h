@@ -40,9 +40,7 @@ class WeightUtils: public TObject {
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
-        //float   GetElectronRecoEff(TLorentzVector&) const;
-        //float   GetMuonTriggerEff(string, vector<TLorentzVector>&) const;
-        //float   GetEleTriggerEff(string, vector<TLorentzVector>&) const;
+        float   GetElectronRecoIdEff(TLorentzVector&) const;
 
         ClassDef(WeightUtils, 0);
 
@@ -55,9 +53,12 @@ class WeightUtils: public TObject {
 
         TGraph  *_puReweight;
         TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
-        TGraphAsymmErrors *_muSF2012_ID_DATA[4], *_muSF2012_ID_MC[4]; 
-        TGraphAsymmErrors *_muSF2012_ISO_DATA[4], *_muSF2012_ISO_MC[4]; 
-        //TGraph *_muSF2012_ID_err[4], *_muSF2012_ISO_err[4];
+        TGraphAsymmErrors *_muSF_ID_DATA[4], *_muSF_ID_MC[4]; 
+        TGraphAsymmErrors *_muSF_ISO_DATA[4], *_muSF_ISO_MC[4]; 
+
+        TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
+
+        //TGraph *_muSF_ID_err[4], *_muSF_ISO_err[4];
 
         //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
         //TH2D    *h2_EleMVASF;

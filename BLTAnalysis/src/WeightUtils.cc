@@ -7,15 +7,16 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _isRealData = isRealData;
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
+    std::string fileName;
 
     // PU weights
-    std::string puFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
-    TFile* puFile = new TFile(puFileName.c_str(), "OPEN");
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    TFile* puFile = new TFile(fileName.c_str(), "OPEN");
     _puReweight = (TGraph*)puFile->Get("pileup_sf");
 
-    // trigger efficiencies 
-    std::string triggerFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_BCDEF.root";
-    TFile* triggerFile = new TFile(triggerFileName.c_str(), "OPEN");
+    // muon trigger efficiencies 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_BCDEF.root";
+    TFile* triggerFile = new TFile(fileName.c_str(), "OPEN");
 
     std::string filePath = "IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesDATA/";
     _eff_IsoMu24_DATA[0] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin0_&_Tight2012_pass_&_tag_IsoMu24_pass_DATA").c_str());
@@ -23,38 +24,52 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eff_IsoMu24_DATA[2] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin2_&_Tight2012_pass_&_tag_IsoMu24_pass_DATA").c_str());
     _eff_IsoMu24_DATA[3] = (TGraphAsymmErrors*)triggerFile->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_&_tag_IsoMu24_pass_DATA").c_str());
 
-    // tight muon ID sf
-    std::string idFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/EfficienciesAndSF_BCDEF.root";
-    TFile* f_muRecoSF2012_ID = new TFile(idFileName.c_str(), "OPEN"); 
+    // muon tight ID sf
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/EfficienciesAndSF_BCDEF.root";
+    TFile* f_muRecoSF_ID = new TFile(fileName.c_str(), "OPEN"); 
 
     filePath = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/efficienciesDATA/";
-    _muSF2012_ID_DATA[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin0_DATA").c_str());
-    _muSF2012_ID_DATA[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin1_DATA").c_str());
-    _muSF2012_ID_DATA[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin2_DATA").c_str());
-    _muSF2012_ID_DATA[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin3_DATA").c_str());
+    _muSF_ID_DATA[0] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin0_DATA").c_str());
+    _muSF_ID_DATA[1] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin1_DATA").c_str());
+    _muSF_ID_DATA[2] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin2_DATA").c_str());
+    _muSF_ID_DATA[3] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin3_DATA").c_str());
 
     filePath = "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/efficienciesMC/";
-    _muSF2012_ID_MC[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin0_MC").c_str());
-    _muSF2012_ID_MC[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin1_MC").c_str());
-    _muSF2012_ID_MC[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin2_MC").c_str());
-    _muSF2012_ID_MC[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ID->Get((filePath + "pt_PLOT_abseta_bin3_MC").c_str());
+    _muSF_ID_MC[0] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin0_MC").c_str());
+    _muSF_ID_MC[1] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin1_MC").c_str());
+    _muSF_ID_MC[2] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin2_MC").c_str());
+    _muSF_ID_MC[3] = (TGraphAsymmErrors*)f_muRecoSF_ID->Get((filePath + "pt_PLOT_abseta_bin3_MC").c_str());
 
     // loose muon ISO sf
-    std::string isoFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_BCDEF.root";
-    TFile* f_muRecoSF2012_ISO = new TFile(isoFileName.c_str(), "OPEN"); 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_BCDEF.root";
+    TFile* f_muRecoSF_ISO = new TFile(fileName.c_str(), "OPEN"); 
 
     filePath = "tkLooseISO_highptID_newpt_eta/efficienciesDATA/";
-    _muSF2012_ISO_DATA[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_DATA").c_str());
-    _muSF2012_ISO_DATA[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_DATA").c_str());
-    _muSF2012_ISO_DATA[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_DATA").c_str());
-    _muSF2012_ISO_DATA[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_DATA").c_str());
+    _muSF_ISO_DATA[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_DATA").c_str());
+    _muSF_ISO_DATA[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_DATA").c_str());
+    _muSF_ISO_DATA[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_DATA").c_str());
+    _muSF_ISO_DATA[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_DATA").c_str());
 
     filePath = "tkLooseISO_highptID_newpt_eta/efficienciesMC/";
-    _muSF2012_ISO_MC[0] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_MC").c_str());
-    _muSF2012_ISO_MC[1] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_MC").c_str());
-    _muSF2012_ISO_MC[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_MC").c_str());
-    _muSF2012_ISO_MC[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_MC").c_str());
+    _muSF_ISO_MC[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_MC").c_str());
+    _muSF_ISO_MC[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_MC").c_str());
+    _muSF_ISO_MC[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_MC").c_str());
+    _muSF_ISO_MC[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_MC").c_str());
 
+    // electron trigger efficiencies
+    // electron reco efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
+    TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
+
+    // electron id efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
+    TFile* f_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_ID[0] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_0");
+    _eleSF_ID[1] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_1");
+    _eleSF_ID[2] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_2");
+    _eleSF_ID[3] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_3");
+    _eleSF_ID[4] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_4");
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -112,8 +127,7 @@ float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
 
     float weight = 1;
     if (muon.Pt() < 200.) {
-        weight   *= _muSF2012_ID_DATA[etaBin]->Eval(muon.Pt())/_muSF2012_ID_MC[etaBin]->Eval(muon.Pt());
-        //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(muonP4.Pt());
+        weight   *= _muSF_ID_DATA[etaBin]->Eval(muon.Pt())/_muSF_ID_MC[etaBin]->Eval(muon.Pt());
     }
     
     return weight;
@@ -132,29 +146,27 @@ float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
 
     float weight = 1;
     if (muon.Pt() < 200.) {
-        weight   *= _muSF2012_ISO_DATA[etaBin]->Eval(muon.Pt())/_muSF2012_ISO_MC[etaBin]->Eval(muon.Pt());
-        //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(muonP4.Pt());
+        weight   *= _muSF_ISO_DATA[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC[etaBin]->Eval(muon.Pt());
     }
     
     return weight;
 }
 
-//float WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
-//{
-//    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
-//    int etaBin = 0;
-//    for (int i = 0; i < 4; ++i) {
-//        if (fabs(electron.Eta()) > binningEta[i] && fabs(electron.Eta()) <= binningEta[i+1]) {
-//            etaBin = i;
-//            break;
-//        }
-//    }
-//
-//    float weight = 1;
-//    if (electron.Pt() < 200.) {
-//        weight   *= _muSF2012_ID_DATA[etaBin]->Eval(electron.Pt())/_muSF2012_ID_MC[etaBin]->Eval(electron.Pt());
-//        //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(electronP4.Pt());
-//    }
-//    
-//    return weight;
-//}
+float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
+{
+    float binningPt[] = {10., 20., 35., 50., 90., 500.};
+    int ptBin = 0;
+    for (int i = 0; i < 5; ++i) {
+        if (fabs(electron.Pt()) > binningPt[i] && fabs(electron.Pt()) <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    if (electron.Pt() < 500.) {
+        weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
+    }
+    
+    return weight;
+}

@@ -165,6 +165,7 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
 
     float weight = 1;
     if (electron.Pt() < 500.) {
+        weight *= _eleSF_RECO->Eval(electron.Eta());
         weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
     }
     

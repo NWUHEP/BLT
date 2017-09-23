@@ -110,7 +110,7 @@ public:
     Float_t met, metPhi, ht, htPhi;
 
     // generator level data
-    TLorentzVector gnuOneP4, gnuTwoP4;
+    TLorentzVector genOneP4, genTwoP4;
 
     // MET kluge 
     float MetKluge(float);

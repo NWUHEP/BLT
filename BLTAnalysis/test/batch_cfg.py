@@ -11,7 +11,7 @@ selection  = 'ee'
 period     = '2016'
 
 ''' 
-    Set job configurations.  The order of arguments is: (Dataset, path to data,
+    Set job configurations.  The order of arguments is:  (Dataset, path to data,
     number of jobs, arguments to pass to executable, output directory name)
 '''
 
@@ -111,10 +111,10 @@ elif selection == 'ee':
             nJobs     = 30,
             suffix    = 'electron_2016H'
           ),
-        ])
+])
+
 
 path       = '/tthome/share/bacon/production/12'
-
 mc_list = []
 mc_list.extend([
     # Drell-Yan
@@ -256,7 +256,7 @@ mc_list.extend([
         nJobs    = 10,
         suffix   = 'zz_2l2q'
        ),
-    ])
+])
 
 path = '/tthome/share/bacon/production/11'
 sig_list = []
@@ -271,7 +271,7 @@ sig_list.extend([
         nJobs    = 5,
         suffix   = 'bprime_bb_semilep'
        ),
-    ])
+])
 
 batch_list = []
 batch_list += data_list

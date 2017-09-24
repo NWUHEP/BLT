@@ -53,7 +53,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         //triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 
     } else if (params->selection == "ee") {
-        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
     }
 
     // Weight utility class
@@ -256,7 +256,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         if (
-                electron->pt > 20 
+                electron->pt > 10 
                 && fabs(electron->eta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
                 && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
@@ -367,9 +367,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= weights->GetMuonISOEff(muonTwoP4);
 
             // trigger weight
-            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
+            //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+            //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+            //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
     } 
     if (params->selection == "ee") {
@@ -399,7 +399,54 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
-    } 
+
+        if (!isData) {
+            eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
+            eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
+
+            // trigger weight
+            //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", electronOneP4);
+            //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", electronTwoP4);
+            //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
+        }
+    }
+    if (params->selection == "emu") {
+        if (electrons.size() < 1 || muons.size()<1 )
+            return kTRUE;
+        hTotalEvents->Fill(5);
+
+        if (muons[0]->pt < 25 || electrons[0]]->pt < 20) 
+            return kTRUE;
+        hTotalEvents->Fill(6);
+
+        //if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
+        //    return kTRUE;
+        hTotalEvents->Fill(7);
+
+        if (bjets.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(8);
+
+
+        TLorentzVector muonP4, electronP4;
+        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
+        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        leptonOneP4 = muonP4;
+        leptonTwoP4 = electronP4;
+        leptonOneQ = muons[0]->q;
+        leptonTwoQ = electrons[0]->q;
+
+        // fill b jets
+        bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
+        bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
+
+        if (!isData) {
+            eventWeight *= weights->GetMuonIDEff(muonP4);
+            eventWeight *= weights->GetElectronRecoIdEff(electronP4);
+        }
+    }
+    
+    
 
 
     outTree->Fill();

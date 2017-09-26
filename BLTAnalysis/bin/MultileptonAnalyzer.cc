@@ -63,7 +63,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     if (true) { // this will need to be turned off for MC
         string jsonFileName = cmssw_base + 
             "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
-        //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
+            //"/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt";
         lumiMask.AddJSONFile(jsonFileName);
     }
 
@@ -401,8 +401,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
 
         if (!isData) {
-            eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
-            eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
+            //eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
+            //eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
 
             // trigger weight
             //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", electronOneP4);
@@ -415,7 +415,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-        if (muons[0]->pt < 25 || electrons[0]]->pt < 20) 
+        if (muons[0]->pt < 25 || electrons[0]->pt < 20) 
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -442,7 +442,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         if (!isData) {
             eventWeight *= weights->GetMuonIDEff(muonP4);
-            eventWeight *= weights->GetElectronRecoIdEff(electronP4);
+            //eventWeight *= weights->GetElectronRecoIdEff(electronP4);
         }
     }
     

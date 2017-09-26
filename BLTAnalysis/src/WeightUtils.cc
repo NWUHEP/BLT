@@ -5,6 +5,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _dataPeriod = dataPeriod;
     _selection  = selection;
     _isRealData = isRealData;
+    
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
 
@@ -55,6 +56,24 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF2012_ISO_MC[2] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_MC").c_str());
     _muSF2012_ISO_MC[3] = (TGraphAsymmErrors*)f_muRecoSF2012_ISO->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_MC").c_str());
 
+
+    ///////////////////////
+    // electrons
+    std::string fileName;
+    // electron trigger efficiencies
+    // electron reco efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
+    TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
+
+    // electron id efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
+    TFile* f_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_ID[0] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_0");
+    _eleSF_ID[1] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_1");
+    _eleSF_ID[2] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_2");
+    _eleSF_ID[3] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_3");
+    _eleSF_ID[4] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_4");
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -139,22 +158,22 @@ float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
     return weight;
 }
 
-//float WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
-//{
-//    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
-//    int etaBin = 0;
-//    for (int i = 0; i < 4; ++i) {
-//        if (fabs(electron.Eta()) > binningEta[i] && fabs(electron.Eta()) <= binningEta[i+1]) {
-//            etaBin = i;
-//            break;
-//        }
-//    }
-//
-//    float weight = 1;
-//    if (electron.Pt() < 200.) {
-//        weight   *= _muSF2012_ID_DATA[etaBin]->Eval(electron.Pt())/_muSF2012_ID_MC[etaBin]->Eval(electron.Pt());
-//        //isoWeight = 1.;//_muSF2012_ISO[etaBin]->Eval(electronP4.Pt());
-//    }
-//    
-//    return weight;
-//}
+float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
+{
+    float binningPt[] = {10., 20., 35., 50., 90., 500.};
+    int ptBin = 0;
+    for (int i = 0; i < 5; ++i) {
+        if (fabs(electron.Pt()) > binningPt[i] && fabs(electron.Pt()) <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    if (electron.Pt() < 500.) {
+        weight *= _eleSF_RECO->Eval(electron.Eta());
+        weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
+    }
+    
+    return weight;
+}

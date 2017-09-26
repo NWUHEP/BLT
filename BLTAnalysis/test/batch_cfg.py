@@ -7,7 +7,7 @@ cfg = bm.JobConfig
 ''' Specify parameters '''
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'ee'
+selection  = 'emu'
 period     = '2016'
 
 ''' 
@@ -287,4 +287,3 @@ batch = bm.BatchMaster(config_list = batch_list,
                      )
 batch.submit_to_batch()
 # end
-

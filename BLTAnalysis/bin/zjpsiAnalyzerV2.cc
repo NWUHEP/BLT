@@ -41,7 +41,7 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
-    if (params->selection == "mumu" || params->selection == "emu" || params->selection == "4l" || params->selection == "4mu") {
+    if (params->selection == "mumu" || params->selection == "emu" || params->selection == "4l" || params->selection == "4mu" || params->selection == "4mu_otman") {
         //triggerNames.push_back("HLT_IsoMu22_v*");
         //triggerNames.push_back("HLT_IsoTkMu22_v*");
         //triggerNames.push_back("HLT_IsoMu24_v*");
@@ -53,6 +53,9 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
 
     } else if (params->selection == "ee") {
         triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
+    
+    } else if (params->selection == "jpsi_control") {
+        triggerNames.push_back("HLT_Dimuon0er16_Jpsi_NoOS_NoVertexing_v*");
     }
 
     // Weight utility class
@@ -102,11 +105,17 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("rZCandErr", &rZCandErr);
     outTree->Branch("rZCandChi2", &rZCandChi2);
     outTree->Branch("rZCandNdof", &rZCandNdof);
+    outTree->Branch("rZCandProb", &rZCandProb);
+    outTree->Branch("rZCandRxy", &rZCandRxy);
+    outTree->Branch("rZCandRxyErr", &rZCandRxyErr);
     
     outTree->Branch("rJpsiCand", &rJpsiCand);
     outTree->Branch("rJpsiCandErr", &rJpsiCandErr);
     outTree->Branch("rJpsiCandChi2", &rJpsiCandChi2);
     outTree->Branch("rJpsiCandNdof", &rJpsiCandNdof);
+    outTree->Branch("rJpsiCandProb", &rJpsiCandProb);
+    outTree->Branch("rJpsiCandRxy", &rJpsiCandRxy);
+    outTree->Branch("rJpsiCandRxyErr", &rJpsiCandRxyErr);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -194,7 +203,7 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
 
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
-    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
+    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",16,0.5,16.5);
 
     ReportPostBegin();
 }
@@ -331,8 +340,11 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                     // loose muon ID
                     && (muon->typeBits & baconhep::kPFMuon)
                     && ((muon->typeBits & baconhep::kGlobal) || (muon->selectorBits & baconhep::kTrackerMuonArbitrated))
+                    //&& fabs(muon->d0) < 0.5
+                    //&& fabs(muon->dz) < 1.0
                     && fabs(muon->d0) < 0.5
-                    && fabs(muon->dz) < 1.0
+                    && fabs(muon->dz) < 20.0
+                    //&& muon->sip3d < 4.0
                 ){
                     muons.push_back(muon);
         }
@@ -663,6 +675,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonOneFlavor  = 1;
 
         leptonOneD0        = muons_d0[muonOneIndex];
+        leptonOneDZ      = muons_dz[muonOneIndex];
         leptonTwoP4      = muonTwoP4;
         //leptonTwoIso     = muons_iso[muonTwoIndex];
         leptonTwoQ       = muons_q[muonTwoIndex];
@@ -726,21 +739,79 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
         
-        // Select the leading muon
         TLorentzVector muonOneP4;
         unsigned muonOneIndex = 0;
         bool validMuon1 = false;
-        for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
-            if (
-                    muons_isTight[i] 
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    && muons_P4[i].Pt() > 25.0
-                )
-            {
-                muonOneP4 = muons_P4[i];
-                muonOneIndex = i;
-                validMuon1 = true;
-                break;
+        TLorentzVector muonTwoP4;
+        unsigned muonTwoIndex = muonOneIndex + 1;
+        bool validMuon2 = false;
+
+        unsigned int pairing_algo = 1;
+
+        if (pairing_algo == 0) {
+        
+            // Select the leading muon
+            for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
+                if (
+                        muons_isTight[i] 
+                        && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                       // && (muons_TkIso[i]/muons_P4[i].Pt()) < 0.05
+                        && muons_P4[i].Pt() > 22.0
+                    )
+                {
+                    muonOneP4 = muons_P4[i];
+                    muonOneIndex = i;
+                    validMuon1 = true;
+                    break;
+                }
+            }
+
+            // Select the oppositely charged second muon
+            for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
+                if (
+                        muons_q[muonOneIndex] != muons_q[i]
+                        && muons_isTight[i]
+                        && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                        //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.05
+                        && muons_P4[i].Pt() > 10.0
+                   )
+                {
+                    muonTwoP4 = muons_P4[i];
+                    muonTwoIndex = i;
+                    validMuon2 = true;
+                    break;
+                }
+            }
+        }
+
+        else if (pairing_algo == 1) {
+            float zMass_pdg = 91.188;
+            float zMassDiff = 100.;
+            for (unsigned i = 0; i < muons_P4.size(); ++i) {
+                for (unsigned j = i + 1; j < muons_P4.size(); ++j) {
+                    float thisMass = (muons_P4[i] + muons_P4[j]).M();
+                    if (
+                            fabs(thisMass - zMass_pdg) < zMassDiff
+                            && muons_isTight[i]
+                            && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
+                            //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.05
+                            && muons_P4[i].Pt() > 22.0
+                            && muons_isTight[j]
+                            && (muons_iso[j]/muons_P4[j].Pt()) < 0.15
+                            //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.05
+                            && muons_P4[j].Pt() > 10.0
+                            && muons_q[i] != muons_q[j]
+                       ) 
+                    {
+                        muonOneIndex = i;
+                        muonTwoIndex = j;
+                        muonOneP4 = muons_P4[i];
+                        muonTwoP4 = muons_P4[j];
+                        validMuon1 = true;
+                        validMuon2 = true;
+                        zMassDiff = fabs(thisMass - zMass_pdg);
+                    }
+                }
             }
         }
 
@@ -748,25 +819,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             return kTRUE;
 
         hTotalEvents->Fill(6);
-
-        // Select the oppositely charged second muon
-        TLorentzVector muonTwoP4;
-        unsigned muonTwoIndex = muonOneIndex + 1;
-        bool validMuon2 = false;
-        for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
-            if (
-                    muons_q[muonOneIndex] != muons_q[i]
-                    && muons_isTight[i]
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.15
-                    && muons_P4[i].Pt() > 20.0
-               )
-            {
-                muonTwoP4 = muons_P4[i];
-                muonTwoIndex = i;
-                validMuon2 = true;
-                break;
-            }
-        }
 
         if (!validMuon2)
             return kTRUE;
@@ -784,6 +836,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonOneFlavor  = 1;
 
         leptonOneD0        = muons_d0[muonOneIndex];
+        leptonOneDZ      = muons_dz[muonOneIndex];
         leptonTwoP4      = muonTwoP4;
         leptonTwoIso     = muons_iso[muonTwoIndex];
         leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
@@ -796,12 +849,22 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             
         leptonTwoD0        = muons_d0[muonTwoIndex];
         leptonTwoDZ        = muons_dz[muonTwoIndex];
-    
+
+        float thisZMass = (muonOneP4 + muonTwoP4).M();
+        if (
+                thisZMass < 2.0 ||
+                (thisZMass > 4.0 && thisZMass < 75.) ||
+                thisZMass > 107.
+           )
+            return kTRUE;
+        hTotalEvents->Fill(8);
+
         // Check for dimuon vertex 
         unsigned int leptonOneIndex = muons_index[muonOneIndex];
         unsigned int leptonTwoIndex = muons_index[muonTwoIndex];
 
         bool hasValidZVertex = false;
+        //bool hasGoodZVertex = false;
          
         for (int i = 0; i < fDimuonVertexArr->GetEntries(); ++i) {
             TVertex* dimuonVert = (TVertex*) fDimuonVertexArr->At(i);
@@ -818,7 +881,12 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                     rZCandErr = vertErr;
                     rZCandChi2 = dimuonVert->chi2;
                     rZCandNdof = dimuonVert->ndof;
+                    rZCandProb = dimuonVert->prob;
+                    rZCandRxy = dimuonVert->rxy;
+                    rZCandRxyErr = dimuonVert->rxy_err;
                     hasValidZVertex = true; 
+                    //if (rZCandProb > 0.005)
+                    //    hasGoodZVertex = true;
                     break;
             }
         }
@@ -826,54 +894,92 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         if (!hasValidZVertex)
             return kTRUE; 
         
-        hTotalEvents->Fill(8);
+        hTotalEvents->Fill(9);
 
-        // Select the J/Psi candidate leading muon
+        //if (!hasGoodZVertex)
+        //    return kTRUE;
+
+        //hTotalEvents->Fill(10);
+
         TLorentzVector muonThreeP4;
         unsigned muonThreeIndex = 0;
         bool validMuon3 = false;
-        for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
-            if (
-                    i != muonOneIndex 
-                    && i != muonTwoIndex
-                    && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
-                    && muons_P4[i].Pt() > 4.0
-                )
-            {
-                muonThreeP4 = muons_P4[i];
-                muonThreeIndex = i;
-                validMuon3 = true;
-                break;
+        TLorentzVector muonFourP4;
+        unsigned muonFourIndex = muonThreeIndex + 1;
+        bool validMuon4 = false;
+
+        if (pairing_algo == 0) {
+
+            // Select the J/Psi candidate leading muon
+            for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
+                if (
+                        i != muonOneIndex 
+                        && i != muonTwoIndex
+                        && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                        //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.10
+                        && muons_P4[i].Pt() > 4.0
+                    )
+                {
+                    muonThreeP4 = muons_P4[i];
+                    muonThreeIndex = i;
+                    validMuon3 = true;
+                    break;
+                }
+            }
+            
+            // Select the J/Psi candidate subleading muon
+            for (unsigned i = muonThreeIndex+1; i < muons_P4.size(); ++i) {
+                if (
+                        i != muonOneIndex 
+                        && i != muonTwoIndex
+                        && muons_q[muonThreeIndex] != muons_q[i]
+                   )
+                {
+                    muonFourP4 = muons_P4[i];
+                    muonFourIndex = i;
+                    validMuon4 = true;
+                    break;
+                }
+            }
+        }
+
+        else if (pairing_algo == 1) {
+            float jpsiMass_pdg = 3.097;
+            float jpsiMassDiff = 100.;
+            for (unsigned i = 0; i < muons_P4.size(); ++i) {
+                for (unsigned j = i + 1; j < muons_P4.size(); ++j) {
+                    float thisMass = (muons_P4[i] + muons_P4[j]).M();
+                    if (
+                            fabs(thisMass - jpsiMass_pdg) < jpsiMassDiff
+                            && !(i == muonOneIndex || i == muonTwoIndex)
+                            && !(j == muonOneIndex || j == muonTwoIndex)
+                            && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                            //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.10
+                            && muons_P4[i].Pt() > 4.0
+                            && muons_q[i] != muons_q[j]
+                       ) 
+                    {
+                        muonThreeIndex = i;
+                        muonFourIndex = j;
+                        muonThreeP4 = muons_P4[i];
+                        muonFourP4 = muons_P4[j];
+                        validMuon3 = true;
+                        validMuon4 = true;
+                        jpsiMassDiff = fabs(thisMass - jpsiMass_pdg);
+                    }
+                }
             }
         }
         
         if (!validMuon3)
             return kTRUE;
        
-        hTotalEvents->Fill(9);
-
-        // Select the J/Psi candidate subleading muon
-        TLorentzVector muonFourP4;
-        unsigned muonFourIndex = muonThreeIndex + 1;
-        bool validMuon4 = false;
-        for (unsigned i = muonThreeIndex+1; i < muons_P4.size(); ++i) {
-            if (
-                    i != muonOneIndex 
-                    && i != muonTwoIndex
-                    && muons_q[muonThreeIndex] != muons_q[i]
-               )
-            {
-                muonFourP4 = muons_P4[i];
-                muonFourIndex = i;
-                validMuon4 = true;
-                break;
-            }
-        }
+        hTotalEvents->Fill(10);
         
         if (!validMuon4)
             return kTRUE;
 
-        hTotalEvents->Fill(10);
+        hTotalEvents->Fill(11);
         
         leptonThreeP4      = muonThreeP4;
         leptonThreeIso     = muons_iso[muonThreeIndex];
@@ -900,18 +1006,299 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             
         leptonFourD0        = muons_d0[muonFourIndex];
         leptonFourDZ        = muons_dz[muonFourIndex];
+        
+        float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
+        if (
+                thisJpsiMass < 2.0 ||
+                (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
+                thisJpsiMass > 107.
+           )
+            return kTRUE;
+        hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
         unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
         unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
+        //bool hasGoodJpsiVertex = false;
          
         for (int i = 0; i < fDimuonVertexArr->GetEntries(); ++i) {
             TVertex* dimuonVert = (TVertex*) fDimuonVertexArr->At(i);
             if (
                     ((dimuonVert->index1 == leptonThreeIndex && dimuonVert->index2 == leptonFourIndex) ||
                     (dimuonVert->index1 == leptonFourIndex && dimuonVert->index2 == leptonThreeIndex)) &&
+                    (dimuonVert->isValid)
+               ) {
+                    TVector3 vertPos;
+                    TVector3 vertErr;  
+                    vertPos.SetXYZ(dimuonVert->x, dimuonVert->y, dimuonVert->z);
+                    vertErr.SetXYZ(dimuonVert->xerr, dimuonVert->yerr, dimuonVert->zerr);
+                    rJpsiCand = vertPos; 
+                    rJpsiCandErr = vertErr;
+                    rJpsiCandChi2 = dimuonVert->chi2;
+                    rJpsiCandNdof = dimuonVert->ndof;
+                    rJpsiCandProb = dimuonVert->prob;
+                    rJpsiCandRxy = dimuonVert->rxy;
+                    rJpsiCandRxyErr = dimuonVert->rxy_err;
+                    hasValidJpsiVertex = true; 
+                    //if (rJpsiCandProb > 0.005)
+                    //    hasGoodJpsiVertex = true;
+                    break;
+            }
+        }
+        
+        if (!hasValidJpsiVertex)
+            return kTRUE;
+ 
+        hTotalEvents->Fill(13);
+
+        //if (!hasGoodJpsiVertex)
+        //    return kTRUE;
+
+        hTotalEvents->Fill(14);
+
+        //if (fabs(rJpsiCand.Z() - rZCand.Z()) > 1.)
+        //    return kTRUE;
+
+        //hTotalEvents->Fill(16);
+        
+        if (photons.size() > 0)
+            photonOneP4 = photons[0];
+    }
+
+    else if (params->selection == "4mu_otman") {
+        vector<pair<TLorentzVector, unsigned int>> tightMuons;
+        vector<pair<TLorentzVector, unsigned int>> tightIsoMuons;
+        vector<pair<TLorentzVector, unsigned int>> looseMuons;
+        vector<pair<TLorentzVector, unsigned int>> looseIsoMuons;
+        TLorentzVector muonOneP4, muonTwoP4, muonThreeP4, muonFourP4;
+        unsigned int muonOneIndex = 0;
+        unsigned int muonTwoIndex = 0;
+        //unsigned int muonThreeIndex = 0;
+        //unsigned int muonFourIndex = 0;
+        for (unsigned i = 0; i < muons_P4.size(); ++i) {
+            looseMuons.push_back(make_pair(muons_P4[i], i));
+            if (muons_iso[i]/muons_P4[i].Pt() < 0.25) 
+                looseIsoMuons.push_back(make_pair(muons_P4[i], i));
+            if (muons_isTight[i]) {
+                tightMuons.push_back(make_pair(muons_P4[i], i));
+                if (muons_iso[i]/muons_P4[i].Pt() < 0.15)
+                    tightIsoMuons.push_back(make_pair(muons_P4[i], i));
+            }
+        }
+        if (tightMuons.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        if (tightIsoMuons.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+        float zMass_pdg = 91.188;
+        bool inZWindow = false;
+        for (unsigned i = 0; i < tightIsoMuons.size(); ++i) {
+            for (unsigned j = i + 1; j < tightIsoMuons.size(); ++j) {
+                float thisDimuonMass = (tightIsoMuons[i].first + tightIsoMuons[j].first).M();
+                if (fabs(thisDimuonMass - zMass_pdg) < 5.0) {
+                    inZWindow = true;
+                    muonOneP4 = tightIsoMuons[i].first;
+                    muonOneIndex = tightIsoMuons[i].second;
+                    muonTwoP4 = tightIsoMuons[j].first;
+                    muonTwoIndex = tightIsoMuons[j].second;
+                } 
+            }
+        }
+        if (!inZWindow)
+            return kTRUE;
+        hTotalEvents->Fill(7);
+        if (looseMuons.size() < 4)
+            return kTRUE;
+        hTotalEvents->Fill(8);
+        if (looseIsoMuons.size() < 4)
+            return kTRUE;
+        hTotalEvents->Fill(9);
+        float jpsiMass_pdg = 3.097;
+        bool inJpsiWindow = false;
+        for (unsigned i = 0; i < looseIsoMuons.size(); ++i) {
+            for (unsigned j = i + 1; j < looseIsoMuons.size(); ++j) {
+                float thisDimuonMass = (looseIsoMuons[i].first + looseIsoMuons[j].first).M();
+                if (
+                        !(looseIsoMuons[i].second == muonOneIndex || looseIsoMuons[i].second == muonTwoIndex) &&
+                        !(looseIsoMuons[j].second == muonOneIndex || looseIsoMuons[j].second == muonTwoIndex) &&
+                        fabs(thisDimuonMass - jpsiMass_pdg) < 0.5
+                   ) {
+                    inJpsiWindow = true;
+                    muonThreeP4 = looseIsoMuons[i].first;
+                    //muonThreeIndex = looseIsoMuons[i].second;
+                    muonFourP4 = looseIsoMuons[j].first;
+                    //muonFourIndex = looseIsoMuons[j].second;
+                }
+            }
+        }
+        if (!inJpsiWindow)
+            return kTRUE;
+        hTotalEvents->Fill(10);
+        if (
+                muonOneP4.Pt() < 22.0 ||
+                muonTwoP4.Pt() < 10.0 ||
+                muonThreeP4.Pt() < 4.0 ||
+                muonFourP4.Pt() < 3.0
+           )
+            return kTRUE;
+        hTotalEvents->Fill(11);
+    }
+    
+    else if (params->selection == "jpsi_control") {
+        if (muons_P4.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        
+        TLorentzVector muonOneP4;
+        unsigned muonOneIndex = 0;
+        bool validMuon1 = false;
+        TLorentzVector muonTwoP4;
+        unsigned muonTwoIndex = muonOneIndex + 1;
+        bool validMuon2 = false;
+
+        unsigned int pairing_algo = 1;
+        
+        if (pairing_algo == 0) {
+
+            // Select the J/Psi candidate leading muon
+            for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
+                if (
+                        (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                        && muons_P4[i].Pt() > 4.0
+                    )
+                {
+                    muonOneP4 = muons_P4[i];
+                    muonOneIndex = i;
+                    validMuon1 = true;
+                    break;
+                }
+            }
+            
+            // Select the J/Psi candidate subleading muon
+            for (unsigned i = muonOneIndex+1; i < muons_P4.size(); ++i) {
+                if (
+                        muons_q[muonOneIndex] != muons_q[i]
+                   )
+                {
+                    muonTwoP4 = muons_P4[i];
+                    muonTwoIndex = i;
+                    validMuon2 = true;
+                    break;
+                }
+            }
+        }
+
+        else if (pairing_algo == 1) {
+            float jpsiMass_pdg = 3.097;
+            float jpsiMassDiff = 100.;
+            for (unsigned i = 0; i < muons_P4.size(); ++i) {
+                for (unsigned j = i + 1; j < muons_P4.size(); ++j) {
+                    float thisMass = (muons_P4[i] + muons_P4[j]).M();
+                    if (
+                            fabs(thisMass - jpsiMass_pdg) < jpsiMassDiff
+                            && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                            && muons_P4[i].Pt() > 4.0
+                            && muons_q[i] != muons_q[j]
+                       ) 
+                    {
+                        muonOneIndex = i;
+                        muonTwoIndex = j;
+                        muonOneP4 = muons_P4[i];
+                        muonTwoP4 = muons_P4[j];
+                        validMuon1 = true;
+                        validMuon2 = true;
+                        jpsiMassDiff = fabs(thisMass - jpsiMass_pdg);
+                    }
+                }
+            }
+        }
+
+
+        leptonOneP4      = muonOneP4;
+        leptonOneIso     = muons_iso[muonOneIndex];
+        leptonOneTkIsoNR     = muons_TkIsoNR[muonOneIndex];
+        leptonOneTkIso     = muons_TkIso[muonOneIndex];
+        leptonOnePFIso     = muons_PFIso[muonOneIndex];
+        leptonOneQ       = muons_q[muonOneIndex];
+        leptonOneTrigger = muons_trigger[muonOneIndex];
+        leptonOneIsTight = muons_isTight[muonOneIndex];
+        leptonOneFlavor  = 1;
+
+        leptonOneD0        = muons_d0[muonOneIndex];
+        leptonOneDZ      = muons_dz[muonOneIndex];
+        leptonTwoP4      = muonTwoP4;
+        leptonTwoIso     = muons_iso[muonTwoIndex];
+        leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
+        leptonTwoTkIso     = muons_TkIso[muonTwoIndex];
+        leptonTwoPFIso     = muons_PFIso[muonTwoIndex];
+        leptonTwoQ       = muons_q[muonTwoIndex];
+        leptonTwoTrigger = muons_trigger[muonTwoIndex];
+        leptonTwoIsTight = muons_isTight[muonTwoIndex];
+        leptonTwoFlavor  = 1;
+            
+        leptonTwoD0        = muons_d0[muonTwoIndex];
+        leptonTwoDZ        = muons_dz[muonTwoIndex];
+
+        
+        if (!validMuon1)
+            return kTRUE;
+       
+        hTotalEvents->Fill(6);
+        
+        if (!validMuon2)
+            return kTRUE;
+
+        hTotalEvents->Fill(7);
+        
+        leptonOneP4      = muonOneP4;
+        leptonOneIso     = muons_iso[muonOneIndex];
+        leptonOneTkIsoNR     = muons_TkIsoNR[muonOneIndex];
+        leptonOneTkIso     = muons_TkIso[muonOneIndex];
+        leptonOnePFIso     = muons_PFIso[muonOneIndex];
+        leptonOneQ       = muons_q[muonOneIndex];
+        leptonOneTrigger = muons_trigger[muonOneIndex];
+        leptonOneIsTight = muons_isTight[muonOneIndex];
+        leptonOneFlavor  = 1;
+
+        leptonOneD0        = muons_d0[muonOneIndex];
+        leptonOneDZ        = muons_dz[muonOneIndex];
+
+        leptonTwoP4      = muonTwoP4;
+        leptonTwoIso     = muons_iso[muonTwoIndex];
+        leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
+        leptonTwoTkIso     = muons_TkIso[muonTwoIndex];
+        leptonTwoPFIso     = muons_PFIso[muonTwoIndex];
+        leptonTwoQ       = muons_q[muonTwoIndex];
+        leptonTwoTrigger = muons_trigger[muonTwoIndex];
+        leptonTwoIsTight = muons_isTight[muonTwoIndex];
+        leptonTwoFlavor  = 1;
+            
+        leptonTwoD0        = muons_d0[muonTwoIndex];
+        leptonTwoDZ        = muons_dz[muonTwoIndex];
+        
+        float thisJpsiMass = (muonOneP4 + muonTwoP4).M();
+        if (
+                thisJpsiMass < 2.0 ||
+                (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
+                thisJpsiMass > 107.
+           )
+            return kTRUE;
+        hTotalEvents->Fill(8);
+       
+        // Check for dimuon vertex 
+        unsigned int leptonOneIndex = muons_index[muonOneIndex];
+        unsigned int leptonTwoIndex = muons_index[muonTwoIndex];
+
+        bool hasValidJpsiVertex = false;
+         
+        for (int i = 0; i < fDimuonVertexArr->GetEntries(); ++i) {
+            TVertex* dimuonVert = (TVertex*) fDimuonVertexArr->At(i);
+            if (
+                    ((dimuonVert->index1 == leptonOneIndex && dimuonVert->index2 == leptonTwoIndex) ||
+                    (dimuonVert->index1 == leptonTwoIndex && dimuonVert->index2 == leptonOneIndex)) &&
                     (dimuonVert->isValid)
                ) {
                     TVector3 vertPos;
@@ -930,7 +1317,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         if (!hasValidJpsiVertex)
             return kTRUE;
  
-        hTotalEvents->Fill(11);
+        hTotalEvents->Fill(9);
         
         if (photons.size() > 0)
             photonOneP4 = photons[0];
@@ -989,6 +1376,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonOneFlavor  = 1;
 
         leptonOneD0        = electrons_d0[electronOneIndex];
+        leptonOneDZ      = electrons_dz[electronOneIndex];
         leptonTwoP4      = electronTwoP4;
         //leptonTwoIso     = electrons_iso[electronTwoIndex];
         leptonTwoQ       = electrons_q[electronTwoIndex];

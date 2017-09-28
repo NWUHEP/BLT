@@ -22,6 +22,7 @@
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
 #include "TLorentzVector.h"
+#include "TRandom3.h"
 
 using namespace std;
 
@@ -51,14 +52,17 @@ class WeightUtils: public TObject {
         string _selection;
         bool   _isRealData;
 
+        // rng
+        TRandom3 *rng;
+
         TGraph  *_puReweight;
         TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
-        TGraphAsymmErrors *_muSF_ID_DATA[4], *_muSF_ID_MC[4]; 
-        TGraphAsymmErrors *_muSF_ISO_DATA[4], *_muSF_ISO_MC[4]; 
+        TGraphAsymmErrors *_muSF_ID_DATA_BCDEF[4], *_muSF_ID_MC_BCDEF[4]; 
+        TGraphAsymmErrors *_muSF_ISO_DATA_BCDEF[4], *_muSF_ISO_MC_BCDEF[4]; 
+        TGraphAsymmErrors *_muSF_ID_DATA_GH[4], *_muSF_ID_MC_GH[4]; 
+        TGraphAsymmErrors *_muSF_ISO_DATA_GH[4], *_muSF_ISO_MC_GH[4]; 
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
-
-        //TGraph *_muSF_ID_err[4], *_muSF_ISO_err[4];
 
         //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
         //TH2D    *h2_EleMVASF;

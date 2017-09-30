@@ -107,6 +107,10 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("nElectrons", &nElectrons);
     outTree->Branch("nJets", &nJets);
     outTree->Branch("nBJets", &nBJets);
+    outTree->Branch("nGenElectrons",&nGenElectrons);
+    outTree->Branch("nGenMuons",&nGenMuons);
+    outTree->Branch("nGenTaus",&nGenTaus);
+    
 
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
@@ -177,24 +181,29 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     ///////////////////////
 
     if (!isData) {
-        unsigned count = 0;
+        unsigned genelectronscount = 0;
+        unsigned genmuoncount = 0;
+        unsigned gentaucount = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+            if(particle->parent <0) continue;
+            TGenParticle* particleparent = (TGenParticle*) fGenParticleArr->At(particle->parent);
+            //if(particleparent->parent <0) continue;
+            //TGenParticle* particlegrandparent = (TGenParticle*) fGenParticleArr->At(particleparent->parent); && abs(particlegrandparent->pdgId) == 24
 
-            if (
-                    particle->status == 23 
-                    && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
-                    && particle->parent != -2
-               ) {
-                ++count;
-
-            }
+            if ( abs(particle->pdgId) == 11 && abs(particleparent->pdgId) == 24 ) ++genelectronscount;
+            if ( abs(particle->pdgId) == 13 && abs(particleparent->pdgId) == 24 ) ++genmuoncount;
+            if ( abs(particle->pdgId) == 15 && abs(particleparent->pdgId) == 24 ) ++gentaucount;
+            
         }
-        nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
-        //cout << nPartons << "\n" << endl;
-    } else {
-        nPartons = 0;
-    }
+        nGenElectrons = genelectronscount;
+        nGenMuons = genmuoncount;
+        nGenTaus = gentaucount;
+        cout << "elec:" << nGenElectrons << ", muon:" << nGenMuons << ", tau:"<< nGenTaus << endl;
+        
+    } 
+    
+
 
     ///////////////////
     // Select objects//
@@ -401,8 +410,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
 
         if (!isData) {
-            //eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
-            //eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
+            eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
+            eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
 
             // trigger weight
             //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", electronOneP4);
@@ -442,7 +451,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         if (!isData) {
             eventWeight *= weights->GetMuonIDEff(muonP4);
-            //eventWeight *= weights->GetElectronRecoIdEff(electronP4);
+            eventWeight *= weights->GetElectronRecoIdEff(electronP4);
         }
     }
     

@@ -7,7 +7,7 @@ cfg = bm.JobConfig
 ''' Specify parameters '''
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'emu'
+selection  = 'ee'
 period     = '2016'
 
 ''' 

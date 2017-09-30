@@ -91,7 +91,7 @@ public:
     Float_t leptonOneQ,leptonTwoQ;
     Float_t met, metPhi;
 
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;
 
     //ClassDef(MultileptonAnalyzer,0);
 };

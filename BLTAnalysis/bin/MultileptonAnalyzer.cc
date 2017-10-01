@@ -115,6 +115,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
+    hGenEvents = new TH1D(outHistName.c_str(),"GenEvents",70,0.5,70.5);
+
 
     ReportPostBegin();
 }
@@ -122,6 +124,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 {
 
+    ////////////////////////////////////////
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
@@ -202,6 +205,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         cout << "elec:" << nGenElectrons << ", muon:" << nGenMuons << ", tau:"<< nGenTaus << endl;
         
     } 
+    unsigned nGenState = 60;// others or data
+    if (nGenElectrons==2 && nGenMuons==0 && nGenTaus==0) nGenState = 0; //ee
+    else if (nGenElectrons==1 && nGenMuons==1 && nGenTaus==0) nGenState = 10; //emu
+    else if (nGenElectrons==0 && nGenMuons==2 && nGenTaus==0) nGenState = 20; //mumu
+    else if (nGenElectrons==1 && nGenMuons==0 && nGenTaus==1) nGenState = 30; //etau
+    else if (nGenElectrons==0 && nGenMuons==1 && nGenTaus==1) nGenState = 40; //mutau
+    else if (nGenElectrons==0 && nGenMuons==0 && nGenTaus==2) nGenState = 50; // tautau
+    //else nGenState = 60; // others or data
+
+    cout<<nGenState<<endl;
+
+    hGenEvents->Fill(nGenState+1);
+    hGenEvents->Fill(nGenState+2);// for MC, this does not matter
+    hGenEvents->Fill(nGenState+3);// for MC, this does not matter
+
     
 
 
@@ -219,6 +237,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         return kTRUE;
     }
     hTotalEvents->Fill(4);
+    hGenEvents->Fill(nGenState+4);
+
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
 
@@ -259,7 +279,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
 
     /* 2. ELECTRONS */
-    std::vector<TElectron*> electrons;
+    vector<TElectron*> electrons;
+    vector<TLorentzVector> veto_electrons; // for vetoing jets that overlap with electrons (not saved!!!)
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -273,6 +294,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             TLorentzVector electronP4;
             copy_p4(electron, ELE_MASS, electronP4);
             electrons.push_back(electron);
+            veto_electrons.push_back(electronP4);
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -295,6 +317,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
             if (vJet.DeltaR(mu) < 0.5) {
+                muOverlap = true;
+                break;
+            }
+        }
+        for (const auto& ele: veto_electrons) {
+            if (vJet.DeltaR(ele) < 0.5) {
                 muOverlap = true;
                 break;
             }
@@ -343,19 +371,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (muons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
+        hGenEvents->Fill(nGenState+5);
 
         if (muons[0]->pt < 25 || muons[1]->pt < 20)
             return kTRUE;
         hTotalEvents->Fill(6);
+        hGenEvents->Fill(nGenState+6);
 
         //if (muons[0]->q != muons[1]->q) // remove opposite sign muons
         //if (muons[0]->q == muons[1]->q)  // remove same sign muons
         //    return kTRUE;
         hTotalEvents->Fill(7);
+        hGenEvents->Fill(nGenState+7);
 
         if (bjets.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(8);
+        hGenEvents->Fill(nGenState+8);
 
         TLorentzVector muonOneP4, muonTwoP4;
         copy_p4(muons[0], MUON_MASS, muonOneP4);
@@ -385,18 +417,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (electrons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
+        hGenEvents->Fill(nGenState+5);
 
         if (electrons[0]->pt < 25 || electrons[1]->pt < 20)
             return kTRUE;
         hTotalEvents->Fill(6);
+        hGenEvents->Fill(nGenState+6);
+
 
         //if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
         //    return kTRUE;
         hTotalEvents->Fill(7);
+        hGenEvents->Fill(nGenState+7);
 
         if (bjets.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(8);
+        hGenEvents->Fill(nGenState+8);
 
         TLorentzVector electronOneP4, electronTwoP4;
         copy_p4(electrons[0], ELE_MASS, electronOneP4);
@@ -423,18 +460,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (electrons.size() < 1 || muons.size()<1 )
             return kTRUE;
         hTotalEvents->Fill(5);
+        hGenEvents->Fill(nGenState+5);
 
         if (muons[0]->pt < 25 || electrons[0]->pt < 20) 
             return kTRUE;
         hTotalEvents->Fill(6);
+        hGenEvents->Fill(nGenState+6);
 
         //if (electrons[0]->q == electrons[1]->q)  // remove same sign muons
         //    return kTRUE;
         hTotalEvents->Fill(7);
+        hGenEvents->Fill(nGenState+7);
 
         if (bjets.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(8);
+        hGenEvents->Fill(nGenState+8);
 
 
         TLorentzVector muonP4, electronP4;

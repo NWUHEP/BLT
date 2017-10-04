@@ -149,6 +149,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // gen level objects
     outTree->Branch("genOneP4", &genOneP4);
     outTree->Branch("genTwoP4", &genTwoP4);
+    outTree->Branch("genOneId", &genOneId);
+    outTree->Branch("genTwoId", &genTwoId);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -202,7 +204,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
 
-    if (!passTrigger && isData)
+    if (!passTrigger) //&& isData)
         return kTRUE;
     hTotalEvents->Fill(3);
 
@@ -228,16 +230,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Generator objects //
     ///////////////////////
 
-    vector<TLorentzVector> genP4;
+    vector<TGenParticle*> genParticles;
     if (!isData) {
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-
-            //cout << particle->status << ", "
-            //     << particle->pdgId  << ", "
-            //     << particle->parent
-            //     << endl;
+            //cout << i << ", " << particle->status << ", " << particle->pdgId  << ", " << particle->parent;
+            //cout << "\t" << particle->pt << ", " << particle->eta;
+            //cout << endl;
 
             if (
                     particle->status == 23 
@@ -247,20 +247,27 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 ++count;
             }
 
+            // This will save Z and J/psi in 4l events
             if (
-                    (abs(particle->pdgId) == 443 || abs(particle->pdgId) == 23) 
+                    params->selection == "4l"
+                    && (abs(particle->pdgId) == 443 || abs(particle->pdgId) == 23) 
                     && particle->status == 62 
                ) {
-                //cout << particle->status << ", " << particle->pdgId  << ", " << particle->parent;
-                //cout << "\t" << particle->pt << ", " << particle->eta;
-                //cout << endl;
+                genParticles.push_back(particle);
+            } 
 
-                TLorentzVector nu;
-                nu.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
-                genP4.push_back(nu);
+            // This will save leptons (mostly for use with dilepton analyses)
+            if ((abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 || abs(particle->pdgId) == 15)) {
+                if (particle->parent != -2) {
+                    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                    if (fabs(mother->pdgId) == 24) {
+                        genParticles.push_back(particle);
+                    }
+                }
             }
+
+            nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
         }
-        nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
     } else {
         nPartons = 0;
     }
@@ -304,30 +311,51 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
         muonP4.SetPtEtaPhiM(muonSF*muon->pt, muon->eta, muon->phi, MUON_MASS);
 
-        if (
-                muon->pt > 3 
-                && fabs(muon->eta) < 2.4
-                // Loose muon ID
-                //&& (muon->typeBits & baconhep::kPFMuon)
-                //&& ((muon->typeBits & baconhep::kGlobal) || (muon->typeBits & baconhep::kTracker))
-                // tight muon ID and ISO
-                && (muon->typeBits & baconhep::kPFMuon) 
-                && (muon->typeBits & baconhep::kGlobal) 
-                && muon->muNchi2    < 10.
-                && muon->nMatchStn  > 1
-                && muon->nPixHits   > 0
-                && fabs(muon->d0)   < 0.2
-                && fabs(muon->dz)   < 0.5
-                && muon->nTkLayers  > 5 
-                && muon->nValidHits > 0
-
-           ) {
-            muons.push_back(muon);
-
-            // muons for jet veto
-            if (muonP4.Pt() > 5) {
-                veto_muons.push_back(muonP4);
+        // Remove muons with very small deltaR
+        float minDeltaR = 1e6;
+        for (unsigned j=0; j < muons.size(); ++j) {
+            TLorentzVector tmpMuonP4;
+            tmpMuonP4.SetPtEtaPhiM(muons[j]->pt, muons[j]->eta, muons[j]->phi, 0.1051);
+            float dr = muonP4.DeltaR(tmpMuonP4);
+            if (dr < minDeltaR) {
+                minDeltaR = dr;
             }
+        }
+
+
+        if (
+                muonP4.Pt() > 3.
+                && fabs(muonP4.Eta()) < 2.4
+                // Loose muon ID
+                && (muon->typeBits & baconhep::kPFMuon)
+                && ((muon->typeBits & baconhep::kGlobal) || (muon->selectorBits & baconhep::kTrackerMuonArbitrated))
+                && fabs(muon->d0)  < 0.5
+                && fabs(muon->dz)  < 20.0
+                && minDeltaR > 0.02
+
+                // tight muon ID and ISO
+                //&& (muon->typeBits & baconhep::kPFMuon) 
+                //&& (muon->typeBits & baconhep::kGlobal) 
+                //&& muon->muNchi2    < 10.
+                //&& muon->nMatchStn  > 1
+                //&& muon->nPixHits   > 0
+                //&& fabs(muon->d0)   < 0.2
+                //&& fabs(muon->dz)   < 0.5
+                //&& muon->nTkLayers  > 5 
+                //&& muon->nValidHits > 0
+
+            ) {
+                muons.push_back(muon);
+            }
+
+        // muons for jet veto
+        if (
+                muonP4.Pt() > 5
+                // tight muon ID and ISO
+                && (muon->typeBits & baconhep::kPOGTightMuon)
+                && GetMuonIsolation(muon) < 0.15
+           ) {
+            veto_muons.push_back(muonP4);
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -451,7 +479,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
 
-
         if (muons[0]->pt < 20. || muons[1]->pt < 10.)
             return kTRUE;
         hTotalEvents->Fill(6);
@@ -463,7 +490,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         dimuonP4 = muonOneP4 + muonTwoP4;
         //cout << muonOneP4.Pt() << ", " << muonTwoP4.Pt() << ", " <<  dimuonP4.M() << endl;
 
-        if (dimuonP4.M() > 50.)
+        if (
+            !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+            || !(muons[1]->typeBits & baconhep::kPOGTightMuon)
+            || leptonOneIso/leptonOneP4.Pt() > 0.15 
+            || leptonTwoIso/leptonTwoP4.Pt() > 0.15 
+           )
             return kTRUE;
         hTotalEvents->Fill(7);
 
@@ -501,7 +533,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
           dileptonVertexOne     = vertPos;
           dileptonVertexErrOne  = vertErr;
           dileptonVertexChi2One = dimuonVert->chi2;
-          dileptonVertexDOFOne  = dimuonVert->ndof;
+          dILEPTONVertexDOFOne  = dimuonVert->ndof;
           hasValidVertex        = true;
           break;
           }
@@ -644,6 +676,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             muonP4[2].SetPtEtaPhiM(muons[2]->pt, muons[2]->eta, muons[2]->phi, 0.1052);
             muonP4[3].SetPtEtaPhiM(muons[3]->pt, muons[3]->eta, muons[3]->phi, 0.1052);
 
+            // This will reorder the lepton collection so that the lead two
+            // muons have invariant mass closest to a Z
+            vector<unsigned> bestPair = PairDileptonToZ(muonP4); 
+            vector<TMuon*> sortedMuons;
+            vector<TLorentzVector> sortedMuonP4;
+            for (unsigned i = 0; i < bestPair.size(); ++i) {
+                sortedMuons.push_back(muons[bestPair[i]]);
+                sortedMuonP4.push_back(muonP4[bestPair[i]]);
+            }
+            muons  = sortedMuons;
+            muonP4 = sortedMuonP4;
+            //--------------------------------------------------//
+
             leptonOneP4     = muonP4[0];
             leptonOneIso    = GetMuonIsolation(muons[0]);
             leptonOneFlavor = muons[0]->q*13;
@@ -668,11 +713,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonFourDZ     = muons[3]->dz;
             leptonFourD0     = muons[3]->d0;
 
+            // Apply James' Z+J/psi selection
+            if (
+                    !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+                    || !(muons[1]->typeBits & baconhep::kPOGTightMuon)
+                    || leptonOneIso/leptonOneP4.Pt() > 0.15 
+                    || leptonTwoIso/leptonTwoP4.Pt() > 0.15 
+                    || leptonThreeIso/leptonThreeP4.Pt() > 0.25
+               )
+                return kTRUE;
+            hTotalEvents->Fill(6);
+
             if (!isData) {
                 eventWeight *= weights->GetMuonIDEff(muonP4[0]);
                 eventWeight *= weights->GetMuonISOEff(muonP4[0]);
                 eventWeight *= weights->GetMuonIDEff(muonP4[1]);
                 eventWeight *= weights->GetMuonISOEff(muonP4[1]);
+
                 eventWeight *= weights->GetMuonIDEff(muonP4[2]);
                 //eventWeight *= weights->GetMuonISOEff(muonP4[2]);
                 eventWeight *= weights->GetMuonIDEff(muonP4[3]);
@@ -687,12 +744,52 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         } else if (muons.size() == 2 and electrons.size() == 2) {
 
-            hTotalEvents->Fill(5);
-            return kTRUE;
-
-            if (muons[0]->pt < 25)
+            if (electrons[0]->pt < 25. || electrons[1]->pt < 15.)
                 return kTRUE;
             hTotalEvents->Fill(6);
+
+            TLorentzVector lepP4;
+            lepP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 0.1052);
+            leptonOneP4     = lepP4;
+            leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+            leptonOneFlavor = electrons[0]->q*13;
+            leptonOneDZ     = electrons[0]->dz;
+            leptonOneD0     = electrons[0]->d0;
+
+            lepP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 0.1052);
+            leptonTwoP4     = lepP4;
+            leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
+            leptonTwoFlavor = electrons[1]->q*13;
+            leptonTwoDZ     = electrons[1]->dz;
+            leptonTwoD0     = electrons[1]->d0;
+
+            lepP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
+            leptonThreeP4     = lepP4;
+            leptonThreeIso    = GetMuonIsolation(muons[0]);
+            leptonThreeFlavor = muons[0]->q*13;
+            leptonThreeDZ     = muons[0]->dz;
+            leptonThreeD0     = muons[0]->d0;
+
+            lepP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.1052);
+            leptonFourP4     = lepP4;
+            leptonFourIso    = GetMuonIsolation(muons[1]);
+            leptonFourFlavor = muons[1]->q*13;
+            leptonFourDZ     = muons[1]->dz;
+            leptonFourD0     = muons[1]->d0;
+
+            if (!isData) {
+                // figure this out
+                //eventWeight *= weights->GetMuonIDEff(muonP4[2]);
+                //eventWeight *= weights->GetMuonISOEff(muonP4[2]);
+                //eventWeight *= weights->GetMuonIDEff(muonP4[3]);
+                //eventWeight *= weights->GetMuonISOEff(muonP4[3]);
+
+                // trigger weight
+                //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+                //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
+
+            }
 
         } else {
             hTotalEvents->Fill(5);
@@ -722,9 +819,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         jetTwoTag    = 0.;
     } 
 
-    if (!isData && genP4.size() == 2) {
-        genOneP4.SetPtEtaPhiM(genP4[0].Pt(), genP4[0].Eta(), genP4[0].Phi(), genP4[0].M()); 
-        genTwoP4.SetPtEtaPhiM(genP4[1].Pt(), genP4[1].Eta(), genP4[1].Phi(), genP4[1].M()); 
+    if (!isData && genParticles.size() == 2) {
+        genOneId = genParticles[0]->pdgId;
+        genOneP4.SetPtEtaPhiM(genParticles[0]->pt, genParticles[0]->eta, genParticles[0]->phi, genParticles[0]->mass); 
+        genTwoId = genParticles[1]->pdgId;
+        genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
     } else {
         genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
         genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
@@ -823,4 +922,35 @@ float MultileptonAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, c
     return combIso;
 }
 
+vector<unsigned> MultileptonAnalyzer::PairDileptonToZ(vector<TLorentzVector> leptons)
+{
+    unsigned pairings[3][4] = {{0, 1, 2, 3}, {0, 2, 1, 3}, {0, 3, 1, 2}};
+    float minMassDiff = 1e6;
+    unsigned bestPairing[4] = {0, 1, 2, 3};
+    for (unsigned i = 0; i < 3; ++i) {
+        unsigned *p = pairings[i];
+        TLorentzVector dilepton1 = leptons[p[0]] + leptons[p[1]];
+        TLorentzVector dilepton2 = leptons[p[2]] + leptons[p[3]];
 
+        if (fabs(dilepton1.M() - 91.2) < minMassDiff) {
+            minMassDiff = fabs(dilepton1.M() - 91.2);
+
+            // This makes me loathe c++
+            bestPairing[0] = p[0];
+            bestPairing[1] = p[1];
+            bestPairing[2] = p[2];
+            bestPairing[3] = p[3];
+        }
+        if (fabs(dilepton2.M() - 91.2) < minMassDiff) {
+            minMassDiff = fabs(dilepton2.M() - 91.2);
+            bestPairing[0] = p[2];
+            bestPairing[1] = p[3];
+            bestPairing[2] = p[0];
+            bestPairing[3] = p[1];
+        }
+    }
+
+    // this too
+    vector<unsigned> outPairing(bestPairing, bestPairing + sizeof(bestPairing)/sizeof(unsigned));
+    return outPairing;
+}

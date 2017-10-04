@@ -7,7 +7,7 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = '4l'
+selection  = 'mumu'
 period     = '2016'
 
 ''' 
@@ -167,16 +167,16 @@ path       = '/tthome/share/bacon/production/12'
 mc_list = []
 mc_list.extend([
     # Drell-Yan
-    #cfg(data_name = 'DYJetsToLL_M-50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'zjets_m-50'
-    #   ),
-    #cfg(data_name = 'DYJetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zjets_m-10to50'
-    #   ),
+    cfg(data_name = 'DYJetsToLL_M-50',
+        path     = '{0}/Summer16_DYJetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'zjets_m-50'
+       ),
+    cfg(data_name = 'DYJetsToLL_M-10to50',
+        path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50'
+       ),
     cfg(data_name = 'DY1JetsToLL_M-50',
         path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
         nJobs    = 10,

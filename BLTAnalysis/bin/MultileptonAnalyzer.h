@@ -110,12 +110,14 @@ public:
     Float_t met, metPhi, ht, htPhi;
 
     // generator level data
+    Int_t genOneId, genTwoId;
     TLorentzVector genOneP4, genTwoP4;
 
     // MET kluge 
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
+    vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

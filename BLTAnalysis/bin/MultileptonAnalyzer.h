@@ -95,6 +95,7 @@ public:
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
+    Int_t leptonOneMother, leptonTwoMother, leptonThreeMother, leptonFourMother; 
     Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
     Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
@@ -110,14 +111,14 @@ public:
     Float_t met, metPhi, ht, htPhi;
 
     // generator level data
-    Int_t genOneId, genTwoId;
+    Int_t genOneId, genTwoId, genOneMother, genTwoMother;
     TLorentzVector genOneP4, genTwoP4;
 
-    // MET kluge 
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
+    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

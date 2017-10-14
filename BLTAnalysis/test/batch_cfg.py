@@ -16,7 +16,7 @@ period     = '2016'
 '''
 
 data_list = []
-if selection in ['mumu', 'emu', '4l']:
+if selection in ['mumu', '4l']:
     data_list.extend([
         cfg(data_name = 'muon_2016B_v1',
             path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
@@ -64,7 +64,7 @@ if selection in ['mumu', 'emu', '4l']:
             suffix    = 'muon_2016H'
            ),
         ])
-if selection in ['ee', 'emu', '4l']:
+if selection in ['ee', '4l']:
     data_list.extend([
         cfg(data_name = 'electron_2016B',
             path     = '{0}/SingleElectron_Run2016B-03Feb2017_ver1-v1'.format(path),
@@ -110,6 +110,55 @@ if selection in ['ee', 'emu', '4l']:
             path     = '{0}/SingleElectron_Run2016H-03Feb2017_ver3-v1'.format(path),
             nJobs    = 30,
             suffix   = 'electron_2016H'
+           ),
+        ])
+
+if selection == 'emu':
+    data_list.extend([
+        cfg(data_name = 'mueg_2016B',
+            path     = '{0}/MuonEG_Run2016B-03Feb2017_ver1-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016B'
+           ),
+        cfg(data_name = 'mueg_2016B',
+            path     = '{0}/MuonEG_Run2016B-03Feb2017_ver2-v2'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016B'
+           ),
+        cfg(data_name = 'mueg_2016C',
+            path     = '{0}/MuonEG_Run2016C-03Feb2017-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016C'
+           ),
+        cfg(data_name = 'mueg_2016D',
+            path     = '{0}/MuonEG_Run2016D-03Feb2017-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016D'
+           ),
+        cfg(data_name = 'mueg_2016E',
+            path     = '{0}/MuonEG_Run2016E-03Feb2017-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016E'
+           ),
+        cfg(data_name = 'mueg_2016F',
+            path     = '{0}/MuonEG_Run2016F-03Feb2017-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016F'
+           ),
+        cfg(data_name = 'mueg_2016G',
+            path     = '{0}/MuonEG_Run2016G-03Feb2017-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016G'
+           ),
+        cfg(data_name = 'mueg_2016H',
+            path     = '{0}/MuonEG_Run2016H-03Feb2017_ver2-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016H'
+           ),
+        cfg(data_name = 'mueg_2016H',
+            path     = '{0}/MuonEG_Run2016H-03Feb2017_ver3-v1'.format(path),
+            nJobs    = 30,
+            suffix   = 'mueg_2016H'
            ),
         ])
 
@@ -165,10 +214,10 @@ mc_list.extend([
     #cfg(data_name = 'DY4JetsToLL_M-10to50',
     #    path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
     #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
     #   ),
 
     # top
+#    suffix   = 'z4jets_m-10to50'
 #    cfg(data_name = 'ttbar_leptonic',
 #        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
 #        nJobs    = 50,
@@ -194,16 +243,16 @@ mc_list.extend([
 #        nJobs    = 10,
 #        suffix   = 'tbar_s'
 #       ),
-    cfg(data_name = 'T_t-channel',
-        path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 't_t'
-       ),
-    cfg(data_name = 'Tbar_t-channel',
-        path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 'tbar_t'
-       ),
+    #cfg(data_name = 'T_t-channel',
+    #    path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 't_t'
+    #   ),
+    #cfg(data_name = 'Tbar_t-channel',
+    #    path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'tbar_t'
+    #   ),
     cfg(data_name = 'T_tW-channel',
         path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
         nJobs    = 10,
@@ -216,31 +265,31 @@ mc_list.extend([
        ),
 
     # Diboson
-    #cfg(data_name = 'WW',
-    #    path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'ww'
-    #   ),
-    #cfg(data_name = 'WZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_2l2q'
-    #   ),
-    #cfg(data_name = 'WZJetsTo3LNu',
-    #    path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_3lnu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Nu',
-    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2nu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2q'
-    #   ),
+    cfg(data_name = 'WW',
+        path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
+        nJobs    = 10,
+        suffix   = 'ww'
+       ),
+    cfg(data_name = 'WZJetsTo2L2Q',
+        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'wz_2l2q'
+       ),
+    cfg(data_name = 'WZJetsTo3LNu',
+        path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
+        nJobs    = 10,
+        suffix   = 'wz_3lnu'
+       ),
+    cfg(data_name = 'ZZJetsTo2L2Nu',
+        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_2l2nu'
+       ),
+    cfg(data_name = 'ZZJetsTo2L2Q',
+        path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_2l2q'
+       ),
     #cfg(data_name = 'ZZJetsTo4L',
     #    path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
     #    nJobs    = 10,
@@ -248,26 +297,9 @@ mc_list.extend([
     #   ),
     ])
 
-path = '/tthome/share/bacon/production/11'
-sig_list = []
-sig_list.extend([
-    cfg(data_name = 'Bprime2Xb_X2mumu',
-        path     = '{0}/Spring16_Bprime2Xb_X2mumu_tChannel'.format(path),
-        nJobs    = 5,
-        suffix   = 'bprime_t-channel'
-       ),
-    cfg(data_name = 'BB2bbdimufatjet',
-        path     = '{0}/Spring16_BB2bbdimufatjet'.format(path),
-        nJobs    = 5,
-        suffix   = 'bprime_bb_semilep'
-       ),
-    ])
-
 batch_list = []
 batch_list += data_list
-#batch_list += mc_list 
-#batch_list += sig_list
-
+batch_list += mc_list 
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
                        selection   = selection,

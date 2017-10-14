@@ -496,7 +496,6 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
         } else if (btagSF < 1) { //downgrade tagged to untagged
             if(isBTagged && rNumber > btagSF) isBTagged = false;
         }
-
     } else {
         float mcEff = 0.003; //_misTagEff->Eval(jetPt);
         if(mistagSF > 1){  // use this if SF>1

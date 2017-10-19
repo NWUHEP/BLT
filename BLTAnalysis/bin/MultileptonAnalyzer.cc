@@ -97,6 +97,17 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
     outTree->Branch("leptonOneQ", &leptonOneQ);
     outTree->Branch("leptonTwoQ", &leptonTwoQ);
+    outTree->Branch("leptonOneMother", &leptonOneMother);
+    outTree->Branch("leptonTwoMother", &leptonTwoMother);
+    outTree->Branch("leptonOneD0", &leptonOneD0);
+    outTree->Branch("leptonOneDZ", &leptonOneDZ);
+    outTree->Branch("leptonTwoD0", &leptonTwoD0);
+    outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
+
+    outTree->Branch("leptonOneSip3d", &leptonOneSip3d);
+    outTree->Branch("leptonTwoSip3d", &leptonTwoSip3d);
+
+    
 
     // jets
     outTree->Branch("bjetOneP4", &bjetOneP4);
@@ -113,9 +124,10 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     
 
     // event counter
-    string outHistName = params->get_output_treename("TotalEvents");
-    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
-    hGenEvents = new TH1D(outHistName.c_str(),"GenEvents",70,0.5,70.5);
+    string outHistName1 = params->get_output_treename("TotalEvents");
+    hTotalEvents = new TH1D(outHistName1.c_str(),"TotalEvents",10,0.5,10.5);
+    string outHistName2 = params->get_output_treename("GenEvents");
+    hGenEvents = new TH1D(outHistName2.c_str(),"GenEvents",70,0.5,70.5);
 
 
     ReportPostBegin();
@@ -182,11 +194,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     ///////////////////////
     // Generator objects //
     ///////////////////////
+    vector<TGenParticle*> genParticles;
 
     if (!isData) {
         unsigned genelectronscount = 0;
         unsigned genmuoncount = 0;
         unsigned gentaucount = 0;
+        //unsigned genindirectelectroncount = 0;
+        //unsigned genindirectmuoncount     = 0;
+
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
             if(particle->parent <0) continue;
@@ -197,12 +213,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if ( abs(particle->pdgId) == 11 && abs(particleparent->pdgId) == 24 ) ++genelectronscount;
             if ( abs(particle->pdgId) == 13 && abs(particleparent->pdgId) == 24 ) ++genmuoncount;
             if ( abs(particle->pdgId) == 15 && abs(particleparent->pdgId) == 24 ) ++gentaucount;
-            
+
+            if ( abs(particle->pdgId) == 11 && ((abs(particleparent->pdgId) == 24)|| (abs(particleparent->pdgId) == 15)) ) genParticles.push_back(particle); 
+            if ( abs(particle->pdgId) == 13 && ((abs(particleparent->pdgId) == 24)|| (abs(particleparent->pdgId) == 15)) ) genParticles.push_back(particle); 
+            //if ( abs(particle->pdgId) == 11 && abs(particleparent->pdgId) == 15 ) ++genindirectelectroncount;
+            //if ( abs(particle->pdgId) == 13 && abs(particleparent->pdgId) == 15 ) ++genindirectelectroncount;
         }
         nGenElectrons = genelectronscount;
         nGenMuons = genmuoncount;
         nGenTaus = gentaucount;
-        cout << "elec:" << nGenElectrons << ", muon:" << nGenMuons << ", tau:"<< nGenTaus << endl;
+        //cout << "elec:" << nGenElectrons << ", muon:" << nGenMuons << ", tau:"<< nGenTaus << endl;
         
     } 
     unsigned nGenState = 60;// others or data
@@ -214,11 +234,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     else if (nGenElectrons==0 && nGenMuons==0 && nGenTaus==2) nGenState = 50; // tautau
     //else nGenState = 60; // others or data
 
-    cout<<nGenState<<endl;
+    //cout<<nGenState<<endl;
 
     hGenEvents->Fill(nGenState+1);
-    hGenEvents->Fill(nGenState+2);// for MC, this does not matter
-    hGenEvents->Fill(nGenState+3);// for MC, this does not matter
+    hGenEvents->Fill(nGenState+2); // for MC, this does not matter
+    hGenEvents->Fill(nGenState+3); // for MC, this does not matter
 
     
 
@@ -264,7 +284,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // Fill containers
         if (
-                muon->pt > 10
+                muon->pt > 3
                 && fabs(muon->eta) < 2.4
                 && particleSelector->PassMuonID(muon, cuts->tightMuID)
                 && muon->trkIso/muon->pt < 0.1
@@ -286,7 +306,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         if (
-                electron->pt > 10 
+                electron->pt > 3 
                 && fabs(electron->eta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
                 && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
@@ -316,13 +336,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (vJet.DeltaR(mu) < 0.5) {
+            if (vJet.DeltaR(mu) < 0.4) {
                 muOverlap = true;
                 break;
             }
         }
         for (const auto& ele: veto_electrons) {
-            if (vJet.DeltaR(ele) < 0.5) {
+            if (vJet.DeltaR(ele) < 0.4) {
                 muOverlap = true;
                 break;
             }
@@ -373,7 +393,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
-        if (muons[0]->pt < 25 || muons[1]->pt < 20)
+        if (muons[0]->pt < 25 || muons[1]->pt < 3)
             return kTRUE;
         hTotalEvents->Fill(6);
         hGenEvents->Fill(nGenState+6);
@@ -396,21 +416,33 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoP4 = muonTwoP4;
         leptonOneQ = muons[0]->q;
         leptonTwoQ = muons[1]->q;
+        leptonOneDZ  = muons[0]->dz;
+        leptonOneD0  = muons[0]->d0;
+        leptonTwoDZ  = muons[1]->dz;
+        leptonTwoD0  = muons[1]->d0;
+        leptonOneSip3d = muons[0]->sip3d;
+        leptonTwoSip3d = muons[1]->sip3d;
+    
 
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
 
         if (!isData) {
+
+            leptonOneMother = GetGenMotherId(genParticles, leptonOneP4);
+            leptonTwoMother = GetGenMotherId(genParticles, leptonTwoP4);
+
+
             eventWeight *= weights->GetMuonIDEff(muonOneP4);
             eventWeight *= weights->GetMuonISOEff(muonOneP4);
             eventWeight *= weights->GetMuonIDEff(muonTwoP4);
             eventWeight *= weights->GetMuonISOEff(muonTwoP4);
 
             // trigger weight
-            //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
+            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+            eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
     } 
     if (params->selection == "ee") {
@@ -419,7 +451,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
-        if (electrons[0]->pt < 25 || electrons[1]->pt < 20)
+        if (electrons[0]->pt < 25 || electrons[1]->pt < 3)
             return kTRUE;
         hTotalEvents->Fill(6);
         hGenEvents->Fill(nGenState+6);
@@ -447,6 +479,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
 
         if (!isData) {
+            leptonOneMother = GetGenMotherId(genParticles, leptonOneP4);
+            leptonTwoMother = GetGenMotherId(genParticles, leptonTwoP4);
+
             eventWeight *= weights->GetElectronRecoIdEff(electronOneP4);
             eventWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
 
@@ -462,7 +497,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
-        if (muons[0]->pt < 25 || electrons[0]->pt < 20) 
+        if (muons[0]->pt < 25 || electrons[0]->pt < 3) 
             return kTRUE;
         hTotalEvents->Fill(6);
         hGenEvents->Fill(nGenState+6);
@@ -491,6 +526,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         bjetTwoP4.SetPtEtaPhiM(bjets[1]->pt, bjets[1]->eta, bjets[1]->phi, bjets[1]->mass);
 
         if (!isData) {
+            leptonOneMother = GetGenMotherId(genParticles, leptonOneP4);
+            leptonTwoMother = GetGenMotherId(genParticles, leptonTwoP4);
+
             eventWeight *= weights->GetMuonIDEff(muonP4);
             eventWeight *= weights->GetElectronRecoIdEff(electronP4);
         }
@@ -549,3 +587,16 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
+int MultileptonAnalyzer::GetGenMotherId(vector<TGenParticle*> particles, TLorentzVector p4)
+{
+    int motherId = 0;
+    for (unsigned i = 0; i < particles.size(); ++i) {
+        TLorentzVector genP4;
+        genP4.SetPtEtaPhiM(particles[i]->pt, particles[i]->eta, particles[i]->phi, particles[i]->mass); 
+        if (genP4.DeltaR(p4) < 0.3) {
+            TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particles[i]->parent);
+            motherId = mother->pdgId;
+        }
+    }
+    return motherId;
+}

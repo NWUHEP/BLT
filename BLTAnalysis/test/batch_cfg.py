@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+
 import BLT.BLTAnalysis.BatchMaster as bm
 import sys
 
@@ -7,7 +8,7 @@ cfg = bm.JobConfig
 ''' Specify parameters '''
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'ee'
+selection  = 'mumu'
 period     = '2016'
 
 ''' 
@@ -209,16 +210,16 @@ mc_list.extend([
     #    suffix   = 'tbar_s'
     #   ),
 
-    cfg(data_name = 'T_t-channel',
-        path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 't_t'
-       ),
-    cfg(data_name = 'Tbar_t-channel',
-        path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 'tbar_t'
-       ),
+    #cfg(data_name = 'T_t-channel',
+    #    path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 't_t'
+    #   ),
+    #cfg(data_name = 'Tbar_t-channel',
+    #    path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'tbar_t'
+    #   ),
     cfg(data_name = 'T_tW-channel',
         path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
         nJobs    = 10,
@@ -231,31 +232,50 @@ mc_list.extend([
        ),
 
     # Diboson
-    cfg(data_name = 'WW',
-        path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'ww'
-       ),
-    cfg(data_name = 'WZJetsTo2L2Q',
-        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_2l2q'
-       ),
-    cfg(data_name = 'WZJetsTo3LNu',
-        path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_3lnu'
-       ),
-    cfg(data_name = 'ZZJetsTo2L2Nu',
-        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_2l2nu'
-       ),
+    # WW
+    #cfg(data_name = 'WW2L2Nu',
+    #    path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'ww_2l2nu'
+    #   ),
+    #cfg(data_name = 'WWLNuQQ',
+    #    path     = '{0}/Summer16_WWToLNuQQ_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'ww_1l1nu2q'
+    #   ),
+    #cfg(data_name = 'WW4Q',
+    #    path     = '{0}/Summer16_WWTo4Q_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'ww_4q'
+    #   ),
+    # WZ
+    #cfg(data_name = 'WZJetsTo2L2Q',
+    #    path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'wz_2l2q'
+    #   ),
+    #cfg(data_name = 'WZJetsTo3LNu',
+    #    path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'wz_3lnu'
+    #   ),
+    # ZZ
+    #cfg(data_name = 'ZZJetsTo2L2Nu',
+    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_2l2nu'
+    #   ),
     cfg(data_name = 'ZZJetsTo2L2Q',
         path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
         nJobs    = 10,
         suffix   = 'zz_2l2q'
        ),
+    #cfg(data_name = 'ZZJets4Q',
+    #    path     = '{0}/Summer16_ZZTo4Q_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_4q'
+    #   ),
+       
 ])
 
 path = '/tthome/share/bacon/production/11'

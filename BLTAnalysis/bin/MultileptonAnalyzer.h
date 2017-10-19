@@ -59,6 +59,7 @@ public:
     void   Terminate();
     void   ReportPostBegin();
     void   ReportPostTerminate();
+    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
 
     TFile *outFile;
     TTree *outTree;
@@ -88,10 +89,13 @@ public:
     Float_t eventWeight, nPU;
 
     TLorentzVector leptonOneP4, leptonTwoP4, bjetOneP4, bjetTwoP4;
-    Float_t leptonOneQ,leptonTwoQ;
+    Float_t leptonOneQ,leptonTwoQ;    
+    Float_t leptonOneD0, leptonTwoD0, leptonOneDZ, leptonTwoDZ,leptonOneSip3d,leptonTwoSip3d;
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;
+    Int_t leptonOneMother, leptonTwoMother;
+
 
     //ClassDef(MultileptonAnalyzer,0);
 };

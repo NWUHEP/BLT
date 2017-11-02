@@ -38,6 +38,7 @@
 // C++ headers
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <iostream>
@@ -86,9 +87,9 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, nPU;
+    Float_t eventWeight, triggerWeight, puWeight, nPU;
     TVector3 rPV;
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons;
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
@@ -99,6 +100,7 @@ public:
     Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
     Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
 
     // dimuon vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
@@ -106,12 +108,12 @@ public:
     Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
 
     // jet data
-    TLorentzVector jetOneP4, jetTwoP4;
-    Float_t jetOneTag, jetTwoTag;
-    Float_t met, metPhi, ht, htPhi;
+    TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
+    Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
+    Float_t met, metPhi, ht, htPhi, htSum;
 
     // generator level data
-    Int_t genOneId, genTwoId, genOneMother, genTwoMother;
+    Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
     TLorentzVector genOneP4, genTwoP4;
 
     float MetKluge(float);
@@ -119,6 +121,9 @@ public:
     float GetElectronIsolation(const baconhep::TElectron*, float);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+    //vector<TJet*> KinematicTopTag(vector<TJet*>, TVector2, TLorentzVector);
+
+    //vector<vector<unsigned> > comb(int, int);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

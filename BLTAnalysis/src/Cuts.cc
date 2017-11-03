@@ -288,6 +288,9 @@ Cuts::Cuts() {
     catPhMVAID.mvaValCat3                 = 0.126;
     catPhMVAID.mvaValCat4                 = 0.135;
 
+    looseMVAPhID.cutName                  = "looseMVAPhID";
+    tightMVAPhID.cutName                  = "tightMVAPhID";
+
     hzgMVAID.cutName                        = "hzgMVAID";
     hzgMVAID.mvaVal[0]                      = -0.9;
     hzgMVAID.mvaVal[1]                      = -0.5;

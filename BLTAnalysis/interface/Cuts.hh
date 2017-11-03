@@ -100,7 +100,7 @@ public:
         float mvaValCat3;
         float mvaValCat4;
         std::string cutName;
-    } catPhMVAID;
+    } catPhMVAID, looseMVAPhID, tightMVAPhID;
 
     struct elMVACuts {
         float mvaVal[6];

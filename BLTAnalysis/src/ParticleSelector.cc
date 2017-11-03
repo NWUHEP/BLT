@@ -329,6 +329,21 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
 
 bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const {
     bool phoPass = false;
+    if (cutLevel.cutName == "looseMVAPhID") {
+        if (ph->mva > 0.2) 
+            phoPass = true;
+    }
+    else if (cutLevel.cutName == "tightMVAPhID") {
+        if (fabs(ph->scEta) <= 1.479) { // barrel
+            if (ph->mva > 0.68)
+                phoPass = true;
+        }
+        else { //endcap
+            if (ph->mva > 0.60)
+                phoPass = true;
+        }
+    }
+    
     return phoPass;
 }
 

@@ -299,11 +299,11 @@ mc_dict['ttbar'] = [
         nJobs    = 50,
         suffix   = 'ttbar_lep'
        ),
-    cfg(data_name = 'ttbar_semileptonic',
-        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-        nJobs    = 50,
-        suffix   = 'ttbar_semilep'
-       ),
+    #cfg(data_name = 'ttbar_semileptonic',
+    #    path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_semilep'
+    #   ),
     #cfg(data_name = 'ttbar_leptonic',
     #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
     #    nJobs    = 50,

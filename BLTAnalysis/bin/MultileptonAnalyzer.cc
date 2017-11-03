@@ -242,31 +242,39 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 genParticles.push_back(particle);
             } 
 
-            // This will save leptons (mostly for use with dilepton analyses)
-            if ((abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13) && particle->status == 1) {
-                if (particle->parent != -2) {
-                    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-                    //cout << i << ", " << particle->pdgId  << ", " << mother->pdgId << ", " << particle->status << endl;;
-                    if (fabs(mother->pdgId) == 24 || abs(mother->pdgId) == 15) {
-                        //cout << i << ", " << particle->pdgId  << ", " << mother->pdgId;
-                        //cout << "\t" << particle->pt << ", " << particle->eta;
-                        //cout << endl;
-
-                        if (mother->parent != -2) {
-                            genParticles.push_back(particle);
-                            genMotherId.push_back(mother->pdgId);
-
-                            //TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent);
-                            //cout << gmother->pdgId << endl;
-                        }
-
+            // This will save final state leptons
+            if (
+                    (abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13) 
+                    && particle->status == 1 
+                    && particle->parent != -2
+               ) {
+                // Find if the lepton comes from a top quark
+                TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                int origin = abs(mother->pdgId);
+                int intermediary = origin;
+                while (origin != 6 && mother->parent != -2) {
+                    mother = (TGenParticle*) fGenParticleArr->At(mother->parent);
+                    origin = abs(mother->pdgId);
+                    if (origin == 15) {
+                        intermediary = 15;
+                    } else if (intermediary != 15 && origin == 24) {
+                        intermediary = 24;
                     }
                 }
-            }
 
-            nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+                //cout << i << ", " << particle->pdgId  << ", " << intermediary << ", " 
+                //     << origin << ", " << particle->status << endl;
+
+                if (origin == 6 && (intermediary == 24 || intermediary == 15)) {
+                    genParticles.push_back(particle);
+                    genMotherId.push_back(intermediary);
+                }
+            }
         }
+        nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+
         //cout << genParticles.size() << endl;
+        //cout << "\n";
 
         // categorize events based on decay type
         if (genParticles.size() == 2) {
@@ -517,7 +525,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     /* TAUS */
     vector<TTau*> taus;
     for (int i=0; i < fTauArr->GetEntries(); i++) {
-         TTau *tau = (TTau*) fTauArr->At(i);
+        TTau *tau = (TTau*) fTauArr->At(i);
         assert(tau);
 
         TLorentzVector tauP4; 

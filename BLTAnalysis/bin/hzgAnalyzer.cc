@@ -439,6 +439,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     }
     sort(taus.begin(), taus.end(), sort_by_higher_pt<TTau>);
 
+    /* PHOTONS */
+    vector <TPhoton*> photons;
+    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
+        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
+        assert(photon);
+
+    if (
+            // ID conditions
+            photon->pt > 10
+            && fabs(photon->eta) < 2.5 
+            && particleSelector->PassPhotonMVA(photon, cuts->looseMVAPhID)
+            && photon->passElectronVeto
+        )
+        photons.push_back(photon);
+    } 
+    sort(photons.begin(), photons.end(), sort_by_higher_pt<TPhoton>);
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -532,7 +548,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nElectrons = electrons.size();
     nTaus      = taus.size();
 
-    if (params->selection == "mu4j") {
+    if (params->selection == "mumug") {
+    }
+    /*if (params->selection == "mu4j") {
 
         if (muons.size() != 1 || electrons.size() != 0) 
             return kTRUE;
@@ -764,7 +782,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             eventWeight = leptonOneRecoWeight*leptonTwoRecoWeight*triggerWeight;
         }
-    } 
+    } */
 
     ///////////////////
     // Fill jet info //

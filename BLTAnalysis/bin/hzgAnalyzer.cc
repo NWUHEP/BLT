@@ -115,6 +115,10 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
 
+    // photons
+    outTree->Branch("photonOneP4", &photonOneP4);
+    outTree->Branch("photonOneR9", &photonOneR9);
+
     // lepton vertices
     outTree->Branch("dileptonVertexOne", &dileptonVertexOne);
     outTree->Branch("dileptonVertexErrOne", &dileptonVertexErrOne);
@@ -324,17 +328,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
 
         if (     
-                // tight muon ID and ISO
-                //&& (muon->typeBits & baconhep::kPFMuon) 
-                //&& (muon->typeBits & baconhep::kGlobal) 
-                //&& muon->muNchi2    < 10.
-                //&& muon->nMatchStn  > 1
-                //&& muon->nPixHits   > 0
-                //&& fabs(muon->d0)   < 0.2
-                //&& fabs(muon->dz)   < 0.5
-                //&& muon->nTkLayers  > 5 
-                //&& muon->nValidHits > 0
-                //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.25
+               //// tight muon ID and ISO
+               //muonP4.Pt() > 5.
+               //&& fabs(muonP4.Eta()) < 2.4
+               //&& (muon->typeBits & baconhep::kPFMuon) 
+               //&& (muon->typeBits & baconhep::kGlobal) 
+               //&& muon->muNchi2    < 10.
+               //&& muon->nMatchStn  > 1
+               //&& muon->nPixHits   > 0
+               //&& fabs(muon->d0)   < 0.2
+               //&& fabs(muon->dz)   < 0.5
+               //&& muon->nTkLayers  > 5 
+               //&& muon->nValidHits > 0
+               //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.25
+           //){
+           // muons.push_back(muon);
+       // }
 
                 // h->ZZ->4l "tight" ID and pf_isorel < 0.35
                 muonP4.Pt() > 5.
@@ -343,14 +352,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 && fabs(muon->dz) < 1.0
                 && ((muon->typeBits & baconhep::kGlobal) || 
                    ((muon->typeBits & baconhep::kTracker) && muon->nMatchStn > 0)) // Global muon or (arbitrated) tracker muon
-                && !(muon->selectorBits & baconhep::kAllStandAloneMuons) // no standalone muons
+                //&& !(muon->selectorBits & baconhep::kAllStandAloneMuons) // no standalone muons
+                //&& !(muon->typeBits & baconhep::kStandalone) // no standalone muons
                 && muon->sip3d < 4.0                 
                 && GetMuonIsolation(muon)/muonP4.Pt() < 0.35
 
                 ) {
                     // We now have h->ZZ->4l "loose" muons
                     if (muonP4.Pt() < 200.0) {
-                        if (muon->pogIDBits & baconhep::kPOGLooseMuon)
+                        //if (muon->pogIDBits & baconhep::kPOGLooseMuon)
                             muons.push_back(muon);
                     }
                     else {
@@ -366,6 +376,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             muons.push_back(muon);
                     }
                 }
+                    
 
         // muons for jet veto
         if (
@@ -549,7 +560,97 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nTaus      = taus.size();
 
     if (params->selection == "mumug") {
-    }
+        if (muons.size() < 2) 
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        if (photons.size() < 1)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+        
+        unsigned int muonOneIndex = 0;
+        unsigned int muonTwoIndex = 1;
+        bool hasValidPair = false;
+        float zMassDiff = 100.;
+        for (unsigned int i = 0; i < muons.size(); ++i) {
+            for (unsigned int j = i+1; j < muons.size(); ++j) {
+                TLorentzVector tempMuonOne, tempMuonTwo;
+                tempMuonOne.SetPtEtaPhiM(muons[i]->pt, muons[i]->eta, muons[i]->phi, MUON_MASS);
+                tempMuonTwo.SetPtEtaPhiM(muons[j]->pt, muons[j]->eta, muons[j]->phi, MUON_MASS);
+                float thisMass = (tempMuonOne + tempMuonTwo).M();
+                if (
+                        muons[i]->q != muons[j]->q
+                        && muons[i]->pt > 20.0 
+                        && muons[j]->pt > 10.0
+                        && thisMass > 50.0
+                   ) {
+                    if (hasValidPair) {
+                        if (fabs(thisMass - ZMASS) < zMassDiff) {
+                            zMassDiff = fabs(thisMass - ZMASS);
+                            leptonOneP4 = tempMuonOne;
+                            leptonTwoP4 = tempMuonTwo;
+                            muonOneIndex = i;
+                            muonTwoIndex = j;
+                        }
+                    }
+                    else {
+                        zMassDiff = fabs(thisMass - ZMASS);
+                        leptonOneP4 = tempMuonOne;
+                        leptonTwoP4 = tempMuonTwo;
+                        muonOneIndex = i;
+                        muonTwoIndex = j;
+                        hasValidPair = true;
+                    }
+                }
+            }
+        }
+
+        if (!hasValidPair)
+            return kTRUE;
+        hTotalEvents->Fill(7);
+
+        photonOneP4.SetPtEtaPhiM(photons[0]->pt, photons[0]->eta, photons[0]->phi, 0.);
+        if (photonOneP4.Pt() < 15.0)
+            return kTRUE;
+        hTotalEvents->Fill(8);
+
+        //float m_ll = (leptonOneP4 + leptonTwoP4).M();
+        //float m_llg = (leptonOneP4 + leptonTwoP4 + photonOneP4).M();
+        //if (photonOneP4.Et() < 0.14*m_llg)
+        //    return kTRUE;
+        //hTotalEvents->Fill(9);
+        //if (leptonOneP4.DeltaR(photonOneP4) < 0.4)
+        //    return kTRUE;
+        //hTotalEvents->Fill(10);
+        //if (leptonTwoP4.DeltaR(photonOneP4) < 0.4)
+        //    return kTRUE;
+        //hTotalEvents->Fill(11);
+        //if (m_ll + m_llg < 185.0)
+        //    return kTRUE;
+        //hTotalEvents->Fill(12);
+        //if (m_ll < 100.0 || m_ll > 180.0)
+        //    return kTRUE;
+        //hTotalEvents->Fill(13);
+ 
+        leptonOneIso    = GetMuonIsolation(muons[muonOneIndex]);
+        leptonOneFlavor = muons[muonOneIndex]->q*13;
+        leptonOneDZ     = muons[muonOneIndex]->dz;
+        leptonOneD0     = muons[muonOneIndex]->d0;
+            
+        leptonTwoIso    = GetMuonIsolation(muons[muonTwoIndex]);
+        leptonTwoFlavor = muons[muonTwoIndex]->q*13;
+        leptonTwoDZ     = muons[muonTwoIndex]->dz;
+        leptonTwoD0     = muons[muonTwoIndex]->d0;
+
+        photonOneR9 = photons[0]->r9;
+
+        if (!isData) {
+            eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
+            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
+            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+        } 
+    } // end mumug selection
+
     /*if (params->selection == "mu4j") {
 
         if (muons.size() != 1 || electrons.size() != 0) 

@@ -102,6 +102,10 @@ public:
     Float_t leptonOneDZ, leptonTwoDZ;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
 
+    // photon data
+    TLorentzVector photonOneP4;
+    Float_t photonOneR9;
+
     // dilepton vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
     Float_t dileptonVertexChi2One, dileptonVertexDOFOne;

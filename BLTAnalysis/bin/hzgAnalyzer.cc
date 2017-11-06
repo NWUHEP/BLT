@@ -360,7 +360,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 ) {
                     // We now have h->ZZ->4l "loose" muons
                     if (muonP4.Pt() < 200.0) {
-                        //if (muon->pogIDBits & baconhep::kPOGLooseMuon)
+                        if (muon->pogIDBits & baconhep::kPOGLooseMuon)
                             muons.push_back(muon);
                     }
                     else {

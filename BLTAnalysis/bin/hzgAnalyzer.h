@@ -119,6 +119,7 @@ public:
     // generator level data
     Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
     TLorentzVector genOneP4, genTwoP4;
+    Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
 
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);

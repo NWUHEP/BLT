@@ -146,6 +146,9 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("genTwoP4", &genTwoP4);
     outTree->Branch("genTwoId", &genTwoId);
     //outTree->Branch("genTwoMother", &genTwoMother);
+    outTree->Branch("fromHardProcessFinalState", &fromHardProcessFinalState);
+    outTree->Branch("isPromptFinalState", &isPromptFinalState);
+    outTree->Branch("hasPhotonMatch", &hasPhotonMatch);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -223,6 +226,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     }
                 }
             }
+
+            // Save photons to check generator flags with DY sample
+            if (abs(particle->pdgId) == 22 && particle->status == 1)
+                genParticles.push_back(particle);
 
             nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
         }
@@ -644,6 +651,33 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOneR9 = photons[0]->r9;
 
         if (!isData) {
+            float photon_gen_dr = 100.;
+            TGenParticle *photon_match = new TGenParticle;
+            for (unsigned int ip = 0; ip < genParticles.size(); ++ip) {
+                TGenParticle *genPart = genParticles.at(ip);
+                if (genPart->pdgId == 22) {
+                    TLorentzVector genP4;
+                    genP4.SetPtEtaPhiM(genPart->pt, genPart->eta, genPart->phi, genPart->mass); 
+                    if (genP4.DeltaR(photonOneP4) < photon_gen_dr) {
+                        *photon_match = *genPart;
+                        photon_gen_dr = genP4.DeltaR(photonOneP4);
+                    }
+                }
+            }
+            
+            if (photon_gen_dr < 0.3) {
+                hasPhotonMatch            = true;
+                fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
+                isPromptFinalState        = photon_match->isPromptFinalState;
+            }
+            else {
+                hasPhotonMatch            = false;
+                fromHardProcessFinalState = false;
+                isPromptFinalState        = false;
+            }
+
+            delete photon_match;
+
             eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
             eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id

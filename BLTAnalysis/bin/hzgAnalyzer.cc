@@ -270,7 +270,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nPV           = fPVArr->GetEntries();
     if (!isData) {
         nPU = fInfo->nPUmean;
-        puWeight *= weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+        puWeight = weights->GetPUWeight(nPU); // pileup reweighting
         eventWeight *= puWeight;
     } else {
         nPU = 0;

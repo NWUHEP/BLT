@@ -565,6 +565,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
     nTaus      = taus.size();
+    nPhotons   = photons.size();
 
     if (params->selection == "mumug") {
         if (muons.size() < 2) 
@@ -678,10 +679,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             delete photon_match;
 
-            eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
-            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
-            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
+            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
+            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
         } 
     } // end mumug selection
 

@@ -50,11 +50,13 @@ void copy_p4(const T* lhs, float mass, TLorentzVector& rhs) {
     rhs.SetPtEtaPhiM(lhs->pt, lhs->eta, lhs->phi, mass);
 }
 
+
 // Sort functions
 template<class T>
 bool sort_by_higher_pt(const T* lhs, const T* rhs) {
     return lhs->pt > rhs->pt;
 }
+
 
 // Basic classes
 namespace baconhep {

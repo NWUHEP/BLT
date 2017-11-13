@@ -157,7 +157,7 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("LHEWeight", &fLHEWeightArr, &b_LHEWeightArr);
     fChain->SetBranchAddress("Electron", &fElectronArr, &b_ElectronArr);
     fChain->SetBranchAddress("Muon", &fMuonArr, &b_MuonArr);
-    //fChain->SetBranchAddress("Tau", &fTauArr, &b_TauArr);
+    fChain->SetBranchAddress("Tau", &fTauArr, &b_TauArr);
     fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
     fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
     fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);

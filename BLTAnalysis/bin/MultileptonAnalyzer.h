@@ -86,11 +86,12 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, nPU;
+    Float_t eventWeight, eventWeightId,eventWeightIso,eventWeightTrigger, eventWeightPu, nPU;
 
     TLorentzVector leptonOneP4, leptonTwoP4, bjetOneP4, bjetTwoP4;
     Float_t leptonOneQ,leptonTwoQ;    
     Float_t leptonOneD0, leptonTwoD0, leptonOneDZ, leptonTwoDZ,leptonOneSip3d,leptonTwoSip3d;
+    Float_t bjetOneBmva,bjetTwoBmva;
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;

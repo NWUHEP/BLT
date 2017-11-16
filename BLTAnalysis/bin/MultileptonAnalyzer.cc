@@ -130,13 +130,16 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("nGenElectrons",&nGenElectrons);
     outTree->Branch("nGenMuons",&nGenMuons);
     outTree->Branch("nGenTaus",&nGenTaus);
+    outTree->Branch("nGenTause",&nGenTause);
+    outTree->Branch("nGenTausmu",&nGenTausmu);
+    outTree->Branch("nGenTaush",&nGenTaush);
     
 
     // event counter
     string outHistName1 = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName1.c_str(),"TotalEvents",20,0.5,20.5);
     string outHistName2 = params->get_output_treename("GenEvents");
-    hGenEvents = new TH1D(outHistName2.c_str(),"GenEvents",90,0.5,90.5);
+    hGenEvents = new TH1D(outHistName2.c_str(),"GenEvents",200,0.5,200.5);
 
 
     ReportPostBegin();
@@ -213,6 +216,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         unsigned genelectronscount = 0;
         unsigned genmuoncount = 0;
         unsigned gentaucount = 0;
+        //unsigned gentauecount=0;
+        //unsigned gentaumucount=0;
 
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
@@ -222,6 +227,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if ( abs(particle->pdgId) == 11 && abs(particleparent->pdgId) == 24 ) ++genelectronscount;
             if ( abs(particle->pdgId) == 13 && abs(particleparent->pdgId) == 24 ) ++genmuoncount;
             if ( abs(particle->pdgId) == 15 && abs(particleparent->pdgId) == 24 ) ++gentaucount;
+            //if ( abs(particle->pdgId) == 11 && abs(particleparent->pdgId) == 15 ) ++gentauecount;
+            //if ( abs(particle->pdgId) == 13 && abs(particleparent->pdgId) == 15 ) ++gentaumucount;
 
             if ( abs(particle->pdgId) == 11 && ((abs(particleparent->pdgId) == 24)|| (abs(particleparent->pdgId) == 15)) ) genParticles.push_back(particle); 
             if ( abs(particle->pdgId) == 13 && ((abs(particleparent->pdgId) == 24)|| (abs(particleparent->pdgId) == 15)) ) genParticles.push_back(particle); 
@@ -229,20 +236,41 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         nGenElectrons = genelectronscount;
         nGenMuons = genmuoncount;
         nGenTaus = gentaucount;
-        
+        //nGenTause = gentauecount;
+        //nGenTausmu= gentaumucount;
+        //nGenTaush = gentaucount - gentauecount - gentaumucount;
     } 
-    unsigned nGenState = 80;// others or data
+
+
+    unsigned nGenState = 200;// others or data
     if (nGenElectrons==2 && nGenMuons==0 && nGenTaus==0) nGenState = 0; //ee
     else if (nGenElectrons==1 && nGenMuons==1 && nGenTaus==0) nGenState = 10; //emu
     else if (nGenElectrons==0 && nGenMuons==2 && nGenTaus==0) nGenState = 20; //mumu
     else if (nGenElectrons==1 && nGenMuons==0 && nGenTaus==1) nGenState = 30; //etau
     else if (nGenElectrons==0 && nGenMuons==1 && nGenTaus==1) nGenState = 40; //mutau
     else if (nGenElectrons==0 && nGenMuons==0 && nGenTaus==2) nGenState = 50; // tautau
-    else if (nGenElectrons + nGenMuons + nGenTaus ==1) nGenState = 60; // semilep
-    else if (nGenElectrons + nGenMuons + nGenTaus ==0) nGenState = 70; // hadronic or others
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenElectrons==1) nGenState = 60; // eh
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenMuons==1)     nGenState = 70; // muh
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenTaus==1)      nGenState = 80; // tauh
+    else if (nGenElectrons + nGenMuons + nGenTaus ==0) nGenState = 90; // hadronic or others
     hGenEvents->Fill(nGenState+1);
     hGenEvents->Fill(nGenState+2); // for MC, this does not matter
     hGenEvents->Fill(nGenState+3); // for MC, this does not matter
+
+    /*
+    else if (nGenElectrons==1 && nGenMuons==0 && nGenTaus==1 && nGenTause ==1) nGenState = 100; //etau_e
+    else if (nGenElectrons==1 && nGenMuons==0 && nGenTaus==1 && nGenTausmu==1) nGenState = 110; //etau_mu
+    else if (nGenElectrons==1 && nGenMuons==0 && nGenTaus==1 && nGenTaush ==1) nGenState = 120; //etau_h
+    else if (nGenElectrons==0 && nGenMuons==1 && nGenTaus==1 && nGenTause ==1) nGenState = 130; //mutau_e
+    else if (nGenElectrons==0 && nGenMuons==1 && nGenTaus==1 && nGenTausmu==1) nGenState = 140; //mutau_mu
+    else if (nGenElectrons==0 && nGenMuons==1 && nGenTaus==1 && nGenTaush ==1) nGenState = 150; //mutau_h
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenTaus==1 && nGenTause ==1) nGenState = 160; // tau_e h
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenTaus==1 && nGenTausmu==1) nGenState = 170; // tau_mu h
+    else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenTaus==1 && nGenTaush ==1) nGenState = 180; // tau_h h
+   
+    cout<<nGenTaus<<","<<nGenTause<<","<<nGenTausmu<<","<<nGenTaush<<","<<nGenState<<endl;
+    */  
+
 
     
 
@@ -614,8 +642,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
     
     if (params->selection == "etau"){
-        //cout<<taus.size() <<endl;
-        if ( muons.size() !=0 || taus.size() !=1 || nElectrons!=1 )
+    if ( muons.size() !=0 || taus.size() !=1 || nElectrons!=1 )
             return kTRUE;
     hTotalEvents->Fill(5);
     hGenEvents->Fill(nGenState+5);
@@ -624,13 +651,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         return kTRUE;
     hTotalEvents->Fill(6);
     hGenEvents->Fill(nGenState+6);
-
+    cout<<"start charge"<<endl;
     if (electrons[0]->q == taus[0]->q)
         return kTRUE;
     hTotalEvents->Fill(7);
     hGenEvents->Fill(nGenState+7);
 
-    if ( (nJets< 2) )// || (nBJets<0.1)) 
+    if ( (nJets< 2)  || (nBJets<1)) 
         return kTRUE;
     hTotalEvents->Fill(8);
     hGenEvents->Fill(nGenState+8);
@@ -640,7 +667,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     copy_p4(taus[0], taus[0]->m, tauOneP4);
     leptonOneP4 = electronOneP4;
     leptonTwoP4 = tauOneP4;
-    leptonOneQ = muons[0]->q;
+    leptonOneQ = electrons[0]->q;
     leptonTwoQ = taus[0]->q;
 
     // fill b jets

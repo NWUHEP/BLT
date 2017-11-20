@@ -7,19 +7,19 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'emu'
+selection  = 'mutau'
 period     = '2016'
 
-data_samples = []
-mc_samples   = ['ttbar']
+data_samples = ['single_mu']
+mc_samples   = ['ttbar', 't', 'zjets']#, 'wjets']
 
 ''' 
     Set job configurations.  The order of arguments is: (Dataset, path to data,
     number of jobs, arguments to pass to executable, output directory name)
 '''
 
-data_list = {}
-data_list['single_mu'] = [
+data_dict = {}
+data_dict['single_mu'] = [
         cfg(data_name = 'muon_2016B_v1',
             path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
             nJobs     = 30,
@@ -67,7 +67,7 @@ data_list['single_mu'] = [
            ),
         ]
 
-data_list['single_el'] = [
+data_dict['single_el'] = [
         cfg(data_name = 'electron_2016B',
             nJobs    = 30,
             path     = '{0}/SingleElectron_Run2016B-03Feb2017_ver1-v1'.format(path),
@@ -115,7 +115,7 @@ data_list['single_el'] = [
            ),
         ]
 
-data_list['mueg'] = [
+data_dict['mueg'] = [
         cfg(data_name = 'mueg_2016B',
             path     = '{0}/MuonEG_Run2016B-03Feb2017_ver1-v1'.format(path),
             nJobs    = 30,
@@ -294,11 +294,16 @@ mc_dict['qcd'] = [
 
 mc_dict['ttbar'] = [
     # top
-    cfg(data_name = 'ttbar_leptonic',
-        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+    cfg(data_name = 'ttbar_inclusive',
+        path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
-        suffix   = 'ttbar_lep'
+        suffix   = 'ttbar_inclusive'
        ),
+    #cfg(data_name = 'ttbar_leptonic',
+    #    path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_lep'
+    #   ),
     #cfg(data_name = 'ttbar_semileptonic',
     #    path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
     #    nJobs    = 50,

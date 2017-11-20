@@ -52,6 +52,7 @@ public :
         totalEvents         = 0;
         passedEvents        = 0;
     }
+
     virtual ~BLTSelector() { }
     virtual Int_t   Version() const { return 2; }
     virtual void    Begin(TTree *tree);

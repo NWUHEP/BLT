@@ -63,6 +63,7 @@ public:
 
     TFile *outFile;
     TTree *outTree;
+    TH1D *hGenCat;
 
     // Lumi mask
     RunLumiRangeMap lumiMask;
@@ -102,6 +103,11 @@ public:
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
 
+    // tau variables
+    Int_t tauDecayMode;
+    UInt_t tauPhotonMult, tauChHadMult;
+    Float_t tauMVA;
+
     // dimuon vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
     Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
@@ -121,9 +127,7 @@ public:
     float GetElectronIsolation(const baconhep::TElectron*, float);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
-    //vector<TJet*> KinematicTopTag(vector<TJet*>, TVector2, TLorentzVector);
-
-    //vector<vector<unsigned> > comb(int, int);
+    vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

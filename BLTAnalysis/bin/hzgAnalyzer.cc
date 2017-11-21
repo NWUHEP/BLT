@@ -50,14 +50,15 @@ void hzgAnalyzer::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
-    if (params->selection == "mumug") {
+    if (params->selection == "mumu" || params->selection == "mumug") {
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
     }
     else if (params->selection == "elelg") {
-        //NEED TO CHECK THIS
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
     }
         
     // Weight utility class
@@ -86,6 +87,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("triggerStatus", &triggerStatus);
     outTree->Branch("eventWeight", &eventWeight);
     outTree->Branch("puWeight", &puWeight);
+    outTree->Branch("genWeight", &genWeight);
     outTree->Branch("triggerWeight", &triggerWeight);
     outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
@@ -149,6 +151,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("fromHardProcessFinalState", &fromHardProcessFinalState);
     outTree->Branch("isPromptFinalState", &isPromptFinalState);
     outTree->Branch("hasPhotonMatch", &hasPhotonMatch);
+    outTree->Branch("vetoDY", &vetoDY);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -186,6 +189,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     ///////////////////////
     // Generator objects //
     ///////////////////////
+
+    vetoDY = false; 
 
     vector<TGenParticle*> genParticles;
     vector<int> genMotherId;
@@ -227,9 +232,19 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
 
-            // Save photons to check generator flags with DY sample
-            if (abs(particle->pdgId) == 22 && particle->status == 1)
+            // DY photon veto
+            if (abs(particle->pdgId) == 22 && particle->parent > 0) {
                 genParticles.push_back(particle);
+                TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                if (fabs(mother->pdgId) < 22 && particle->pt > 5) {
+                    TLorentzVector particleP4;
+                    TLorentzVector motherP4;
+                    particleP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass); 
+                    motherP4.SetPtEtaPhiM(mother->pt, mother->eta, mother->phi, mother->mass); 
+                    if (particleP4.DeltaR(motherP4) > 0.3) 
+                        vetoDY = true;
+                }                    
+            }
 
             nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
         }
@@ -405,13 +420,18 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         TLorentzVector electronP4;
-        electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
+        electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, ELE_MASS);
 
         if (
                 electron->pt > 10
                 && fabs(electron->eta) < 2.5
-                && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                //&& particleSelector->PassElectronID(electron, cuts->tightElID)
+                && particleSelector->PassElectronID(electron, cuts->tightMVAElID)
+                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
+                && fabs(electron->d0) < 0.5
+                && fabs(electron->dz) < 1.0
+                && electron->sip3d < 4.0 
            ) {
             electrons.push_back(electron);
             veto_electrons.push_back(electronP4);
@@ -567,7 +587,56 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nTaus      = taus.size();
     nPhotons   = photons.size();
 
-    if (params->selection == "mumug") {
+    if (params->selection == "mumu") {
+        if (muons.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        TLorentzVector muonOneP4, muonTwoP4;
+        muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, MUON_MASS);
+        muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, MUON_MASS);
+        if (muonOneP4.Pt() < 20.0) 
+            return kTRUE;
+        hTotalEvents->Fill(6);
+        if (muonTwoP4.Pt() < 10.0)
+            return kTRUE;
+        hTotalEvents->Fill(7);
+        TLorentzVector dimuon = muonOneP4 + muonTwoP4;
+        if (muons[0]->q == muons[1]->q)
+            return kTRUE;
+        hTotalEvents->Fill(8);
+        if (dimuon.M() < 80.0 || dimuon.M() > 100.0)
+            return kTRUE;
+        hTotalEvents->Fill(9);
+
+        int isGlobalOne = (muons[0]->typeBits & baconhep::kGlobal) > 0;
+        int isGlobalTwo = (muons[1]->typeBits & baconhep::kGlobal) > 0;
+        int isTrackerOne = (muons[0]->typeBits & baconhep::kTracker) > 0;
+        int isTrackerTwo = (muons[1]->typeBits & baconhep::kTracker) > 0;
+     
+        bool printForSync = true;
+        
+        if (printForSync)
+            cout << runNumber << "," << lumiSection << "," << evtNumber << ","  << 
+                    muonOneP4.Pt() << "," << muonOneP4.Eta() << "," << 
+                    muonOneP4.Phi() << "," <<
+                    isGlobalOne << "," << isTrackerOne << "," <<  
+                    muons[0]->nMatchStn << "," << muons[0]->d0 << "," << 
+                    muons[0]->dz << "," << muons[0]->sip3d << "," << 
+                    muons[0]->nPixHits << "," << muons[0]->nTkLayers << "," << 
+                    muons[0]->pt << "," << muons[0]->ptErr << "," << 
+                    GetMuonIsolation(muons[0]) << "," <<
+                    muonTwoP4.Pt() << "," << muonTwoP4.Eta() << "," << 
+                    muonTwoP4.Phi() << "," << 
+                    isGlobalTwo << "," << isTrackerTwo << "," <<
+                    muons[1]->nMatchStn << "," << muons[1]->d0 << "," << 
+                    muons[1]->dz << "," << muons[1]->sip3d << "," << 
+                    muons[1]->nPixHits << "," << muons[1]->nTkLayers << "," << 
+                    muons[1]->pt << "," << muons[1]->ptErr << "," << 
+                    GetMuonIsolation(muons[1]) << endl;
+        return kTRUE;
+    }
+
+    else if (params->selection == "mumug") {
         if (muons.size() < 2) 
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -652,6 +721,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOneR9 = photons[0]->r9;
 
         if (!isData) {
+
             float photon_gen_dr = 100.;
             TGenParticle *photon_match = new TGenParticle;
             for (unsigned int ip = 0; ip < genParticles.size(); ++ip) {
@@ -679,246 +749,136 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             delete photon_match;
 
+            genWeight = fGenEvtInfo->weight;
+
             //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
             //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
             //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
         } 
     } // end mumug selection
-
-    /*if (params->selection == "mu4j") {
-
-        if (muons.size() != 1 || electrons.size() != 0) 
+    
+    else if (params->selection == "elelg") {
+        if (electrons.size() < 2) 
             return kTRUE;
         hTotalEvents->Fill(5);
-
-        // convert to TLorentzVectors
-        TLorentzVector muonP4;
-        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        float muonIso = GetMuonIsolation(muons[0]);
-        if ( !(muons[0]->typeBits & baconhep::kPOGTightMuon) || muonIso/muonP4.Pt() > 0.15 )
+        if (photons.size() < 1)
             return kTRUE;
         hTotalEvents->Fill(6);
+        
+        unsigned int electronOneIndex = 0;
+        unsigned int electronTwoIndex = 1;
+        bool hasValidPair = false;
+        float zMassDiff = 100.;
+        for (unsigned int i = 0; i < electrons.size(); ++i) {
+            for (unsigned int j = i+1; j < electrons.size(); ++j) {
+                TLorentzVector tempElectronOne, tempElectronTwo;
+                tempElectronOne.SetPtEtaPhiM(electrons[i]->pt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
+                tempElectronTwo.SetPtEtaPhiM(electrons[j]->pt, electrons[j]->eta, electrons[j]->phi, ELE_MASS);
+                float thisMass = (tempElectronOne + tempElectronTwo).M();
+                if (
+                        electrons[i]->q != electrons[j]->q
+                        && electrons[i]->pt > 25.0 
+                        && electrons[j]->pt > 15.0
+                        && thisMass > 50.0
+                   ) {
+                    if (hasValidPair) {
+                        if (fabs(thisMass - ZMASS) < zMassDiff) {
+                            zMassDiff = fabs(thisMass - ZMASS);
+                            leptonOneP4 = tempElectronOne;
+                            leptonTwoP4 = tempElectronTwo;
+                            electronOneIndex = i;
+                            electronTwoIndex = j;
+                        }
+                    }
+                    else {
+                        zMassDiff = fabs(thisMass - ZMASS);
+                        leptonOneP4 = tempElectronOne;
+                        leptonTwoP4 = tempElectronTwo;
+                        electronOneIndex = i;
+                        electronTwoIndex = j;
+                        hasValidPair = true;
+                    }
+                }
+            }
+        }
 
-        if (muons[0]->pt < 25.)
+        if (!hasValidPair)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (nJets + nBJets < 4 || nBJets < 1)
+        photonOneP4.SetPtEtaPhiM(photons[0]->pt, photons[0]->eta, photons[0]->phi, 0.);
+        if (photonOneP4.Pt() < 15.0)
             return kTRUE;
         hTotalEvents->Fill(8);
 
-        leptonOneP4     = muonP4;
-        leptonOneIso    = muonIso;
-        leptonOneFlavor = muons[0]->q*13;
-        leptonOneDZ     = muons[0]->dz;
-        leptonOneD0     = muons[0]->d0;
+        //float m_ll = (leptonOneP4 + leptonTwoP4).M();
+        //float m_llg = (leptonOneP4 + leptonTwoP4 + photonOneP4).M();
+        //if (photonOneP4.Et() < 0.14*m_llg)
+        //    return kTRUE;
+        //hTotalEvents->Fill(9);
+        //if (leptonOneP4.DeltaR(photonOneP4) < 0.4)
+        //    return kTRUE;
+        //hTotalEvents->Fill(10);
+        //if (leptonTwoP4.DeltaR(photonOneP4) < 0.4)
+        //    return kTRUE;
+        //hTotalEvents->Fill(11);
+        //if (m_ll + m_llg < 185.0)
+        //    return kTRUE;
+        //hTotalEvents->Fill(12);
+        //if (m_ll < 100.0 || m_ll > 180.0)
+        //    return kTRUE;
+        //hTotalEvents->Fill(13);
+ 
+        leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
+        leptonOneFlavor = electrons[electronOneIndex]->q*13;
+        leptonOneDZ     = electrons[electronOneIndex]->dz;
+        leptonOneD0     = electrons[electronOneIndex]->d0;
+            
+        leptonTwoIso    = GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
+        leptonTwoFlavor = electrons[electronTwoIndex]->q*13;
+        leptonTwoDZ     = electrons[electronTwoIndex]->dz;
+        leptonTwoD0     = electrons[electronTwoIndex]->d0;
 
-        // Collect the highest pt jets in the event
-        //jets = KinematicTopTag(muonP4, metP2, jets); // do this here probably
-        std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
-        jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-        jetOneTag = jets[0]->csv;
-        jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-        jetTwoTag = jets[1]->csv;
-        jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-        jetThreeTag = jets[2]->csv;
-        jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-        jetFourTag = jets[3]->csv;
-
-        if (!isData) {
-            leptonOneMother = GetGenMotherId(genParticles, muonP4);
-
-            leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
-            leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
-
-            // trigger weight
-            pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-            triggerWeight *= trigEff.first/trigEff.second;
-
-            eventWeight = triggerWeight*leptonOneRecoWeight;
-        }
-
-    } if (params->selection == "mumu") {
-
-        if (muons.size() < 2)
-            return kTRUE;
-        hTotalEvents->Fill(5);
-
-        // convert to TLorentzVectors
-        TLorentzVector muonOneP4, muonTwoP4, dimuonP4;
-        muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.1052);
-        dimuonP4 = muonOneP4 + muonTwoP4;
-
-        float muonOneIso = GetMuonIsolation(muons[0]);
-        float muonTwoIso = GetMuonIsolation(muons[1]);
-        if (
-                !(muons[0]->typeBits & baconhep::kPOGTightMuon)
-                || !(muons[1]->typeBits & baconhep::kPOGTightMuon)
-                || muonOneIso/muonOneP4.Pt() > 0.15 
-                || muonTwoIso/muonTwoP4.Pt() > 0.15 
-           )
-            return kTRUE;
-        hTotalEvents->Fill(6);
-
-        if (muons[0]->pt < 25. || muons[1]->pt < 3.)
-            return kTRUE;
-        hTotalEvents->Fill(7);
-
-        if (nJets + nBJets < 2)
-            return kTRUE;
-        hTotalEvents->Fill(8);
-
-        leptonOneP4     = muonOneP4;
-        leptonOneIso    = muonOneIso;
-        leptonOneFlavor = muons[0]->q*13;
-        leptonOneDZ     = muons[0]->dz;
-        leptonOneD0     = muons[0]->d0;
-
-        leptonTwoP4     = muonTwoP4;
-        leptonTwoIso    = muonTwoIso;
-        leptonTwoFlavor = muons[1]->q*13;
-        leptonTwoDZ     = muons[1]->dz;
-        leptonTwoD0     = muons[1]->d0;
+        photonOneR9 = photons[0]->r9;
 
         if (!isData) {
-            leptonOneMother = GetGenMotherId(genParticles, muonOneP4);
-            leptonTwoMother = GetGenMotherId(genParticles, muonTwoP4);
 
-            leptonOneRecoWeight = weights->GetMuonIDEff(muonOneP4);
-            leptonOneRecoWeight *= weights->GetMuonISOEff(muonOneP4);
-            leptonTwoRecoWeight = weights->GetMuonIDEff(muonTwoP4);
-            leptonTwoRecoWeight *= weights->GetMuonISOEff(muonTwoP4);
+            float photon_gen_dr = 100.;
+            TGenParticle *photon_match = new TGenParticle;
+            for (unsigned int ip = 0; ip < genParticles.size(); ++ip) {
+                TGenParticle *genPart = genParticles.at(ip);
+                if (genPart->pdgId == 22) {
+                    TLorentzVector genP4;
+                    genP4.SetPtEtaPhiM(genPart->pt, genPart->eta, genPart->phi, genPart->mass); 
+                    if (genP4.DeltaR(photonOneP4) < photon_gen_dr) {
+                        *photon_match = *genPart;
+                        photon_gen_dr = genP4.DeltaR(photonOneP4);
+                    }
+                }
+            }
+            
+            if (photon_gen_dr < 0.3) {
+                hasPhotonMatch            = true;
+                fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
+                isPromptFinalState        = photon_match->isPromptFinalState;
+            }
+            else {
+                hasPhotonMatch            = false;
+                fromHardProcessFinalState = false;
+                isPromptFinalState        = false;
+            }
 
-            // trigger weight
-            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            triggerWeight *= (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            delete photon_match;
 
-            eventWeight = triggerWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
-        }
-    } else if (params->selection == "ee") {
+            genWeight = fGenEvtInfo->weight;
 
-        if (electrons.size() < 2)
-            return kTRUE;
-        hTotalEvents->Fill(5);
-
-        if (electrons[0]->pt < 30 || electrons[1]->pt < 10)
-            return kTRUE;
-        hTotalEvents->Fill(6);
-
-        TLorentzVector electronOneP4, electronTwoP4, dielectronP4;
-        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
-        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6);
-        dielectronP4 = electronOneP4 + electronTwoP4;
-        if (dielectronP4.M() < 12.)
-            return kTRUE;
-        hTotalEvents->Fill(7);
-
-        if (nJets + nBJets < 2)
-            return kTRUE;
-        hTotalEvents->Fill(8);
-
-        leptonOneP4     = electronOneP4;
-        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonOneFlavor = 11*electrons[0]->q;
-        leptonOneDZ     = electrons[0]->dz;
-        leptonOneD0     = electrons[0]->d0;
-
-        leptonTwoP4     = electronTwoP4;
-        leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
-        leptonTwoFlavor = 11*electrons[1]->q;
-        leptonTwoDZ     = electrons[1]->dz;
-        leptonTwoD0     = electrons[1]->d0;
-
-        if (!isData) {
-            leptonOneMother = GetGenMotherId(genParticles, electronOneP4);
-            leptonTwoMother = GetGenMotherId(genParticles, electronTwoP4);
-
-            leptonOneRecoWeight *= weights->GetElectronRecoIdEff(electronOneP4);
-            leptonTwoRecoWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
-
-            // trigger weight
-            //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
-
-            eventWeight = leptonOneRecoWeight*leptonTwoRecoWeight;
-        }
-
-    } else if (params->selection == "emu") {
-
-        if (muons.size() != 1 || electrons.size() != 1)
-            return kTRUE;
-        hTotalEvents->Fill(5);
-
-        // trigger matching for thresholds
-        float muPtThreshold = 25.;
-        if (trigger->passObj("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*", 1, muons[0]->hltMatchBits)
-                || trigger->passObj("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*", 1, muons[0]->hltMatchBits)
-           ) {
-            muPtThreshold = 10;
-        } else if (trigger->passObj("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", 1, muons[0]->hltMatchBits)
-                || trigger->passObj("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", 1, muons[0]->hltMatchBits)
-                ) {
-            muPtThreshold = 25;
-        }
-
-        float elPtThreshold = 10.;
-        if (trigger->passObj("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", 2, electrons[0]->hltMatchBits)
-                || trigger->passObj("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*", 2, electrons[0]->hltMatchBits)
-           ) {
-            elPtThreshold = 15;
-        } else if (trigger->passObj("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*", 2, electrons[0]->hltMatchBits)
-                || trigger->passObj("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*", 2, electrons[0]->hltMatchBits)
-                ) {
-            elPtThreshold = 25;
-        }
-
-        if (muons[0]->pt < muPtThreshold || electrons[0]->pt < elPtThreshold)
-            return kTRUE;
-        hTotalEvents->Fill(6);
-
-        TLorentzVector muonP4, electronP4, dilepton;
-        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
-        dilepton = muonP4 + electronP4;
-        if (dilepton.M() < 12)
-            return kTRUE;
-        hTotalEvents->Fill(7);
-
-        if (nJets + nBJets < 2)
-            return kTRUE;
-        hTotalEvents->Fill(8);
-
-        leptonOneP4     = muonP4;
-        leptonOneIso    = GetMuonIsolation(muons[0]);
-        leptonOneFlavor = 13*muons[0]->q;
-        leptonOneDZ     = muons[0]->dz;
-        leptonOneD0     = muons[0]->d0;
-
-        leptonTwoP4     = electronP4;
-        leptonTwoIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonTwoFlavor = 11*electrons[0]->q;
-        leptonTwoDZ     = electrons[0]->dz;
-        leptonTwoD0     = electrons[0]->d0;
-
-        if (!isData) {
-            leptonOneMother = GetGenMotherId(genParticles, muonP4);
-            leptonTwoMother = GetGenMotherId(genParticles, electronP4);
-
-            leptonOneRecoWeight *= weights->GetMuonIDEff(muonP4);
-            leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
-            leptonTwoRecoWeight *= weights->GetElectronRecoIdEff(electronP4);
-
-            // trigger weight
-            pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-            triggerWeight *= trigEff.first/trigEff.second;
-
-            eventWeight = leptonOneRecoWeight*leptonTwoRecoWeight*triggerWeight;
-        }
-    } */
+            //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
+            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
+            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+        } 
+    } // end elelg selection
 
     ///////////////////
     // Fill jet info //

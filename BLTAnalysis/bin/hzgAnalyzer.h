@@ -87,7 +87,7 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, triggerWeight, puWeight, nPU;
+    Float_t eventWeight, triggerWeight, puWeight, genWeight, nPU;
     TVector3 rPV;
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
@@ -120,6 +120,7 @@ public:
     Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
     TLorentzVector genOneP4, genTwoP4;
     Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
+    Bool_t vetoDY;
 
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);

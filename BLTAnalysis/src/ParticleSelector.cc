@@ -136,6 +136,35 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
             //if (el->mvaOld > cutLevel.mvaVal[1]) elPass = true;  //FIXME
         }
 
+    } else if (cutLevel.cutName == "looseMVAElID") {
+        if (fabs(el->eta) < 0.8) {
+            if (el->mva > 0.837) 
+                elPass = true;
+        }
+        else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
+            if (el->mva > 0.715)
+                elPass = true;
+        }
+        else {
+            if (el->mva > 0.357)
+                elPass = true;
+        }
+
+    } else if (cutLevel.cutName == "tightMVAElID") {
+        if (fabs(el->eta) < 0.8) {
+            if (el->mva > 0.941) 
+                elPass = true;
+        }
+
+        else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
+            if (el->mva > 0.899)
+                elPass = true;
+        }
+        else {
+            if (el->mva > 0.758)
+                elPass = true;
+        }
+
     } else if (cutLevel.cutName == "hzzMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {

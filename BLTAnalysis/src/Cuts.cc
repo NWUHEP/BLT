@@ -156,6 +156,9 @@ Cuts::Cuts() {
     mvaPreElID.dr03EcalRecHitSumEt[1]     = 0.2;
     mvaPreElID.dr03HcalTowerSumEt[1]      = 0.2;
     mvaPreElID.numberOfLostHits[1]        = 0;
+    
+    looseMVAElID.cutName                  = "looseMVAElID";
+    tightMVAElID.cutName                  = "tightMVAElID";
 
     looseElIso.cutName                    = "looseElIso";
     looseElIso.chIso04                    = 99999;

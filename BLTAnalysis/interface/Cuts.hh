@@ -60,7 +60,7 @@ public:
         float dr03HcalTowerSumEt[2];
         int   numberOfLostHits[2];
         std::string cutName;
-    } vetoElID, looseElID, mediumElID, tightElID, mvaPreElID;
+    } vetoElID, looseElID, mediumElID, tightElID, mvaPreElID, looseMVAElID, tightMVAElID;
 
     struct elIsoCuts {
         float chIso04;

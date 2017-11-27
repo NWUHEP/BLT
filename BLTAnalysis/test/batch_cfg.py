@@ -11,7 +11,7 @@ selection  = 'mutau'
 period     = '2016'
 
 data_samples = ['single_mu']
-mc_samples   = ['ttbar', 't', 'zjets']#, 'wjets']
+mc_samples   = ['ttbar', 't', 'zjets', 'wjets', 'diboson', 'qcd']
 
 ''' 
     Set job configurations.  The order of arguments is: (Dataset, path to data,

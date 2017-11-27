@@ -560,6 +560,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     /* TAUS */
     vector<TTau*> taus;
+    vector<TLorentzVector> veto_taus;
     for (int i=0; i < fTauArr->GetEntries(); i++) {
         TTau *tau = (TTau*) fTauArr->At(i);
         assert(tau);
@@ -570,14 +571,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Prevent overlap of muons and jets
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (tauP4.DeltaR(mu) < 0.4) {
+            if (tauP4.DeltaR(mu) < 0.3) {
                 muOverlap = true;
                 break;
             }
         }
         bool elOverlap = false;
         for (const auto& el: veto_electrons) {
-            if (tauP4.DeltaR(el) < 0.4) {
+            if (tauP4.DeltaR(el) < 0.3) {
                 elOverlap = true;
                 break;
             }
@@ -589,11 +590,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByTightCombinedIsolationDBSumPtCorr3Hits)
+                && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {
             taus.push_back(tau);
+            veto_taus.push_back(tauP4);
         }
     }
     sort(taus.begin(), taus.end(), sort_by_higher_pt<TTau>);
@@ -629,10 +631,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+
         bool elOverlap = false;
         for (const auto& el: veto_electrons) {
             if (jetP4.DeltaR(el) < 0.4) {
                 elOverlap = true;
+                break;
+            }
+        }
+
+        bool tauOverlap = false;
+        for (const auto& tau: veto_taus) {
+            if (jetP4.DeltaR(tau) < 0.4) {
+                tauOverlap = true;
                 break;
             }
         }
@@ -643,6 +654,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
                 && !muOverlap 
                 && !elOverlap
+                && !tauOverlap
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
@@ -696,7 +708,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     if (params->selection == "mu4j") {
 
-        if (muons.size() != 1 || electrons.size() != 0) 
+        if (muons.size() != 1 || electrons.size() != 0 || taus.size() != 0) 
             return kTRUE;
         hTotalEvents->Fill(5);
 
@@ -747,10 +759,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             eventWeight *= triggerWeight*leptonOneRecoWeight;
         }
-
     } else if (params->selection == "mumu") {
 
-        if (muons.size() < 2)
+        if (muons.size() < 2 || electrons.size() != 0 || taus.size() != 0)
             return kTRUE;
         hTotalEvents->Fill(5);
 
@@ -809,7 +820,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (params->selection == "ee") {
 
-        if (electrons.size() < 2)
+        if (electrons.size() < 2 || muons.size != 0 || taus.size() != 0)
             return kTRUE;
         hTotalEvents->Fill(5);
 
@@ -857,7 +868,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (params->selection == "emu") {
 
-        if (muons.size() != 1 || electrons.size() != 1)
+        if (muons.size() != 1 || electrons.size() != 1 || taus.size() != 0)
             return kTRUE;
         hTotalEvents->Fill(5);
 
@@ -929,7 +940,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (params->selection == "mutau") {
 
-        if (muons.size() != 1 || taus.size() != 1)
+        if (muons.size() != 1 || taus.size() != 1 || electrons.size() != 0)
             return kTRUE;
         hTotalEvents->Fill(5);
 

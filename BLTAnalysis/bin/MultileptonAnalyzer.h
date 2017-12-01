@@ -95,7 +95,7 @@ public:
     Float_t met, metPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;
-    UInt_t nGenTause, nGenTausmu, nGenTaush;
+    Int_t nGenTause, nGenTausmu, nGenTaush;
     Int_t leptonOneMother, leptonTwoMother;
 
     //ClassDef(MultileptonAnalyzer,0);

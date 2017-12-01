@@ -126,6 +126,9 @@ public:
 
     // MET kluge 
     float MetKluge(float);
+    
+    float GetMuonIsolation(const baconhep::TMuon*);
+    float GetElectronIsolation(const baconhep::TElectron*, float);
 
     //ClassDef(zjpsiAnalyzerV2,0);
 };

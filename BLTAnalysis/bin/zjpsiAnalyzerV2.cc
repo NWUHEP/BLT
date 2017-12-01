@@ -51,6 +51,10 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 
+    } else if (params->selection == "2e2mu") {
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
+        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+
     } else if (params->selection == "ee") {
         triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
     
@@ -433,42 +437,32 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
    
 
     /* ELECTRONS */
-    std::vector<TLorentzVector> electrons;
-    vector<float> electrons_iso;
-    vector<float> electrons_q;
-    vector<bool> electrons_trigger;
-    vector<float> electrons_d0;
-    vector<float> electrons_dz;
+    vector<TElectron*> electrons;
+    vector<TLorentzVector> veto_electrons;
     vector<unsigned int> electrons_index;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
 
+        TLorentzVector electronP4;
+        electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, ELE_MASS);
+
         if (
-                electron->pt > 20 
+                electron->pt > 10
                 && fabs(electron->eta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
                 && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
+                && fabs(electron->d0) < 0.5
+                && fabs(electron->dz) < 1.0
+                //&& electron->sip3d < 4.0 
            ) {
-            TLorentzVector electronP4;
-            copy_p4(electron, ELE_MASS, electronP4);
-            electrons.push_back(electronP4);
-            electrons_iso.push_back(0.);
-            electrons_q.push_back(electron->q);
-            electrons_d0.push_back(electron->d0);
-            electrons_dz.push_back(electron->dz);
+            electrons.push_back(electron);
             electrons_index.push_back(electron->eleIndex);
-
-            // trigger matching
-            bool triggered = false;
-            for (unsigned i = 0; i < triggerNames.size(); ++i) {
-                triggered |= trigger->passObj(triggerNames[i], 1, electron->hltMatchBits);
-            }
-            electrons_trigger.push_back(triggered);
+            veto_electrons.push_back(electronP4);
         }
     }
-
-    std::sort(electrons.begin(), electrons.end(), P4SortCondition);
+    sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
 
     
     /* PHOTONS */
@@ -1328,17 +1322,73 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
         
-        // Select the leading electron
         TLorentzVector electronOneP4;
         unsigned electronOneIndex = 0;
         bool validElectron1 = false;
-        for (unsigned i = 0; i < (electrons.size() - 1); ++i) {
-            if ( electrons[i].Pt() > 25.0 )
-            {
-                electronOneP4 = electrons[i];
-                electronOneIndex = i;
-                validElectron1 = true;
-                break;
+        TLorentzVector electronTwoP4;
+        unsigned electronTwoIndex = electronOneIndex + 1;
+        bool validElectron2 = false;
+
+        unsigned int pairing_algo = 1;
+
+        if (pairing_algo == 0) {
+        
+            // Select the leading electron
+            for (unsigned i = 0; i < (electrons.size() - 1); ++i) {
+                TLorentzVector tempElectronOne;
+                tempElectronOne.SetPtEtaPhiM(electrons[i]->pt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
+                if (tempElectronOne.Pt() > 25.0)
+                {
+                    electronOneP4 = tempElectronOne;
+                    electronOneIndex = i;
+                    validElectron1 = true;
+                    break;
+                }
+            }
+
+            // Select the oppositely charged second electron
+            for (unsigned i = electronOneIndex+1; i < electrons.size(); ++i) {
+                TLorentzVector tempElectronTwo;
+                tempElectronTwo.SetPtEtaPhiM(electrons[i]->pt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
+                if (
+                        electrons[electronOneIndex]->q != electrons[i]->q
+                        && tempElectronTwo.Pt() > 15.0
+                   )
+                {
+                    electronTwoP4 = tempElectronTwo;
+                    electronTwoIndex = i;
+                    validElectron2 = true;
+                    break;
+                }
+            }
+        }
+
+        else if (pairing_algo == 1) {
+            float zMass_pdg = 91.188;
+            float zMassDiff = 100.;
+            for (unsigned i = 0; i < electrons.size(); ++i) {
+                TLorentzVector tempElectronOne;
+                tempElectronOne.SetPtEtaPhiM(electrons[i]->pt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
+                for (unsigned j = i + 1; j < electrons.size(); ++j) {
+                    TLorentzVector tempElectronTwo;
+                    tempElectronTwo.SetPtEtaPhiM(electrons[j]->pt, electrons[j]->eta, electrons[j]->phi, ELE_MASS);
+                    float thisMass = (tempElectronOne + tempElectronTwo).M();
+                    if (
+                            fabs(thisMass - zMass_pdg) < zMassDiff
+                            && tempElectronOne.Pt() > 25.0
+                            && tempElectronTwo.Pt() > 15.0
+                            && electrons[i]->q != electrons[j]->q
+                       ) 
+                    {
+                        electronOneIndex = i;
+                        electronTwoIndex = j;
+                        electronOneP4 = tempElectronOne;
+                        electronTwoP4 = tempElectronTwo;
+                        validElectron1 = true;
+                        validElectron2 = true;
+                        zMassDiff = fabs(thisMass - zMass_pdg);
+                    }
+                }
             }
         }
 
@@ -1347,50 +1397,38 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         hTotalEvents->Fill(6);
 
-        // Select the oppositely charged second muon
-        TLorentzVector electronTwoP4;
-        unsigned electronTwoIndex = electronOneIndex + 1;
-        bool validElectron2 = false;
-        for (unsigned i = electronOneIndex+1; i < electrons.size(); ++i) {
-            if (
-                    electrons_q[electronOneIndex] != electrons_q[i]
-                    && electrons[i].Pt() > 20.0
-               )
-            {
-                electronTwoP4 = electrons[i];
-                electronTwoIndex = i;
-                validElectron2 = true;
-                break;
-            }
-        }
-
         if (!validElectron2)
             return kTRUE;
 
         hTotalEvents->Fill(7);
 
         leptonOneP4      = electronOneP4;
-        //leptonOneIso     = electrons_iso[electronOneIndex];
-        leptonOneQ       = electrons_q[electronOneIndex];
-        leptonOneTrigger = electrons_trigger[electronOneIndex];
-        leptonOneFlavor  = 1;
+        leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
+        leptonOneFlavor = electrons[electronOneIndex]->q*11;
+        leptonOneDZ     = electrons[electronOneIndex]->dz;
+        leptonOneD0     = electrons[electronOneIndex]->d0;
 
-        leptonOneD0        = electrons_d0[electronOneIndex];
-        leptonOneDZ      = electrons_dz[electronOneIndex];
-        leptonTwoP4      = electronTwoP4;
-        //leptonTwoIso     = electrons_iso[electronTwoIndex];
-        leptonTwoQ       = electrons_q[electronTwoIndex];
-        leptonTwoTrigger = electrons_trigger[electronTwoIndex];
-        leptonTwoFlavor  = 1;
-            
-        leptonTwoD0        = electrons_d0[electronTwoIndex];
-        leptonTwoDZ        = electrons_dz[electronTwoIndex];
-    
+        leptonTwoP4      = electronTwoP4;            
+        leptonTwoIso    = GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
+        leptonTwoFlavor = electrons[electronTwoIndex]->q*11;
+        leptonTwoDZ     = electrons[electronTwoIndex]->dz;
+        leptonTwoD0     = electrons[electronTwoIndex]->d0;
+
+        float thisZMass = (electronOneP4 + electronTwoP4).M();
+        if (
+                thisZMass < 2.0 ||
+                (thisZMass > 4.0 && thisZMass < 75.) ||
+                thisZMass > 107.
+           )
+            return kTRUE;
+        hTotalEvents->Fill(8);
+
         // Check for dielectron vertex 
         unsigned int leptonOneIndex = electrons_index[electronOneIndex];
         unsigned int leptonTwoIndex = electrons_index[electronTwoIndex];
 
         bool hasValidZVertex = false;
+        //bool hasGoodZVertex = false;
          
         for (int i = 0; i < fDielectronVertexArr->GetEntries(); ++i) {
             TVertex* dielectronVert = (TVertex*) fDielectronVertexArr->At(i);
@@ -1407,61 +1445,104 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                     rZCandErr = vertErr;
                     rZCandChi2 = dielectronVert->chi2;
                     rZCandNdof = dielectronVert->ndof;
+                    rZCandProb = dielectronVert->prob;
+                    rZCandRxy = dielectronVert->rxy;
+                    rZCandRxyErr = dielectronVert->rxy_err;
                     hasValidZVertex = true; 
+                    //if (rZCandProb > 0.005)
+                    //    hasGoodZVertex = true;
                     break;
             }
         }
-        
+ 
         if (!hasValidZVertex)
             return kTRUE; 
         
-        hTotalEvents->Fill(8);
+        hTotalEvents->Fill(9);
 
-        // Select the J/Psi candidate leading muon
+        //if (!hasGoodZVertex)
+        //    return kTRUE;
+
+        //hTotalEvents->Fill(10);
+        //
+
         TLorentzVector muonThreeP4;
         unsigned muonThreeIndex = 0;
         bool validMuon3 = false;
-        for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
-            if (
-                    (muons_iso[i]/muons_P4[i].Pt()) < 0.25
-                    && muons_P4[i].Pt() > 4.0
-                )
-            {
-                muonThreeP4 = muons_P4[i];
-                muonThreeIndex = i;
-                validMuon3 = true;
-                break;
+        TLorentzVector muonFourP4;
+        unsigned muonFourIndex = muonThreeIndex + 1;
+        bool validMuon4 = false;
+
+        if (pairing_algo == 0) {
+
+            // Select the J/Psi candidate leading muon
+            for (unsigned i = 0; i < (muons_P4.size() - 1); ++i) {
+                if (
+                        (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                        //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.10
+                        && muons_P4[i].Pt() > 4.0
+                    )
+                {
+                    muonThreeP4 = muons_P4[i];
+                    muonThreeIndex = i;
+                    validMuon3 = true;
+                    break;
+                }
+            }
+            
+            // Select the J/Psi candidate subleading muon
+            for (unsigned i = muonThreeIndex+1; i < muons_P4.size(); ++i) {
+                if (muons_q[muonThreeIndex] != muons_q[i])
+                {
+                    muonFourP4 = muons_P4[i];
+                    muonFourIndex = i;
+                    validMuon4 = true;
+                    break;
+                }
+            }
+        }
+
+        else if (pairing_algo == 1) {
+            float jpsiMass_pdg = 3.097;
+            float jpsiMassDiff = 100.;
+            for (unsigned i = 0; i < muons_P4.size(); ++i) {
+                for (unsigned j = i + 1; j < muons_P4.size(); ++j) {
+                    float thisMass = (muons_P4[i] + muons_P4[j]).M();
+                    if (
+                            fabs(thisMass - jpsiMass_pdg) < jpsiMassDiff
+                            && (muons_iso[i]/muons_P4[i].Pt()) < 0.25
+                            //&& (muons_TkIso[i]/muons_P4[i].Pt()) < 0.10
+                            && muons_P4[i].Pt() > 4.0
+                            && muons_q[i] != muons_q[j]
+                       ) 
+                    {
+                        muonThreeIndex = i;
+                        muonFourIndex = j;
+                        muonThreeP4 = muons_P4[i];
+                        muonFourP4 = muons_P4[j];
+                        validMuon3 = true;
+                        validMuon4 = true;
+                        jpsiMassDiff = fabs(thisMass - jpsiMass_pdg);
+                    }
+                }
             }
         }
         
         if (!validMuon3)
             return kTRUE;
        
-        hTotalEvents->Fill(9);
-
-        // Select the J/Psi candidate subleading muon
-        TLorentzVector muonFourP4;
-        unsigned muonFourIndex = muonThreeIndex + 1;
-        bool validMuon4 = false;
-        for (unsigned i = muonThreeIndex+1; i < muons_P4.size(); ++i) {
-            if (
-                    muons_q[muonThreeIndex] != muons_q[i]
-               )
-            {
-                muonFourP4 = muons_P4[i];
-                muonFourIndex = i;
-                validMuon4 = true;
-                break;
-            }
-        }
+        hTotalEvents->Fill(10);
         
         if (!validMuon4)
             return kTRUE;
 
-        hTotalEvents->Fill(10);
+        hTotalEvents->Fill(11);
         
         leptonThreeP4      = muonThreeP4;
         leptonThreeIso     = muons_iso[muonThreeIndex];
+        leptonThreeTkIsoNR     = muons_TkIsoNR[muonThreeIndex];
+        leptonThreeTkIso     = muons_TkIso[muonThreeIndex];
+        leptonThreePFIso     = muons_PFIso[muonThreeIndex];
         leptonThreeQ       = muons_q[muonThreeIndex];
         leptonThreeTrigger = muons_trigger[muonThreeIndex];
         leptonThreeIsTight = muons_isTight[muonThreeIndex];
@@ -1472,6 +1553,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         leptonFourP4      = muonFourP4;
         leptonFourIso     = muons_iso[muonFourIndex];
+        leptonFourTkIsoNR     = muons_TkIsoNR[muonFourIndex];
+        leptonFourTkIso     = muons_TkIso[muonFourIndex];
+        leptonFourPFIso     = muons_PFIso[muonFourIndex];
         leptonFourQ       = muons_q[muonFourIndex];
         leptonFourTrigger = muons_trigger[muonFourIndex];
         leptonFourIsTight = muons_isTight[muonFourIndex];
@@ -1479,12 +1563,22 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             
         leptonFourD0        = muons_d0[muonFourIndex];
         leptonFourDZ        = muons_dz[muonFourIndex];
+        
+        float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
+        if (
+                thisJpsiMass < 2.0 ||
+                (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
+                thisJpsiMass > 107.
+           )
+            return kTRUE;
+        hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
         unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
         unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
+        //bool hasGoodJpsiVertex = false;
          
         for (int i = 0; i < fDimuonVertexArr->GetEntries(); ++i) {
             TVertex* dimuonVert = (TVertex*) fDimuonVertexArr->At(i);
@@ -1501,7 +1595,12 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                     rJpsiCandErr = vertErr;
                     rJpsiCandChi2 = dimuonVert->chi2;
                     rJpsiCandNdof = dimuonVert->ndof;
+                    rJpsiCandProb = dimuonVert->prob;
+                    rJpsiCandRxy = dimuonVert->rxy;
+                    rJpsiCandRxyErr = dimuonVert->rxy_err;
                     hasValidJpsiVertex = true; 
+                    //if (rJpsiCandProb > 0.005)
+                    //    hasGoodJpsiVertex = true;
                     break;
             }
         }
@@ -1509,36 +1608,47 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         if (!hasValidJpsiVertex)
             return kTRUE;
  
-        hTotalEvents->Fill(11);
+        hTotalEvents->Fill(13);
+
+        //if (!hasGoodJpsiVertex)
+        //    return kTRUE;
+
+        hTotalEvents->Fill(14);
+
+        //if (fabs(rJpsiCand.Z() - rZCand.Z()) > 1.)
+        //    return kTRUE;
+
+        //hTotalEvents->Fill(16);
         
         if (photons.size() > 0)
             photonOneP4 = photons[0];
+        
     }
 
-    else if (params->selection == "ee") {
+    //else if (params->selection == "ee") {
 
-        if (electrons.size() != 2)
-            return kTRUE;
-        hTotalEvents->Fill(5);
+    //    if (electrons.size() != 2)
+    //        return kTRUE;
+    //    hTotalEvents->Fill(5);
 
-        TLorentzVector dielectron;
-        dielectron = electrons[0] + electrons[1];
-        if (dielectron.M() < 12. || dielectron.M() > 70.)
-            return kTRUE;
-        hTotalEvents->Fill(6);
+    //    TLorentzVector dielectron;
+    //    dielectron = electrons[0] + electrons[1];
+    //    if (dielectron.M() < 12. || dielectron.M() > 70.)
+    //        return kTRUE;
+    //    hTotalEvents->Fill(6);
 
-        leptonOneP4      = electrons[0];
-        //leptonOneIso     = electrons_iso[0];
-        leptonOneQ       = electrons_q[0];
-        leptonOneTrigger = electrons_trigger[0];
-        leptonOneFlavor  = 0;
+    //    leptonOneP4      = electrons[0];
+    //    //leptonOneIso     = electrons_iso[0];
+    //    leptonOneQ       = electrons_q[0];
+    //    leptonOneTrigger = electrons_trigger[0];
+    //    leptonOneFlavor  = 0;
 
-        leptonTwoP4      = electrons[1];
-        //leptonTwoIso     = electrons_iso[1];
-        leptonTwoQ       = electrons_q[1];
-        leptonTwoTrigger = electrons_trigger[1];
-        leptonTwoFlavor  = 0;
-    }
+    //    leptonTwoP4      = electrons[1];
+    //    //leptonTwoIso     = electrons_iso[1];
+    //    leptonTwoQ       = electrons_q[1];
+    //    leptonTwoTrigger = electrons_trigger[1];
+    //    leptonTwoFlavor  = 0;
+    //}
 
     else if (params->selection == "4l") {
 
@@ -1740,4 +1850,27 @@ float zjpsiAnalyzerV2::MetKluge(float met)
     }
     
     return corrections[bin];
+}
+
+float zjpsiAnalyzerV2::GetMuonIsolation(const baconhep::TMuon* mu)
+{
+    float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
+    return combIso;
+}
+
+float zjpsiAnalyzerV2::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
+{
+    int iEta = 0;
+    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
+    for (unsigned i = 0; i < 8; ++i) {
+        if (fabs(el->scEta) > etaBins[i] && fabs(el->scEta) < etaBins[i+1]) {
+            iEta = i;
+            break;
+        }
+    }
+
+    float combIso = el->chHadIso + std::max(0., (double)el->neuHadIso + el->gammaIso - rho*effArea[iEta]);
+
+    return combIso;
 }

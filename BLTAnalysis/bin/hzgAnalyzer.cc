@@ -425,9 +425,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (
                 electron->pt > 10
                 && fabs(electron->eta) < 2.5
-                //&& particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronID(electron, cuts->tightMVAElID)
-                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && particleSelector->PassElectronID(electron, cuts->tightElID)
+                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
                 && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
@@ -736,16 +735,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
             
-            if (photon_gen_dr < 0.3) {
-                hasPhotonMatch            = true;
-                fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
-                isPromptFinalState        = photon_match->isPromptFinalState;
-            }
-            else {
-                hasPhotonMatch            = false;
-                fromHardProcessFinalState = false;
-                isPromptFinalState        = false;
-            }
+            //if (photon_gen_dr < 0.3) {
+            //    hasPhotonMatch            = true;
+            //    fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
+            //    isPromptFinalState        = photon_match->isPromptFinalState;
+            //}
+            //else {
+            //    hasPhotonMatch            = false;
+            //    fromHardProcessFinalState = false;
+            //    isPromptFinalState        = false;
+            //}
 
             delete photon_match;
 
@@ -831,12 +830,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //hTotalEvents->Fill(13);
  
         leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
-        leptonOneFlavor = electrons[electronOneIndex]->q*13;
+        leptonOneFlavor = electrons[electronOneIndex]->q*11;
         leptonOneDZ     = electrons[electronOneIndex]->dz;
         leptonOneD0     = electrons[electronOneIndex]->d0;
             
         leptonTwoIso    = GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
-        leptonTwoFlavor = electrons[electronTwoIndex]->q*13;
+        leptonTwoFlavor = electrons[electronTwoIndex]->q*11;
         leptonTwoDZ     = electrons[electronTwoIndex]->dz;
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
 
@@ -858,16 +857,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
             
-            if (photon_gen_dr < 0.3) {
-                hasPhotonMatch            = true;
-                fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
-                isPromptFinalState        = photon_match->isPromptFinalState;
-            }
-            else {
-                hasPhotonMatch            = false;
-                fromHardProcessFinalState = false;
-                isPromptFinalState        = false;
-            }
+            //if (photon_gen_dr < 0.3) {
+            //    hasPhotonMatch            = true;
+            //    fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
+            //    isPromptFinalState        = photon_match->isPromptFinalState;
+            //}
+            //else {
+            //    hasPhotonMatch            = false;
+            //    fromHardProcessFinalState = false;
+            //    isPromptFinalState        = false;
+            //}
 
             delete photon_match;
 

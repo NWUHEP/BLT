@@ -166,7 +166,7 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
     fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
     fChain->SetBranchAddress("DimuonVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
-    fChain->SetBranchAddress("DielectronVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
+    fChain->SetBranchAddress("DielectronVertex", &fDielectronVertexArr, &b_DielectronVertexArr);
     fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);
     //fChain->SetBranchAddress("AK8CHS", &fAK8CHSArr, &b_AK8CHSArr);
     //fChain->SetBranchAddress("AddAK8CHS", &fAddAK8CHSArr, &b_AddAK8CHSArr);

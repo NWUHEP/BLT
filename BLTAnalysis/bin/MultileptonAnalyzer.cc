@@ -820,7 +820,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (params->selection == "ee") {
 
-        if (electrons.size() < 2 || muons.size != 0 || taus.size() != 0)
+        if (electrons.size() < 2 || muons.size() != 0 || taus.size() != 0)
             return kTRUE;
         hTotalEvents->Fill(5);
 

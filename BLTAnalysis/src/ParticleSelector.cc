@@ -96,7 +96,7 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
     bool elPass = false;
     float energyInverse = fabs(1. - el->eoverp)/el->ecalEnergy;
 
-    if (fabs(el->scEta) < 1.479) { // barrel
+    if (fabs(el->scEta) <= 1.479) { // barrel
         if (
                 el->sieie           < 0.00998
                 && fabs(el->dEtaIn) < 0.00308
@@ -108,13 +108,11 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                 && fabs(el->dz)     < 1.
                 && !el->isConv
            ) elPass = true;
-    } else if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566) { // transition
-        elPass = false;
-    } else if (fabs(el->scEta) > 1.566) { // endcap
+    } else { // endcap
         if (
-                el->sieie        < 0.0394
-                && fabs(el->dEtaIn)    < 0.0292
-                && fabs(el->dPhiIn) < 0.00605
+                el->sieie        < 0.0292
+                && fabs(el->dEtaIn)    < 0.00605
+                && fabs(el->dPhiIn) < 0.0394
                 && el->hovere       < 0.0641
                 && energyInverse    < 0.0129
                 && el->nMissingHits <= 1

@@ -92,6 +92,9 @@ public:
     TVector3 rZCand;
     TVector3 rJpsiCand;
 
+    Bool_t rZValid;
+    Bool_t rJpsiValid;
+
     TVector3 rPVErr;
     TVector3 rDimuonErr;
     TVector3 rZCandErr;
@@ -117,16 +120,19 @@ public:
 
     Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
+    Int_t leptonOneMother, leptonTwoMother, leptonThreeMother, leptonFourMother; 
 
+    TLorentzVector jetOneP4, jetTwoP4;
+    Float_t jetOneTag, jetTwoTag;
     Float_t jetD0, bjetD0;
     Float_t bjetPUID, bjetTag, jetPUID, jetTag, genJetTag, genBJetTag;
-    Float_t met, metPhi;
+    Float_t met, metPhi, ht, htPhi;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nPhotons;
 
     // MET kluge 
     float MetKluge(float);
-    
+    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
 

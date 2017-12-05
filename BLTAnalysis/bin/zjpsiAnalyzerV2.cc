@@ -960,6 +960,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         leptonOneD0        = muons_d0[muonOneIndex];
         leptonOneDZ      = muons_dz[muonOneIndex];
+
         leptonTwoP4      = muonTwoP4;
         leptonTwoIso     = muons_iso[muonTwoIndex];
         leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
@@ -1207,9 +1208,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             eventWeight *= weights->GetMuonIDEff(leptonTwoP4);
             eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
-            eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
+            //eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
             //eventWeight *= weights->GetMuonISOEff(muonP4[2]);
-            eventWeight *= weights->GetMuonIDEff(leptonFourP4);
+            //eventWeight *= weights->GetMuonIDEff(leptonFourP4);
             //eventWeight *= weights->GetMuonISOEff(muonP4[3]);
 
             // trigger weight
@@ -1369,33 +1370,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                 }
             }
         }
-
-
-        leptonOneP4      = muonOneP4;
-        leptonOneIso     = muons_iso[muonOneIndex];
-        leptonOneTkIsoNR     = muons_TkIsoNR[muonOneIndex];
-        leptonOneTkIso     = muons_TkIso[muonOneIndex];
-        leptonOnePFIso     = muons_PFIso[muonOneIndex];
-        leptonOneQ       = muons_q[muonOneIndex];
-        leptonOneTrigger = muons_trigger[muonOneIndex];
-        leptonOneIsTight = muons_isTight[muonOneIndex];
-        leptonOneFlavor  = 1;
-
-        leptonOneD0        = muons_d0[muonOneIndex];
-        leptonOneDZ      = muons_dz[muonOneIndex];
-        leptonTwoP4      = muonTwoP4;
-        leptonTwoIso     = muons_iso[muonTwoIndex];
-        leptonTwoTkIsoNR     = muons_TkIsoNR[muonTwoIndex];
-        leptonTwoTkIso     = muons_TkIso[muonTwoIndex];
-        leptonTwoPFIso     = muons_PFIso[muonTwoIndex];
-        leptonTwoQ       = muons_q[muonTwoIndex];
-        leptonTwoTrigger = muons_trigger[muonTwoIndex];
-        leptonTwoIsTight = muons_isTight[muonTwoIndex];
-        leptonTwoFlavor  = 1;
-            
-        leptonTwoD0        = muons_d0[muonTwoIndex];
-        leptonTwoDZ        = muons_dz[muonTwoIndex];
-
         
         if (!validMuon1)
             return kTRUE;
@@ -1489,7 +1463,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         unsigned electronTwoIndex = electronOneIndex + 1;
         bool validElectron2 = false;
 
-        unsigned int pairing_algo = 1;
+        unsigned int pairing_algo = 0;
 
         if (pairing_algo == 0) {
         
@@ -1576,13 +1550,13 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
         leptonTwoTrigger = electrons_trigger[electronTwoIndex];
 
-        float thisZMass = (electronOneP4 + electronTwoP4).M();
-        if (
-                thisZMass < 2.0 ||
-                (thisZMass > 4.0 && thisZMass < 75.) ||
-                thisZMass > 107.
-           )
-            return kTRUE;
+        //float thisZMass = (electronOneP4 + electronTwoP4).M();
+        //if (
+        //        thisZMass < 2.0 ||
+        //        (thisZMass > 4.0 && thisZMass < 75.) ||
+        //        thisZMass > 107.
+        //   )
+        //    return kTRUE;
         hTotalEvents->Fill(8);
 
         // Check for dielectron vertex 
@@ -1727,13 +1701,13 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonFourD0        = muons_d0[muonFourIndex];
         leptonFourDZ        = muons_dz[muonFourIndex];
         
-        float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
-        if (
-                thisJpsiMass < 2.0 ||
-                (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
-                thisJpsiMass > 107.
-           )
-            return kTRUE;
+        //float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
+        //if (
+        //        thisJpsiMass < 2.0 ||
+        //        (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
+        //        thisJpsiMass > 107.
+        //   )
+        //    return kTRUE;
         hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
@@ -1795,8 +1769,8 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         eventWeight *= weights->GetElectronRecoIdEff(leptonOneP4);
         eventWeight *= weights->GetElectronRecoIdEff(leptonTwoP4);
-        eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
-        eventWeight *= weights->GetMuonIDEff(leptonFourP4);
+        //eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
+        //eventWeight *= weights->GetMuonIDEff(leptonFourP4);
         }
         
     }

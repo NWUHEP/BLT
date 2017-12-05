@@ -526,14 +526,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Prevent overlap of muons and jets
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (tauP4.DeltaR(mu) < 0.4) {
+            if (tauP4.DeltaR(mu) < 0.3) {
                 muOverlap = true;
                 break;
             }
         }
         bool elOverlap = false;
         for (const auto& el: veto_electrons) {
-            if (tauP4.DeltaR(el) < 0.4) {
+            if (tauP4.DeltaR(el) < 0.3) {
                 elOverlap = true;
                 break;
             }
@@ -632,6 +632,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
 
+    TVector2 metP2;
+    metP2.SetMagPhi(met, metPhi);
     /* HT */
     htSum = sumJetPt;
     ht    = hadronicP4.Pt();
@@ -753,9 +755,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // trigger weight
             pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
             pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            triggerWeight *= (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
 
-            eventWeight = triggerWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
+            eventWeight *= triggerWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (params->selection == "ee") {
 
@@ -795,15 +797,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneMother = GetGenMotherId(genParticles, electronOneP4);
             leptonTwoMother = GetGenMotherId(genParticles, electronTwoP4);
 
-            leptonOneRecoWeight *= weights->GetElectronRecoIdEff(electronOneP4);
-            leptonTwoRecoWeight *= weights->GetElectronRecoIdEff(electronTwoP4);
+            leptonOneRecoWeight = weights->GetElectronRecoIdEff(electronOneP4);
+            leptonTwoRecoWeight = weights->GetElectronRecoIdEff(electronTwoP4);
 
             // trigger weight
             //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
             //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
             //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
 
-            eventWeight = leptonOneRecoWeight*leptonTwoRecoWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
 
     } else if (params->selection == "emu") {
@@ -867,15 +869,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
             leptonTwoMother = GetGenMotherId(genParticles, electronP4);
 
-            leptonOneRecoWeight *= weights->GetMuonIDEff(muonP4);
+            leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
-            leptonTwoRecoWeight *= weights->GetElectronRecoIdEff(electronP4);
+            leptonTwoRecoWeight = weights->GetElectronRecoIdEff(electronP4);
 
             // trigger weight
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-            triggerWeight *= trigEff.first/trigEff.second;
+            triggerWeight = trigEff.first/trigEff.second;
 
-            eventWeight = leptonOneRecoWeight*leptonTwoRecoWeight*triggerWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight*triggerWeight;
         }
     } else if (params->selection == "4l") {
 

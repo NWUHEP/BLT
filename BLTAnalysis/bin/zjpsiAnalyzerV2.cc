@@ -87,6 +87,7 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
     outTree->Branch("eventWeight", &eventWeight);
+    outTree->Branch("genWeight", &genWeight);
     outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
     outTree->Branch("nPartons", &nPartons);
@@ -1560,7 +1561,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(8);
 
         // Check for dielectron vertex 
-        unsigned int leptonOneIndex = electrons_index[electronOneIndex];
+        /*unsigned int leptonOneIndex = electrons_index[electronOneIndex];
         unsigned int leptonTwoIndex = electrons_index[electronTwoIndex];
 
         bool hasValidZVertex = false;
@@ -1594,7 +1595,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         //if (!hasValidZVertex)
         //    return kTRUE; 
        
-        rZValid = hasValidZVertex; 
+        rZValid = hasValidZVertex; */
         hTotalEvents->Fill(9);
 
         //if (!hasGoodZVertex)
@@ -1711,7 +1712,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
-        unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
+        /* unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
         unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
@@ -1745,7 +1746,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         //if (!hasValidJpsiVertex)
         //    return kTRUE;
     
-        rJpsiValid = hasValidJpsiVertex;
+        rJpsiValid = hasValidJpsiVertex; */
         hTotalEvents->Fill(13);
 
         //if (!hasGoodJpsiVertex)
@@ -1769,6 +1770,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         eventWeight *= weights->GetElectronRecoIdEff(leptonOneP4);
         eventWeight *= weights->GetElectronRecoIdEff(leptonTwoP4);
+        genWeight = fGenEvtInfo->weight;
         //eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
         //eventWeight *= weights->GetMuonIDEff(leptonFourP4);
         }

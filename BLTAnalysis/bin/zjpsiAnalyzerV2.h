@@ -85,7 +85,7 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, nPU;
+    Float_t eventWeight, nPU, genWeight;
 
     TVector3 rPV;
     TVector3 rDimuon;

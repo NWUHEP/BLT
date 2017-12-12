@@ -157,6 +157,10 @@ Cuts::Cuts() {
     mvaPreElID.dr03HcalTowerSumEt[1]      = 0.2;
     mvaPreElID.numberOfLostHits[1]        = 0;
 
+    looseMVAElID.cutName                  = "looseMVAElID";
+    tightMVAElID.cutName                  = "tightMVAElID";
+
+
     looseElIso.cutName                    = "looseElIso";
     looseElIso.chIso04                    = 99999;
     looseElIso.nhIso04                    = 99999;
@@ -199,6 +203,7 @@ Cuts::Cuts() {
     tightMuID.TrackLayersWithMeasurement  = 5;
     tightMuID.dxy                         = 0.2;
     tightMuID.dz                          = 0.5;
+
 
     /* Muon ISO */
     amumuMuDetIso.cutName                    = "amumuMuDetIso";

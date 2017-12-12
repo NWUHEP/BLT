@@ -2,6 +2,7 @@
 #include <map>
 
 //
+
 // See header file for class documentation
 //
 
@@ -281,7 +282,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     else if (nGenElectrons==0 && nGenMuons==0 && nGenTausmu==1 && nGenTaush==1) nGenState = 140; // tau_mu + tau_h
     else if (nGenElectrons==0 && nGenMuons==0 && nGenTaush==2) nGenState = 150; // tau_h + tau_h
 
-
     else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenElectrons==1) nGenState = 200; // eh
     else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenMuons==1)     nGenState = 210; // muh
     else if (nGenElectrons + nGenMuons + nGenTaus ==1 && nGenTaus==1 && nGenTause ==1) nGenState = 220; // tau_e h
@@ -344,13 +344,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 muon->pt > 3
                 && fabs(muon->eta) < 2.4
                 && particleSelector->PassMuonID(muon, cuts->tightMuID)
-                && muon->trkIso/muon->pt < 0.1
+                //&& muon->trkIso/muon->pt < 0.1
+                && GetMuonIsolation(muon)/muon->pt < 0.15 // //PF ISO, tightISO 0.15, looseISO 0.25
             ) {
             muons.push_back(muon);
             //muons for jet veto
-            //if (muonP4.Pt() > 20) {
-            veto_muons.push_back(muonP4);
-            //}   
+            if (muonP4.Pt() > 10) veto_muons.push_back(muonP4);
+               
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -361,17 +361,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
+        //cout<<electron->mva <<endl;
 
         if (
                 electron->pt > 3
                 && fabs(electron->eta) < 2.5
-                && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && particleSelector->PassElectronID(electron, cuts->tightElID) // cut-based ID in barrel+endcup
+                //&& particleSelector->PassElectronMVA(electron, cuts->tightMVAElID)
+                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl) //PF ISO
            ) {
             TLorentzVector electronP4;
             copy_p4(electron, ELE_MASS, electronP4);
             electrons.push_back(electron);
-            veto_electrons.push_back(electronP4);
+            if (electronP4.Pt() > 10) veto_electrons.push_back(electronP4);
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -403,13 +405,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
         if (elOverlap ) hTotalEvents->Fill(11);
         if (muOverlap ) hTotalEvents->Fill(12);
+        // https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
+
         if( // Selection adopted from Stany's tau counting selection for ttDM
-                tau->pt > 18  
+                tau->pt > 20
                 && abs(tau->eta) < 2.3 
-                && !muOverlap
-                && !elOverlap
+                //&& !muOverlap
+                //&& !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits) //kByTightIsolationMVA3oldDMwLT)
+                && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits) //kByTightIsolationMVA3oldDMwLT) byTightCombinedIsolationDeltaBetaCorr3Hits
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {
@@ -564,7 +568,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
-        if (muons[0]->pt < 25 || taus[0]->pt < 18)
+        if (muons[0]->pt < 25 || taus[0]->pt < 20)
             return kTRUE;
         hTotalEvents->Fill(6);
         hGenEvents->Fill(nGenState+6);
@@ -780,6 +784,12 @@ int MultileptonAnalyzer::GetGenMotherId(vector<TGenParticle*> particles, TLorent
         }
     }
     return motherId;
+}
+
+float MultileptonAnalyzer::GetMuonIsolation( baconhep::TMuon* mu)
+{
+    float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
+    return combIso;
 }
 
 

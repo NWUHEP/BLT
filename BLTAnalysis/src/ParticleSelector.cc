@@ -93,7 +93,9 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
 {
     bool elPass = false;
     float energyInverse = fabs(1. - el->eoverp)/el->ecalEnergy;
-
+    
+    // based on https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_2016_data_for
+    // Tight eid
     if (fabs(el->scEta) < 1.479) 
     { // barrel
         if (
@@ -108,16 +110,16 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                 && !el->isConv
            ) elPass = true;
     } 
-    else if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566) 
-    { // transition
-        elPass = false;//return elPass;
-    } 
-    else if (fabs(el->scEta) > 1.566) 
+    //else if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566) 
+    //{ // transition
+    //    elPass = false;//return elPass;
+    //} 
+    else if (fabs(el->scEta) > 1.4446) 
     { // endcap
         if (
-                fabs(el->dEtaIn)    < 0.0292
-                && fabs(el->dPhiIn) < 0.00605
-                && el->sieie        < 0.0394
+                el->sieie           < 0.0292
+                && fabs(el->dEtaIn) < 0.00605
+                && fabs(el->dPhiIn) < 0.0394
                 && el->hovere       < 0.0641
                 && fabs(el->d0)     < 1.
                 && fabs(el->dz)     < 1.
@@ -138,7 +140,34 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
         } else if (el->pt > cutLevel.pt[1]) {
             //if (el->mvaOld > cutLevel.mvaVal[1]) elPass = true;  //FIXME
         }
+    } else if (cutLevel.cutName == "looseMVAElID") {
+        if (fabs(el->eta) < 0.8) {
+            if (el->mva > 0.837) 
+                elPass = true;
+        }
+        else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
+            if (el->mva > 0.715)
+                elPass = true;
+        }
+        else {
+            if (el->mva > 0.357)
+                elPass = true;
+        }
 
+    } else if (cutLevel.cutName == "tightMVAElID") {
+        if (fabs(el->eta) < 0.8) {
+            if (el->mva > 0.941) 
+                elPass = true;
+        }
+
+        else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
+            if (el->mva > 0.899)
+                elPass = true;
+        }
+        else {
+            if (el->mva > 0.758)
+                elPass = true;
+        }
     } else if (cutLevel.cutName == "hzzMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {

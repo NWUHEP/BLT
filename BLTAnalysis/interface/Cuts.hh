@@ -61,6 +61,7 @@ public:
         int   numberOfLostHits[2];
         std::string cutName;
     } vetoElID, looseElID, mediumElID, tightElID, mvaPreElID;
+    
 
     struct elIsoCuts {
         float chIso04;
@@ -110,7 +111,7 @@ public:
         float sip[6];
         int conversionVeto[6];
         std::string cutName;
-    } hzgMVAID, hzzMVAID, hwwMVAID;
+    } hzgMVAID, hzzMVAID, hwwMVAID, looseMVAElID, tightMVAElID;
 
     struct vbfJetIDCuts {
         float betaStarC[2];

@@ -60,6 +60,7 @@ public:
     void   ReportPostBegin();
     void   ReportPostTerminate();
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+    float GetMuonIsolation(baconhep::TMuon* mu);
 
     TFile *outFile;
     TTree *outTree;

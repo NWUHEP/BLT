@@ -583,6 +583,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        //std::bitset<64> tauId(tau->hpsDisc);
+        //cout << tauId << endl;
+        //cout << baconhep::kByVTightIsolationMVA3newDMwoLT << endl;
 
         if( // Selection adopted from Stany's tau counting selection for ttDM
                 tau->pt > 18  
@@ -591,6 +594,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
                 && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits)
+                //&& (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwoLT)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {
@@ -716,7 +720,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TLorentzVector muonP4;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
         float muonIso = GetMuonIsolation(muons[0]);
-        if ( !(muons[0]->typeBits & baconhep::kPOGTightMuon) || muonIso/muonP4.Pt() > 0.15 )
+        if (muonIso/muonP4.Pt() > 0.15 )
             return kTRUE;
         hTotalEvents->Fill(6);
 
@@ -786,7 +790,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (nJets + nBJets < 2)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         hTotalEvents->Fill(8);
 
@@ -950,13 +954,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector muonP4, tauP4, dilepton;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 511e-6);
+        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
         dilepton = muonP4 + tauP4;
         if (dilepton.M() < 12)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (nJets + nBJets < 2)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         hTotalEvents->Fill(8);
 

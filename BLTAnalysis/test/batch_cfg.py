@@ -7,11 +7,11 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'mutau'
+selection  = 'mu4j'
 period     = '2016'
 
 data_samples = ['single_mu']
-mc_samples   = ['ttbar', 't', 'zjets', 'wjets', 'diboson', 'qcd']
+mc_samples   = ['ttbar', 't', 'zjets', 'wjets', 'qcd']
 
 ''' 
     Set job configurations.  The order of arguments is: (Dataset, path to data,
@@ -177,46 +177,46 @@ mc_dict['zjets'] = [
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
        ),
-    #cfg(data_name = 'DY1JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY1JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY3JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY4JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
+    cfg(data_name = 'DY1JetsToLL_M-50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50'
+       ),
+    cfg(data_name = 'DY1JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-10to50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-10to50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-10to50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
     ]
 
 mc_dict['wjets'] = [

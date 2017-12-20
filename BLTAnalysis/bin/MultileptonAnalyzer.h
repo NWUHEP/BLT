@@ -94,6 +94,7 @@ public:
     Float_t leptonOneD0, leptonTwoD0, leptonOneDZ, leptonTwoDZ,leptonOneSip3d,leptonTwoSip3d;
     Float_t bjetOneBmva,bjetTwoBmva;
     Float_t met, metPhi;
+    Float_t tauChHadMult,tauPhotonMult,tauDecayMode,tauMVA;
 
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;
     Int_t nGenTause, nGenTausmu, nGenTaush;

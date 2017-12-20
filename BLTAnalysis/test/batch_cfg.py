@@ -8,7 +8,7 @@ cfg = bm.JobConfig
 ''' Specify parameters '''
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'etau'
+selection  = 'mumu'
 period     = '2016'
 
 ''' 
@@ -128,17 +128,69 @@ mc_list.extend([
         path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
         suffix   = 'zjets_m-10to50'
+      ),
+
+    cfg(data_name = 'DY1JetsToLL_M-50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'z1jets_m-50'
        ),
-    cfg(data_name = 'WJetsToLNu_HT-70To100',
-        path     = '{0}/Summer16_WJetsToLNu_HT-70To100'.format(path),
+    cfg(data_name = 'DY1JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
-        suffix   = 'wjets_HT-70to100'
+        suffix   = 'z1jets_m-10to50'
+      ),
+        cfg(data_name = 'DY2JetsToLL_M-50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'z2jets_m-50'
        ),
-    cfg(data_name = 'WJetsToLNu_HT-100To200',
-        path     = '{0}/Summer16_WJetsToLNu_HT-100To200'.format(path),
+    cfg(data_name = 'DYJ2etsToLL_M-10to50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph'.format(path),
         nJobs    = 10,
-        suffix   = 'wjets_HT-100to200'
+        suffix   = 'z2jets_m-10to50'
+      ),
+    cfg(data_name = 'DY3JetsToLL_M-50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'z3jets_m-50'
        ),
+    cfg(data_name = 'DY3JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-10to50'
+      ),
+        cfg(data_name = 'DY4JetsToLL_M-50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'z4jets_m-50'
+       ),
+    cfg(data_name = 'DYJ4etsToLL_M-10to50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+      ),
+    # wjets
+    cfg(data_name = 'W1JetsToLNu',
+        path     = '{0}/Summer16_W1JetsToLNu'.format(path),
+        nJobs    = 10,
+        suffix   = 'w1jets'
+        ),
+    cfg(data_name = 'W2JetsToLNu',
+        path     = '{0}/Summer16_W2JetsToLNu'.format(path),
+        nJobs    = 10,
+        suffix   = 'w2jets'
+        ),
+    cfg(data_name = 'W3JetsToLNu',
+        path     = '{0}/Summer16_W3JetsToLNu'.format(path),
+        nJobs    = 10,
+        suffix   = 'w3jets'
+        ),
+    cfg(data_name = 'W4JetsToLNu',
+        path     = '{0}/Summer16_W4JetsToLNu'.format(path),
+        nJobs    = 10,
+        suffix   = 'w4jets'
+        ),
    
     # top
     # top: ttbar

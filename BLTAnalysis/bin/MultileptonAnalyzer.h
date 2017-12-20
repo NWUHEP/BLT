@@ -62,7 +62,8 @@ public:
     void   ReportPostTerminate();
 
     TFile *outFile;
-    TTree *outTree;
+    std::map<string, TTree*> outTrees;
+    std::map<string, TH1D*> eventCounts;
     TH1D *hGenCat;
 
     // Lumi mask

@@ -88,9 +88,14 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, triggerWeight, puWeight, nPU;
+    Float_t nPU;
     TVector3 rPV;
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+
+    // weights and uncertainties
+    Float_t eventWeight, triggerWeight, puWeight, topPtWeight;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
+    Float_t triggerUnc, puUnc, topPtUnc, lepOneRecoUnc, lepTwoRecoUnc;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
@@ -101,7 +106,6 @@ public:
     Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
     Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
-    Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
 
     // tau variables
     Int_t tauDecayMode;

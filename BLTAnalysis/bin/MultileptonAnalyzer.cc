@@ -99,13 +99,18 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("evtNumber", &evtNumber, "eventNumber/l");
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
-    outTree->Branch("eventWeight", &eventWeight);
-    outTree->Branch("puWeight", &puWeight);
-    outTree->Branch("triggerWeight", &triggerWeight);
     outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
     outTree->Branch("nPartons", &nPartons);
     outTree->Branch("rPV", &rPV);
+
+    // weights and their uncertainties
+    outTree->Branch("eventWeight", &eventWeight);
+    outTree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
+    outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+    outTree->Branch("topPtWeight", &topPtWeight);
+    outTree->Branch("puWeight", &puWeight);
+    outTree->Branch("triggerWeight", &triggerWeight);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -120,7 +125,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonOneMother", &leptonOneMother);
     outTree->Branch("leptonOneD0", &leptonOneD0);
     outTree->Branch("leptonOneDZ", &leptonOneDZ);
-    outTree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
 
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
@@ -128,11 +132,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoMother", &leptonTwoMother);
     outTree->Branch("leptonTwoD0", &leptonTwoD0);
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
-    outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+
 
     if (params->selection == "mutau") {
-        outTree->Branch("tauChHadMult",  &tauChHadMult);
-        outTree->Branch("tauPhotonMult", &tauPhotonMult);
+        //outTree->Branch("tauChHadMult",  &tauChHadMult);
+        //outTree->Branch("tauPhotonMult", &tauPhotonMult);
         outTree->Branch("tauDecayMode",  &tauDecayMode);
         outTree->Branch("tauMVA",        &tauMVA);
     }
@@ -527,6 +531,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // muons for jet veto
         if (
                 muonP4.Pt() > 10
+                && fabs(muonP4.Eta()) < 2.4
                 // tight muon ID and ISO
                 && (muon->typeBits & baconhep::kPOGTightMuon)
                 && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
@@ -585,16 +590,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
         //std::bitset<64> tauId(tau->hpsDisc);
         //cout << tauId << endl;
-        //cout << baconhep::kByVTightIsolationMVA3newDMwoLT << endl;
+        //cout << endl;
 
         if( // Selection adopted from Stany's tau counting selection for ttDM
-                tau->pt > 18  
+                tau->pt > 20  
                 && abs(tau->eta) < 2.3 
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits)
-                //&& (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwoLT)
+                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3newDMwLT)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {
@@ -934,6 +938,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
             leptonTwoRecoWeight = weights->GetElectronRecoIdEff(electronP4);
+            cout << leptonTwoRecoWeight << endl;
 
             // trigger weight
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
@@ -976,8 +981,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonTwoDZ     = taus[0]->dzLeadChHad;
         leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        tauChHadMult  = taus[0]->nSignalChHad;
-        tauPhotonMult = taus[0]->nSignalGamma;
+        //tauChHadMult  = taus[0]->nSignalChHad;
+        //tauPhotonMult = taus[0]->nSignalGamma;
         tauDecayMode  = taus[0]->decaymode;
         tauMVA        = taus[0]->rawIsoMVA3newDMwLT;
 

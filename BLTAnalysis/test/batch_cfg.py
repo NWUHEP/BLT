@@ -7,11 +7,11 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'mu4j'
+selection  = 'ee'
 period     = '2016'
 
-data_samples = ['single_mu']
-mc_samples   = ['ttbar', 't', 'zjets', 'wjets', 'qcd']
+data_samples = ['single_el']
+mc_samples   = ['ttbar', 't', 'zjets', 'wjets']
 
 ''' 
     Set job configurations.  The order of arguments is: (Dataset, path to data,

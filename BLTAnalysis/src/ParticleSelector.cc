@@ -108,9 +108,7 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                 && fabs(el->dz)     < 1.
                 && !el->isConv
            ) elPass = true;
-    } else if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566) { // transition
-        elPass = false;
-    } else if (fabs(el->scEta) > 1.566) { // endcap
+    } else {
         if (
                 el->sieie           < 0.0292
                 && fabs(el->dEtaIn) < 0.00605

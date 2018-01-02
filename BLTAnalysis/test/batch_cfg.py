@@ -7,15 +7,14 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'ee'
+selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_el']
-mc_samples   = ['ttbar', 't', 'zjets', 'wjets']
+data_samples = ['single_el']#, 'single_el']
+mc_samples   = []#'ttbar', 't', 'zjets', 'wjets', 'diboson']
 
 ''' 
-    Set job configurations.  The order of arguments is: (Dataset, path to data,
-    number of jobs, arguments to pass to executable, output directory name)
+    Set job configurations.  
 '''
 
 data_dict = {}
@@ -30,22 +29,22 @@ data_dict['single_mu'] = [
             nJobs     = 30,
             suffix    = 'muon_2016B'
            ),
-        cfg(data_name = 'muon_2016C_v1',
+        cfg(data_name = 'muon_2016C',
             path      = '{0}/SingleMuon_Run2016C-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016C'
            ),
-        cfg(data_name = 'muon_2016D_v1',
+        cfg(data_name = 'muon_2016D',
             path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016D'
            ),
-        cfg(data_name = 'muon_2016E_v1',
+        cfg(data_name = 'muon_2016E',
             path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016E'
            ),
-        cfg(data_name = 'muon_2016F_v1',
+        cfg(data_name = 'muon_2016F',
             path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
             nJobs     = 30,
             suffix    = 'muon_2016F'
@@ -68,12 +67,12 @@ data_dict['single_mu'] = [
         ]
 
 data_dict['single_el'] = [
-        cfg(data_name = 'electron_2016B',
+        cfg(data_name = 'electron_2016B_v1',
             nJobs    = 30,
             path     = '{0}/SingleElectron_Run2016B-03Feb2017_ver1-v1'.format(path),
             suffix   = 'electron_2016B'
            ),
-        cfg(data_name = 'electron_2016B',
+        cfg(data_name = 'electron_2016B_v2',
             path     = '{0}/SingleElectron_Run2016B-03Feb2017_ver2-v2'.format(path),
             nJobs    = 30,
             suffix   = 'electron_2016B'
@@ -103,12 +102,12 @@ data_dict['single_el'] = [
             nJobs    = 30,
             suffix   = 'electron_2016G'
            ),
-        cfg(data_name = 'electron_2016H',
+        cfg(data_name = 'electron_2016H_v2',
             path     = '{0}/SingleElectron_Run2016H-03Feb2017_ver2-v1'.format(path),
             nJobs    = 30,
             suffix   = 'electron_2016H'
            ),
-        cfg(data_name = 'electron_2016H',
+        cfg(data_name = 'electron_2016H_v3',
             path     = '{0}/SingleElectron_Run2016H-03Feb2017_ver3-v1'.format(path),
             nJobs    = 30,
             suffix   = 'electron_2016H'
@@ -116,12 +115,12 @@ data_dict['single_el'] = [
         ]
 
 data_dict['mueg'] = [
-        cfg(data_name = 'mueg_2016B',
+        cfg(data_name = 'mueg_2016B_v1',
             path     = '{0}/MuonEG_Run2016B-03Feb2017_ver1-v1'.format(path),
             nJobs    = 30,
             suffix   = 'mueg_2016B'
            ),
-        cfg(data_name = 'mueg_2016B',
+        cfg(data_name = 'mueg_2016B_v2',
             path     = '{0}/MuonEG_Run2016B-03Feb2017_ver2-v2'.format(path),
             nJobs    = 30,
             suffix   = 'mueg_2016B'
@@ -151,12 +150,12 @@ data_dict['mueg'] = [
             nJobs    = 30,
             suffix   = 'mueg_2016G'
            ),
-        cfg(data_name = 'mueg_2016H',
+        cfg(data_name = 'mueg_2016H_v2',
             path     = '{0}/MuonEG_Run2016H-03Feb2017_ver2-v1'.format(path),
             nJobs    = 30,
             suffix   = 'mueg_2016H'
            ),
-        cfg(data_name = 'mueg_2016H',
+        cfg(data_name = 'mueg_2016H_v3',
             path     = '{0}/MuonEG_Run2016H-03Feb2017_ver3-v1'.format(path),
             nJobs    = 30,
             suffix   = 'mueg_2016H'

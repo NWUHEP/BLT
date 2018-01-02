@@ -92,9 +92,8 @@ class BatchMaster():
 
     def submit_to_batch(self):
         '''
-        Submits batch jobs to batch.  Currently only works
-        for lpc batch system, but should be updated for more 
-        general use
+        Submits batch jobs to scheduler.  Currently only works
+        for condor-based batch systems.
         '''
 
         print 'Running on {0}'.format(self._location)

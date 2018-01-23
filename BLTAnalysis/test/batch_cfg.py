@@ -10,8 +10,8 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_el']#, 'single_el']
-mc_samples   = []#'ttbar', 't', 'zjets', 'wjets', 'diboson']
+data_samples = ['single_mu', 'single_el']
+mc_samples   = ['ttbar', 'zjets', 't', 'wjets', 'diboson']
 
 ''' 
     Set job configurations.  

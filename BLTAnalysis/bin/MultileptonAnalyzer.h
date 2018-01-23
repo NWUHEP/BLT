@@ -121,6 +121,7 @@ public:
     // jet data
     TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
     Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
+    Int_t jetOneFlavor, jetTwoFlavor, jetThreeFlavor, jetFourFlavor;
     Float_t met, metPhi, ht, htPhi, htSum;
 
     // generator level data

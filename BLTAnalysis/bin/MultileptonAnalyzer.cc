@@ -444,7 +444,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Fill event info //
     /////////////////////
 
-    eventWeight   = 1;
     runNumber     = fInfo->runNum;
     evtNumber     = fInfo->evtNum;
     lumiSection   = fInfo->lumiSec;

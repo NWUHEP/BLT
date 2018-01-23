@@ -148,7 +148,7 @@ float WeightUtils::GetPUWeight(float nPU)
     return _puReweight->Eval(nPU); 
 }
 
-std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
+std::pair<double, double> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
     float effData = 1;
     float effMC   = 1;
@@ -206,12 +206,10 @@ float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
 
     float weight = 1;
     float random = rng->Rndm();
-    if (muon.Pt() < 200.) {
-        if (random > 0.468) {
-            weight   *= _muSF_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
-        } else {
-            weight   *= _muSF_ID_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_GH[etaBin]->Eval(muon.Pt());
-        }
+    if (random > 0.468) {
+        weight   *= _muSF_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
+    } else {
+        weight   *= _muSF_ID_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_GH[etaBin]->Eval(muon.Pt());
     }
     
     return weight;
@@ -230,12 +228,10 @@ float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
 
     float weight = 1;
     float random = rng->Rndm();
-    if (muon.Pt() < 200.) {
-        if (random > 0.468) {
-            weight   *= _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
-        } else {
-            weight   *= _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
-        }
+    if (random > 0.468) {
+        weight   *= _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
+    } else {
+        weight   *= _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
     }
     
     return weight;
@@ -253,10 +249,8 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
     }
 
     float weight = 1;
-    if (electron.Pt() < 500.) {
-        weight *= _eleSF_RECO->Eval(electron.Eta());
-        weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
-    }
+    weight *= _eleSF_RECO->Eval(electron.Eta());
+    weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
     
     return weight;
 }

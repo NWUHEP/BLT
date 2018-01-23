@@ -38,7 +38,7 @@ class WeightUtils: public TObject {
         void    SetSelection(string);
 
         float   GetPUWeight(float);
-        pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
+        pair<double, double>   GetTriggerEffWeight(string, TLorentzVector&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
         float   GetElectronRecoIdEff(TLorentzVector&) const;
@@ -71,10 +71,10 @@ class WeightUtils: public TObject {
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
 
         // electron trigger efficiencies (the bins for 2.1 < |eta| < 2.4 are copies of the 1.6 to 2.1 bins 
-        float _elePtBins[8] = {30, 32, 35, 40, 50, 60, 120, 1000};
+        float _elePtBins[8] = {30, 32, 35, 40, 50, 60, 120, 9999};
         float _eleEtaBins[13] = {-2.4, -2.1, -1.6, -1.4, -0.8, -0.4, 0., 0.4, 0.8, 1.4, 1.6, 2.1, 2.4};
         float _ele_trigEff_data[12][7] = {
-            {0.686, 0.747, 0.798, 0.838, 0.855, 0.866, 0.884},
+            {0.686, 0.747, 0.798, 0.838, 0.855, 0.866, 0.884}, // not real
             {0.686, 0.747, 0.798, 0.838, 0.855, 0.866, 0.884},
             {0.714, 0.772, 0.822, 0.865, 0.882, 0.888, 0.922},
             {0.809, 0.859, 0.893, 0.924, 0.939, 0.954, 0.965},
@@ -85,10 +85,10 @@ class WeightUtils: public TObject {
             {0.805, 0.860, 0.896, 0.927, 0.942, 0.957, 0.971},
             {0.683, 0.763, 0.814, 0.864, 0.880, 0.880, 0.896},
             {0.676, 0.743, 0.797, 0.841, 0.860, 0.877, 0.896},
-            {0.676, 0.743, 0.797, 0.841, 0.860, 0.877, 0.896}
+            {0.676, 0.743, 0.797, 0.841, 0.860, 0.877, 0.896} // not real
         };
         float _ele_trigEff_mc[12][7] = {
-            {0.796, 0.833, 0.879, 0.909, 0.920, 0.940, 0.963},
+            {0.796, 0.833, 0.879, 0.909, 0.920, 0.940, 0.963}, // not real
             {0.796, 0.833, 0.879, 0.909, 0.920, 0.940, 0.963},
             {0.792, 0.836, 0.867, 0.904, 0.919, 0.933, 0.954},
             {0.845, 0.886, 0.904, 0.928, 0.947, 0.974, 0.980},
@@ -99,7 +99,7 @@ class WeightUtils: public TObject {
             {0.853, 0.886, 0.906, 0.930, 0.953, 0.973, 0.990},
             {0.783, 0.821, 0.867, 0.903, 0.918, 0.936, 0.940},
             {0.802, 0.848, 0.889, 0.914, 0.929, 0.944, 0.975},
-            {0.802, 0.848, 0.889, 0.914, 0.929, 0.944, 0.975}
+            {0.802, 0.848, 0.889, 0.914, 0.929, 0.944, 0.975} // not real
         };
 
 };

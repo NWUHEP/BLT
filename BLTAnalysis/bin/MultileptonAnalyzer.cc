@@ -771,16 +771,27 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneMother = GetGenMotherId(genParticles, muonOneP4);
             leptonTwoMother = GetGenMotherId(genParticles, muonTwoP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetMuonIDEff(muonOneP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonOneP4);
             leptonTwoRecoWeight = weights->GetMuonIDEff(muonTwoP4);
             leptonTwoRecoWeight *= weights->GetMuonISOEff(muonTwoP4);
 
-            // trigger weight
-            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+            // trigger weights with trigger matching
+            bitset<2> triggered;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
+                    triggered.set(0);
+                if (trigger->passObj(name, 1, muons[1]->hltMatchBits))
+                    triggered.set(1);
+            }
+
+            pair<double, double> trigEff1, trigEff2;
+            trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4) : make_pair(0., 0.);
+            trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4) : make_pair(0., 0.);
             triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
 
+            // update the event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
@@ -820,14 +831,25 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneMother = GetGenMotherId(genParticles, electronOneP4);
             leptonTwoMother = GetGenMotherId(genParticles, electronTwoP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetElectronRecoIdEff(electronOneP4);
             leptonTwoRecoWeight = weights->GetElectronRecoIdEff(electronTwoP4);
 
-            // trigger weight
-            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonOneP4);
-            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonTwoP4);
+            // trigger weights with trigger matching
+            bitset<2> triggered;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
+                    triggered.set(0);
+                if (trigger->passObj(name, 1, electrons[1]->hltMatchBits))
+                    triggered.set(1);
+            }
+
+            pair<double, double> trigEff1, trigEff2;
+            trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4) : make_pair(0., 0.);
+            trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4) : make_pair(0., 0.);
             triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
 
+            // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
@@ -883,19 +905,27 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
             leptonTwoMother = GetGenMotherId(genParticles, electronP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
             leptonTwoRecoWeight = weights->GetElectronRecoIdEff(electronP4);
 
-            // trigger weight
-            if (muonTriggered) {
-                pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                triggerWeight = trigEff.first/trigEff.second;
-            } else if (electronTriggered) {
-                pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
-                triggerWeight = trigEff.first/trigEff.second;
+            // trigger weights with trigger matching
+            bitset<2> triggered;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
+                    triggered.set(0);
+                if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
+                    triggered.set(1);
             }
 
+
+            pair<double, double> trigEff1, trigEff2;
+            trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4) : make_pair(0., 0.);
+            trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4) : make_pair(0., 0.);
+            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+
+            // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
@@ -939,14 +969,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, electronP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetElectronRecoIdEff(electronP4);
             leptonTwoRecoWeight = 0.95;
 
-            // trigger weight
+            // trigger weights
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
             triggerWeight = trigEff.first/trigEff.second;
 
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight*triggerWeight;
+            // update event weight
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+            eventWeight *= triggerWeight;
 
         }
     } else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 1) { // mu+tau selection
@@ -989,14 +1022,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
             leptonTwoRecoWeight = 0.95;
 
-            // trigger weight
+            // trigger weights
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
             triggerWeight = trigEff.first/trigEff.second;
 
+            // update event weights
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
             eventWeight *= triggerWeight;
 
@@ -1051,6 +1086,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
             triggerWeight = trigEff.first/trigEff.second;
 
+            // update event weights
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
@@ -1100,6 +1136,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 
+            // reconstruction weights
             leptonOneRecoWeight = weights->GetMuonIDEff(muonP4);
             leptonOneRecoWeight *= weights->GetMuonISOEff(muonP4);
 
@@ -1107,6 +1144,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
             triggerWeight = trigEff.first/trigEff.second;
 
+            // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }

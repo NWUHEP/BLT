@@ -64,6 +64,9 @@ class WeightUtils: public TObject {
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
 
+        TH2F *_eff_doubleg_leg1_DATA, *_eff_doubleg_leg1_MC;
+        TH2F *_eff_doubleg_leg2_DATA, *_eff_doubleg_leg2_MC;
+
         //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
         //TH2D    *h2_EleMVASF;
 };

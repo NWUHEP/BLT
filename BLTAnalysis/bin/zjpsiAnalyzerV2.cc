@@ -9,15 +9,8 @@ using namespace std;
 
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 
-zjpsiAnalyzerV2::zjpsiAnalyzerV2() : BLTSelector()
-{
-
-}
-
-zjpsiAnalyzerV2::~zjpsiAnalyzerV2()
-{
-
-}
+zjpsiAnalyzerV2::zjpsiAnalyzerV2() : BLTSelector(){}
+zjpsiAnalyzerV2::~zjpsiAnalyzerV2(){}
 
 void zjpsiAnalyzerV2::Begin(TTree *tree)
 {
@@ -41,11 +34,7 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
-    if (params->selection == "mumu" || params->selection == "emu" || params->selection == "4l" || params->selection == "4mu" || params->selection == "4mu_otman") {
-        //triggerNames.push_back("HLT_IsoMu22_v*");
-        //triggerNames.push_back("HLT_IsoTkMu22_v*");
-        //triggerNames.push_back("HLT_IsoMu24_v*");
-        //triggerNames.push_back("HLT_IsoTkMu24_v*");
+    if (params->selection == "mumu" || params->selection == "4mu" || params->selection == "4mu_otman") {
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
@@ -55,9 +44,6 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
 
-    } else if (params->selection == "ee") {
-        triggerNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*");
-    
     } else if (params->selection == "jpsi_control") {
         triggerNames.push_back("HLT_Dimuon0er16_Jpsi_NoOS_NoVertexing_v*");
     }
@@ -181,24 +167,7 @@ void zjpsiAnalyzerV2::Begin(TTree *tree)
     outTree->Branch("leptonFourDZ", &leptonFourDZ);
     outTree->Branch("leptonFourMother", &leptonFourMother);
 
-    // jets
-    //outTree->Branch("jetP4", &jetP4);
-    //outTree->Branch("jetD0", &jetD0);
-    //outTree->Branch("jetTag", &jetTag);
-    //outTree->Branch("jetPUID", &jetPUID);
-    //outTree->Branch("jetFlavor", &jetFlavor);
-
-    //outTree->Branch("bjetP4", &bjetP4);
-    //outTree->Branch("bjetD0", &bjetD0);
-    //outTree->Branch("bjetTag", &bjetTag);
-    //outTree->Branch("bjetPUID", &bjetPUID);
-    //outTree->Branch("bjetFlavor", &bjetFlavor);
-
-    //outTree->Branch("genBJetP4", &genBJetP4);
-    //outTree->Branch("genBJetTag", &genBJetTag);
-    //outTree->Branch("genJetP4", &genJetP4);
-    //outTree->Branch("genJetTag", &genJetTag);
-    
+    // jets  
     outTree->Branch("jetOneP4", &jetOneP4);
     outTree->Branch("jetOneTag", &jetOneTag);
 
@@ -286,9 +255,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-            //cout << i << ", " << particle->status << ", " << particle->pdgId  << ", " << particle->parent;
-            //cout << "\t" << particle->pt << ", " << particle->eta;
-            //cout << endl;
             genParticles.push_back(particle);
 
             if (
@@ -299,61 +265,9 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                 ++count;
             }
 
-            // This will save Z and J/psi in 4l events
-            //if (
-            //        params->selection == "4mu"
-            //        && (abs(particle->pdgId) == 443 || abs(particle->pdgId) == 23) 
-            //        //&& particle->status == 62 
-            //   ) {
-            //    genParticles.push_back(particle);
-            //}
-
-            //// Let's save some quarks too
-            //if (
-            //        params->selection == "4mu"
-            //        && (0 < abs(particle->pdgId) && abs(particle->pdgId) < 7)
-            //   ) { 
-            //    genParticles.push_back(particle);
-            //}
-
-            // This will save leptons (mostly for use with dilepton analyses)
-            //if (abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13) {
-            //    if (particle->parent != -2) {
-            //        TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //        //if (fabs(mother->pdgId) == 24 || abs(mother->pdgId) == 15) {
-            //            //cout << i << ", " << particle->status << ", " << particle->pdgId  << ", " << particle->parent << ", " << mother->pdgId;
-            //            //cout << "\t" << particle->pt << ", " << particle->eta;
-            //            //cout << endl;
-            //            genParticles.push_back(particle);
-
-            //            //// categorize the event (only works for e+mu events)
-            //            //if (abs(particle->pdgId) == 11 && abs(mother->pdgId) == 24) {
-            //            //    genEventType.set(0);
-            //            //} else  if (abs(particle->pdgId) == 11 && abs(mother->pdgId) == 15) {
-            //            //    genEventType.set(1);
-            //            //} else  if (abs(particle->pdgId) == 13 && abs(mother->pdgId) == 24) {
-            //            //    genEventType.set(2);
-            //            //} else  if (abs(particle->pdgId) == 13 && abs(mother->pdgId) == 15) {
-            //            //    genEventType.set(3);
-            //            //} 
-            //        //}
-            //    }
-            //}
-
             nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
         }
 
-        //if (genEventType.to_string() == "0101") { // W->e + W->mu
-        //    hTotalEvents->Fill(11);
-        //} else if (genEventType.to_string() == "0110") { // tau->e + W->mu
-        //    hTotalEvents->Fill(12);
-        //} else if (genEventType.to_string() == "1001") { // W->e + tau->mu
-        //    hTotalEvents->Fill(13);
-        //} else if (genEventType.to_string() == "1010") { // tau->e + tau->mu
-        //    hTotalEvents->Fill(14);
-        //} else { // everything else
-        //    hTotalEvents->Fill(15);
-        //}
     } else {
         nPartons = 0;
     }
@@ -386,11 +300,10 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
     /* MUONS */
     vector<TMuon*> muons;
     vector<TLorentzVector> veto_muons;
-
     for (int i=0; i < fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
-        assert(muon);
-        
+        assert(muon); 
+
     /* Apply Rochester Muon Corrections */
         TLorentzVector muonP4;
         copy_p4(muon, MUON_MASS, muonP4);
@@ -424,11 +337,8 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                     // loose muon ID
                     && (muon->typeBits & baconhep::kPFMuon)
                     && ((muon->typeBits & baconhep::kGlobal) || (muon->selectorBits & baconhep::kTrackerMuonArbitrated))
-                    //&& fabs(muon->d0) < 0.5
-                    //&& fabs(muon->dz) < 1.0
                     && fabs(muon->d0) < 0.5
                     && fabs(muon->dz) < 20.0
-                    //&& muon->sip3d < 4.0
                 ){
                     muons.push_back(muon);
         }
@@ -449,7 +359,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
     vector<float> muons_d0;
     vector<float> muons_dz;
     vector<unsigned int> muons_index;
-    //vector<map<int, TVector3>> muons_vertices;
 
     for (unsigned i = 0; i < muons.size(); i++) {
         TMuon* muon = muons[i];
@@ -463,7 +372,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         muons_d0.push_back(muon->d0);
         muons_dz.push_back(muon->dz);
         muons_index.push_back(muon->muIndex);
-     //   muons_vertices.push_back(muon->dimuonVertex);
 
         // ID and isolation
         if ( 
@@ -491,15 +399,12 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
 
         // Tracker isolation Pt removal 
         // Remove muon track pt from muon track isolation variable
-        //for (unsigned j = i+1; j < muons.size(); j++) {
         for (unsigned j = 0; j < muons.size(); j++) {
             if (i!=j) {
                 TLorentzVector muon_j;
                 copy_p4(muons[j], MUON_MASS, muon_j);
-
                 if (muonP4.DeltaR(muon_j) < 0.3) {
                     muon->trkIso = max(0., muon->trkIso - muon_j.Pt());
-                    //muons[j]->trkIso = max(0., muons[j]->trkIso - muonP4.Pt());
                 }
             }
         }
@@ -546,7 +451,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
                 && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
-                //&& electron->sip3d < 4.0 
            ) {
             electrons.push_back(electron);
             electrons_index.push_back(electron->eleIndex);
@@ -572,7 +476,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         if (
                 photon->pt > 10
                 && fabs(photon->eta) < 2.5
-                //&& particleSelector->PassPhotonID(photon, cuts->loosePhID)
                 && particleSelector->PassPhotonID(photon, cuts->preSelPhID)
                 && particleSelector->PassPhotonIso(photon, cuts->loosePhIso, cuts->EAPho)
            ) {
@@ -664,7 +567,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
     /* HT */
     ht    = hadronicP4.Pt();
     htPhi = hadronicP4.Phi();
-
 
     ///////////////////////////////
     /* Apply analysis selections */
@@ -974,13 +876,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonTwoD0        = muons_d0[muonTwoIndex];
         leptonTwoDZ        = muons_dz[muonTwoIndex];
 
-        //float thisZMass = (muonOneP4 + muonTwoP4).M();
-        //if (
-        //        thisZMass < 2.0 ||
-        //        (thisZMass > 4.0 && thisZMass < 75.) ||
-        //        thisZMass > 107.
-        //   )
-        //    return kTRUE;
         hTotalEvents->Fill(8);
 
         // Check for dimuon vertex 
@@ -1133,13 +1028,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonFourD0        = muons_d0[muonFourIndex];
         leptonFourDZ        = muons_dz[muonFourIndex];
         
-        //float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
-        //if (
-        //        thisJpsiMass < 2.0 ||
-        //        (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
-        //        thisJpsiMass > 107.
-        //   )
-        //    return kTRUE;
         hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
@@ -1550,13 +1438,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
         leptonTwoTrigger = electrons_trigger[electronTwoIndex];
 
-        //float thisZMass = (electronOneP4 + electronTwoP4).M();
-        //if (
-        //        thisZMass < 2.0 ||
-        //        (thisZMass > 4.0 && thisZMass < 75.) ||
-        //        thisZMass > 107.
-        //   )
-        //    return kTRUE;
         hTotalEvents->Fill(8);
 
         // Check for dielectron vertex 
@@ -1701,13 +1582,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         leptonFourD0        = muons_d0[muonFourIndex];
         leptonFourDZ        = muons_dz[muonFourIndex];
         
-        //float thisJpsiMass = (muonThreeP4 + muonFourP4).M();
-        //if (
-        //        thisJpsiMass < 2.0 ||
-        //        (thisJpsiMass > 4.0 && thisJpsiMass < 75.) ||
-        //        thisJpsiMass > 107.
-        //   )
-        //    return kTRUE;
         hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
@@ -1775,109 +1649,6 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         
     }
     
-//    else if (params->selection == "ee") {
-//
-//        if (electrons.size() != 2)
-//            return kTRUE;
-//        hTotalEvents->Fill(5);
-//
-//        TLorentzVector dielectron;
-//        dielectron = electrons[0] + electrons[1];
-//        if (dielectron.M() < 12. || dielectron.M() > 70.)
-//            return kTRUE;
-//        hTotalEvents->Fill(6);
-//
-//        leptonOneP4      = electrons[0];
-//        //leptonOneIso     = electrons_iso[0];
-//        leptonOneQ       = electrons_q[0];
-//        leptonOneTrigger = electrons_trigger[0];
-//        leptonOneFlavor  = 0;
-//
-//        leptonTwoP4      = electrons[1];
-//        //leptonTwoIso     = electrons_iso[1];
-//        leptonTwoQ       = electrons_q[1];
-//        leptonTwoTrigger = electrons_trigger[1];
-//        leptonTwoFlavor  = 0;
-//    }
-
-    else if (params->selection == "4l") {
-
-        /*if (nMuons >= 4) { 
-
-            if (muons_P4_type1[0].Pt() < 25)
-                return kTRUE;
-            hTotalEvents->Fill(6);
-
-            leptonOneP4        = muons[0];
-            leptonOneIso       = muons_iso[0];
-            leptonOneQ         = muons_q[0];
-            leptonOneTrigger   = muons_trigger[0];
-            leptonOneFlavor    = 0;
-
-            leptonOneD0        = muons_d0[0];
-            leptonOneDZ        = muons_dz[0];
-
-            leptonTwoP4        = muons[1];
-            leptonTwoIso       = muons_iso[1];
-            leptonTwoQ         = muons_q[1];
-            leptonTwoTrigger   = muons_trigger[1];
-            leptonTwoFlavor    = 0;
-            
-            leptonTwoD0        = muons_d0[1];
-            leptonTwoDZ        = muons_dz[1];
-            
-            leptonThreeP4      = muons[2];
-            leptonThreeIso     = muons_iso[2];
-            leptonThreeQ       = muons_q[2];
-            leptonThreeTrigger = muons_trigger[2];
-            leptonThreeFlavor  = 0;
-            leptonFourP4       = muons[3];
-            leptonFourIso      = muons_iso[3];
-            leptonFourQ        = muons_q[3];
-            leptonFourTrigger  = muons_trigger[3];
-            leptonFourFlavor   = 0;
-
-        } else if (muons.size() >= 2 and electrons.size() >= 2) {
-
-            if (muons[0].Pt() < 25)
-                return kTRUE;
-            hTotalEvents->Fill(6);
-        
-            leptonOneP4      = muons[0];
-            leptonOneIso     = muons_iso[0];
-            leptonOneQ       = muons_q[0];
-            leptonOneTrigger = muons_trigger[0];
-            leptonOneFlavor  = 0;
-            
-            leptonOneD0        = muons_d0[0];
-            leptonOneDZ        = muons_dz[0];
-           
-            leptonTwoP4      = muons[1];
-            leptonTwoIso     = muons_iso[1];
-            leptonTwoQ       = muons_q[1];
-            leptonTwoTrigger = muons_trigger[1];
-            leptonTwoFlavor  = 0;
-            
-            leptonTwoD0        = muons_d0[1];
-            leptonTwoDZ        = muons_dz[1];
-
-            leptonThreeP4      = electrons[0];
-            leptonThreeIso     = electrons_iso[0];
-            leptonThreeQ       = electrons_q[0];
-            leptonThreeTrigger = electrons_trigger[0];
-            leptonThreeFlavor  = 1;
-            leptonFourP4       = electrons[1];
-            leptonFourIso      = electrons_iso[1];
-            leptonFourQ        = electrons_q[1];
-            leptonFourTrigger  = electrons_trigger[1];
-            leptonFourFlavor   = 1;
-        } else {
-            hTotalEvents->Fill(5);
-            return kTRUE;
-        }*/
-    }
-
-
     ///////////////////
     // Fill jet info //
     ///////////////////

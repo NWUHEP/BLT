@@ -56,7 +56,7 @@ void hzgAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
     }
-    else if (params->selection == "elelg") {
+    else if (params->selection == "ee" || params->selection == "elelg") {
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
     }
@@ -756,6 +756,42 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
         } 
     } // end mumug selection
+    
+    else if (params->selection == "ee") {
+        if (electrons.size() < 2)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        TLorentzVector electronOneP4, electronTwoP4;
+        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, ELE_MASS);
+        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, ELE_MASS);
+        if (electronOneP4.Pt() < 25.0) 
+            return kTRUE;
+        hTotalEvents->Fill(6);
+        if (electronTwoP4.Pt() < 15.0)
+            return kTRUE;
+        hTotalEvents->Fill(7);
+        TLorentzVector dielectron = electronOneP4 + electronTwoP4;
+        if (electrons[0]->q == electrons[1]->q)
+            return kTRUE;
+        hTotalEvents->Fill(8);
+        if (dielectron.M() < 80.0 || dielectron.M() > 100.0)
+            return kTRUE;
+        hTotalEvents->Fill(9);
+     
+        bool printForSync = true;
+        
+        if (printForSync)
+            cout << runNumber << "," << lumiSection << "," << evtNumber << ","  << 
+                    electronOneP4.Pt() << "," << electronOneP4.Eta() << "," << 
+                    electronOneP4.Phi() << "," <<
+                    electrons[0]->dz << "," << electrons[0]->sip3d << "," << 
+                    GetElectronIsolation(electrons[0], fInfo->rhoJet) << "," <<
+                    electronTwoP4.Pt() << "," << electronTwoP4.Eta() << "," << 
+                    electronTwoP4.Phi() << "," << 
+                    electrons[1]->dz << "," << electrons[1]->sip3d << "," << 
+                    GetElectronIsolation(electrons[1], fInfo->rhoJet) << endl;
+        return kTRUE;
+    }
     
     else if (params->selection == "elelg") {
         if (electrons.size() < 2) 

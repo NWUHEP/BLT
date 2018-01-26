@@ -25,6 +25,8 @@
 // Constants
 static const double ELE_MASS  = 0.000511;
 static const double MUON_MASS = 0.105658369;
+static const double ZMASS = 91.188;
+static const double PSIMASS = 3.097;
 
 static const int ELE_PDGID  = 11;  // e-
 static const int MUON_PDGID = 13;  // mu-

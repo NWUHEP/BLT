@@ -91,7 +91,16 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_MC").c_str());
 
     // electron trigger efficiencies
-    //
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg1_Ele23_HZZSelection_Tag35.root";
+    TFile* f_elTrigSF_leg1 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleg_leg1_DATA = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffData2D");
+    _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D");
+
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
+    TFile* f_elTrigSF_leg2 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleg_leg2_DATA = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffData2D");
+    _eff_doubleg_leg2_MC   = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffMC2D");
+
     // electron reco efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
@@ -143,6 +152,20 @@ std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLor
     if (triggerName == "HLT_IsoMu24_v*") {
         if (lepton.Pt() < 500.) {
             effData = _eff_IsoMu24_DATA[etaBin]->Eval(lepton.Pt());
+        }
+    }
+
+    else if (triggerName == "HLT_DoubleEG_leg1") {
+        if (lepton.Pt() < 500.) {
+            effData = _eff_doubleg_leg1_DATA->Interpolate(lepton.Eta(), lepton.Pt());
+            effMC   = _eff_doubleg_leg1_MC->Interpolate(lepton.Eta(), lepton.Pt());
+        }
+    }
+    
+    else if (triggerName == "HLT_DoubleEG_leg2") {
+        if (lepton.Pt() < 500.) {
+            effData = _eff_doubleg_leg2_DATA->Interpolate(lepton.Eta(), lepton.Pt());
+            effMC   = _eff_doubleg_leg2_MC->Interpolate(lepton.Eta(), lepton.Pt());
         }
     }
 

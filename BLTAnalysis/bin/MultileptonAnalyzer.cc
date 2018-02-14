@@ -30,13 +30,13 @@ MultileptonAnalyzer::~MultileptonAnalyzer()
 
 void MultileptonAnalyzer::Begin(TTree *tree)
 {
+    rng = new TRandom3();
 
     // Parse command line option
     std::string tmp_option = GetOption();
     std::vector<std::string> options;
     std::regex re_whitespace("(\\s+)");  // split by white space
-    std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1),
-            std::sregex_token_iterator(), std::back_inserter(options));
+    std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1), std::sregex_token_iterator(), std::back_inserter(options));
 
     // Set the parameters
     params.reset(new Parameters());
@@ -98,7 +98,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // muon momentum corrections
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
-    rng = new TRandom3();
 
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
@@ -242,6 +241,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     bitset<4> tauDecay;
     float topSF = 1.;
     if (!isData) {
+        
+        // Set data period for 2016 MC scale factors
+        if (rng->Rndm() < 0.468) {
+            weights->SetDataPeriod("2016BtoF");    
+        } else {
+            weights->SetDataPeriod("2016GH");
+        }
+
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
@@ -557,6 +564,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
+        //cout << electron->regscale << ", " << electron->regsmear << endl;
 
         if (
                 electron->pt > 10
@@ -780,16 +788,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // trigger weights with trigger matching
             bitset<2> triggered;
             for (const auto& name: passTriggerNames) {
-                if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
+                if (trigger->passObj(name, 1, muons[0]->hltMatchBits) && muonOneP4.Pt() > 25)
                     triggered.set(0);
-                if (trigger->passObj(name, 1, muons[1]->hltMatchBits))
+                if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
                     triggered.set(1);
             }
 
             pair<double, double> trigEff1, trigEff2;
             trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4) : make_pair(0., 0.);
             trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4) : make_pair(0., 0.);
-            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            if (trigEff1.second > 0 || trigEff2.second > 0) {
+                triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            } else {
+                triggerWeight = 0;
+            }
 
             // update the event weight
             eventWeight *= triggerWeight;
@@ -838,16 +850,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // trigger weights with trigger matching
             bitset<2> triggered;
             for (const auto& name: passTriggerNames) {
-                if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
+                if (trigger->passObj(name, 1, electrons[0]->hltMatchBits) && electronOneP4.Pt() > 30)
                     triggered.set(0);
-                if (trigger->passObj(name, 1, electrons[1]->hltMatchBits))
+                if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
                     triggered.set(1);
             }
 
             pair<double, double> trigEff1, trigEff2;
             trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4) : make_pair(0., 0.);
             trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4) : make_pair(0., 0.);
-            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+
+            if (trigEff1.second > 0 || trigEff2.second > 0) {
+                triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            } else {
+                triggerWeight = 0;
+            }
 
             // update event weight
             eventWeight *= triggerWeight;
@@ -923,7 +940,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<double, double> trigEff1, trigEff2;
             trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4) : make_pair(0., 0.);
             trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4) : make_pair(0., 0.);
-            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            if (trigEff1.second > 0 || trigEff2.second > 0) {
+                triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            } else {
+                triggerWeight = 0;
+            }
 
             // update event weight
             eventWeight *= triggerWeight;

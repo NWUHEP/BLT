@@ -7,9 +7,6 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _isRealData = isRealData;
     std::string fileName;
 
-    rng = new TRandom3();
-
-
     const std::string cmssw_base = getenv("CMSSW_BASE");
     // PU weights
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
@@ -162,11 +159,10 @@ std::pair<double, double> WeightUtils::GetTriggerEffWeight(string triggerName, T
             }
         }
         
-        float random = rng->Rndm();
-        if (random > 0.468) {
+        if (_dataPeriod == "2016BtoF") {
             effData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->Eval(lepton.Pt());
-        } else {
+        } else if (_dataPeriod == "2016GH") {
             effData = _muSF_IsoMu24_DATA_GH[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_GH[etaBin]->Eval(lepton.Pt());
         }
@@ -205,10 +201,9 @@ float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
     }
 
     float weight = 1;
-    float random = rng->Rndm();
-    if (random > 0.468) {
+    if (_dataPeriod == "2016BtoF") {
         weight   *= _muSF_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
-    } else {
+    } else if (_dataPeriod == "2016GH") {
         weight   *= _muSF_ID_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_GH[etaBin]->Eval(muon.Pt());
     }
     
@@ -227,10 +222,9 @@ float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
     }
 
     float weight = 1;
-    float random = rng->Rndm();
-    if (random > 0.468) {
+    if (_dataPeriod == "2016BtoF") {
         weight   *= _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
-    } else {
+    } else if (_dataPeriod == "2016GH") {
         weight   *= _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
     }
     

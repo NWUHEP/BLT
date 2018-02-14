@@ -52,9 +52,6 @@ class WeightUtils: public TObject {
         string _selection;
         bool   _isRealData;
 
-        // rng
-        TRandom3 *rng;
-
         // pileup
         TGraph  *_puReweight;
 

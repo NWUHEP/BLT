@@ -13,8 +13,9 @@
 // =============================================================================
 
 
-#ifndef MULTILEPTONANALYZER_HH
-#define MULTILEPTONANALYZER_HH
+
+#ifndef THREEMUONANALYZER_HH
+#define THREEMUONANALYZER_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -49,17 +50,17 @@
 #include <regex>
 
 
-class MultileptonAnalyzer: public BLTSelector {
+class ThreeMuonAnalyzer: public BLTSelector {
 public:
-    MultileptonAnalyzer();
-    ~MultileptonAnalyzer();
+    ThreeMuonAnalyzer();
+    ~ThreeMuonAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
     void   Terminate();
     void   ReportPostBegin();
     void   ReportPostTerminate();
-    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+
     float GetMuonIsolation(baconhep::TMuon* mu);
 
     TFile *outFile;
@@ -87,21 +88,20 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, eventWeightId,eventWeightIso,eventWeightTrigger, eventWeightPu, nPU;
+    Float_t eventWeight, eventWeightId, eventWeightIso, eventWeightTrigger, eventWeightPu, nPU;
+    
 
-    TLorentzVector leptonOneP4, leptonTwoP4, bjetOneP4, bjetTwoP4,bjetThreeP4, bjetFourP4;
-    Float_t leptonOneQ,leptonTwoQ;    
-    Float_t leptonOneD0, leptonTwoD0, leptonOneDZ, leptonTwoDZ,leptonOneSip3d,leptonTwoSip3d;
-    Float_t bjetOneBmva,bjetTwoBmva;
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4;
+    Float_t leptonThreeISO;    
+
     Float_t met, metPhi;
-    Float_t tauChHadMult,tauPhotonMult,tauDecayMode,tauMVA;
+    UInt_t nJets, nBJets, nMuons, nElectrons;
 
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nGenElectrons, nGenMuons, nGenTaus;
-    Int_t nGenTause, nGenTausmu, nGenTaush;
-    Int_t leptonOneMother, leptonTwoMother;
+    
+    
 
-    //ClassDef(MultileptonAnalyzer,0);
+    //ClassDef(ThreeMuonAnalyzer,0);
 };
 
 
-#endif  // MULTILEPTONANALYZER_HH
+#endif  // THREEMUONANALYZER_HH

@@ -121,8 +121,14 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // jets
     outTree->Branch("bjetOneP4", &bjetOneP4);
     outTree->Branch("bjetTwoP4", &bjetTwoP4);
-    outTree->Branch("bjetOneBmva", &bjetOneBmva);
-    outTree->Branch("bjetTwoBmva", &bjetTwoBmva);
+
+    if (params->selection == "mu4j" ) {
+        outTree->Branch("bjetThreeP4", &bjetThreeP4);
+        outTree->Branch("bjetFourP4", &bjetFourP4);
+    } else{
+        outTree->Branch("bjetOneBmva", &bjetOneBmva);
+        outTree->Branch("bjetTwoBmva", &bjetTwoBmva);
+    }
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -187,6 +193,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     }
 
     hTotalEvents->Fill(3);
+
 
     /////////////////////
     // Fill event info //
@@ -346,12 +353,28 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 muon->pt > 3
                 && fabs(muon->eta) < 2.4
                 //&& particleSelector->PassMuonID(muon, cuts->tightMuID)
-                && (muon->typeBits & baconhep::kPOGTightMuon)
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+                //&& (muon->typeBits & baconhep::kPOGTightMuon)
+                //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+                // loose muon ID and ISO
+                // from Nate
+                && (muon->typeBits & baconhep::kPFMuon) 
+                && (muon->typeBits & baconhep::kGlobal) 
+                && muon->muNchi2    < 10.
+                && muon->nMatchStn  > 1
+                && muon->nPixHits   > 0
+                && fabs(muon->d0)   < 0.2
+                && fabs(muon->dz)   < 0.5
+                && muon->nTkLayers  > 5 
+                && muon->nValidHits > 0
+                && GetMuonIsolation(muon)/muonP4.Pt() < 0.25  
             ) {
             muons.push_back(muon);
             //muons for jet veto
-            if (muonP4.Pt() > 10) veto_muons.push_back(muonP4);
+            if (muonP4.Pt() > 10
+                // tight muon ID and ISO
+                && (muon->typeBits & baconhep::kPOGTightMuon)
+                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+                ) veto_muons.push_back(muonP4);
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -392,14 +415,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Prevent overlap of muons and jets
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (tauP4.DeltaR(mu) < 0.4) {
+            if (tauP4.DeltaR(mu) < 0.3) {
                 muOverlap = true;
                 break;
             }
         }
         bool elOverlap = false;
         for (const auto& el: veto_electrons) {
-            if (tauP4.DeltaR(el) < 0.4) {
+            if (tauP4.DeltaR(el) < 0.3) {
                 elOverlap = true;
                 break;
             }
@@ -450,14 +473,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         vJet.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (vJet.DeltaR(mu) < 0.4) {
+            if (vJet.DeltaR(mu) < 0.3) {
                 muOverlap = true;
                 break;
             }
         }
         bool elOverlap = false;
         for (const auto& ele: veto_electrons) {
-            if (vJet.DeltaR(ele) < 0.4) {
+            if (vJet.DeltaR(ele) < 0.3) {
                 elOverlap = true;
                 break;
             }
@@ -465,7 +488,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         bool tauOverlap = false;
         for (const auto& tau: veto_taus) {
-            if (vJet.DeltaR(tau) < 0.4) {
+            if (vJet.DeltaR(tau) < 0.3) {
                 tauOverlap = true;
                 break;
             }
@@ -509,9 +532,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
 
+
     if (params->selection == "mumu") {
-        if ((muons.size()!=2) || (nElectrons!=0)  || (taus.size() != 0))
-            return kTRUE;
+
+        
+        if ((muons.size()!=2) || (nElectrons!=0)  || (taus.size() != 0)
+            || !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+            || !(muons[1]->typeBits & baconhep::kPOGTightMuon)
+            || GetMuonIsolation(muons[0])/muons[0]->pt > 0.15 
+            || GetMuonIsolation(muons[1])/muons[1]->pt > 0.15         
+        ) return kTRUE;
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
@@ -532,9 +562,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector muonOneP4, muonTwoP4;
         //copy_p4(muons[0], MUON_MASS, muonOneP4);
-        //copy_p4(muons[1], MUON_MASS, muonTwoP4);
+        //copy_p4(muons[1], MUON_MASS, muonTwoP4);     
         muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
         muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.1052);
+
         leptonOneP4 = muonOneP4;
         leptonTwoP4 = muonTwoP4;
         leptonOneQ = muons[0]->q;
@@ -570,11 +601,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeightTrigger *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
     } 
-
     if (params->selection == "mutau") {
         //cout<<taus.size() <<endl;
-        if ( muons.size() !=1 || taus.size() !=1 || nElectrons!=0)
-            return kTRUE;
+        if ( muons.size() !=1 || taus.size() !=1 || nElectrons!=0 
+            || !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+            || GetMuonIsolation(muons[0])/muons[0]->pt > 0.15 
+            ) return kTRUE;
         hTotalEvents->Fill(5);
         hGenEvents->Fill(nGenState+5);
 
@@ -630,12 +662,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             // trigger weight
             pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            eventWeightTrigger *= trigEff1.first/trigEff.second;;
+            eventWeightTrigger *= trigEff1.first/trigEff1.second;;
         }
     } 
     if (params->selection == "mu4j") {
 
-        if (muons.size() != 1 || electrons.size() != 0 || taus.size() != 0) 
+        if (muons.size() != 1 || electrons.size() != 0 || taus.size() != 0
+            || !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+            || GetMuonIsolation(muons[0])/muons[0]->pt > 0.15 
+            ) 
             return kTRUE;
         hTotalEvents->Fill(5);
 
@@ -663,9 +698,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // fill b jets
         bjetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);   
         bjetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);  
-        bjetOneBmva = jets[0]->bmva;
-        bjetTwoBmva = jets[1]->bmva; 
-
+        bjetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);   
+        bjetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);  
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 
@@ -677,7 +711,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= trigEff.first/trigEff.second;
         }
     }
-
     if (params->selection == "ee") {
 
         if ( (nMuons!=0) || (nElectrons!=2) )
@@ -726,8 +759,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*", electronTwoP4);
             //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
-    }
-    
+    }  
     if (params->selection == "etau"){
         if ( muons.size() !=0 || taus.size() !=1 || nElectrons!=1 )
             return kTRUE;
@@ -777,11 +809,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
     }
-
     if (params->selection == "emu") {
 
-        if (muons.size() != 1 || electrons.size() != 1 || taus.size() != 0)
-            return kTRUE;
+        if (muons.size() != 1 || electrons.size() != 1 || taus.size() != 0 
+            || !(muons[0]->typeBits & baconhep::kPOGTightMuon)
+            || GetMuonIsolation(muons[0])/muons[0]->pt > 0.15 
+            ) return kTRUE;
         hTotalEvents->Fill(5);
 
         if (muons[0]->pt < 25 || electrons[0]->pt < 3)
@@ -828,8 +861,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
     
-    
-
 
     outTree->Fill();
     this->passedEvents++; // controller variables

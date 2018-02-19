@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+
 import BLT.BLTAnalysis.BatchMaster as bm
 import sys
 
@@ -7,8 +8,8 @@ cfg = bm.JobConfig
 
 ''' Specify parameters '''
 path       = '/tthome/share/bacon/production/12a'
-executable = 'execBatch.sh'
-selection  = 'mu4j'
+executable = 'fakerate_execBatch.sh'
+selection  = '3mu'
 period     = '2016'
 
 ''' 
@@ -17,7 +18,7 @@ period     = '2016'
 '''
 
 data_list = []
-if selection in ['mumu', 'emu', 'mutau', 'mu4j']:
+if selection in ['3mu']:
     data_list.extend([
         cfg(data_name = 'muon_2016B_v1',
             path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
@@ -65,107 +66,11 @@ if selection in ['mumu', 'emu', 'mutau', 'mu4j']:
             suffix    = 'muon_2016H'
           ),
         ])
-elif selection in ['ee', 'etau']:
-    data_list.extend([
-         cfg(data_name = 'electron_2016B_v1',
-            path      = '{0}/SingleElectron_Run2016B-03Feb2017_ver1-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016B'
-           ),
-        cfg(data_name = 'electron_2016B_v2',
-            path      = '{0}/SingleElectron_Run2016B-03Feb2017_ver2-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016B'
-           ),
-        cfg(data_name = 'electron_2016C_v1',
-            path      = '{0}/SingleElectron_Run2016C-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016C'
-           ),
-        cfg(data_name = 'electron_2016D_v1',
-            path      = '{0}/SingleElectron_Run2016D-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016D'
-           ),
-        cfg(data_name = 'electron_2016E_v1',
-            path      = '{0}/SingleElectron_Run2016E-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016E'
-           ),
-        cfg(data_name = 'electron_2016F_v1',
-            path      = '{0}/SingleElectron_Run2016F-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016F'
-           ),
-        cfg(data_name = 'electron_2016G',
-            path      = '{0}/SingleElectron_Run2016G-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016G'
-           ),
-        cfg(data_name = 'electron_2016H_v2',
-            path      = '{0}/SingleElectron_Run2016H-03Feb2017_ver2-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016H'
-           ),
-        cfg(data_name = 'electron_2016H_v3',
-            path      = '{0}/SingleElectron_Run2016H-03Feb2017_ver3-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'electron_2016H'
-          ),
-])
+
 
 
 path       = '/tthome/share/bacon/production/12'
 mc_list = []
-if selection in ['mu4j']:
-    mc_list.extend([
-        # QCD
-    cfg(data_name = 'QCD_HT50to100',
-        path     = '{0}/Summer16_QCD_HT50to100'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht50to100'
-       ),
-    cfg(data_name = 'QCD_HT100to200',
-        path     = '{0}/Summer16_QCD_HT100to200'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht100to200'
-       ),
-    cfg(data_name = 'QCD_HT200to300',
-        path     = '{0}/Summer16_QCD_HT200to300'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht200to300'
-       ),
-    cfg(data_name = 'QCD_HT300to500',
-        path     = '{0}/Summer16_QCD_HT300to500'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht300to500'
-       ),
-    cfg(data_name = 'QCD_HT500to700',
-        path     = '{0}/Summer16_QCD_HT500to700'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht500to700'
-       ),
-    cfg(data_name = 'QCD_HT700to1000',
-        path     = '{0}/Summer16_QCD_HT700to1000'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht700to1000'
-       ),
-    cfg(data_name = 'QCD_HT1000to1500',
-        path     = '{0}/Summer16_QCD_HT1000to1500'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht1000to1500'
-       ),
-    cfg(data_name = 'QCD_HT1500to2000',
-        path     = '{0}/Summer16_QCD_HT1500to2000'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht1500to2000'
-       ),
-    cfg(data_name = 'QCD_HT2000toInf',
-        path     = '{0}/Summer16_QCD_HT2000toInf'.format(path),
-        nJobs    = 10,
-        suffix   = 'qcd_ht2000'
-       )
-    ])
 
 mc_list.extend([
     # Drell-Yan
@@ -190,7 +95,7 @@ mc_list.extend([
         nJobs    = 10,
         suffix   = 'z1jets_m-10to50'
       ),
-        cfg(data_name = 'DY2JetsToLL_M-50',
+    cfg(data_name = 'DY2JetsToLL_M-50',
         path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
         nJobs    = 50,
         suffix   = 'z2jets_m-50'
@@ -240,76 +145,7 @@ mc_list.extend([
         path     = '{0}/Summer16_W4JetsToLNu'.format(path),
         nJobs    = 10,
         suffix   = 'w4jets'
-        ),
-   
-    # top
-    # top: ttbar
-    cfg(data_name = 'ttbar',
-       path     = '{0}/Summer16_TT_powheg'.format(path),
-       nJobs    = 50,
-       suffix   = 'ttbar'
-      ),
-
-
-    # top: single t
-    cfg(data_name = 'T_tW-channel',
-        path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 't_tw'
-       ),
-    cfg(data_name = 'Tbar_tW-channel',
-        path     = '{0}/Summer16_ST_tW_antitop_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-        nJobs    = 10,
-        suffix   = 'tbar_tw'
-       ),
-
-    # Diboson
-    # WW
-    cfg(data_name = 'ZZJetsTo2L2Q',
-        path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_2l2q'
-       ),
-    
-    cfg(data_name = 'WW2L2Nu',
-        path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'ww_2l2nu'
-       ),
-    cfg(data_name = 'WWLNuQQ',
-        path     = '{0}/Summer16_WWToLNuQQ_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'ww_1l1nu2q'
-       ),
-    cfg(data_name = 'WW4Q',
-        path     = '{0}/Summer16_WWTo4Q_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'ww_4q'
-       ),
-    # WZ
-    cfg(data_name = 'WZJetsTo2L2Q',
-        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_2l2q'
-       ),
-    cfg(data_name = 'WZJetsTo3LNu',
-        path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_3lnu'
-       ),
-    # ZZ
-    cfg(data_name = 'ZZJetsTo2L2Nu',
-        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_2l2nu'
-       ),
-
-    cfg(data_name = 'ZZJets4Q',
-        path     = '{0}/Summer16_ZZTo4Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_4q'
-       ),
-       
+        )
 ])
 
 

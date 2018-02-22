@@ -96,7 +96,7 @@ public:
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
-    Float_t triggerUnc, puUnc, topPtUnc, lepOneRecoUnc, lepTwoRecoUnc;
+    Float_t triggerUnc, puUnc, topPtUnc, leptonOneRecoUnc, leptonTwoRecoUnc;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;

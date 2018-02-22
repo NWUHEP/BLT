@@ -136,6 +136,13 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
 
+        tree->Branch("leptonOneRecoUnc", &leptonOneRecoUnc);
+        tree->Branch("leptonTwoRecoUnc", &leptonTwoRecoUnc);
+        tree->Branch("topPtUnc", &topPtUnc);
+        tree->Branch("puUnc", &puUnc);
+        tree->Branch("triggerUnc", &triggerUnc);
+
+        // met and ht
         tree->Branch("met", &met);
         tree->Branch("metPhi", &metPhi);
         tree->Branch("ht", &ht);

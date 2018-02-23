@@ -1,5 +1,25 @@
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
 
+// helper functions
+int GetBinNumber(TGraphAsymmErrors* graph, float x0)
+{
+    Double_t x,y;
+    float xmin = 1e9;
+    for (int i = 0; i < graph->GetN(); i++) {
+        graph->GetPoint(i, x, y);
+        float diff = fabs(x - x0);
+        if (diff > xmin) {
+            return i - 1;
+        } else {
+            xmin = diff;
+        }
+    }
+    return graph->GetN() - 1; 
+}
+
+
+// definitions for WeightUtils
+
 WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
 {
     _dataPeriod = dataPeriod;
@@ -165,18 +185,17 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             effData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->Eval(lepton.Pt());
 
-            int ptBin = _muSF_IsoMu24_DATA_BCDEF[etaBin]->GetXaxis()->FindBin(x); 
-            errData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->GetErrorX(ptBin);
-            errMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->GetErrorX(ptBin);
+            int ptBin = GetBinNumber(_muSF_IsoMu24_DATA_BCDEF[etaBin], lepton.Pt()); 
+            errData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->GetErrorY(ptBin);
+            errMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->GetErrorY(ptBin);
         } else if (_dataPeriod == "2016GH") {
             effData = _muSF_IsoMu24_DATA_GH[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_GH[etaBin]->Eval(lepton.Pt());
 
-            int ptBin = _muSF_IsoMu24_DATA_GH[etaBin]->GetXaxis()->FindBin(x); 
-            errData = _muSF_IsoMu24_DATA_GH[etaBin]->GetErrorX(ptBin);
-            errMC   = _muSF_IsoMu24_MC_GH[etaBin]->GetErrorX(ptBin);
+            int ptBin = GetBinNumber(_muSF_IsoMu24_DATA_GH[etaBin], lepton.Pt()); 
+            errData = _muSF_IsoMu24_DATA_GH[etaBin]->GetErrorY(ptBin);
+            errMC   = _muSF_IsoMu24_MC_GH[etaBin]->GetErrorY(ptBin);
         }
-
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
         int etaBin = 0;
         int ptBin = 0;
@@ -196,7 +215,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
         effMC   = _ele_trigEff_mc[etaBin][ptBin];
     }
 
-    EfficiencyContainer effCont(effData, effMC, errData, effMC);
+    EfficiencyContainer effCont(effData, effMC, errData, errMC);
     return effCont;
 }
 
@@ -259,6 +278,24 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
     
     return weight;
 }
+
+// Definitions for EfficiencyContainer
+//
+EfficiencyContainer::EfficiencyContainer()
+{
+    _dataEff = 0.;
+    _mcEff   = 0.;
+    _dataErr = 0.;
+    _mcErr   = 0.;
+};
+
+EfficiencyContainer::EfficiencyContainer(float dataEff, float mcEff, float dataErr, float mcErr)
+{
+    _dataEff = dataEff;
+    _mcEff   = mcEff;
+    _dataErr = dataErr;
+    _mcErr   = mcErr;
+};
 
 void EfficiencyContainer::SetData(float dataEff, float mcEff, float dataErr, float mcErr)
 {

@@ -28,8 +28,8 @@ using namespace std;
 
 class EfficiencyContainer: public TObject{
     public:
-        EfficiencyContainer() {};
-        EfficiencyContainer(float, float, float, float) {};
+        EfficiencyContainer();
+        EfficiencyContainer(float, float, float, float);
         virtual ~EfficiencyContainer() {};
         void SetData(float, float, float, float);
         pair<double, double> GetEff() {return make_pair(_dataEff, _mcEff);};

@@ -96,7 +96,7 @@ public:
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
-    Float_t triggerUnc, puUnc, topPtUnc, leptonOneRecoUnc, leptonTwoRecoUnc;
+    Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
@@ -131,6 +131,8 @@ public:
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
+    float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
+    float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);

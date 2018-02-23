@@ -136,11 +136,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
 
-        tree->Branch("leptonOneRecoUnc", &leptonOneRecoUnc);
-        tree->Branch("leptonTwoRecoUnc", &leptonTwoRecoUnc);
-        tree->Branch("topPtUnc", &topPtUnc);
-        tree->Branch("puUnc", &puUnc);
-        tree->Branch("triggerUnc", &triggerUnc);
+        tree->Branch("leptonOneRecoVar", &leptonOneRecoVar);
+        tree->Branch("leptonTwoRecoVar", &leptonTwoRecoVar);
+        tree->Branch("topPtVar", &topPtVar);
+        tree->Branch("puVar", &puVar);
+        tree->Branch("triggerVar", &triggerVar);
 
         // met and ht
         tree->Branch("met", &met);
@@ -801,13 +801,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     triggered.set(1);
             }
 
-            pair<double, double> trigEff1, trigEff2;
-            trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4) : make_pair(0., 0.);
-            trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4) : make_pair(0., 0.);
-            if (trigEff1.second > 0 || trigEff2.second > 0) {
-                triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+
+            if (triggered.any()) {
+                EfficiencyContainer effCont1, effCont2;
+                if (triggered.test(0)) {
+                    effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+                }
+                if (triggered.test(1)) {
+                    effCont2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                }
+                triggerWeight = GetTriggerSF(effCont1, effCont2);
+                triggerVar    = GetTriggerSFError(effCont1, effCont2);
+
+                cout << triggerWeight << ", " << triggerVar << endl;
             } else {
-                triggerWeight = 0;
+                return kTRUE;
             }
 
             // update the event weight
@@ -863,21 +871,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     triggered.set(1);
             }
 
-            pair<double, double> trigEff1, trigEff2;
-            trigEff1 = triggered.test(0) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4) : make_pair(0., 0.);
-            trigEff2 = triggered.test(1) ? weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4) : make_pair(0., 0.);
-
-            if (trigEff1.second > 0 || trigEff2.second > 0) {
-                triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
-            } else {
-                triggerWeight = 0;
-            }
 
             // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
-    } else if (muons.size() == 1 && electrons.size() == 1 && taus.size() == 0) { // e+mu selection
+    }/* else if (muons.size() == 1 && electrons.size() == 1 && taus.size() == 0) { // e+mu selection
         channel = "emu";
         eventCounts[channel]->Fill(1);
 
@@ -1176,7 +1175,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else {
+    }*/ else {
         return kTRUE;
     }
 
@@ -1387,3 +1386,43 @@ vector<TJet*> MultileptonAnalyzer::KinematicTopTag(vector<TJet*> jets, TVector2 
     return newJets;
 }
 
+float MultileptonAnalyzer::GetTriggerSF(EfficiencyContainer eff1, EfficiencyContainer eff2)
+{
+    pair<double, double> trigEff1, trigEff2;
+    trigEff1 = eff1.GetEff();
+    trigEff2 = eff2.GetEff();
+
+    float sf = 1.;
+    if (trigEff1.second > 0 || trigEff2.second > 0) {
+        sf = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+    }
+
+    return sf;
+}
+
+float MultileptonAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyContainer eff2)
+{
+    pair<double, double> trigEff1, trigEff2, trigErr1, trigErr2;
+    trigEff1 = eff1.GetEff();
+    trigErr1 = eff1.GetErr();
+    trigEff2 = eff2.GetEff();
+    trigErr2 = eff2.GetErr();
+
+    cout << trigEff1.first << " :: " << trigEff1.second << " :: "
+         << trigEff2.first << " :: " << trigEff2.second << endl;
+
+    cout << trigErr1.first << " :: " << trigErr1.second << " :: "
+         << trigErr2.first << " :: " << trigErr2.second << endl;
+
+    float denom = 1 - (1 - trigEff1.second)*(1 - trigEff2.second);
+    float dEffData1 = (1 - trigEff2.first)/denom;
+    float dEffData2 = (1 - trigEff1.first)/denom;
+    float dEffMC1   = -(1 - trigEff2.second)/pow(denom, 2);
+    float dEffMC2   = -(1 - trigEff1.second)/pow(denom, 2);
+
+    float sfVar = pow(trigErr1.first*dEffData1, 2)
+                  + pow(trigErr2.first*dEffData2, 2)
+                  + pow(trigErr1.second*dEffMC1, 2)
+                  + pow(trigErr2.second*dEffMC2, 2);
+    return sfVar;
+}

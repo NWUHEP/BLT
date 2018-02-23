@@ -26,6 +26,20 @@
 
 using namespace std;
 
+class EfficiencyContainer: public TObject{
+    public:
+        EfficiencyContainer() {};
+        EfficiencyContainer(float, float, float, float) {};
+        virtual ~EfficiencyContainer() {};
+        void SetData(float, float, float, float);
+        pair<double, double> GetEff() {return make_pair(_dataEff, _mcEff);};
+        pair<double, double> GetErr() {return make_pair(_dataErr, _mcErr);};
+        
+    private:
+        float _dataEff, _mcEff;
+        float _dataErr, _mcErr;
+};
+
 class WeightUtils: public TObject {
     public:
         WeightUtils() {};
@@ -38,7 +52,7 @@ class WeightUtils: public TObject {
         void    SetSelection(string);
 
         float   GetPUWeight(float);
-        pair<double, double>   GetTriggerEffWeight(string, TLorentzVector&) const;
+        EfficiencyContainer GetTriggerEffWeight(string, TLorentzVector&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
         float   GetElectronRecoIdEff(TLorentzVector&) const;

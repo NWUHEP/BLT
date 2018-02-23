@@ -145,10 +145,12 @@ float WeightUtils::GetPUWeight(float nPU)
     return _puReweight->Eval(nPU); 
 }
 
-std::pair<double, double> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
+EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
     float effData = 1;
+    float errData = 1;
     float effMC   = 1;
+    float errMC   = 1;
     if (triggerName == "HLT_IsoMu24_v*") {
         float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
         int etaBin = 0;
@@ -162,9 +164,17 @@ std::pair<double, double> WeightUtils::GetTriggerEffWeight(string triggerName, T
         if (_dataPeriod == "2016BtoF") {
             effData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->Eval(lepton.Pt());
+
+            int ptBin = _muSF_IsoMu24_DATA_BCDEF[etaBin]->GetXaxis()->FindBin(x); 
+            errData = _muSF_IsoMu24_DATA_BCDEF[etaBin]->GetErrorX(ptBin);
+            errMC   = _muSF_IsoMu24_MC_BCDEF[etaBin]->GetErrorX(ptBin);
         } else if (_dataPeriod == "2016GH") {
             effData = _muSF_IsoMu24_DATA_GH[etaBin]->Eval(lepton.Pt());
             effMC   = _muSF_IsoMu24_MC_GH[etaBin]->Eval(lepton.Pt());
+
+            int ptBin = _muSF_IsoMu24_DATA_GH[etaBin]->GetXaxis()->FindBin(x); 
+            errData = _muSF_IsoMu24_DATA_GH[etaBin]->GetErrorX(ptBin);
+            errMC   = _muSF_IsoMu24_MC_GH[etaBin]->GetErrorX(ptBin);
         }
 
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
@@ -186,7 +196,8 @@ std::pair<double, double> WeightUtils::GetTriggerEffWeight(string triggerName, T
         effMC   = _ele_trigEff_mc[etaBin][ptBin];
     }
 
-    return std::make_pair(effData, effMC);
+    EfficiencyContainer effCont(effData, effMC, errData, effMC);
+    return effCont;
 }
 
 float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
@@ -248,4 +259,12 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
     
     return weight;
 }
+
+void EfficiencyContainer::SetData(float dataEff, float mcEff, float dataErr, float mcErr)
+{
+    _dataEff = dataEff;
+    _mcEff   = mcEff;
+    _dataErr = dataErr;
+    _mcErr   = mcErr;
+};
 

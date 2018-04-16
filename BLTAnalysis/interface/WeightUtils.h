@@ -53,9 +53,8 @@ class WeightUtils: public TObject {
 
         float   GetPUWeight(float);
         EfficiencyContainer GetTriggerEffWeight(string, TLorentzVector&) const;
-        float   GetMuonIDEff(TLorentzVector&) const; 
-        float   GetMuonISOEff(TLorentzVector&) const; 
-        float   GetElectronRecoIdEff(TLorentzVector&) const;
+        EfficiencyContainer GetMuonRecoEff(TLorentzVector&) const; 
+        EfficiencyContainer GetElectronRecoEff(TLorentzVector&) const;
 
         ClassDef(WeightUtils, 0);
 

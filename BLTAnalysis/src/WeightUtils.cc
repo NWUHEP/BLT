@@ -1,7 +1,8 @@
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
 
 // helper functions
-int GetBinNumber(TGraphAsymmErrors* graph, float x0)
+template <class Graph>
+int GetBinNumber(Graph graph, float x0)
 {
     Double_t x,y;
     float xmin = 1e9;
@@ -213,13 +214,15 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
         }
         effData = _ele_trigEff_data[etaBin][ptBin];
         effMC   = _ele_trigEff_mc[etaBin][ptBin];
+        errData = 0.005*_ele_trigEff_data[etaBin][ptBin];
+        errMC   = 0.005*_ele_trigEff_mc[etaBin][ptBin];
     }
 
     EfficiencyContainer effCont(effData, effMC, errData, errMC);
     return effCont;
 }
 
-float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
+EfficiencyContainer WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
 {
     float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
     int etaBin = 0;
@@ -230,38 +233,52 @@ float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
         }
     }
 
-    float weight = 1;
+    float effData = 1;
+    float errData = 1;
+    float effMC   = 1;
+    float errMC   = 1;
     if (_dataPeriod == "2016BtoF") {
-        weight   *= _muSF_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
+        float effDataID  = _muSF_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt());
+        float effDataISO = _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt());
+        effData    = effDataID*effDataISO;
+
+        float effMCID    = _muSF_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
+        float effMCISO   = _muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
+        effMC      = effMCID*effMCISO;
+
+        int ptBin = GetBinNumber<TGraphAsymmErrors*>(_muSF_ID_DATA_BCDEF[etaBin], muon.Pt()); 
+        float errDataID  = _muSF_ID_DATA_BCDEF[etaBin]->GetErrorY(ptBin);
+        float errDataISO = _muSF_ISO_DATA_BCDEF[etaBin]->GetErrorY(ptBin);
+        float errMCID    = _muSF_ID_MC_BCDEF[etaBin]->GetErrorY(ptBin);
+        float errMCISO   = _muSF_ISO_MC_BCDEF[etaBin]->GetErrorY(ptBin);
+
+        errData = effData*(pow(errDataID/effDataID, 2) + pow(errDataISO/effDataISO, 2));
+        errMC   = effMC*(pow(errMCID/effMCID, 2) + pow(errMCISO/effMCISO, 2));
+
     } else if (_dataPeriod == "2016GH") {
-        weight   *= _muSF_ID_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ID_MC_GH[etaBin]->Eval(muon.Pt());
+        float effDataID  = _muSF_ID_DATA_GH[etaBin]->Eval(muon.Pt());
+        float effDataISO = _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt());
+        effData    = effDataID*effDataISO;
+
+        float effMCID    = _muSF_ID_MC_GH[etaBin]->Eval(muon.Pt());
+        float effMCISO   = _muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
+        effMC      = effMCID*effMCISO;
+
+        int ptBin = GetBinNumber<TGraphAsymmErrors*>(_muSF_ID_DATA_GH[etaBin], muon.Pt()); 
+        float errDataID  = _muSF_ID_DATA_GH[etaBin]->GetErrorY(ptBin);
+        float errDataISO = _muSF_ISO_DATA_GH[etaBin]->GetErrorY(ptBin);
+        float errMCID    = _muSF_ID_MC_GH[etaBin]->GetErrorY(ptBin);
+        float errMCISO   = _muSF_ISO_MC_GH[etaBin]->GetErrorY(ptBin);
+
+        errData = effData*(pow(errDataID/effDataID, 2) + pow(errDataISO/effDataISO, 2));
+        errMC   = effMC*(pow(errMCID/effMCID, 2) + pow(errMCISO/effMCISO, 2));
     }
     
-    return weight;
+    EfficiencyContainer effCont(effData, effMC, errData, errMC);
+    return effCont;
 }
 
-float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
-{
-    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
-    int etaBin = 0;
-    for (int i = 0; i < 4; ++i) {
-        if (fabs(muon.Eta()) > binningEta[i] && fabs(muon.Eta()) <= binningEta[i+1]) {
-            etaBin = i;
-            break;
-        }
-    }
-
-    float weight = 1;
-    if (_dataPeriod == "2016BtoF") {
-        weight   *= _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
-    } else if (_dataPeriod == "2016GH") {
-        weight   *= _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
-    }
-    
-    return weight;
-}
-
-float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
+EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
 {
     float binningPt[] = {10., 20., 35., 50., 90., 500.};
     int ptBin = 0;
@@ -272,15 +289,25 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
         }
     }
 
-    float weight = 1;
-    weight *= _eleSF_RECO->Eval(electron.Eta());
-    weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
+    float sfReco = _eleSF_RECO->Eval(electron.Eta());
+    float sfId   = _eleSF_ID[ptBin]->Eval(electron.Eta());
+
+    int etaBin;
+    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_RECO, electron.Eta()); 
+    float errReco = _eleSF_RECO->GetErrorY(etaBin);
+
+    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_ID[ptBin], electron.Eta()); 
+    float errId  = _eleSF_ID[ptBin]->GetErrorY(etaBin);
+    float sfErr = sfReco*sfId*(pow(errReco/sfReco, 2) + pow(errId/sfId, 2));
     
-    return weight;
+    EfficiencyContainer effCont(sfReco*sfId, 1., sfErr, 0.);
+    return effCont;
 }
 
+//
 // Definitions for EfficiencyContainer
 //
+
 EfficiencyContainer::EfficiencyContainer()
 {
     _dataEff = 0.;

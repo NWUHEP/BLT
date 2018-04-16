@@ -57,6 +57,38 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_ID_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_ID_GH->Get((filePath + "pt_PLOT_abseta_bin1_MC").c_str());
     _muSF_ID_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_ID_GH->Get((filePath + "pt_PLOT_abseta_bin2_MC").c_str());
     _muSF_ID_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ID_GH->Get((filePath + "pt_PLOT_abseta_bin3_MC").c_str());
+    
+    // muon loose ID sf (BCDEF)
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/EfficienciesAndSF_BCDEF.root";
+    TFile* f_muRecoSF_Loose_ID_BCDEF = new TFile(fileName.c_str(), "OPEN"); 
+
+    filePath = "MC_NUM_LooseID_DEN_genTracks_PAR_pt_eta/efficienciesDATA/";
+    _muSF_Loose_ID_DATA_BCDEF[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin0_DATA").c_str());
+    _muSF_Loose_ID_DATA_BCDEF[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin1_DATA").c_str());
+    _muSF_Loose_ID_DATA_BCDEF[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin2_DATA").c_str());
+    _muSF_Loose_ID_DATA_BCDEF[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin3_DATA").c_str());
+
+    filePath = "MC_NUM_LooseID_DEN_genTracks_PAR_pt_eta/efficienciesMC/";
+    _muSF_Loose_ID_MC_BCDEF[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin0_MC").c_str());
+    _muSF_Loose_ID_MC_BCDEF[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin1_MC").c_str());
+    _muSF_Loose_ID_MC_BCDEF[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin2_MC").c_str());
+    _muSF_Loose_ID_MC_BCDEF[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_BCDEF->Get((filePath + "pt_PLOT_abseta_bin3_MC").c_str());
+
+    // muon loose ID sf (GH)
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/EfficienciesAndSF_GH.root";
+    TFile* f_muRecoSF_Loose_ID_GH = new TFile(fileName.c_str(), "OPEN"); 
+
+    filePath = "MC_NUM_LooseID_DEN_genTracks_PAR_pt_eta/efficienciesDATA/";
+    _muSF_Loose_ID_DATA_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin0_DATA").c_str());
+    _muSF_Loose_ID_DATA_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin1_DATA").c_str());
+    _muSF_Loose_ID_DATA_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin2_DATA").c_str());
+    _muSF_Loose_ID_DATA_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin3_DATA").c_str());
+
+    filePath = "MC_NUM_LooseID_DEN_genTracks_PAR_pt_eta/efficienciesMC/";
+    _muSF_Loose_ID_MC_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin0_MC").c_str());
+    _muSF_Loose_ID_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin1_MC").c_str());
+    _muSF_Loose_ID_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin2_MC").c_str());
+    _muSF_Loose_ID_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ID_GH->Get((filePath + "pt_PLOT_abseta_bin3_MC").c_str());
 
     // tight muon ISO sf (BCDEF)
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_BCDEF.root";
@@ -78,17 +110,49 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_GH.root";
     TFile* f_muRecoSF_ISO_GH = new TFile(fileName.c_str(), "OPEN"); 
 
-    filePath = "tkLooseISO_highptID_newpt_eta/efficienciesDATA/";
-    _muSF_ISO_DATA_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_DATA").c_str());
-    _muSF_ISO_DATA_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_DATA").c_str());
-    _muSF_ISO_DATA_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_DATA").c_str());
-    _muSF_ISO_DATA_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_DATA").c_str());
+    filePath = "TightISO_TightID_pt_eta/efficienciesDATA/";
+    _muSF_ISO_DATA_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_Tight2012_pass_DATA").c_str());
+    _muSF_ISO_DATA_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin1_&_Tight2012_pass_DATA").c_str());
+    _muSF_ISO_DATA_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin2_&_Tight2012_pass_DATA").c_str());
+    _muSF_ISO_DATA_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_DATA").c_str());
 
-    filePath = "tkLooseISO_highptID_newpt_eta/efficienciesMC/";
-    _muSF_ISO_MC_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin0_&_HighPt_pass_MC").c_str());
-    _muSF_ISO_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin1_&_HighPt_pass_MC").c_str());
-    _muSF_ISO_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin2_&_HighPt_pass_MC").c_str());
-    _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pair_newTuneP_probe_pt_PLOT_abseta_bin3_&_HighPt_pass_MC").c_str());
+    filePath = "TightISO_TightID_pt_eta/efficienciesMC/";
+    _muSF_ISO_MC_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_Tight2012_pass_MC").c_str());
+    _muSF_ISO_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin1_&_Tight2012_pass_MC").c_str());
+    _muSF_ISO_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin2_&_Tight2012_pass_MC").c_str());
+    _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_MC").c_str());
+
+    // loose muon ISO sf (BCDEF)
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_BCDEF.root";
+    TFile* f_muRecoSF_Loose_ISO_BCDEF = new TFile(fileName.c_str(), "OPEN"); 
+
+    filePath = "LooseISO_LooseID_pt_eta/efficienciesDATA/";
+    _muSF_Loose_ISO_DATA_BCDEF[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_BCDEF[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin1_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_BCDEF[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin2_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_BCDEF[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin3_&_PF_pass_DATA").c_str());
+
+    filePath = "LooseISO_LooseID_pt_eta/efficienciesMC/";
+    _muSF_Loose_ISO_MC_BCDEF[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_BCDEF[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin1_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_BCDEF[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin2_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_BCDEF[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_BCDEF->Get((filePath + "pt_PLOT_abseta_bin3_&_PF_pass_MC").c_str());
+
+    // loose muon ISO sf (GH)
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_iso/EfficienciesAndSF_GH.root";
+    TFile* f_muRecoSF_Loose_ISO_GH = new TFile(fileName.c_str(), "OPEN"); 
+
+    filePath = "LooseISO_LooseID_pt_eta/efficienciesDATA/";
+    _muSF_Loose_ISO_DATA_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_DATA").c_str());
+    _muSF_Loose_ISO_DATA_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_DATA").c_str());
+
+    filePath = "LooseISO_LooseID_pt_eta/efficienciesMC/";
+    _muSF_Loose_ISO_MC_GH[0] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
+    _muSF_Loose_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
 
     // electron trigger efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg1_Ele23_HZZSelection_Tag35.root";
@@ -196,6 +260,30 @@ float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
     return weight;
 }
 
+float WeightUtils::GetLooseMuonIDEff(TLorentzVector& muon) const
+{
+    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
+    int etaBin = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(muon.Eta()) > binningEta[i] && fabs(muon.Eta()) <= binningEta[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    float random = rng->Rndm();
+    if (muon.Pt() < 200.) {
+        if (random > 0.468) {
+            weight   *= _muSF_Loose_ID_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_Loose_ID_MC_BCDEF[etaBin]->Eval(muon.Pt());
+        } else {
+            weight   *= _muSF_Loose_ID_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_Loose_ID_MC_GH[etaBin]->Eval(muon.Pt());
+        }
+    }
+    
+    return weight;
+}
+
 float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
 {
     float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
@@ -214,6 +302,30 @@ float WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
             weight   *= _muSF_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
         } else {
             weight   *= _muSF_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_ISO_MC_GH[etaBin]->Eval(muon.Pt());
+        }
+    }
+    
+    return weight;
+}
+
+float WeightUtils::GetLooseMuonISOEff(TLorentzVector& muon) const
+{
+    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
+    int etaBin = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(muon.Eta()) > binningEta[i] && fabs(muon.Eta()) <= binningEta[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    float random = rng->Rndm();
+    if (muon.Pt() < 200.) {
+        if (random > 0.468) {
+            weight   *= _muSF_Loose_ISO_DATA_BCDEF[etaBin]->Eval(muon.Pt())/_muSF_Loose_ISO_MC_BCDEF[etaBin]->Eval(muon.Pt());
+        } else {
+            weight   *= _muSF_Loose_ISO_DATA_GH[etaBin]->Eval(muon.Pt())/_muSF_Loose_ISO_MC_GH[etaBin]->Eval(muon.Pt());
         }
     }
     

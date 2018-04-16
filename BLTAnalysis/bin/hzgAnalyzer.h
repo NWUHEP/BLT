@@ -105,6 +105,8 @@ public:
     // photon data
     TLorentzVector photonOneP4;
     Float_t photonOneR9;
+    Float_t photonOneMVA;
+    Bool_t passElectronVeto;
 
     // dilepton vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
@@ -117,19 +119,17 @@ public:
     Float_t met, metPhi, ht, htPhi, htSum;
 
     // generator level data
-    Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
-    TLorentzVector genOneP4, genTwoP4;
-    Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
-    Bool_t vetoDY;
+    TLorentzVector genLeptonOneP4, genLeptonTwoP4, genPhotonP4;
+    Int_t genLeptonOneId, genLeptonTwoId;
+    Bool_t genPhotonFHPFS, genPhotonIPFS;
 
-    float MetKluge(float);
+    //Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
+    //TLorentzVector genOneP4, genTwoP4;
+    //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
+    //Bool_t vetoDY;
+
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
-    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
-    //vector<TJet*> KinematicTopTag(vector<TJet*>, TVector2, TLorentzVector);
-
-    //vector<vector<unsigned> > comb(int, int);
 
     //ClassDef(hzgAnalyzer,0);
 };

@@ -104,8 +104,8 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                 && el->hovere       < 0.0414
                 && energyInverse    < 0.0129
                 && el->nMissingHits <= 1
-                && fabs(el->d0)     < 1.
-                && fabs(el->dz)     < 1.
+                && fabs(el->d0)     < 0.05
+                && fabs(el->dz)     < 0.1
                 && !el->isConv
            ) elPass = true;
     } else {
@@ -116,8 +116,8 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
                 && el->hovere       < 0.0641
                 && energyInverse    < 0.0129
                 && el->nMissingHits <= 1
-                && fabs(el->d0)     < 1.
-                && fabs(el->dz)     < 1.
+                && fabs(el->d0)     < 0.1
+                && fabs(el->dz)     < 0.2
                 && !el->isConv    
            ) elPass = true;
     }    
@@ -248,9 +248,7 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
     }
 
     float combIso = el->chHadIso 
-                    + std::max(0.,(double)el->neuHadIso 
-                            + el->gammaIso 
-                            - _rhoFactor*effArea[iEta]);
+                    + std::max(0., (double)el->neuHadIso + el->gammaIso - _rhoFactor*effArea[iEta]);
 
     bool isoPass = false;
     if (fabs(el->scEta) <= 1.479) {

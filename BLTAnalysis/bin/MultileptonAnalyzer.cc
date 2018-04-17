@@ -766,7 +766,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJets + nBJets < 2)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -849,7 +849,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJets + nBJets < 2)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -946,7 +946,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJets + nBJets < 2)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1023,7 +1023,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJets + nBJets < 2)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1099,7 +1099,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJets + nBJets < 2)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1171,7 +1171,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(2);
 
-        if (nJets + nBJets < 4 || nBJets < 1)
+        if (nJets + nBJets < 4)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
@@ -1251,7 +1251,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 4 || nBJets < 1)
+        if (nJets + nBJets < 4)// || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 

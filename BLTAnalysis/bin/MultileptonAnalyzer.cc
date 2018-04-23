@@ -52,17 +52,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "single_lepton") {
-        if (params->datasetgroup.substr(0, 8)  == "electron") { 
-            triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
-        } else if (params->datasetgroup.substr(0, 8)  == "muon") { 
-            triggerNames.push_back("HLT_IsoMu24_v*");
-            triggerNames.push_back("HLT_IsoTkMu24_v*");
-        } else { // for MC
-            triggerNames.push_back("HLT_Ele27_WPLoose_Gsf_v*");
-            triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
-            triggerNames.push_back("HLT_IsoMu24_v*");
-            triggerNames.push_back("HLT_IsoTkMu24_v*");
-        }
+        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        triggerNames.push_back("HLT_IsoMu24_v*");
+        triggerNames.push_back("HLT_IsoTkMu24_v*");
 
     } else if (params->selection == "single_muon") {
         triggerNames.push_back("HLT_IsoMu24_v*");
@@ -441,14 +433,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             passTriggerNames.push_back(triggerNames[i]);
 
             // remove overlap between single electron and single muon datastreams
-            if (params->selection == "single_lepton" && params->datasetgroup.substr(0, 8)  == "electron" && (triggerNames[i] == "HLT_IsoMu24_v*" || triggerNames[i] == "HLT_IsoTkMu24_v*")) {
+            if (//isData
+                params->selection == "single_lepton" 
+                && params->datasetgroup.substr(0, 8)  == "electron" 
+                && (triggerNames[i] == "HLT_IsoMu24_v*" || triggerNames[i] == "HLT_IsoTkMu24_v*")
+                ) {
                 passTrigger = false;
                 break;
             }
         }
     }
 
-    if (!passTrigger)// && isData)
+    if (!passTrigger)
         return kTRUE;
     hTotalEvents->Fill(3);
 
@@ -524,15 +520,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
 
         if (
-                muonP4.Pt() > 3.
+                muonP4.Pt() > 10.
                 && fabs(muonP4.Eta()) < 2.4
-
-                // Loose muon ID
-                //&& (muon->typeBits & baconhep::kPFMuon)
-                //&& ((muon->typeBits & baconhep::kGlobal) || (muon->selectorBits & baconhep::kTrackerMuonArbitrated))
-                //&& fabs(muon->d0)  < 0.5
-                //&& fabs(muon->dz)  < 20.0
-                //&& minDeltaR > 0.02
 
                 // tight muon ID and ISO
                 && (muon->typeBits & baconhep::kPFMuon) 
@@ -540,10 +529,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && muon->muNchi2    < 10.
                 && muon->nMatchStn  > 1
                 && muon->nPixHits   > 0
-                && fabs(muon->d0)   < 0.2
-                && fabs(muon->dz)   < 0.5
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
+                && fabs(muon->d0)   < 0.2
+                && fabs(muon->dz)   < 0.5
                 && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
                 ) {
                     muons.push_back(muon);
@@ -611,7 +600,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
 
-        if( // Selection adopted from Stany's tau counting selection for ttDM; added MVA tight selection
+        if( 
                 tau->pt > 20  
                 && abs(tau->eta) < 2.3 
                 && !muOverlap
@@ -766,9 +755,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        //if (nJets + nBJets < 2)// || nBJets < 1)
+        //    return kTRUE;
+        //eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonOneP4;
         leptonOneIso    = muonOneIso;
@@ -832,7 +821,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
-    }  else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
+    }  /*else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
         channel = "ee";
         eventCounts[channel]->Fill(1);
 
@@ -929,6 +918,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } else if (find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end()) {
             elPtThreshold = 30.;
         }
+
+        //for (const auto& name: passTriggerNames) {
+        //    cout << name << ", ";
+        //}
+        //cout << muPtThreshold << ", " << elPtThreshold << endl;
 
         if (
                 muons[0]->pt < muPtThreshold 
@@ -1315,10 +1309,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else {
+    }*/ else {
         return kTRUE;
+
     }
 
+    cout << muons.size() << endl;
 
     ///////////////////
     // Fill jet info //

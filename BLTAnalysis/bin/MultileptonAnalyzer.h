@@ -24,6 +24,7 @@
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
+#include "BLT/BLTAnalysis/interface/ElectronCorrector.h"
 
 #include "BLT/BLTAnalysis/interface/RoccoR.h"
 
@@ -73,6 +74,9 @@ public:
     RoccoR *muonCorr;
     TRandom3 *rng;
 
+    // electron scale and smear corrector (trash)
+    EnergyScaleCorrection *electronScaler;
+
     // Params and cuts
     std::unique_ptr<Parameters>         params;
     std::unique_ptr<Cuts>               cuts;
@@ -94,7 +98,7 @@ public:
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // weights and uncertainties
-    Float_t eventWeight, triggerWeight, puWeight, topPtWeight;
+    Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
     Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
 

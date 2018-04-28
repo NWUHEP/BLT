@@ -89,6 +89,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     // muon momentum corrections
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
+    // electron scale corrections
+    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data/");
+
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
 
@@ -125,6 +128,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("topPtWeight", &topPtWeight);
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
+        tree->Branch("genWeight", &genWeight);
 
         tree->Branch("leptonOneRecoVar", &leptonOneRecoVar);
         tree->Branch("leptonTwoRecoVar", &leptonTwoRecoVar);
@@ -543,7 +547,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 muonP4.Pt() > 10
                 && fabs(muonP4.Eta()) < 2.4
                 // tight muon ID and ISO
-                && (muon->typeBits & baconhep::kPOGTightMuon)
+                && (muon->pogIDBits & baconhep::kPOGTightMuon)
                 && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
            ) {
             veto_muons.push_back(muonP4);
@@ -557,6 +561,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
+
+        //float corr = electronScaler->ScaleCorrection(runNumber, 
+        //                                             bool(fabs(electron->eta) < 1.444), 
+        //                                             electron->r9, 
+        //                                             electron->scEta, 
+        //                                             electron->pt
+        //                                             );
+        //cout << corr << endl;
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
@@ -742,22 +754,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         float muonOneIso = GetMuonIsolation(muons[0]);
         float muonTwoIso = GetMuonIsolation(muons[1]);
         if (
-                !(muons[0]->typeBits & baconhep::kPOGTightMuon)
-                || !(muons[1]->typeBits & baconhep::kPOGTightMuon)
-                || muonOneIso/muonOneP4.Pt() > 0.15 
+                muonOneIso/muonOneP4.Pt() > 0.15 
                 || muonTwoIso/muonTwoP4.Pt() > 0.15 
                 || !muonTriggered
            )
             return kTRUE;
         eventCounts[channel]->Fill(2);
 
-        if (muons[0]->pt < 25. || muons[1]->pt < 5.)
+        if (muons[0]->pt < 25. || muons[1]->pt < 10.)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        //if (nJets + nBJets < 2)// || nBJets < 1)
-        //    return kTRUE;
-        //eventCounts[channel]->Fill(4);
+        if (nJets + nBJets < 2)// || nBJets < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonOneP4;
         leptonOneIso    = muonOneIso;
@@ -786,8 +796,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-            effs = effCont2.GetEff();
             errs = effCont2.GetErr();
+            effs = effCont2.GetEff();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
@@ -821,7 +831,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
-    }  /*else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
+    }  else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
         channel = "ee";
         eventCounts[channel]->Fill(1);
 
@@ -1051,7 +1061,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
-            leptonTwoRecoVar    = 0.0001;
+            leptonTwoRecoVar    = 0.05;
 
             // trigger weights
             bool triggered = false;
@@ -1309,12 +1319,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    }*/ else {
+    } else {
         return kTRUE;
 
     }
-
-    cout << muons.size() << endl;
 
     ///////////////////
     // Fill jet info //

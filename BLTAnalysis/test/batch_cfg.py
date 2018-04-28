@@ -7,11 +7,11 @@ import sys
 cfg        = bm.JobConfig
 path       = '/tthome/share/bacon/production/12a'
 executable = 'execBatch.sh'
-selection  = 'fakes'
+selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_mu']#, 'single_el']
-mc_samples   = ['zjets', 'ttbar', 'diboson']#, 't', 'wjets']
+data_samples = ['single_mu', 'single_el']
+mc_samples   = ['zjets', 'ttbar', 'diboson', 't', 'wjets']
 
 ''' 
     Set job configurations.  
@@ -181,51 +181,51 @@ mc_dict['zjets'] = [
         nJobs    = 50,
         suffix   = 'zjets_m-50'
        ),
-    #cfg(data_name = 'DYJetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zjets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY1JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY1JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY3JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph_concat'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-50',
-    #    path     = '{0}/Summer16_DY4JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
+    cfg(data_name = 'DYJetsToLL_M-10to50',
+        path     = '{0}/Summer16_DYJetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50'
+       ),
+    cfg(data_name = 'DY1JetsToLL_M-50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50'
+       ),
+    cfg(data_name = 'DY1JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY1JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-10to50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY2JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-10to50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY3JetsToLL_M-10to50_madgraph_concat'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-10to50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/Summer16_DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
     ]
 
 mc_dict['wjets'] = [
@@ -303,21 +303,21 @@ mc_dict['qcd'] = [
 
 mc_dict['ttbar'] = [
     # top
-    #cfg(data_name = 'ttbar_inclusive',
-    #    path     = '{0}/Summer16_TT_powheg'.format(path),
+    cfg(data_name = 'ttbar_inclusive',
+        path     = '{0}/Summer16_TT_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive'
+       ),
+    #cfg(data_name = 'ttbar_leptonic',
+    #    path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
     #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive'
+    #    suffix   = 'ttbar_lep'
     #   ),
-    cfg(data_name = 'ttbar_leptonic',
-        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-        nJobs    = 50,
-        suffix   = 'ttbar_lep'
-       ),
-    cfg(data_name = 'ttbar_semileptonic',
-        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-        nJobs    = 50,
-        suffix   = 'ttbar_semilep'
-       ),
+    #cfg(data_name = 'ttbar_semileptonic',
+    #    path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_semilep'
+    #   ),
     #cfg(data_name = 'ttbar_leptonic',
     #    path     = '{0}/Summer16_TTJets_DiLept_madgraph'.format(path),
     #    nJobs    = 50,
@@ -360,36 +360,36 @@ mc_dict['t'] = [
 
 mc_dict['diboson'] = [
     # Diboson
-    #cfg(data_name = 'WW',
-    #    path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'ww'
-    #   ),
-    #cfg(data_name = 'WZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_2l2q'
-    #   ),
+    cfg(data_name = 'WW',
+        path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
+        nJobs    = 10,
+        suffix   = 'ww'
+       ),
+    cfg(data_name = 'WZJetsTo2L2Q',
+        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'wz_2l2q'
+       ),
     cfg(data_name = 'WZJetsTo3LNu',
         path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
         nJobs    = 10,
         suffix   = 'wz_3lnu'
        ),
-    #cfg(data_name = 'ZZJetsTo2L2Nu',
-    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2nu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Q',
-    #    path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2q'
-    #   ),
-    cfg(data_name = 'ZZJetsTo4L',
-        path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
+    cfg(data_name = 'ZZJetsTo2L2Nu',
+        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
         nJobs    = 10,
-        suffix   = 'zz_4l'
+        suffix   = 'zz_2l2nu'
        ),
+    cfg(data_name = 'ZZJetsTo2L2Q',
+        path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_2l2q'
+       ),
+    #cfg(data_name = 'ZZJetsTo4L',
+    #    path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_4l'
+    #   ),
     ]
 
 batch_list = []
@@ -403,4 +403,3 @@ batch = bm.BatchMaster(config_list = batch_list,
                        location    = 'nut3'
                      )
 batch.submit_to_batch()
-

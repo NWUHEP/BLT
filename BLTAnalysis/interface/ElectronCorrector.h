@@ -1,15 +1,16 @@
 #ifndef ELECTRONCORRECTOR_H
 #define ELECTRONCORRECTOR_H
 
-#include "BaconAna/DataFormats/interface/TElectron.hh"
-#include <TString.h>
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <cmath>
 #include <string>
 
+#include "BaconAna/DataFormats/interface/TElectron.hh"
+
 using namespace std;
+using namespace baconhep;
 
 /*
  * r9 bins
@@ -24,8 +25,6 @@ using namespace std;
  * 
  */
 
-float r9Cut = 0.94;
-float etaRanges[] = {0, 1, 1.479, 2, 2.5};
 //============================== 
 
 struct scaleData
@@ -46,15 +45,13 @@ typedef map<int, map<int, map<int, scaleData> > > scaleMap;
 //============================== Main class
 class EnergyScaleCorrection
 {
-
-
     public:
         EnergyScaleCorrection(std::string filePath);
         EnergyScaleCorrection(){}; 
         ~EnergyScaleCorrection(void){};
 
         scaleData GetScaleData(TElectron* electron, int runNumber);
-        smearData GetSmearData(TElectron* electron, int runNumber);
+        smearData GetSmearData(TElectron* electron);
     private:
         vector<int> _runNumbers;
         smearMap _smearMap;

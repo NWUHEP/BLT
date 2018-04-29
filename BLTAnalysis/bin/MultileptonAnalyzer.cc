@@ -562,13 +562,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
 
-        //float corr = electronScaler->ScaleCorrection(runNumber, 
-        //                                             bool(fabs(electron->eta) < 1.444), 
-        //                                             electron->r9, 
-        //                                             electron->scEta, 
-        //                                             electron->pt
-        //                                             );
-        //cout << corr << endl;
+        if (isData) {
+            scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
+            cout << sdata.scale << ", " << sdata.scaleErr << endl;
+        } else {
+            smearData sdata = electronScaler->GetSmearData(electron);
+            cout << sdata.scale << ", " << sdata.scaleErr << endl;
+        }
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);

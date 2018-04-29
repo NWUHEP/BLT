@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include <cfloat> 
 #include <iomanip>
-#include <sstream>
 
 using namespace std;
+#include <sstream>
 
 EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
 {
@@ -21,15 +21,12 @@ EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
             >> runMin >> runMax
             >> scale >> scaleErr
             >> nada >> nada >> nada;
-        runBin = 0;
-        for (const auto& iRun: runRanges) {
-            if (runMin == iRun) 
-                break;
-            ++runBin
-        }
+
+        if (r9Bin == 0 and etaBin == 0) 
+            _runNumbers.push_back(runMin);
 
         scaleData data = {scale, scaleErr};
-        this->_scaleMap[r9Bin][etaBin][runBin] = data;
+        this->_scaleMap[r9Bin][etaBin][runMin] = data;
     }
     scaleFile.close();
 
@@ -46,4 +43,49 @@ EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
         this->_smearMap[r9Bin][etaBin] = data;
     }
     smearFile.close();
+}
+
+scaleData EnergyScaleCorrection::GetScaleData(TElectron* electron, int runNumber)
+{
+    unsigned r9Bin = 0;
+    if (electron->r9 >= 0.94) {
+        r9Bin = 1;
+    }
+
+    unsigned etaBin = 0;
+    float etaBinning[] = {0, 1, 1.479, 2, 2.5};
+    for (unsigned i = 0; i < 4; ++i) {
+        if (fabs(electron->eta) >= etaBinning[i] && fabs(electron->eta) < etaBinning[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+
+    int runMin = 0;
+    for (unsigned i = 0; i < _runNumbers.size(); ++i) {
+        if (runNumber >= _runNumbers[i] && runNumber < _runNumbers[i+1])
+            runMin = _runNumbers[i];
+            break;
+    }
+   
+    return _scaleMap[r9Bin][etaBin][runMin];
+}
+
+smearData EnergyScaleCorrection::GetSmearData(TElectron* electron)
+{
+    unsigned r9Bin = 0;
+    if (electron->r9 >= 0.94) {
+        r9Bin = 1;
+    }
+
+    unsigned etaBin = 0;
+    float etaBinning[] = {0, 1, 1.479, 2, 2.5};
+    for (unsigned i = 0; i < 4; ++i) {
+        if (fabs(electron->eta) >= etaBinning[i] && fabs(electron->eta) < etaBinning[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+    
+    return _smearMap[r9Bin][etaBin];
 }

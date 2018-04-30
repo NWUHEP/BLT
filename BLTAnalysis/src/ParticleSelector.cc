@@ -47,6 +47,10 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
     _jetCorrector = new FactorizedJetCorrector(vPar);
 
+    // jet energy resolution
+	jetResolution = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
+	jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
+
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
@@ -555,4 +559,16 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     double correction = _jetCorrector->getCorrection();
 
     return correction;
+}
+
+pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* jet) const
+{
+    JME::JetParameters jetParams;
+    jetParams.setJetPt(jet->pt);
+    jetParams.setJetEta(jet->eta);
+    jetParams.setRho(_rhoFactor);
+
+    float jres = jetResolution.getResolution(jetParams);
+    float jsf  = jetResolutionSF.getScaleFactor(jetParams);
+    return make_pair(jres, jsf);
 }

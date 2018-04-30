@@ -158,7 +158,7 @@ void BLTSelector::Init(TTree *tree)
     fAddCA15PuppiArr         = 0;
 
     fChain->SetBranchAddress("Info", &fInfo, &b_Info);
-    fChain->SetBranchAddress("GenEvtInfo", &fGenEvtInfo, &b_GenEvtInfo);
+    //fChain->SetBranchAddress("GenEvtInfo", &fGenEvtInfo, &b_GenEvtInfo);
     fChain->SetBranchAddress("GenParticle", &fGenParticleArr, &b_GenParticleArr);
     //fChain->SetBranchAddress("LHEWeight", &fLHEWeightArr, &b_LHEWeightArr);
     fChain->SetBranchAddress("Electron", &fElectronArr, &b_ElectronArr);
@@ -166,8 +166,8 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("Tau", &fTauArr, &b_TauArr);
     fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
     fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
-    fChain->SetBranchAddress("DimuonVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
-    fChain->SetBranchAddress("DielectronVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
+    //fChain->SetBranchAddress("DimuonVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
+    //fChain->SetBranchAddress("DielectronVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
     fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);
     //fChain->SetBranchAddress("AK8CHS", &fAK8CHSArr, &b_AK8CHSArr);
     //fChain->SetBranchAddress("AddAK8CHS", &fAddAK8CHSArr, &b_AddAK8CHSArr);

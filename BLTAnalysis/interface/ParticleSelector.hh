@@ -26,6 +26,9 @@
 //CMSSW libraries
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+//#include "CondFormats/JetMETObjects/interface/JetResolutionObject.h"
+//#include "CondFormats/JetMETObjects/interface/JetResolution.h"
+#include "JetMETCorrections/Modules/interface/JetResolution.h"
 
 using namespace std;
 
@@ -60,6 +63,7 @@ public:
     bool PassJetPUID(const baconhep::TJet* jet) const;
     bool BTagModifier(const baconhep::TJet* jet, string) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
+    pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet) const;
 
 private:
     Parameters _parameters;
@@ -72,6 +76,8 @@ private:
 
     // For offline jet corrections
     FactorizedJetCorrector* _jetCorrector;
+    JME::JetResolution jetResolution;
+    JME::JetResolutionScaleFactor jetResolutionSF;
 };
 
 #endif  // PARTICLESELECTOR_HH

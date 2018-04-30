@@ -564,15 +564,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         if (isData) {
             scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
-            cout << sdata.scale << ", " << sdata.scaleErr << endl;
+            electron->pt *= sdata.scale;
         } else {
-            smearData sdata = electronScaler->GetSmearData(electron);
-            cout << sdata.scale << ", " << sdata.scaleErr << endl;
+            float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
+            electron->pt *= rng->Gaus(1, sFactor);
         }
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
-        //cout << electron->regscale << ", " << electron->regsmear << endl;
 
         if (
                 electron->pt > 10
@@ -647,7 +646,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (isData) { // fix for broken bacon JEC
             double jec = particleSelector->JetCorrector(jet, "NONE");
             jet->pt = jet->ptRaw*jec;
+        } else { // apply jet energy resolution corrections to simulation
+            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
+            float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            jet->pt = jet->pt*jerc;
+            cout << resPair.first << " " << resPair.second << " " << jerc << endl;
         }
+
 
         // Prevent overlap of muons and jets
         TLorentzVector jetP4; 
@@ -765,7 +770,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -848,7 +853,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1027,7 +1032,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1103,7 +1108,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
+        if (nJets + nBJets < 2 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1175,7 +1180,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(2);
 
-        if (nJets + nBJets < 4)// || nBJets < 1)
+        if (nJets + nBJets < 4 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
@@ -1255,7 +1260,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 4)// || nBJets < 1)
+        if (nJets + nBJets < 4 || nBJets < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 

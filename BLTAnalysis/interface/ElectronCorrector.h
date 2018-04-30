@@ -1,11 +1,14 @@
 #ifndef ELECTRONCORRECTOR_H
 #define ELECTRONCORRECTOR_H
 
-#include <iostream>
-#include <fstream>
 #include <map>
 #include <cmath>
 #include <string>
+#include <algorithm>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include "TMath.h"
 
 #include "BaconAna/DataFormats/interface/TElectron.hh"
 
@@ -52,6 +55,7 @@ class EnergyScaleCorrection
 
         scaleData GetScaleData(TElectron* electron, int runNumber);
         smearData GetSmearData(TElectron* electron);
+        float GetSmearingFactor(TElectron* electron, int nSigRho, int nSigPhi);
     private:
         vector<int> _runNumbers;
         smearMap _smearMap;

@@ -1,12 +1,5 @@
 #include "BLT/BLTAnalysis/interface/ElectronCorrector.h"
 
-#include <cstdlib>
-#include <cfloat> 
-#include <iomanip>
-
-using namespace std;
-#include <sstream>
-
 EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
 {
     // open scale file and unpack values
@@ -24,6 +17,7 @@ EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
 
         if (r9Bin == 0 and etaBin == 0) 
             _runNumbers.push_back(runMin);
+        sort(_runNumbers.begin(), _runNumbers.end());
 
         scaleData data = {scale, scaleErr};
         this->_scaleMap[r9Bin][etaBin][runMin] = data;
@@ -55,7 +49,7 @@ scaleData EnergyScaleCorrection::GetScaleData(TElectron* electron, int runNumber
     unsigned etaBin = 0;
     float etaBinning[] = {0, 1, 1.479, 2, 2.5};
     for (unsigned i = 0; i < 4; ++i) {
-        if (fabs(electron->eta) >= etaBinning[i] && fabs(electron->eta) < etaBinning[i+1]) {
+        if (fabs(electron->scEta) >= etaBinning[i] && fabs(electron->scEta) < etaBinning[i+1]) {
             etaBin = i;
             break;
         }
@@ -63,11 +57,14 @@ scaleData EnergyScaleCorrection::GetScaleData(TElectron* electron, int runNumber
 
     int runMin = 0;
     for (unsigned i = 0; i < _runNumbers.size(); ++i) {
-        if (runNumber >= _runNumbers[i] && runNumber < _runNumbers[i+1])
+        if (runNumber >= _runNumbers[i] && runNumber < _runNumbers[i+1]) {
             runMin = _runNumbers[i];
             break;
+        }
     }
-   
+
+    if (runMin == 0) runMin = _runNumbers[0];
+
     return _scaleMap[r9Bin][etaBin][runMin];
 }
 
@@ -81,11 +78,23 @@ smearData EnergyScaleCorrection::GetSmearData(TElectron* electron)
     unsigned etaBin = 0;
     float etaBinning[] = {0, 1, 1.479, 2, 2.5};
     for (unsigned i = 0; i < 4; ++i) {
-        if (fabs(electron->eta) >= etaBinning[i] && fabs(electron->eta) < etaBinning[i+1]) {
+        if (fabs(electron->scEta) >= etaBinning[i] && fabs(electron->scEta) < etaBinning[i+1]) {
             etaBin = i;
             break;
         }
     }
-    
+
     return _smearMap[r9Bin][etaBin];
+}
+
+float EnergyScaleCorrection::GetSmearingFactor(TElectron* electron, int nSigRho, int nSigPhi)
+{
+    smearData sdata = GetSmearData(electron);
+    float rho = sdata.rho + sdata.rhoErr*nSigRho;
+    float phi = TMath::Pi()/2 + nSigPhi*TMath::Pi()/2;
+
+    float c = rho*sin(phi);
+    float alpha = rho*sdata.scale*cos(phi);
+
+    return sqrt(c*c + alpha*alpha/electron->pt);
 }

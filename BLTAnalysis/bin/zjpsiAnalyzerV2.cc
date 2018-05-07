@@ -444,6 +444,42 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, ELE_MASS);
 
+        // apply electron energy scale and smear corrections
+        bool isEBEle = (fabs(electron->scEta) < 1.479);
+        const std::string cmssw_base = getenv("CMSSW_BASE");
+        const std::string electronCorrectionFile = "BLT/BLTAnalysis/data/electron_scale_smear/Moriond17_23Jan_ele";
+        EnergyScaleCorrection_class* eScaler = new EnergyScaleCorrection_class(electronCorrectionFile);
+        //eScaler->doScale = true;
+        eScaler->doSmearings = true;
+
+        //if (isData) {
+        //    float scale_corr = eScaler->ScaleCorrection(fInfo->runNum, isEBEle, electron->r9, electron->scEta, electronP4.Et());
+        //    cout << "pt = " << electronP4.Pt() << endl;
+        //    cout << "eta = " << electronP4.Eta() << endl;
+        //    cout << "phi = " << electronP4.Phi() << endl;
+        //    cout << "scale corr = " << scale_corr << endl;
+        //    float newE = electronP4.E()*scale_corr;
+        //    float newPt = electronP4.Pt()*scale_corr;
+        //    electronP4.SetE(newE);
+        //    electronP4.SetPtEtaPhiM(newPt, electronP4.Eta(), electronP4.Phi(), electronP4.M());
+        //    cout << "pt = " << electronP4.Pt() << endl;
+        //    cout << "eta = " << electronP4.Eta() << endl;
+        //    cout << "phi = " << electronP4.Phi() << endl;
+        //}
+        //else {
+        if (!isData) {
+            float sigma = eScaler->getSmearingSigma(fInfo->runNum, isEBEle, electron->r9, electron->scEta, electronP4.Et(), 0, 0);
+            TRandom3* rgen_ = new TRandom3(0);
+            float smear_corr = rgen_->Gaus(1, sigma);
+            float newE = electronP4.E()*smear_corr;
+            float newPt = electronP4.Pt()*smear_corr;
+            electronP4.SetE(newE);
+            electronP4.SetPtEtaPhiM(newPt, electronP4.Eta(), electronP4.Phi(), electronP4.M());
+            delete rgen_;
+        }
+
+        delete eScaler;
+
         if (
                 electron->pt > 10
                 && fabs(electron->eta) < 2.5
@@ -1083,29 +1119,13 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             photonOneP4 = photons[0];
 
         if (!isData) { 
-            leptonOneMother = GetGenMotherId(genParticles, leptonOneP4);
-            leptonTwoMother = GetGenMotherId(genParticles, leptonTwoP4);
-            leptonThreeMother = GetGenMotherId(genParticles, leptonThreeP4);
-            leptonFourMother = GetGenMotherId(genParticles, leptonFourP4);
-
-            cout << "leptonOneMother = " << leptonOneMother << endl;
-            cout << "leptonTwoMother = " << leptonTwoMother << endl;
-            cout << "leptonThreeMother = " << leptonThreeMother << endl;
-            cout << "leptonFourMother = " << leptonFourMother << endl;
-        
             eventWeight *= weights->GetMuonIDEff(leptonOneP4);
             eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             eventWeight *= weights->GetMuonIDEff(leptonTwoP4);
             eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
-            //eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
-            //eventWeight *= weights->GetMuonISOEff(muonP4[2]);
-            //eventWeight *= weights->GetMuonIDEff(leptonFourP4);
-            //eventWeight *= weights->GetMuonISOEff(muonP4[3]);
-
-            // trigger weight
-            //pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-            //pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-            //eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
+            eventWeight *= weights->GetLooseMuonIDEff(leptonThreeP4);
+            eventWeight *= weights->GetLooseMuonISOEff(leptonThreeP4);
+            eventWeight *= weights->GetLooseMuonIDEff(leptonFourP4);
 
         }
 
@@ -1442,7 +1462,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(8);
 
         // Check for dielectron vertex 
-        /*unsigned int leptonOneIndex = electrons_index[electronOneIndex];
+        unsigned int leptonOneIndex = electrons_index[electronOneIndex];
         unsigned int leptonTwoIndex = electrons_index[electronTwoIndex];
 
         bool hasValidZVertex = false;
@@ -1476,7 +1496,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         //if (!hasValidZVertex)
         //    return kTRUE; 
        
-        rZValid = hasValidZVertex; */
+        rZValid = hasValidZVertex; 
         hTotalEvents->Fill(9);
 
         //if (!hasGoodZVertex)
@@ -1586,7 +1606,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         hTotalEvents->Fill(12);
        
         // Check for dimuon vertex 
-        /* unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
+        unsigned int leptonThreeIndex = muons_index[muonThreeIndex];
         unsigned int leptonFourIndex = muons_index[muonFourIndex];
 
         bool hasValidJpsiVertex = false;
@@ -1620,7 +1640,7 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
         //if (!hasValidJpsiVertex)
         //    return kTRUE;
     
-        rJpsiValid = hasValidJpsiVertex; */
+        rJpsiValid = hasValidJpsiVertex; 
         hTotalEvents->Fill(13);
 
         //if (!hasGoodJpsiVertex)
@@ -1637,16 +1657,22 @@ Bool_t zjpsiAnalyzerV2::Process(Long64_t entry)
             photonOneP4 = photons[0];
         
         if (!isData) {
-        leptonOneMother = GetGenMotherId(genParticles, leptonOneP4);
-        leptonTwoMother = GetGenMotherId(genParticles, leptonTwoP4);
-        leptonThreeMother = GetGenMotherId(genParticles, leptonThreeP4);
-        leptonFourMother = GetGenMotherId(genParticles, leptonFourP4);
-
         eventWeight *= weights->GetElectronRecoIdEff(leptonOneP4);
         eventWeight *= weights->GetElectronRecoIdEff(leptonTwoP4);
+        eventWeight *= weights->GetLooseMuonIDEff(leptonThreeP4);
+        eventWeight *= weights->GetLooseMuonISOEff(leptonThreeP4);
+        eventWeight *= weights->GetLooseMuonIDEff(leptonFourP4);
+
+        pair<float, float> eff11 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonOneP4);
+        pair<float, float> eff12 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonTwoP4);
+        pair<float, float> eff21 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonOneP4);
+        pair<float, float> eff22 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonTwoP4);
+        float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
+        float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
+        float triggerWeight = eff_data/eff_mc;
+        eventWeight *= triggerWeight;
+        
         genWeight = fGenEvtInfo->weight;
-        //eventWeight *= weights->GetMuonIDEff(leptonThreeP4);
-        //eventWeight *= weights->GetMuonIDEff(leptonFourP4);
         }
         
     }

@@ -1,6 +1,7 @@
 #include "hzgAnalyzer.h"
 #include <map>
 #include <fstream>
+#include <math.h>
 
 //
 // See header file for class documentation
@@ -183,10 +184,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     if (sync_print_precut) {          
         if (!(
-                (fInfo->runNum == 275833 && fInfo->lumiSec == 94 && fInfo->evtNum == 182331414) ||
-                (fInfo->runNum == 276242 && fInfo->lumiSec == 239 && fInfo->evtNum == 452848218) ||
-                (fInfo->runNum == 276282 && fInfo->lumiSec == 493 && fInfo->evtNum == 823708313) ||
-                (fInfo->runNum == 276282 && fInfo->lumiSec == 737 && fInfo->evtNum == 1292796581) 
+                (fInfo->runNum == 275782 && fInfo->lumiSec == 33 && fInfo->evtNum == 62159628) ||
+                (fInfo->runNum == 275782 && fInfo->lumiSec == 174 && fInfo->evtNum == 324414856) ||
+                (fInfo->runNum == 275890 && fInfo->lumiSec == 1100 && fInfo->evtNum == 2094098901) ||
+                (fInfo->runNum == 275890 && fInfo->lumiSec == 1339 && fInfo->evtNum == 2497521881) ||
+                (fInfo->runNum == 276242 && fInfo->lumiSec == 464 && fInfo->evtNum == 857806976) 
            )) {                                          
               return kTRUE;
         }
@@ -353,20 +355,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // Apply rochester muon momentum corrections
         TLorentzVector muonP4;
         copy_p4(muon, MUON_MASS, muonP4);
-        //double muonSF = 1.;
-        //if (isData) {
-        //    muonSF = muonCorr->kScaleDT(muon->q, muon->pt, muon->eta, muon->phi, 0, 0);
-        //} else {
-        //    muonSF = muonCorr->kScaleAndSmearMC(muon->q, muon->pt, muon->eta, muon->phi,
-        //            muon->nTkLayers, rng->Rndm(), rng->Rndm(), 
-        //            0, 0);
-        //}
+        double muonSF = 1.;
+        if (isData) {
+            muonSF = muonCorr->kScaleDT(muon->q, muon->pt, muon->eta, muon->phi, 0, 0);
+        } else {
+            muonSF = muonCorr->kScaleAndSmearMC(muon->q, muon->pt, muon->eta, muon->phi,
+                    muon->nTkLayers, rng->Rndm(), rng->Rndm(), 
+                    0, 0);
+        }
 
-        //if (fInfo->runNum == 1 && fInfo->lumiSec == 240 && fInfo->evtNum == 66027)
-        //    cout << "SF = " << muonSF << ", " << "pre-corr = " << muon->pt << endl;
-        //muon->pt = muonSF*muon->pt; 
-        //if (fInfo->runNum == 1 && fInfo->lumiSec == 240 && fInfo->evtNum == 66027)
-        //    cout << "post-corr = " << muon->pt << endl;
+        if (sync_print_precut) {
+            cout << "pt_before_roccor, pt_after_roccor" << endl;
+            cout << muon->pt << ", ";
+        }
+
+        muon->pt = muonSF*muon->pt; 
+        if (sync_print_precut)
+            cout << muon->pt << endl;
         muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
 
         // Remove muons with very small deltaR
@@ -465,17 +470,27 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         TLorentzVector electronP4;
-        electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, ELE_MASS);
+        electronP4.SetPtEtaPhiM(electron->calibPt, electron->eta, electron->phi, ELE_MASS);
+        
+        if (sync_print_precut) {
+           cout << "pt , eta, sc_eta, phi, d0, dz, sip3d, iso, pass_mva" << endl;
+           cout << electronP4.Pt() << "," << electronP4.Eta() << "," << 
+                   electron->scEta << ", " << electronP4.Phi() << "," << electron->d0 << "," << 
+                   electron->dz << "," << electron->sip3d << "," << 
+                   GetElectronIsolation(electron, fInfo->rhoJet) << ", " << 
+                   particleSelector->PassElectronMVA(electron, cuts->hzzMVAID) <<endl;
+        }
 
         if (
-                electron->pt > 10
-                && fabs(electron->eta) < 2.5
-                && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                electron->pt > 5
+                && fabs(electron->scEta) < 2.5
+                //&& particleSelector->PassElectronID(electron, cuts->tightElID)
+                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
                 && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
-                && electron->sip3d < 4.0 
+                && fabs(electron->sip3d) < 4.0 
            ) {
             electrons.push_back(electron);
             veto_electrons.push_back(electronP4);
@@ -743,6 +758,32 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(7);
 
+        // trigger matching:
+        bool mu1_fired_leg1 = false;
+        bool mu1_fired_leg2 = false;
+        bool mu2_fired_leg1 = false;
+        bool mu2_fired_leg2 = false;
+        for (unsigned int iT = 0; iT < triggerNames.size(); ++iT) {
+            mu1_fired_leg1 |= trigger->passObj(triggerNames.at(iT), 1, muons[muonOneIndex]->hltMatchBits);
+            mu1_fired_leg2 |= trigger->passObj(triggerNames.at(iT), 2, muons[muonOneIndex]->hltMatchBits);
+            mu2_fired_leg1 |= trigger->passObj(triggerNames.at(iT), 1, muons[muonTwoIndex]->hltMatchBits);
+            mu2_fired_leg2 |= trigger->passObj(triggerNames.at(iT), 2, muons[muonTwoIndex]->hltMatchBits);
+        }
+        if (sync_print_precut) {
+            cout << "mu1_fired_leg1, mu1_fired_leg2, mu2_fired_leg1, mu2_fired_leg2" << endl;
+            cout << mu1_fired_leg1 << ", " << mu1_fired_leg2 << ", " << mu2_fired_leg1 << ", " << mu2_fired_leg2 << endl;
+        }
+
+        // L1EMTF cut 
+        if (
+            fabs(leptonOneP4.DeltaPhi(leptonTwoP4)) < 70.0*(M_PI/180.0)
+            && fabs(leptonOneP4.Eta()) > 1.2 
+            && fabs(leptonTwoP4.Eta()) > 1.2
+            && leptonOneP4.Eta()*leptonTwoP4.Eta() > 0
+           )
+            return kTRUE;
+        hTotalEvents->Fill(8); 
+
         bool hasValidPhoton = false;
         unsigned int photonIndex = 0;
 
@@ -771,13 +812,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (!hasValidPhoton)
             return kTRUE;
-        hTotalEvents->Fill(8);
+        hTotalEvents->Fill(9);
 
         //photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
-        hTotalEvents->Fill(9);
+        hTotalEvents->Fill(10);
         
         if (sync_print_precut) {
             cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
@@ -896,9 +937,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (electrons.size() < 2) 
             return kTRUE;
         hTotalEvents->Fill(5);
+        if (sync_print_precut)
+            cout << "at least two electrons present" << endl;
         if (photons.size() < 1)
             return kTRUE;
         hTotalEvents->Fill(6);
+        if (sync_print_precut)
+        cout << "at least one photon present" << endl;
         
         unsigned int electronOneIndex = 0;
         unsigned int electronTwoIndex = 1;
@@ -907,13 +952,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         for (unsigned int i = 0; i < electrons.size(); ++i) {
             for (unsigned int j = i+1; j < electrons.size(); ++j) {
                 TLorentzVector tempElectronOne, tempElectronTwo;
-                tempElectronOne.SetPtEtaPhiM(electrons[i]->pt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
-                tempElectronTwo.SetPtEtaPhiM(electrons[j]->pt, electrons[j]->eta, electrons[j]->phi, ELE_MASS);
+                tempElectronOne.SetPtEtaPhiM(electrons[i]->calibPt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
+                tempElectronTwo.SetPtEtaPhiM(electrons[j]->calibPt, electrons[j]->eta, electrons[j]->phi, ELE_MASS);
                 float thisMass = (tempElectronOne + tempElectronTwo).M();
                 if (
                         electrons[i]->q != electrons[j]->q
-                        && electrons[i]->pt > 25.0 
-                        && electrons[j]->pt > 15.0
+                        && electrons[i]->calibPt > 25.0 
+                        && electrons[j]->calibPt > 15.0
                         && thisMass > 50.0
                    ) {
                     if (hasValidPair) {
@@ -940,11 +985,62 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (!hasValidPair)
             return kTRUE;
         hTotalEvents->Fill(7);
+        if (sync_print_precut)
+            cout << "valid pair" << endl;
+        
+        bool hasValidPhoton = false;
+        unsigned int photonIndex = 0;
 
-        photonOneP4.SetPtEtaPhiM(photons[0]->pt, photons[0]->eta, photons[0]->phi, 0.);
-        if (photonOneP4.Pt() < 15.0)
+        for (unsigned int i = 0; i < photons.size(); ++i) {
+            TLorentzVector tempPhoton;
+            TLorentzVector tempDilepton;
+            TLorentzVector tempLLG;
+            tempPhoton.SetPtEtaPhiM(photons[i]->calibPt, photons[i]->eta, photons[i]->phi, 0.);
+            tempDilepton = leptonOneP4 + leptonTwoP4;
+            tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
+            float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
+            float this_dr2 = leptonTwoP4.DeltaR(tempPhoton);
+            if (
+                tempPhoton.Pt() > 15.0 &&
+                tempPhoton.Et()/tempLLG.M() > (15.0/110.0) &&
+                tempDilepton.M() + tempLLG.M() > 185.0 &&
+                tempLLG.M() > 100. && tempLLG.M() < 180. &&
+                this_dr1 > 0.4 && this_dr2 > 0.4
+                ) {
+                hasValidPhoton = true;
+                photonIndex = i;
+                break;
+            }
+            else {
+                if (sync_print_precut) {
+                    cout << "photon variables in the loop" << endl;
+                    cout << "pt, et/m_llg, mass_sum, llg_mass, dr1, dr2" << endl;
+                    cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " << 
+                            tempDilepton.M() + tempLLG.M() << ", " << tempLLG.M() << ", " << 
+                            this_dr1 << ", " << this_dr2 << endl;
+                }
+            }
+            //cout << "photon " << i << " valid: " << hasValidPhoton << endl;
+        }
+
+        if (!hasValidPhoton)
             return kTRUE;
         hTotalEvents->Fill(8);
+        if (sync_print_precut)
+            cout << "valid photon" << endl;
+
+        //photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
+        photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
+        if (photonOneP4.Pt() < 15.0)
+            return kTRUE;
+        hTotalEvents->Fill(9);
+        
+        if (sync_print_precut) {
+            cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
+            cout << leptonOneP4.Pt() << ", " << leptonOneP4.Eta() << ", " << leptonOneP4.Phi() << ", " 
+                 << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << ", "
+                 << (leptonOneP4 + leptonTwoP4).M() << ", " << leptonOneP4.DeltaR(photonOneP4) << ", " << leptonTwoP4.DeltaR(photonOneP4) << endl;
+        }
 
         //float m_ll = (leptonOneP4 + leptonTwoP4).M();
         //float m_llg = (leptonOneP4 + leptonTwoP4 + photonOneP4).M();
@@ -1009,10 +1105,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             genWeight = fGenEvtInfo->weight;
 
-            //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
-            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
-            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
+            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 
         } 
     } // end elelg selection
 

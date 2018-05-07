@@ -35,6 +35,9 @@
 #include <TVector3.h>
 #include <TRandom3.h>
 
+// CMSSW headers
+#include "EgammaAnalysis/ElectronTools/interface/EnergyScaleCorrection_class.h"
+
 // C++ headers
 #include <string>
 #include <vector>

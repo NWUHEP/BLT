@@ -5,15 +5,13 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-#selection  = '4mu'
-#selection  = '2e2mu'
-selection  = 'jpsi_control'
-#selection = 'mumu'
-#selection = 'ee'
+selection = 'elelg'
+#selection = 'elelg'
 period     = '2016'
 #path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleMuon/'
+path       = '/eos/uscms/store/user/jbueghly/sync_data/'
 #path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleEG/'
-path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/Charmonium/'
+#path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/Charmonium/'
 #path       = '/eos/uscms/store/user/naodell/bacontuples/12_vertex/'
 #path       = '/eos/uscms/store/user/jbueghly/ref_double_mu/'
 executable = 'execBatch.sh'
@@ -33,8 +31,10 @@ data_list.extend([
     #    suffix   = 'muon_2016B'
     #   ),
     #cfg(data_name = 'muon_2016C_v1',
-    #    path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
+    #    #path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1'.format(path),
+    #    #path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1_newPhoMVA'.format(path),
+    #    path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1_calib'.format(path),
+    #    nJobs    = 67,
     #    suffix   = 'muon_2016C'
     #   ),
     #cfg(data_name = 'muon_2016D_v1',
@@ -74,11 +74,12 @@ data_list.extend([
     #    nJobs    = 20,
     #    suffix   = 'electron_2016B'
     #   ),
-    #cfg(data_name = 'electron_2016C_v1',
-    #    path     = '{0}/DoubleEG_Run2016C-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'electron_2016C'
-    #   ),
+    cfg(data_name = 'electron_2016C_v1',
+        #path     = '{0}/DoubleEG_Run2016C-03Feb2017-v1'.format(path),
+        path     = '{0}/DoubleEG_Run2016C-03Feb2017-v1'.format(path),
+        nJobs    = 36,
+        suffix   = 'electron_2016C'
+       ),
     #cfg(data_name = 'electron_2016D_v1',
     #    path     = '{0}/DoubleEG_Run2016D-03Feb2017-v1'.format(path),
     #    nJobs    = 20,
@@ -111,50 +112,51 @@ data_list.extend([
     #   ),
 
     # Charmonium data
-    cfg(data_name = 'muon_2016B_v2',
-        path     = '{0}/Charmonium_Run2016B-03Feb2017_ver2-v2'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016B'
-       ),
-    cfg(data_name = 'muon_2016C_v1',
-        path     = '{0}/Charmonium_Run2016C-03Feb2017-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016C'
-       ),
-    cfg(data_name = 'muon_2016D_v1',
-        path     = '{0}/Charmonium_Run2016D-03Feb2017-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016D'
-       ),
-    cfg(data_name = 'muon_2016E_v1',
-        path     = '{0}/Charmonium_Run2016E-03Feb2017-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016E'
-       ),
-    cfg(data_name = 'muon_2016F_v1',
-        path     = '{0}/Charmonium_Run2016F-03Feb2017-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016F'
-       ),
-    cfg(data_name = 'muon_2016G_v1',
-        path     = '{0}/Charmonium_Run2016G-03Feb2017-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016G'
-       ),
-    cfg(data_name = 'muon_2016H_v2',
-        path     = '{0}/Charmonium_Run2016H-03Feb2017_ver2-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016H'
-       ),
-    cfg(data_name = 'muon_2016H_v3',
-        path     = '{0}/Charmonium_Run2016H-03Feb2017_ver3-v1'.format(path),
-        nJobs    = 20,
-        suffix   = 'muon_2016H'
-       ),
+    #cfg(data_name = 'muon_2016B_v2',
+    #    path     = '{0}/Charmonium_Run2016B-03Feb2017_ver2-v2'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016B'
+    #   ),
+    #cfg(data_name = 'muon_2016C_v1',
+    #    path     = '{0}/Charmonium_Run2016C-03Feb2017-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016C'
+    #   ),
+    #cfg(data_name = 'muon_2016D_v1',
+    #    path     = '{0}/Charmonium_Run2016D-03Feb2017-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016D'
+    #   ),
+    #cfg(data_name = 'muon_2016E_v1',
+    #    path     = '{0}/Charmonium_Run2016E-03Feb2017-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016E'
+    #   ),
+    #cfg(data_name = 'muon_2016F_v1',
+    #    path     = '{0}/Charmonium_Run2016F-03Feb2017-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016F'
+    #   ),
+    #cfg(data_name = 'muon_2016G_v1',
+    #    path     = '{0}/Charmonium_Run2016G-03Feb2017-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016G'
+    #   ),
+    #cfg(data_name = 'muon_2016H_v2',
+    #    path     = '{0}/Charmonium_Run2016H-03Feb2017_ver2-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016H'
+    #   ),
+    #cfg(data_name = 'muon_2016H_v3',
+    #    path     = '{0}/Charmonium_Run2016H-03Feb2017_ver3-v1'.format(path),
+    #    nJobs    = 20,
+    #    suffix   = 'muon_2016H'
+    #   ),
     ])
 
 mc_list = []
-path       = '/eos/uscms/store/user/jbueghly/jbueghly_mc_multicrab'
+#path       = '/eos/uscms/store/user/jbueghly/jbueghly_mc_multicrab'
+path       = '/eos/uscms/store/user/jbueghly/sync_mc'
 mc_list.extend([
     #cfg(data_name = 'JpsiToMuMu',
     #    path     = '{0}/JpsiToMuMu_JpsiPt8'.format(path),
@@ -167,46 +169,46 @@ mc_list.extend([
     #    suffix   = 'BtoJpsi'
     #   ),
     # Drell-Yan
-    cfg(data_name = 'DYJetsToLL_M-50',
-        path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 50,
-        suffix   = 'zjets_m-50'
-       ),
-    cfg(data_name = 'DYJetsToLL_M-10to50',
-        path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'zjets_m-10to50'
-       ),
-    cfg(data_name = 'DY1JetsToLL_M-50',
-        path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z1jets_m-50'
-       ),
-    cfg(data_name = 'DY1JetsToLL_M-10to50',
-        path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z1jets_m-10to50'
-       ),
-    cfg(data_name = 'DY2JetsToLL_M-50',
-        path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z2jets_m-50'
-       ),
-    cfg(data_name = 'DY2JetsToLL_M-10to50',
-        path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z2jets_m-10to50'
-       ),
-    cfg(data_name = 'DY3JetsToLL_M-50',
-        path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z3jets_m-50'
-       ),
-    cfg(data_name = 'DY3JetsToLL_M-10to50',
-        path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
-        nJobs    = 10,
-        suffix   = 'z3jets_m-10to50'
-       ),
+    #cfg(data_name = 'DYJetsToLL_M-50',
+    #    path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-50'
+    #   ),
+    #cfg(data_name = 'DYJetsToLL_M-10to50',
+    #    path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zjets_m-10to50'
+    #   ),
+    #cfg(data_name = 'DY1JetsToLL_M-50',
+    #    path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z1jets_m-50'
+    #   ),
+    #cfg(data_name = 'DY1JetsToLL_M-10to50',
+    #    path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z1jets_m-10to50'
+    #   ),
+    #cfg(data_name = 'DY2JetsToLL_M-50',
+    #    path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z2jets_m-50'
+    #   ),
+    #cfg(data_name = 'DY2JetsToLL_M-10to50',
+    #    path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z2jets_m-10to50'
+    #   ),
+    #cfg(data_name = 'DY3JetsToLL_M-50',
+    #    path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z3jets_m-50'
+    #   ),
+    #cfg(data_name = 'DY3JetsToLL_M-10to50',
+    #    path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z3jets_m-10to50'
+    #   ),
     #cfg(data_name = 'DY4JetsToLL_M-50',
     #    path     = '{0}/DY4JetsToLL_M-50_madgraph'.format(path),
     #    nJobs    = 10,
@@ -223,6 +225,11 @@ mc_list.extend([
     #    path     = '{0}/TTTo2L2Nu_powheg'.format(path),
     #    nJobs    = 50,
     #    suffix   = 'ttbar_lep'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive',
+    #    path     = '{0}/TT_powheg'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive'
     #   ),
 #    cfg(data_name = 'ttbar_semileptonic',
 #        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
@@ -291,11 +298,11 @@ mc_list.extend([
     #    nJobs    = 10,
     #    suffix   = 'zz_2l2q'
     #   ),
-    cfg(data_name = 'ZZJetsTo4L',
-        path     = '{0}/ZZTo4L_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_4l'
-       ),
+    #cfg(data_name = 'ZZJetsTo4L',
+    #    path     = '{0}/ZZTo4L_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_4l'
+    #   ),
 #    cfg(data_name = 'GluGluHToZZTo4L',
 #        path     = '{0}/GluGluHToZZTo4L_powheg/all'.format(path),
 #        nJobs    = 10,
@@ -308,15 +315,32 @@ mc_list.extend([
 #       ),
     ])
 
-#path       = '/eos/uscms/store/user/jbueghly/12_vertex'
-#sig_list = []
-#sig_list.extend([
+path       = '/eos/uscms/store/user/jbueghly/sync_mc'
+sig_list = []
+sig_list.extend([
 #    cfg(data_name = 'zjpsi_singlet',
 #        path      = '{0}/zjpsi_singlet'.format(path),
 #        nJobs     = 5,
 #        suffix    = 'zjpsi_singlet'
 #        ),
-#    ])
+    cfg(data_name = 'hzg_gluglu',
+        #path      = '{0}/GluGluHToZG_M-125_powheg'.format(path),
+        #path      = '{0}/GluGluHToZG_M-125_powheg_newPhoMVA'.format(path),
+        path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
+        nJobs     = 9,
+        suffix    = 'hzg_gluglu'
+        ),
+    #cfg(data_name = 'hzg_vbf',
+    #    path      = '{0}/VBFHToZG_M-125_powheg'.format(path),
+    #    nJobs     = 9,
+    #    suffix    = 'hzg_vbf'
+    #    ),
+    #cfg(data_name = 'zg_llg',
+    #    path      = '{0}/ZGTo2LG_amcatnlo'.format(path),
+    #    nJobs     = 26,
+    #    suffix    = 'zg_llg'
+    #    ),
+    ])
 
 batch_list = []
 batch_list += data_list

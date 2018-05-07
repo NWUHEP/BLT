@@ -13,3 +13,7 @@ __init__.py
 # Stuff
 *~
 *.log
+
+# directories
+BLTAnalysis/data/electron_scale_smear
+BLTAnalysis/test/batch

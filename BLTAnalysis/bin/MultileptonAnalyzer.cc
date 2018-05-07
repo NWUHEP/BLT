@@ -8,9 +8,6 @@
 using namespace baconhep;
 using namespace std;
 
-const float ZMASS = 91.19;
-const float PSIMASS = 3.096;
-
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 bool sort_by_btag(const baconhep::TJet* lhs, const baconhep::TJet* rhs) 
 {

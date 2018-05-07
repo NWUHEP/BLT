@@ -178,6 +178,24 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_ID[2] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_2");
     _eleSF_ID[3] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_3");
     _eleSF_ID[4] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_4");
+
+    // hzz electron id efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/egamma_eff_hzz_ID_2016.root";
+    TFile* f_hzz_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
+    _hzz_eleSF_ID[0] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_0");
+    _hzz_eleSF_ID[1] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_1");
+    _hzz_eleSF_ID[2] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_2");
+    _hzz_eleSF_ID[3] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_3");
+    _hzz_eleSF_ID[4] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_4");
+    _hzz_eleSF_ID[5] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_5");
+    _hzz_eleSF_ID[6] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_6");
+    _hzz_eleSF_ID[7] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_7");
+    _hzz_eleSF_ID[8] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_8");
+    _hzz_eleSF_ID[9] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_9");
+    _hzz_eleSF_ID[10] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_10");
+    _hzz_eleSF_ID[11] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_11");
+    _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");
+
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -347,6 +365,26 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
     if (electron.Pt() < 500.) {
         weight *= _eleSF_RECO->Eval(electron.Eta());
         weight *= _eleSF_ID[ptBin]->Eval(electron.Eta());
+    }
+    
+    return weight;
+}
+
+float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const 
+{
+    float binningPt[] = {7., 15., 20., 30., 40., 50., 60., 70., 80., 100., 120., 140., 160., 200.}; 
+    int ptBin = 0;
+    for (int i = 0; i < 13; ++i) {
+        if (fabs(electron.calibPt) > binningPt[i] && fabs(electron.calibPt) <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    if (electron.calibPt < 200.) {
+        weight *= _eleSF_RECO->Eval(electron.scEta);
+        weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
     }
     
     return weight;

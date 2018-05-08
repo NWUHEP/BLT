@@ -134,11 +134,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetTwoP4", &jetTwoP4);
     outTree->Branch("jetTwoTag", &jetTwoTag);
 
-    // gen level objects /// TO BE MODIFIED
-    //outTree->Branch("fromHardProcessFinalState", &fromHardProcessFinalState);
-    //outTree->Branch("isPromptFinalState", &isPromptFinalState);
-    //outTree->Branch("hasPhotonMatch", &hasPhotonMatch);
-    //outTree->Branch("vetoDY", &vetoDY);
+    // gen level objects 
 
     outTree->Branch("genLeptonOneP4", &genLeptonOneP4);
     outTree->Branch("genLeptonOneId", &genLeptonOneId);
@@ -147,7 +143,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("genPhotonP4", &genPhotonP4);
     outTree->Branch("genPhotonFHPFS", &genPhotonFHPFS);
     outTree->Branch("genPhotonIPFS", &genPhotonIPFS);
-    /// END GEN LEVEL OBJECT (TO BE MODIFIED)
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -317,6 +312,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     } else {
         nPU = 0;
 
+    }
+    
+    genWeight = 1;
+    if (!isData) {
+        if (fGenEvtInfo->weight < 0) {
+            genWeight = -1;
+            int maxBin = hTotalEvents->GetSize() - 2;
+            hTotalEvents->Fill(maxBin);
+        }
     }
 
     ///////////////////
@@ -814,7 +818,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(9);
 
-        //photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
@@ -861,35 +864,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (!isData) {
 
-        //    float photon_gen_dr = 100.;
-        //    TGenParticle *photon_match = new TGenParticle;
-        //    for (unsigned int ip = 0; ip < genParticles.size(); ++ip) {
-        //        TGenParticle *genPart = genParticles.at(ip);
-        //        if (genPart->pdgId == 22) {
-        //            TLorentzVector genP4;
-        //            genP4.SetPtEtaPhiM(genPart->pt, genPart->eta, genPart->phi, genPart->mass); 
-        //            if (genP4.DeltaR(photonOneP4) < photon_gen_dr) {
-        //                *photon_match = *genPart;
-        //                photon_gen_dr = genP4.DeltaR(photonOneP4);
-        //            }
-        //        }
-        //    }
-            
-            //if (photon_gen_dr < 0.3) {
-            //    hasPhotonMatch            = true;
-            //    fromHardProcessFinalState = photon_match->fromHardProcessFinalState;
-            //    isPromptFinalState        = photon_match->isPromptFinalState;
-            //}
-            //else {
-            //    hasPhotonMatch            = false;
-            //    fromHardProcessFinalState = false;
-            //    isPromptFinalState        = false;
-            //}
-
-            //delete photon_match;
-
-            genWeight = fGenEvtInfo->weight;
-
             //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
             //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
             //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
@@ -920,7 +894,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(9);   
            
         if (!isData) {
-            genWeight = fGenEvtInfo->weight;
 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[0]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[1]); 
@@ -1105,8 +1078,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             //}
 
         //    delete photon_match;
-
-            genWeight = fGenEvtInfo->weight;
 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 

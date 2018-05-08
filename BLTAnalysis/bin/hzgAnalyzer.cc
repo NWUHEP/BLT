@@ -892,8 +892,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
             //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
-            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
             eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
         } 
     } // end mumug selection

@@ -412,6 +412,12 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
     if (photon.calibPt < 500.) {
         weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
     }
+
+    // electron veto scale factor
+    if (fabs(photon.scEta) < 1.444)
+        weight *= 0.9938;
+    else if (fabs(photon.scEta) > 1.566)
+        weight *= 0.9875;
     
     return weight;
 }

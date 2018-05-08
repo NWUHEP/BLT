@@ -26,6 +26,7 @@
 
 // BaconAna class definitions
 #include "BaconAna/DataFormats/interface/TElectron.hh"
+#include "BaconAna/DataFormats/interface/TPhoton.hh"
 
 using namespace std;
 using namespace baconhep;
@@ -49,6 +50,7 @@ class WeightUtils: public TObject {
         float   GetLooseMuonISOEff(TLorentzVector&) const;
         float   GetElectronRecoIdEff(TLorentzVector&) const;
         float   GetHZZElectronRecoIdEff(TElectron&) const;
+        float   GetPhotonMVAIdEff(TPhoton&) const;
 
         ClassDef(WeightUtils, 0);
 
@@ -74,6 +76,8 @@ class WeightUtils: public TObject {
         TGraphAsymmErrors *_muSF_Loose_ISO_DATA_GH[4], *_muSF_Loose_ISO_MC_GH[4]; 
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5], *_hzz_eleSF_ID[13];
+
+        TGraphErrors *_mva_gammaSF_ID[5];
 
         TH2F *_eff_doubleg_leg1_DATA, *_eff_doubleg_leg1_MC;
         TH2F *_eff_doubleg_leg2_DATA, *_eff_doubleg_leg2_MC;

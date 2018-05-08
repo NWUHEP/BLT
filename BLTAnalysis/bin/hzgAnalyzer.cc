@@ -855,9 +855,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoDZ     = muons[muonTwoIndex]->dz;
         leptonTwoD0     = muons[muonTwoIndex]->d0;
 
-        photonOneR9 = photons[0]->r9;
-        photonOneMVA = photons[0]->mva;
-        passElectronVeto = photons[0]->passElectronVeto;  
+        photonOneR9 = photons[photonIndex]->r9;
+        photonOneMVA = photons[photonIndex]->mva;
+        passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
         if (!isData) {
 
@@ -891,9 +891,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             genWeight = fGenEvtInfo->weight;
 
             //eventWeight *= weights->GetMuonIDEff(leptonOneP4); // Fix for h->zz->4l id
-            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             //eventWeight *= weights->GetMuonIDEff(leptonTwoP4); // Fix for h->zz->4l id
-            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
         } 
     } // end mumug selection
     
@@ -902,8 +903,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(5);
         TLorentzVector electronOneP4, electronTwoP4;
-        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, ELE_MASS);
-        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, ELE_MASS);
+        electronOneP4.SetPtEtaPhiM(electrons[0]->calibPt, electrons[0]->eta, electrons[0]->phi, ELE_MASS);
+        electronTwoP4.SetPtEtaPhiM(electrons[1]->calibPt, electrons[1]->eta, electrons[1]->phi, ELE_MASS);
         if (electronOneP4.Pt() < 25.0) 
             return kTRUE;
         hTotalEvents->Fill(6);
@@ -916,21 +917,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(8);
         if (dielectron.M() < 80.0 || dielectron.M() > 100.0)
             return kTRUE;
-        hTotalEvents->Fill(9);
-     
-        bool printForSync = true;
-        
-        if (printForSync)
-            cout << runNumber << "," << lumiSection << "," << evtNumber << ","  << 
-                    electronOneP4.Pt() << "," << electronOneP4.Eta() << "," << 
-                    electronOneP4.Phi() << "," <<
-                    electrons[0]->dz << "," << electrons[0]->sip3d << "," << 
-                    GetElectronIsolation(electrons[0], fInfo->rhoJet) << "," <<
-                    electronTwoP4.Pt() << "," << electronTwoP4.Eta() << "," << 
-                    electronTwoP4.Phi() << "," << 
-                    electrons[1]->dz << "," << electrons[1]->sip3d << "," << 
-                    GetElectronIsolation(electrons[1], fInfo->rhoJet) << endl;
-        return kTRUE;
+        hTotalEvents->Fill(9);   
+           
+        if (!isData) {
+            genWeight = fGenEvtInfo->weight;
+
+            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[0]); 
+            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[1]); 
+
+            pair<float, float> eff11 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonOneP4);
+            pair<float, float> eff12 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonTwoP4);
+            pair<float, float> eff21 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonOneP4);
+            pair<float, float> eff22 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonTwoP4);
+            float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
+            float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
+            float triggerWeight = eff_data/eff_mc;
+            eventWeight *= triggerWeight;
+        }
     }
     
     else if (params->selection == "elelg") {
@@ -1070,9 +1073,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoDZ     = electrons[electronTwoIndex]->dz;
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
 
-        photonOneR9 = photons[0]->r9;
-        photonOneMVA = photons[0]->mva;
-        passElectronVeto = photons[0]->passElectronVeto;  
+        photonOneR9 = photons[photonIndex]->r9;
+        photonOneMVA = photons[photonIndex]->mva;
+        passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
         if (!isData) {
 
@@ -1107,6 +1110,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 
+
+            pair<float, float> eff11 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonOneP4);
+            pair<float, float> eff12 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonTwoP4);
+            pair<float, float> eff21 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonOneP4);
+            pair<float, float> eff22 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonTwoP4);
+            float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
+            float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
+            float triggerWeight = eff_data/eff_mc;
+            eventWeight *= triggerWeight;
+            
+            eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
         } 
     } // end elelg selection
 

@@ -196,6 +196,13 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _hzz_eleSF_ID[11] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_11");
     _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");
 
+    // photon mva id (90%) efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_id/photon_mva_id_2016.root";
+    TFile* f_mva_gammaIdSF = new TFile(fileName.c_str(), "OPEN");
+    _mva_gammaSF_ID[0] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_0");
+    _mva_gammaSF_ID[1] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_1");
+    _mva_gammaSF_ID[2] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_2");
+    _mva_gammaSF_ID[3] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_3");
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -385,6 +392,25 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
     if (electron.calibPt < 200.) {
         weight *= _eleSF_RECO->Eval(electron.scEta);
         weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
+    }
+    
+    return weight;
+}
+
+float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
+{
+    float binningPt[] = {20., 35., 50., 90., 150., 500.};
+    int ptBin = 0;
+    for (int i = 0; i < 5; ++i) {
+        if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
+
+    float weight = 1;
+    if (photon.calibPt < 500.) {
+        weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
     }
     
     return weight;

@@ -90,7 +90,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
     // electron scale corrections
-    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data/");
+    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data");
 
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
@@ -217,7 +217,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     outFile->cd();
     eventWeight = 1.;
     this->totalEvents++;
-    hTotalEvents->Fill(1);
 
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
@@ -241,7 +240,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     bitset<6> wDecay;
     bitset<4> tauDecay;
     float topSF = 1.;
+    topPtWeight = 1.;
+    topPtVar = 0.;
     if (!isData) {
+
+        // save gen weight for amc@nlo Drell-Yan sample
+        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
+        if (genWeight < 0) {
+            hTotalEvents->Fill(10);
+        }
 
         // Set data period for 2016 MC scale factors
         if (rng->Rndm() < 0.468) {
@@ -330,9 +337,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Account for the top pt weights
 
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
-            topPtWeight = sqrt(topSF);
-            topPtVar    = 0.01*topPtWeight;
-            eventWeight *= topPtWeight;
+            topPtWeight *= sqrt(topSF);
+            topPtVar    += pow(0.01*topPtWeight, 2);
         }
 
         // categorize events
@@ -413,8 +419,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             hGenCat->Fill(21); 
             genCategory = 21;
         }
+
+        nPU          = fInfo->nPUmean;
+        puWeight     = weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
+        puVar        = 0.01*puWeight;
+        eventWeight *= puWeight;
+        eventWeight *= topPtWeight;
+        hTotalEvents->Fill(1, puWeight*topPtWeight);
     } else {
+        nPU = 0;
         nPartons = 0;
+        hTotalEvents->Fill(1);
     }
 
     /* Apply lumi mask */
@@ -460,17 +475,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     runNumber     = fInfo->runNum;
     evtNumber     = fInfo->evtNum;
     lumiSection   = fInfo->lumiSec;
-    triggerStatus = passTrigger;
     nPV           = fPVArr->GetEntries();
-    if (!isData) {
-        nPU          = fInfo->nPUmean;
-        puWeight     = weights->GetPUWeight(fInfo->nPUmean); // pileup reweighting
-        puVar        = 0.01*puWeight;
-        eventWeight *= puWeight;
-    } else {
-        nPU = 0;
-
-    }
+    triggerStatus = passTrigger;
 
     ///////////////////
     // Select objects//
@@ -643,16 +649,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
 
-        if (isData) { // fix for broken bacon JEC
-            double jec = particleSelector->JetCorrector(jet, "NONE");
-            jet->pt = jet->ptRaw*jec;
-        } else { // apply jet energy resolution corrections to simulation
+        // apply JEC offline and get scale uncertainties
+        double jec = particleSelector->JetCorrector(jet, "NONE");
+        //cout << jec << endl;
+        jet->pt = jet->ptRaw*jec;
+
+        if (!isData) { // apply jet energy resolution corrections to simulation
             pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
             float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
             jet->pt = jet->pt*jerc;
-            cout << resPair.first << " " << resPair.second << " " << jerc << endl;
+            //cout << resPair.first << " " << resPair.second << " " << jerc << endl;
         }
-
 
         // Prevent overlap of muons and jets
         TLorentzVector jetP4; 

@@ -7,13 +7,18 @@ EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
     float scale, scaleErr, nada;
 
     string line;
-    std::ifstream scaleFile("/tthome/naodell/work/CMSSW_7_4_12/src/BLT/BLTAnalysis/data/electron_scale.dat");
+    std::ifstream scaleFile(filePath + "/electron_scale.dat");
     while (getline(scaleFile, line)) {
         istringstream iss(line);
         iss >> r9Bin >> etaBin 
             >> runMin >> runMax
             >> scale >> scaleErr
             >> nada >> nada >> nada;
+
+        //cout << " " << r9Bin << " " << etaBin 
+        //    << " " << runMin << " " << runMax
+        //    << " " << scale << " " << scaleErr
+        //    << endl;
 
         if (r9Bin == 0 and etaBin == 0) 
             _runNumbers.push_back(runMin);
@@ -26,7 +31,7 @@ EnergyScaleCorrection::EnergyScaleCorrection(std::string filePath)
 
     // open smear file and unpack values
     float rho, rhoErr;
-    std::ifstream smearFile("/tthome/naodell/work/CMSSW_7_4_12/src/BLT/BLTAnalysis/data/electron_smear.dat");
+    std::ifstream smearFile(filePath + "/electron_smear.dat");
     while (getline(smearFile, line)) {
         istringstream iss(line);
         iss >> r9Bin >> etaBin 

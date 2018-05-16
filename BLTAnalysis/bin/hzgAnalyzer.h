@@ -127,7 +127,8 @@ public:
     //Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
     //TLorentzVector genOneP4, genTwoP4;
     //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
-    //Bool_t vetoDY;
+    Bool_t vetoDY;
+    Bool_t brianVetoDY;
 
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);

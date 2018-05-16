@@ -25,6 +25,7 @@
 #include "TRandom3.h"
 
 // BaconAna class definitions
+#include "BaconAna/DataFormats/interface/TMuon.hh"
 #include "BaconAna/DataFormats/interface/TElectron.hh"
 #include "BaconAna/DataFormats/interface/TPhoton.hh"
 
@@ -44,10 +45,12 @@ class WeightUtils: public TObject {
 
         float   GetPUWeight(float);
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
+        pair<float, float>   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
         float   GetLooseMuonIDEff(TLorentzVector&) const;
         float   GetLooseMuonISOEff(TLorentzVector&) const;
+        float   GetHZZMuonIDEff(TMuon&) const;
         float   GetElectronRecoIdEff(TLorentzVector&) const;
         float   GetHZZElectronRecoIdEff(TElectron&) const;
         float   GetPhotonMVAIdEff(TPhoton&) const;
@@ -81,6 +84,8 @@ class WeightUtils: public TObject {
 
         TH2F *_eff_doubleg_leg1_DATA, *_eff_doubleg_leg1_MC;
         TH2F *_eff_doubleg_leg2_DATA, *_eff_doubleg_leg2_MC;
+
+        TH2F *_hzz_muIdSF;
 
         //TH2D    *h2_MuTriggerSFs[2]; // Good for Mu17_Mu8 or Mu17_TkMu8
         //TH2D    *h2_EleMVASF;

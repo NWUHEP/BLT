@@ -153,6 +153,11 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_Loose_ISO_MC_GH[1] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
     _muSF_Loose_ISO_MC_GH[2] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
     _muSF_Loose_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
+   
+    // hzz muon id efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/hzz_muon_id_sf.root";
+    TFile* f_hzz_muIdSF = new TFile(fileName.c_str(), "OPEN");
+    _hzz_muIdSF = (TH2F*)f_hzz_muIdSF->Get("FINAL");
 
     // electron trigger efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg1_Ele23_HZZSelection_Tag35.root";
@@ -243,19 +248,33 @@ std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLor
             effData = _eff_IsoMu24_DATA[etaBin]->Eval(lepton.Pt());
         }
     }
+    
+    return std::make_pair(effData, effMC);
+}
 
-    else if (triggerName == "HLT_DoubleEG_leg1") {
-        if (lepton.Pt() < 500.) {
-            effData = _eff_doubleg_leg1_DATA->Interpolate(lepton.Eta(), lepton.Pt());
-            effMC   = _eff_doubleg_leg1_MC->Interpolate(lepton.Eta(), lepton.Pt());
+std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
+{
+    float effData = 1;
+    float effMC = 1;
+
+    if (electron.calibPt < 200.) {
+        if (triggerName == "HLT_DoubleEG_leg1") {
+            //effData = _eff_doubleg_leg1_DATA->Interpolate(lepton.Eta(), lepton.Pt());
+            //effMC   = _eff_doubleg_leg1_MC->Interpolate(lepton.Eta(), lepton.Pt());
+            effData = _eff_doubleg_leg1_DATA->GetBinContent(_eff_doubleg_leg1_DATA->FindBin(electron.scEta, electron.calibPt));
+            effMC = _eff_doubleg_leg1_MC->GetBinContent(_eff_doubleg_leg1_MC->FindBin(electron.scEta, electron.calibPt));
+        }
+        else if (triggerName == "HLT_DoubleEG_leg2") {
+            //effData = _eff_doubleg_leg2_DATA->Interpolate(lepton.Eta(), lepton.Pt());
+            //effMC   = _eff_doubleg_leg2_MC->Interpolate(lepton.Eta(), lepton.Pt());
+            effData = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, electron.calibPt));
+            effMC = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, electron.calibPt));
         }
     }
-    
-    else if (triggerName == "HLT_DoubleEG_leg2") {
-        if (lepton.Pt() < 500.) {
-            effData = _eff_doubleg_leg2_DATA->Interpolate(lepton.Eta(), lepton.Pt());
-            effMC   = _eff_doubleg_leg2_MC->Interpolate(lepton.Eta(), lepton.Pt());
-        }
+
+    if (effMC == 0) {
+        cout << "zero value for effMC" << endl;
+        effMC = 1;
     }
 
     return std::make_pair(effData, effMC);
@@ -357,6 +376,17 @@ float WeightUtils::GetLooseMuonISOEff(TLorentzVector& muon) const
     return weight;
 }
 
+float WeightUtils::GetHZZMuonIDEff(TMuon& muon) const
+{
+    float weight = 1;
+    if (muon.pt < 200.) 
+        weight *= _hzz_muIdSF->Interpolate(muon.eta, muon.pt);
+    
+    return weight;
+}
+
+
+
 float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
 {
     float binningPt[] = {10., 20., 35., 50., 90., 500.};
@@ -399,9 +429,9 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
 
 float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
 {
-    float binningPt[] = {20., 35., 50., 90., 150., 500.};
+    float binningPt[] = {20., 35., 50., 90., 150.};
     int ptBin = 0;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 4; ++i) {
         if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
             ptBin = i;
             break;
@@ -409,7 +439,7 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
     }
 
     float weight = 1;
-    if (photon.calibPt < 500.) {
+    if (photon.calibPt < 150.) {
         weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
     }
 

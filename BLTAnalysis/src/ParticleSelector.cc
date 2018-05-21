@@ -477,15 +477,15 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) const
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int syst) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
-    //float jetEta    = jet->eta;
-    float bTag      = -1;
     int   jetFlavor = jet->hadronFlavor;
+    float bTag      = -1;
 
-    float binningPt[] = {30, 40, 50, 70, 100, 150, 210, 300};
+    //float binningPt[] = {30, 40, 50, 70, 100, 150, 210, 1000};
+    float binningPt[] = {30, 50, 70, 100, 140, 200, 300, 600};
     int ptBin = 0;
     for (int i = 0; i < 7; ++i) {
         if (jetPt > binningPt[i] && jetPt <= binningPt[i+1]) {
@@ -519,16 +519,37 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
         bTag = jet->bmva;
         if (bTag > 0.9432) 
             isBTagged = true;
-        btagSF   = 0.517971*((1.+(0.332528*jetPt))/(1.+(0.174914*jetPt))); 
-        mistagSF = 0.985864+122.8/(jetPt*jetPt)+0.000416939*jetPt;
+
+        btagSF   = 0.517971*(1.+0.332528*jetPt) / (1. + 0.174914*jetPt); 
+        mistagSF = 0.985864 + 122.8/(jetPt*jetPt) + 0.000416939*jetPt;
 
         if (abs(jetFlavor) == 5) {
             float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
             mcEff = bEff[ptBin];
+
+            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
+            if (syst == 1) {
+                btagSF += scale[ptBin];
+            } else if (syst == -1) {
+                btagSF -= scale[ptBin];
+            }
+
         } else if (abs(jetFlavor) == 4) {
             mcEff = 0.03;
+            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
+            if (syst == 1) {
+                btagSF += scale[ptBin];
+            } else if (syst == -1) {
+                btagSF -= scale[ptBin];
+            }
+
         } else {
             mcEff = 0.002;
+            if (syst == 1) {
+                btagSF *= (1 + (0.253674+ - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            } else if (syst == -1) {
+                btagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            }
         }
     } else if (tagName == "MVAM") {
         // These SF are provided by the b tag POG 
@@ -536,7 +557,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) c
         if (bTag > 0.4432) 
             isBTagged = true;
         btagSF   = 0.600657*((1.+(0.753343*jetPt))/(1.+(0.472587*jetPt))); 
-        mistagSF = 1.11046+-0.00042021*jetPt+1.48012e-06*jetPt*jetPt+-8.44735e-10*jetPt*jetPt*jetPt;
+        mistagSF = 1.11046 - 0.00042021*jetPt + 1.48012e-06*jetPt*jetPt - 8.44735e-10*jetPt*jetPt*jetPt;
 
         if (abs(jetFlavor) == 5) {
             float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};

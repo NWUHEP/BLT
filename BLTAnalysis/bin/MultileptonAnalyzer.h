@@ -102,6 +102,8 @@ public:
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
     Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
 
+    vector<Float_t> pdfWeights;
+
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
 

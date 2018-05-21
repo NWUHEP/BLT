@@ -61,7 +61,7 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
-    bool BTagModifier(const baconhep::TJet* jet, string) const;
+    bool BTagModifier(const baconhep::TJet* jet, string, int) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
     pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet) const;
 

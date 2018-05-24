@@ -37,11 +37,13 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
             runPeriod = "BCD";
         } else if (runPeriod == "2016E" || runPeriod == "2016F") {
             runPeriod = "EF";
-        } else if (runPeriod == "2016G" || runPeriod == "2016H") {
-            runPeriod = "GH";
+        } else if (runPeriod == "2016G") {
+            runPeriod = "G";
+        } else if (runPeriod == "2016H") {
+            runPeriod = "H";
         } 
 
-        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_07Aug2017" + runPeriod + "_V10_DATA/Summer16_07Aug2017" + runPeriod + "_V10_DATA";
+        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
         std::cout << jecPath << std::endl;
         JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
         JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
@@ -56,7 +58,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
         _jetCorrector = new FactorizedJetCorrector(vPar);
     } else { // MC corrections
-        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_07Aug2017_V10_MC/Summer16_07Aug2017_V10_MC";
+        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
         std::cout << jecPath << std::endl;
         JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
         JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");

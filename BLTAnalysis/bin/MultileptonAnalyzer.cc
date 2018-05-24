@@ -301,6 +301,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         qcd_weight6 = ((TLHEWeight*)fLHEWeightArr->At(6))->weight / temp_nominal_scale;
         qcd_weight7 = ((TLHEWeight*)fLHEWeightArr->At(7))->weight / temp_nominal_scale;
         qcd_weight8 = ((TLHEWeight*)fLHEWeightArr->At(8))->weight / temp_nominal_scale;
+
         if(lhe_iter != 5 && lhe_iter != 7){
         float qcd_weight_temp = ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale; 
         qcd_weight =  (qcd_weight_temp < fabs(qcd_weight - 1)) ? qcd_weight_temp : qcd_weight;
@@ -634,13 +635,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
 
-        //if (isData) {
-        //    scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
-        //    electron->pt *= sdata.scale;
-        //} else {
-        //    float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
-        //    electron->pt *= rng->Gaus(1, sFactor);
-        //}
+        if (isData) {
+            scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
+            electron->pt *= sdata.scale;
+        } else {
+            float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
+            electron->pt *= rng->Gaus(1, sFactor);
+        }
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
@@ -718,14 +719,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // apply JEC offline and get scale uncertainties
         //double jec = particleSelector->JetCorrector(jet, "NONE");
         //cout << jec << endl;
-        //jet->pt = jet->ptRaw*jec;
+        jet->pt = jet->ptRaw*jec;
 
-        //if (!isData) { // apply jet energy resolution corrections to simulation
-        //    pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
-        //    float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
-        //    jet->pt = jet->pt*jerc;
-        //    //cout << resPair.first << " " << resPair.second << " " << jerc << endl;
-        //}
+        if (!isData) { // apply jet energy resolution corrections to simulation
+            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
+            float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            jet->pt = jet->pt*jerc;
+            //cout << resPair.first << " " << resPair.second << " " << jerc << endl;
+        }
 
         // Prevent overlap of muons and jets
         TLorentzVector jetP4; 

@@ -104,7 +104,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outHistName = params->get_output_treename("GenCategory");
     hGenCat = new TH1D(outHistName.c_str(), "WW decay modes",30,0.5,30.5);
 
-    vector<std::string> channelNames = {"mumu", "ee", "emu", "etau", "mutau", "e4j", "mu4j", "tautau"};
+    vector<std::string> channelNames = {"mumu", "ee", "emu", 
+                                        "etau", "mutau", 
+                                        "e4j", "mu4j", 
+                                        "mutau_fakes", "mu4j_fakes"
+                                        };
     for (unsigned i = 0; i < channelNames.size(); ++i) {
         string channel = channelNames[i];
         outFile->mkdir(channel.c_str());
@@ -159,7 +163,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonTwoD0", &leptonTwoD0);
         tree->Branch("leptonTwoDZ", &leptonTwoDZ);
 
-        if (channel == "mutau" || channel == "etau") {
+        if (channel == "mutau" || channel == "etau" || channel == "mutau_fakes") {
             //tree->Branch("tauChHadMult",  &tauChHadMult);
             //tree->Branch("tauPhotonMult", &tauPhotonMult);
             tree->Branch("tauDecayMode",  &tauDecayMode);
@@ -174,7 +178,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoTag", &jetTwoTag);
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
-        if (channel == "mu4j" || channel == "e4j") {
+        if (channel == "mu4j" || channel == "e4j" || channel == "mu4j_fakes") {
             tree->Branch("jetThreeP4", &jetThreeP4);
             tree->Branch("jetThreeTag", &jetThreeTag);
             tree->Branch("jetThreeFlavor", &jetThreeFlavor);
@@ -239,6 +243,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     unsigned wCount = 0;
     unsigned tauCount = 0;
+    unsigned topCount = 0;
     bitset<6> wDecay;
     bitset<4> tauDecay;
     float topSF = 1.;
@@ -339,6 +344,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // top pt reweighting: get the scale factor based on the top quark pt
             if (abs(particle->pdgId) == 6 && particle->status == 62) {
                 topSF *= exp(0.0615 - 0.0005*particle->pt);
+                ++topCount;
             }
 
             // Tag events based on neutrino flavors
@@ -562,7 +568,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     particleSelector->SetRho(fInfo->rhoJet);
 
     /* MUONS */
-    vector<TMuon*> muons;
+    vector<TMuon*> muons, fail_muons;
     vector<TLorentzVector> veto_muons;
     for (int i=0; i < fMuonArr->GetEntries(); i++) {
         TMuon* muon = (TMuon*) fMuonArr->At(i);
@@ -608,10 +614,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && muon->nValidHits > 0
                 && fabs(muon->d0)   < 0.2
                 && fabs(muon->dz)   < 0.5
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
            ) {
-            muons.push_back(muon);
-            veto_muons.push_back(muonP4);
+            if (GetMuonIsolation(muon)/muonP4.Pt() < 0.15) {
+                muons.push_back(muon);
+                veto_muons.push_back(muonP4);
+            } else {
+                fail_muons.push_back(muon);
+            }
         }
 
         // muons for jet veto
@@ -626,6 +635,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //}
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
+    sort(fail_muons.begin(), fail_muons.end(), sort_by_higher_pt<TMuon>);
 
     /* ELECTRONS */
     vector<TElectron*> electrons;
@@ -717,9 +727,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(jet);
 
         // apply JEC offline and get scale uncertainties
-        //double jec = particleSelector->JetCorrector(jet, "NONE");
-        //cout << jec << endl;
+        double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
+        //cout << jec << endl;
 
         if (!isData) { // apply jet energy resolution corrections to simulation
             pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
@@ -1128,9 +1138,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        //if (nJets + nBJets < 2 || nBJets < 1)
+        //    return kTRUE;
+        //eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1204,9 +1214,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        //if (nJets + nBJets < 2 || nBJets < 1)
+        //    return kTRUE;
+        //eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
@@ -1420,48 +1430,100 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else if (taus.size() == 2) {
-        channel = "tautau";
-        eventCounts[channel]->Fill(1);
+    } else if (isData && fail_muons.size() == 1 && muons.size() == 0 && electrons.size() == 0) {
 
-        if (taus[0]->pt < 37 || taus[1]->pt < 37)
+        // remove fake muon candidate from the jet collection
+        unsigned ix = 0;
+        for (const auto& jet: jets) {
+            TLorentzVector jetP4, muonP4; 
+            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
+            if (jetP4.DeltaR(muonP4) < 0.4) {
+                jets.erase(jets.begin() + ix);
+                break;
+            }
+            ++ix;  
+        }
+
+        if (taus.size() >= 1) {
+            channel = "mutau_fakes";
+            eventCounts[channel]->Fill(1);
+            nMuons = 1;
+
+            if (fail_muons[0]->pt < 25)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            TLorentzVector muonP4, tauP4, dilepton;
+            muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+            dilepton = muonP4 + tauP4;
+            if (dilepton.M() < 12)
+                return kTRUE;
+            eventCounts[channel]->Fill(3);
+
+            if (nJets + nBJets < 2 || nBJets < 1)
+                return kTRUE;
+            eventCounts[channel]->Fill(4);
+
+            leptonOneP4     = muonP4;
+            leptonOneIso    = GetMuonIsolation(fail_muons[0]);
+            leptonOneFlavor = 13*fail_muons[0]->q;
+            leptonOneDZ     = fail_muons[0]->dz;
+            leptonOneD0     = fail_muons[0]->d0;
+
+            leptonTwoP4     = tauP4;
+            leptonTwoIso    = 0.;
+            leptonTwoFlavor = 15*taus[0]->q;
+            leptonTwoDZ     = taus[0]->dzLeadChHad;
+            leptonTwoD0     = taus[0]->d0LeadChHad;
+
+        } else if (nJets + nBJets >= 4 && nBJets > 0) {
+            channel = "mu4j_fakes";
+            eventCounts[channel]->Fill(1);
+            nMuons = 1;
+
+            // convert to TLorentzVectors
+            TLorentzVector muonP4;
+            muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
+            float muonIso = GetMuonIsolation(fail_muons[0]);
+            if (fail_muons[0]->pt < 25.)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            leptonOneP4     = muonP4;
+            leptonOneIso    = muonIso;
+            leptonOneFlavor = fail_muons[0]->q*13;
+            leptonOneDZ     = fail_muons[0]->dz;
+            leptonOneD0     = fail_muons[0]->d0;
+
+            // Collect the highest pt jets in the event
+            std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+            //jets = KinematicTopTag(jets, metP2, muonP4);
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        } else {
             return kTRUE;
-        eventCounts[channel]->Fill(2);
-
-        TLorentzVector tauOneP4, tauTwoP4, dilepton;
-        tauOneP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
-        tauTwoP4.SetPtEtaPhiM(taus[1]->pt, taus[1]->eta, taus[1]->phi, 1.776);
-        dilepton = tauOneP4 + tauTwoP4;
-        if (dilepton.M() < 12)
-            return kTRUE;
-        eventCounts[channel]->Fill(3);
-
-        if (nJets + nBJets < 2 || nBJets < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
-
-        leptonOneP4     = tauOneP4;
-        leptonOneIso    = 0.;
-        leptonOneFlavor = 15*taus[0]->q;
-        leptonOneDZ     = taus[0]->dzLeadChHad;
-        leptonOneD0     = taus[0]->d0LeadChHad;
-
-        leptonTwoP4     = tauTwoP4;
-        leptonTwoIso    = 0.;
-        leptonTwoFlavor = 15*taus[1]->q;
-        leptonTwoDZ     = taus[1]->dzLeadChHad;
-        leptonTwoD0     = taus[1]->d0LeadChHad;
-
+        }
     } else {
         return kTRUE;
-
     }
 
     ///////////////////
     // Fill jet info //
     ///////////////////
 
-    if (params->selection != "mu4j" && params->selection != "e4j") { // jets are handled differently for the lepton + jet selection
+    if (channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes") { // jets are handled differently for the lepton + jet selection
         if (jets.size() > 0) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag    = jets[0]->csv;

@@ -25,9 +25,8 @@
 
 //CMSSW libraries
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-//#include "CondFormats/JetMETObjects/interface/JetResolutionObject.h"
-//#include "CondFormats/JetMETObjects/interface/JetResolution.h"
 #include "JetMETCorrections/Modules/interface/JetResolution.h"
 
 using namespace std;
@@ -61,9 +60,10 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
-    bool BTagModifier(const baconhep::TJet* jet, string, int) const;
+    bool BTagModifier(const baconhep::TJet* jet, string, int, int, float) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
-    pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet) const;
+    double JetUncertainty(const baconhep::TJet* jet) const;
+    pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
 
 private:
     Parameters _parameters;
@@ -76,6 +76,7 @@ private:
 
     // For offline jet corrections
     FactorizedJetCorrector* _jetCorrector;
+    JetCorrectionUncertainty* _jecUncertainty;
     JME::JetResolution jetResolution;
     JME::JetResolutionScaleFactor jetResolutionSF;
 };

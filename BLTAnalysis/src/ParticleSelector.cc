@@ -30,7 +30,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     vector<string> ds = split(parameters.datasetgroup, '_');
     string datasetname = ds[0];
     const std::string cmssw_base = getenv("CMSSW_BASE");
-    if (datasetname == "muon" || datasetname == "electron") { // data corrections
+    if (datasetname == "muon" || datasetname == "electron") { // data 
+        // jet energy corrections
         string runPeriod   = ds[1];
         cout << datasetname << " " << runPeriod << endl;
         if (runPeriod == "2016B" || runPeriod == "2016C" || runPeriod == "2016D") {
@@ -57,7 +58,13 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         vPar.push_back(*ResJetPar);
 
         _jetCorrector = new FactorizedJetCorrector(vPar);
-    } else { // MC corrections
+
+        // jec uncertainties
+        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+
+    } else { // MC 
+        // jet energy corrections
         std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
         std::cout << jecPath << std::endl;
         JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
@@ -73,12 +80,14 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
         _jetCorrector = new FactorizedJetCorrector(vPar);
 
+        // jec uncertainties
+        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+
         // jet energy resolution
         jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
         jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
-
     }
-
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
@@ -479,14 +488,13 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int syst) const
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int mistagSyst, float rNumber) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
     int   jetFlavor = jet->hadronFlavor;
     float bTag      = -1;
 
-    //float binningPt[] = {30, 40, 50, 70, 100, 150, 210, 1000};
     float binningPt[] = {30, 50, 70, 100, 140, 200, 300, 600};
     int ptBin = 0;
     for (int i = 0; i < 7; ++i) {
@@ -530,27 +538,25 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
             mcEff = bEff[ptBin];
 
             float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
-            if (syst == 1) {
+            if (btagSyst == 1) {
                 btagSF += scale[ptBin];
-            } else if (syst == -1) {
+            } else if (btagSyst == -1) {
                 btagSF -= scale[ptBin];
             }
-
         } else if (abs(jetFlavor) == 4) {
             mcEff = 0.03;
             float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
-            if (syst == 1) {
+            if (btagSyst == 1) {
                 btagSF += scale[ptBin];
-            } else if (syst == -1) {
+            } else if (btagSyst == -1) {
                 btagSF -= scale[ptBin];
             }
-
         } else {
             mcEff = 0.002;
-            if (syst == 1) {
-                btagSF *= (1 + (0.253674+ - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            } else if (syst == -1) {
-                btagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            if (mistagSyst == 1) {
+                mistagSF *= (1 + (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            } else if (mistagSyst == -1) {
+                mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
             }
         }
     } else if (tagName == "MVAM") {
@@ -572,27 +578,30 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     }
 
     // Upgrade or downgrade jet
-    float rNumber = _rng->Uniform(1.);
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
-
-        if(btagSF >= 1){  // use this if SF>1
-            if (!isBTagged) { //upgrade to tagged
+        if (btagSF > 1) {  // use this if SF>1
+            if (!isBTagged) { // upgrade to b tagged
                 float mistagRate = (1. - btagSF) / (1. - 1./mcEff);
-                if (rNumber < mistagRate) isBTagged = true;
+                if (rNumber < mistagRate) 
+                    isBTagged = true;
             }
-        } else if (btagSF < 1) { //downgrade tagged to untagged
-            if(isBTagged && rNumber > btagSF) 
-            isBTagged = false;
+        } else if (btagSF < 1) { // downgrade b tagged to untagged
+            if (isBTagged && rNumber > btagSF) 
+                isBTagged = false;
         }
     } else {
-        if(mistagSF > 1){  // use this if SF>1
+        //cout << mistagSF << " " << mistagSyst << " " << isBTagged << " ";
+        if (mistagSF > 1) {  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagPercent = (1. - mistagSF) / (1. - (1./mcEff));
-                if (rNumber < mistagPercent) isBTagged = true;
+                float mistagRate = (1. - mistagSF) / (1. - 1./mcEff);
+                if (rNumber < mistagRate) 
+                    isBTagged = true;
             }
         } else if (mistagSF < 1) { //downgrade tagged to untagged
-            if (isBTagged && rNumber > mistagSF) isBTagged = false;
+            if (isBTagged && rNumber > mistagSF) 
+                isBTagged = false;
         }
+        //cout << isBTagged << endl;
     }
 
     return isBTagged;
@@ -610,7 +619,17 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     return correction;
 }
 
-pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* jet) const
+double ParticleSelector::JetUncertainty(const baconhep::TJet* jet) const
+{
+    _jecUncertainty->setJetEta(jet->eta);
+    _jecUncertainty->setJetPt(jet->ptRaw);
+
+    double uncertainty = _jecUncertainty->getUncertainty(true);
+
+    return uncertainty;
+}
+
+pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* jet, int syst) const
 {
     JME::JetParameters jetParams;
     jetParams.setJetPt(jet->pt);
@@ -618,6 +637,14 @@ pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* je
     jetParams.setRho(_rhoFactor);
 
     float jres = jetResolution.getResolution(jetParams);
-    float jsf  = jetResolutionSF.getScaleFactor(jetParams);
+    float jsf = 1.;
+    if (syst == 1) {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams, Variation::UP);
+    } else if (syst == -1) {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams, Variation::DOWN);
+    } else {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams);
+    }
+
     return make_pair(jres, jsf);
 }

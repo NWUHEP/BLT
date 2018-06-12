@@ -205,6 +205,21 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("nFwdJets", &nFwdJets);
         tree->Branch("nBJets", &nBJets);
 
+        // jet counters for systematics
+        tree->Branch("nJetsJESUp", &nJetsJESUp);
+        tree->Branch("nJetsJESDown", &nJetsJESDown);
+        tree->Branch("nJetsJERUp", &nJetsJERUp);
+        tree->Branch("nJetsJERDown", &nJetsJERDown);
+
+        tree->Branch("nBJetsJESUp", &nBJetsJESUp);
+        tree->Branch("nBJetsJESDown", &nBJetsJESDown);
+        tree->Branch("nBJetsJERUp", &nBJetsJERUp);
+        tree->Branch("nBJetsJERDown", &nBJetsJERDown);
+        tree->Branch("nBJetsBTagUp", &nBJetsBTagUp);
+        tree->Branch("nBJetsBTagDown", &nBJetsBTagDown);
+        tree->Branch("nBJetsMistagUp", &nBJetsMistagUp);
+        tree->Branch("nBJetsMistagDown", &nBJetsMistagDown);
+
         outTrees[channel] = tree;
 
         // event counter
@@ -263,58 +278,57 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (genWeight < 0) {
             hTotalEvents->Fill(10);
         }
+        //cout << genWeight << endl;
 
         // get weights for assessing PDF and QCD scale systematics
         /*pdf_weight = 0.;
-          qcd_weight = 1;
-          qcd_weight1 = 1;
-          qcd_weight2 = 1;
-          qcd_weight3 = 1;
-          qcd_weight4 = 1;
-          qcd_weight5 = 1;
-          qcd_weight6 = 1;
-          qcd_weight7 = 1;
-          qcd_weight8 = 1;
-          lhe_weight_string = "";
-          gen_weight_string = std::to_string(fGenEvtInfo->weight) + ";"+
-          std::to_string(fGenEvtInfo->id_1) +";"+
-          std::to_string(fGenEvtInfo->id_2) +";"+
-          std::to_string(fGenEvtInfo->x_1) +";"+
-          std::to_string(fGenEvtInfo->x_2) +";"+
-          std::to_string(fGenEvtInfo->scalePDF) +";"+
-          std::to_string(fGenEvtInfo->xs); 
-          if(fLHEWeightArr->GetEntries() >= 100 ){
-          std::cout << "LHEWeight size " << fLHEWeightArr->GetEntries() << std::endl; 
-          float temp_nominal_scale = ((TLHEWeight*)fLHEWeightArr->At(0))->weight;
-        //?only last 100 should be taken
-        for(int lhe_iter=0; lhe_iter < fLHEWeightArr->GetEntries(); lhe_iter++)
-        {
+        qcd_weight = 1;
+        qcd_weight1 = 1;
+        qcd_weight2 = 1;
+        qcd_weight3 = 1;
+        qcd_weight4 = 1;
+        qcd_weight5 = 1;
+        qcd_weight6 = 1;
+        qcd_weight7 = 1;
+        qcd_weight8 = 1;
+        lhe_weight_string = "";
+        gen_weight_string = std::to_string(fGenEvtInfo->weight) + ";"+
+            std::to_string(fGenEvtInfo->id_1) +";"+
+            std::to_string(fGenEvtInfo->id_2) +";"+
+            std::to_string(fGenEvtInfo->x_1) +";"+
+            std::to_string(fGenEvtInfo->x_2) +";"+
+            std::to_string(fGenEvtInfo->scalePDF) +";"+
+            std::to_string(fGenEvtInfo->xs); 
+        if(fLHEWeightArr->GetEntries() >= 100 ){
+            std::cout << "LHEWeight size " << fLHEWeightArr->GetEntries() << std::endl; 
+            float temp_nominal_scale = ((TLHEWeight*)fLHEWeightArr->At(0))->weight;
+            // only last 100 should be taken
+            for(int lhe_iter=0; lhe_iter < fLHEWeightArr->GetEntries(); lhe_iter++)
+            {
+                uint16_t temp_u16 = round(abs(((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale * 500));
+                lhe_weight_string += std::string((char*)&temp_u16, sizeof(uint16_t));
+                if(lhe_iter > 9) {
+                    pdf_weight += pow(temp_nominal_scale - ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight, 2.);
+                }
 
-        uint16_t temp_u16 = round(abs(((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale * 500));
-        lhe_weight_string += std::string((char*)&temp_u16, sizeof(uint16_t));
-        if(lhe_iter > 9)
-        pdf_weight += pow(temp_nominal_scale - ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight, 2.);
+                if(lhe_iter <= 9){
+                    qcd_weight1 = ((TLHEWeight*)fLHEWeightArr->At(1))->weight / temp_nominal_scale;
+                    qcd_weight2 = ((TLHEWeight*)fLHEWeightArr->At(2))->weight / temp_nominal_scale;
+                    qcd_weight3 = ((TLHEWeight*)fLHEWeightArr->At(3))->weight / temp_nominal_scale;
+                    qcd_weight4 = ((TLHEWeight*)fLHEWeightArr->At(4))->weight / temp_nominal_scale;
+                    qcd_weight5 = ((TLHEWeight*)fLHEWeightArr->At(5))->weight / temp_nominal_scale;
+                    qcd_weight6 = ((TLHEWeight*)fLHEWeightArr->At(6))->weight / temp_nominal_scale;
+                    qcd_weight7 = ((TLHEWeight*)fLHEWeightArr->At(7))->weight / temp_nominal_scale;
+                    qcd_weight8 = ((TLHEWeight*)fLHEWeightArr->At(8))->weight / temp_nominal_scale;
 
+                    if(lhe_iter != 5 && lhe_iter != 7){
+                        float qcd_weight_temp = ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale; 
+                        qcd_weight =  (qcd_weight_temp < fabs(qcd_weight - 1)) ? qcd_weight_temp : qcd_weight;
 
-
-        if(lhe_iter <= 9){
-        qcd_weight1 = ((TLHEWeight*)fLHEWeightArr->At(1))->weight / temp_nominal_scale;
-        qcd_weight2 = ((TLHEWeight*)fLHEWeightArr->At(2))->weight / temp_nominal_scale;
-        qcd_weight3 = ((TLHEWeight*)fLHEWeightArr->At(3))->weight / temp_nominal_scale;
-        qcd_weight4 = ((TLHEWeight*)fLHEWeightArr->At(4))->weight / temp_nominal_scale;
-        qcd_weight5 = ((TLHEWeight*)fLHEWeightArr->At(5))->weight / temp_nominal_scale;
-        qcd_weight6 = ((TLHEWeight*)fLHEWeightArr->At(6))->weight / temp_nominal_scale;
-        qcd_weight7 = ((TLHEWeight*)fLHEWeightArr->At(7))->weight / temp_nominal_scale;
-        qcd_weight8 = ((TLHEWeight*)fLHEWeightArr->At(8))->weight / temp_nominal_scale;
-
-        if(lhe_iter != 5 && lhe_iter != 7){
-        float qcd_weight_temp = ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale; 
-        qcd_weight =  (qcd_weight_temp < fabs(qcd_weight - 1)) ? qcd_weight_temp : qcd_weight;
-
-        }
-        }		
-        }
-        pdf_weight = pow(pdf_weight/(99. * temp_nominal_scale * temp_nominal_scale), .5); //should temp_nominal_scale be squared?
+                    }
+                }		
+            }
+            pdf_weight = pow(pdf_weight/(99. * temp_nominal_scale * temp_nominal_scale), .5); //should temp_nominal_scale be squared
         }*/
 
         // loop over gen particle collection:
@@ -719,9 +733,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
 
-    nJets    = 0;
-    nFwdJets = 0;
-    nBJets   = 0;
+    ResetJetCounters();
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
@@ -729,13 +741,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // apply JEC offline and get scale uncertainties
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
-        //cout << jec << endl;
 
+
+        float gRand = 1.;
         if (!isData) { // apply jet energy resolution corrections to simulation
-            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
-            float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 0);
+            gRand = rng->Gaus(0, resPair.first);
+            float jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
             jet->pt = jet->pt*jerc;
-            //cout << resPair.first << " " << resPair.second << " " << jerc << endl;
         }
 
         // Prevent overlap of muons and jets
@@ -766,8 +779,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if (
-                jet->pt > 30 
-                && fabs(jet->eta) < 4.7
+                fabs(jet->eta) < 4.7
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
                 && !muOverlap 
                 && !elOverlap
@@ -775,25 +787,26 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
-                hadronicP4 += jetP4;
-                sumJetPt += jetP4.Pt();
-                jets.push_back(jet);
 
                 if (isData) {
-                    if (jet->bmva > 0.9432) { 
-                        ++nBJets;
-                    } else {
+                    if (jet->pt > 30) {
                         ++nJets;
+                        if (jet->bmva > 0.9432) { 
+                            ++nBJets;
+                        } 
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "MVAT", 0)) { 
-                        ++nBJets;
-                    } else {
-                        ++nJets;
-                    }
+                    JetCounting(jet, gRand);
                 }
+
+                if (jet->pt > 30) {
+                    hadronicP4 += jetP4;
+                    sumJetPt += jetP4.Pt();
+                    jets.push_back(jet);
+                }
+ 
             } else {
-                if (fabs(jet->eta) > 2.4) {
+                if (fabs(jet->eta) > 2.4 && jet->pt > 30) {
                     hadronicP4 += jetP4;
                     sumJetPt += jetP4.Pt();
                     ++nFwdJets;
@@ -802,6 +815,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
     std::sort(jets.begin(), jets.end(), sort_by_btag);
+
+    //cout << nBJets << ", " << nBJetsMistagUp << ", " << nBJetsMistagDown << endl;
+
+    // use the highest jet multiplicities given all systematic variations
+    unsigned nJetList[] = {nJets, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown};
+    nJetsCut = *std::max_element(nJetList, nJetList+sizeof(nJetList)/sizeof(unsigned));
+
+    unsigned nBJetList[] = {nBJets, nBJetsJESUp, nBJetsJESDown, 
+                            nBJetsJERUp, nBJetsJERDown, 
+                            nBJetsBTagUp, nBJetsBTagDown, 
+                            nBJetsMistagUp, nBJetsMistagDown
+                           };
+    nBJetsCut = *std::max_element(nBJetList, nBJetList+sizeof(nBJetList)/sizeof(unsigned));
 
     /* MET */
     met    = fInfo->pfMETC;
@@ -853,7 +879,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJetsCut < 2 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -946,7 +972,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2 || nBJets < 1)
+        if (nJetsCut < 2 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1052,7 +1078,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 2)// || nBJets < 1)
+        if (nJetsCut < 2)// || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1138,7 +1164,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        //if (nJets + nBJets < 2 || nBJets < 1)
+        //if (nJetsCut < 2 || nBJetsCut < 1)
         //    return kTRUE;
         //eventCounts[channel]->Fill(4);
 
@@ -1214,7 +1240,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        //if (nJets + nBJets < 2 || nBJets < 1)
+        //if (nJetsCut < 2 || nBJetsCut < 1)
         //    return kTRUE;
         //eventCounts[channel]->Fill(4);
 
@@ -1286,7 +1312,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(2);
 
-        if (nJets + nBJets < 4 || nBJets < 1)
+        if (nJetsCut < 4 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
@@ -1296,22 +1322,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneDZ     = electrons[0]->dz;
         leptonOneD0     = electrons[0]->d0;
 
-
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, electronP4);
-        jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-        jetOneTag      = jets[0]->csv;
-        jetOneFlavor   = jets[0]->hadronFlavor;
-        jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-        jetTwoTag      = jets[1]->csv;
-        jetTwoFlavor   = jets[1]->hadronFlavor;
-        jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-        jetThreeTag    = jets[2]->csv;
-        jetThreeFlavor = jets[2]->hadronFlavor;
-        jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-        jetFourTag     = jets[3]->csv;
-        jetFourFlavor  = jets[3]->hadronFlavor;
+        if (nJets >= 4) {
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        }
 
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, electronP4);
@@ -1366,7 +1393,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJets + nBJets < 4 || nBJets < 1)
+        if (nJetsCut < 4 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1376,23 +1403,23 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         leptonOneDZ     = muons[0]->dz;
         leptonOneD0     = muons[0]->d0;
 
-
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, muonP4);
-        jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-        jetOneTag      = jets[0]->csv;
-        jetOneFlavor   = jets[0]->hadronFlavor;
-        jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-        jetTwoTag      = jets[1]->csv;
-        jetTwoFlavor   = jets[1]->hadronFlavor;
-        jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-        jetThreeTag    = jets[2]->csv;
-        jetThreeFlavor = jets[2]->hadronFlavor;
-        jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-        jetFourTag     = jets[3]->csv;
-        jetFourFlavor  = jets[3]->hadronFlavor;
-
+        if (nJets >= 4) {
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        }
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 
@@ -1439,6 +1466,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
             muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
             if (jetP4.DeltaR(muonP4) < 0.4) {
+                if (jet->bmva > 0.9432) { 
+                    --nBJets;
+                } else {
+                    --nJets;
+                }
                 jets.erase(jets.begin() + ix);
                 break;
             }
@@ -1462,9 +1494,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             eventCounts[channel]->Fill(3);
 
-            if (nJets + nBJets < 2 || nBJets < 1)
-                return kTRUE;
-            eventCounts[channel]->Fill(4);
+            //if (nJets < 2 || nBJets < 1)
+            //    return kTRUE;
+            //eventCounts[channel]->Fill(4);
 
             leptonOneP4     = muonP4;
             leptonOneIso    = GetMuonIsolation(fail_muons[0]);
@@ -1478,7 +1510,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (nJets + nBJets >= 4 && nBJets > 0) {
+        } else if (nJets >= 4 && nBJets > 0) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
             nMuons = 1;
@@ -1764,4 +1796,85 @@ float MultileptonAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, Efficienc
         + pow(trigErr1.second*dEffMC1, 2)
         + pow(trigErr2.second*dEffMC2, 2);
     return sfVar;
+}
+
+void MultileptonAnalyzer::ResetJetCounters()
+{
+    nJets = nBJets = nFwdJets = 0;
+    nJetsCut       = nBJetsCut        = 0;
+    nJetsJESUp     = nJetsJESDown     = 0;
+    nJetsJERUp     = nJetsJERDown     = 0;
+    nBJetsJESUp    = nBJetsJESDown    = 0;
+    nBJetsJERUp    = nBJetsJERDown    = 0;
+    nBJetsBTagUp   = nBJetsBTagDown   = 0;
+    nBJetsMistagUp = nBJetsMistagDown = 0;
+}
+
+void MultileptonAnalyzer::JetCounting(TJet* jet, float resRand)
+{
+    float jetPt = jet->pt;
+
+    float rNumber = rng->Uniform(1.);
+    if (jet->pt > 30) {
+
+        // nominal
+        ++nJets;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) ++nBJets;
+
+        // b tag up
+        if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, rNumber)) ++nBJetsBTagUp;
+             
+        // b tag down
+        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, rNumber))  ++nBJetsBTagDown;
+
+        // misttag up
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, rNumber)) ++nBJetsMistagUp;
+        
+        // mistag down
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, rNumber)) ++nBJetsMistagDown;
+    }
+
+    // JES up
+    double jec = particleSelector->JetCorrector(jet, "NONE");
+    float jecUnc = particleSelector->JetUncertainty(jet);
+    jet->pt = jet->ptRaw*jec*(1 + jecUnc);
+    if (jet->pt > 30) {
+        ++nJetsJESUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            ++nBJetsJESUp;
+        } 
+    }
+
+    // JES down
+    jet->pt = jet->ptRaw*jec*(1 - jecUnc);
+    if (jet->pt > 30) {
+        ++nJetsJESDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            ++nBJetsJESDown;
+        } 
+    }
+
+    // JER up
+    pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 1);
+    float jerc = 1 + resRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+    jet->pt = jet->ptRaw*jec*jerc;
+    if (jet->pt > 30) {
+        ++nJetsJERUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            ++nBJetsJERUp;
+        }     
+    }
+
+    // JER down
+    resPair     = particleSelector->JetResolutionAndSF(jet, -1);
+    jerc        = 1 + resRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+    jet->pt     = jet->ptRaw*jec*jerc;
+    if (jet->pt > 30) {
+        ++nJetsJERDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            ++nBJetsJERDown;
+        } 
+    }
+    jet->pt = jetPt;
+
 }

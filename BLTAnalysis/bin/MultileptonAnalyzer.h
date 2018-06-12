@@ -97,6 +97,11 @@ public:
     TVector3 rPV;
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
+    // modified multiplicities for jet related uncertainties
+    unsigned nJetsCut, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown;
+    unsigned nBJetsCut, nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
+    unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
+
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
@@ -134,6 +139,7 @@ public:
     Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
     TLorentzVector genOneP4, genTwoP4;
 
+    // helper functions
     float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
@@ -142,9 +148,10 @@ public:
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
+    void ResetJetCounters();
+    void JetCounting(TJet* jet, float);
 
     //ClassDef(MultileptonAnalyzer,0);
 };
-
 
 #endif  // MULTILEPTONANALYZER_HH

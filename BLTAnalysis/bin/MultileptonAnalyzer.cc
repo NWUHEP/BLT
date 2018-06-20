@@ -116,7 +116,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         string treeName = "bltTree_" + params->datasetgroup;
         tree = new TTree(treeName.c_str(), treeName.c_str());
 
-        // event data
         tree->Branch("runNumber", &runNumber);
         tree->Branch("evtNumber", &evtNumber, "eventNumber/l");
         tree->Branch("lumiSection", &lumiSection);
@@ -220,6 +219,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("nBJetsMistagUp", &nBJetsMistagUp);
         tree->Branch("nBJetsMistagDown", &nBJetsMistagDown);
 
+        // theory uncertainties
+        tree->Branch("qcdWeights", &qcdWeights);
+        tree->Branch("pdfWeight", &pdfWeight);
+        tree->Branch("alphaS", &alphaS);
+
         outTrees[channel] = tree;
 
         // event counter
@@ -278,58 +282,24 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (genWeight < 0) {
             hTotalEvents->Fill(10);
         }
-        //cout << genWeight << endl;
 
         // get weights for assessing PDF and QCD scale systematics
-        /*pdf_weight = 0.;
-        qcd_weight = 1;
-        qcd_weight1 = 1;
-        qcd_weight2 = 1;
-        qcd_weight3 = 1;
-        qcd_weight4 = 1;
-        qcd_weight5 = 1;
-        qcd_weight6 = 1;
-        qcd_weight7 = 1;
-        qcd_weight8 = 1;
-        lhe_weight_string = "";
-        gen_weight_string = std::to_string(fGenEvtInfo->weight) + ";"+
-            std::to_string(fGenEvtInfo->id_1) +";"+
-            std::to_string(fGenEvtInfo->id_2) +";"+
-            std::to_string(fGenEvtInfo->x_1) +";"+
-            std::to_string(fGenEvtInfo->x_2) +";"+
-            std::to_string(fGenEvtInfo->scalePDF) +";"+
-            std::to_string(fGenEvtInfo->xs); 
-        if(fLHEWeightArr->GetEntries() >= 100 ){
-            std::cout << "LHEWeight size " << fLHEWeightArr->GetEntries() << std::endl; 
-            float temp_nominal_scale = ((TLHEWeight*)fLHEWeightArr->At(0))->weight;
-            // only last 100 should be taken
-            for(int lhe_iter=0; lhe_iter < fLHEWeightArr->GetEntries(); lhe_iter++)
-            {
-                uint16_t temp_u16 = round(abs(((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale * 500));
-                lhe_weight_string += std::string((char*)&temp_u16, sizeof(uint16_t));
-                if(lhe_iter > 9) {
-                    pdf_weight += pow(temp_nominal_scale - ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight, 2.);
+        pdfWeight = 0.;
+        alphaS    = 1.;
+        qcdWeights.clear();
+        if (fLHEWeightArr != 0) {
+            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
+                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
+                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
+                if (id >= 1001 && id <= 1009) {
+                    qcdWeights.push_back(lheWeight);
+                } else if (id >= 2001 && id <= 2100) {		
+                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
+                } else if (id == 2101 || id == 2102) {
+                    alphaS = lheWeight;
                 }
-
-                if(lhe_iter <= 9){
-                    qcd_weight1 = ((TLHEWeight*)fLHEWeightArr->At(1))->weight / temp_nominal_scale;
-                    qcd_weight2 = ((TLHEWeight*)fLHEWeightArr->At(2))->weight / temp_nominal_scale;
-                    qcd_weight3 = ((TLHEWeight*)fLHEWeightArr->At(3))->weight / temp_nominal_scale;
-                    qcd_weight4 = ((TLHEWeight*)fLHEWeightArr->At(4))->weight / temp_nominal_scale;
-                    qcd_weight5 = ((TLHEWeight*)fLHEWeightArr->At(5))->weight / temp_nominal_scale;
-                    qcd_weight6 = ((TLHEWeight*)fLHEWeightArr->At(6))->weight / temp_nominal_scale;
-                    qcd_weight7 = ((TLHEWeight*)fLHEWeightArr->At(7))->weight / temp_nominal_scale;
-                    qcd_weight8 = ((TLHEWeight*)fLHEWeightArr->At(8))->weight / temp_nominal_scale;
-
-                    if(lhe_iter != 5 && lhe_iter != 7){
-                        float qcd_weight_temp = ((TLHEWeight*)fLHEWeightArr->At(lhe_iter))->weight / temp_nominal_scale; 
-                        qcd_weight =  (qcd_weight_temp < fabs(qcd_weight - 1)) ? qcd_weight_temp : qcd_weight;
-
-                    }
-                }		
             }
-            pdf_weight = pow(pdf_weight/(99. * temp_nominal_scale * temp_nominal_scale), .5); //should temp_nominal_scale be squared
-        }*/
+        }
 
         // loop over gen particle collection:
         //   * parton counting for combining inclusive and jet-binned Drell-Yan samples
@@ -709,7 +679,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if( 
-                tau->pt > 20  
+                tau->pt > 18  
                 && abs(tau->eta) < 2.3 
                 && !muOverlap
                 && !elOverlap
@@ -1459,6 +1429,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (isData && fail_muons.size() == 1 && muons.size() == 0 && electrons.size() == 0) {
 
+        cout << nJets << "\t" << nBJets << "\t";
         // remove fake muon candidate from the jet collection
         unsigned ix = 0;
         for (const auto& jet: jets) {
@@ -1466,17 +1437,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
             muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
             if (jetP4.DeltaR(muonP4) < 0.4) {
+                --nJets;
                 if (jet->bmva > 0.9432) { 
                     --nBJets;
-                } else {
-                    --nJets;
-                }
+                } 
                 jets.erase(jets.begin() + ix);
                 break;
             }
             ++ix;  
         }
 
+        cout << nJets << "\t" << nBJets << endl;
         if (taus.size() >= 1) {
             channel = "mutau_fakes";
             eventCounts[channel]->Fill(1);
@@ -1510,7 +1481,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (nJets >= 4 && nBJets > 0) {
+        } else if (nJets >= 4 && nBJets >= 1) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
             nMuons = 1;

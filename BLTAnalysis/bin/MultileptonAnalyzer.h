@@ -30,6 +30,7 @@
 
 // BaconAna class definitions (might need to add more)
 #include "BaconAna/Utils/interface/TTrigger.hh"
+#include "BaconAna/DataFormats/interface/TLHEWeight.hh"
 
 // ROOT headers
 #include <TLorentzVector.h>
@@ -107,7 +108,8 @@ public:
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
     Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
 
-    vector<Float_t> pdfWeights;
+    vector<float> qcdWeights;
+    float pdfWeight, alphaS;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;

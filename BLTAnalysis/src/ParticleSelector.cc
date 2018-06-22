@@ -27,43 +27,6 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     _rng = new TRandom3(1337);
 
     // offline jet corrections on-the-fly
-    std::string runPeriod = "H";
-    if (
-        parameters.datasetgroup == "muon_2016B" 
-            || parameters.datasetgroup == "muon_2016C" 
-            || parameters.datasetgroup == "muon_2016D"
-        ) {
-        runPeriod = "BCD";
-    } else if (parameters.datasetgroup == "muon_2016E" || parameters.datasetgroup == "muon_2016F") {
-        runPeriod = "EF";
-    } else if (parameters.datasetgroup == "muon_2016G") {
-        runPeriod = "G";
-    } else {
-        runPeriod = "H";
-    }
-
-    const std::string cmssw_base = getenv("CMSSW_BASE");
-    std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
-    std::cout << jecPath << std::endl;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecPath + "_L2Relative_AK4PFchs.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(jecPath + "_L1FastJet_AK4PFchs.txt");
-
-    vector<JetCorrectorParameters> vPar;
-    vPar.push_back(*L1JetPar);
-    vPar.push_back(*L2JetPar);
-    vPar.push_back(*L3JetPar);
-    vPar.push_back(*ResJetPar);
-
-    _jetCorrector = new FactorizedJetCorrector(vPar);
-    // jet energy resolution
-    jetResolution = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
-    jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
-
-    // offline jet corrections on-the-fly
-    // using V10 by Nate
-    /*
     vector<string> ds = split(parameters.datasetgroup, '_');
     string datasetname = ds[0];
     const std::string cmssw_base = getenv("CMSSW_BASE");
@@ -124,13 +87,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         // jet energy resolution
         jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
         jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
-<<<<<<< HEAD
-
-    }*/
-
-=======
     }
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {

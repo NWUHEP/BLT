@@ -243,11 +243,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     eventWeight = 1.;
     this->totalEvents++;
     hTotalEvents->Fill(1);
-<<<<<<< HEAD
     
-=======
-
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
             << " Run: " << fInfo->runNum 
@@ -416,10 +412,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 } else if (tauDecay.test(0) && tauCount == 1) {// tau->e, tau->h
                     hGenCat->Fill(7); 
                     genCategory = 7;
-<<<<<<< HEAD
-                
-=======
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
                 } else if (tauDecay.test(1) && tauCount == 1) {// tau->mu, tau->h
                     hGenCat->Fill(8); 
                     genCategory = 8;
@@ -487,13 +479,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // top pt reweighting
         eventWeight *= topPtWeight;
-<<<<<<< HEAD
-        hTotalEvents->Fill(11, puWeight*topPtWeight);
-    } else {
-        nPU = 0;
-        nPartons = 0;
-        hTotalEvents->Fill(11);
-=======
 
         // keep track of total number of generated events with weights
         hTotalEvents->Fill(9, topPtWeight);
@@ -501,7 +486,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     } else {
         nPU = 0;
         nPartons = 0;
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     }
 
     /* Apply lumi mask */
@@ -603,37 +587,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (
                 muonP4.Pt() > 10.
                 && fabs(muonP4.Eta()) < 2.4
-<<<<<<< HEAD
-                && (muon->pogIDBits & baconhep::kPOGTightMuon)
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
-                
-                // tight muon ID and ISO
-                //&& (muon->typeBits & baconhep::kPFMuon) 
-                //&& (muon->typeBits & baconhep::kGlobal) 
-                //&& muon->muNchi2    < 10.
-                //&& muon->nMatchStn  > 1
-                //&& muon->nPixHits   > 0
-                //&& fabs(muon->d0)   < 0.2
-                //&& fabs(muon->dz)   < 0.5
-                //&& muon->nTkLayers  > 5 
-                //&& muon->nValidHits > 0
-                
-                //&& GetMuonIsolation(muon)/muonP4.Pt() > 0.15  // inverse for fake profile
-                ) {
-                    muons.push_back(muon);
-                    //veto_muons.push_back(muonP4);
-                }
-
-        // muons for jet veto
-        if (
-                muonP4.Pt() > 10.
-                && fabs(muonP4.Eta()) < 2.4
-                && (muon->pogIDBits & baconhep::kPOGTightMuon)
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
-            ) {
-                veto_muons.push_back(muonP4);
-            }
-=======
 
                 // tight muon ID and ISO
                 && (muon->typeBits & baconhep::kPFMuon) 
@@ -664,7 +617,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //   ) {
         //    veto_muons.push_back(muonP4);
         //}
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
     sort(fail_muons.begin(), fail_muons.end(), sort_by_higher_pt<TMuon>);
@@ -727,13 +679,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
 
-<<<<<<< HEAD
-        if( // Selection adopted from Stany's tau counting selection for ttDM
-                tau->pt > 20  
-=======
         if( 
                 tau->pt > 18  
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
                 && abs(tau->eta) < 2.3 
                 && !muOverlap
                 && !elOverlap
@@ -763,21 +710,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(jet);
 
         // apply JEC offline and get scale uncertainties
-<<<<<<< HEAD
-
-        //double jec = particleSelector->JetCorrector(jet, "NONE");
-        //jet->pt = jet->ptRaw*jec;
-        //if (!isData) { // apply jet energy resolution corrections to simulation
-
-        if (isData) { // fix for broken bacon JEC
-            double jec = particleSelector->JetCorrector(jet, "NONE");
-            jet->pt = jet->ptRaw*jec;
-        } else { // apply jet energy resolution corrections to simulation
-
-
-            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet);
-            float jerc = 1 + rng->Gaus(0, resPair.first)*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
-=======
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
 
@@ -787,7 +719,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 0);
             gRand = rng->Gaus(0, resPair.first);
             float jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
             jet->pt = jet->pt*jerc;
         }
 
@@ -892,13 +823,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // trigger selections
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end() 
         || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
-<<<<<<< HEAD
-    //bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
-    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPLoose_Gsf_v*") != passTriggerNames.end() 
-        || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
-=======
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
 
     string channel = "";
     if (       electrons.size() == 0 && muons.size() == 2 && taus.size() == 0) { // mu+mu selection
@@ -976,32 +901,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-<<<<<<< HEAD
-            if (triggered.any()) {
-                EfficiencyContainer effContTrigger1, effContTrigger2;
-
-                if (triggered.test(0)) {
-                    effContTrigger1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-                }
-                if (triggered.test(1)) {
-                    effContTrigger2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
-                }
-                triggerWeight = GetTriggerSF(effContTrigger1, effContTrigger2);
-                triggerVar    = GetTriggerSFError(effContTrigger1, effContTrigger2);
-
-=======
             // trigger weights with trigger matching:
             //
             // check if lepton could pass the trigger threshold and is matched
             // to a trigger object.  When both muons pass the trigger, use the
             // efficiency for detecting either
-            bitset<2> triggered;
-            for (const auto& name: passTriggerNames) {
-                if (trigger->passObj(name, 1, muons[0]->hltMatchBits) && muonOneP4.Pt() > 25)
-                    triggered.set(0);
-                if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
-                    triggered.set(1);
-            }
 
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
@@ -1020,7 +924,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
             } else {
                 return kTRUE;
             }
@@ -1095,18 +998,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
 
-<<<<<<< HEAD
-            if (triggered.any()) {
-                EfficiencyContainer effContTrigger1, effContTrigger2;
-                if (triggered.test(0)) {
-                    effContTrigger1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
-                }
-                if (triggered.test(1)) {
-                    effContTrigger2 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
-                }
-                triggerWeight = GetTriggerSF(effContTrigger1, effContTrigger2);
-                triggerVar    = GetTriggerSFError(effContTrigger1, effContTrigger2);
-=======
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
@@ -1124,7 +1015,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
             } else {
                 return kTRUE;
             }
@@ -1164,11 +1054,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-<<<<<<< HEAD
-        if (nJets + nBJets < 2 || nBJets < 1)
-=======
-        if (nJetsCut < 2)// || nBJetsCut < 1)
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
+        if (nJetsCut < 2 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1221,23 +1107,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
 
-<<<<<<< HEAD
-            if (triggered.any()) {
-                EfficiencyContainer effContTrigger1, effContTrigger2;
-
-                if (triggered.test(0)) {
-                    effContTrigger1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                }
-                if (triggered.test(1)) {
-                    effContTrigger2 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
-                }
-                triggerWeight = GetTriggerSF(effContTrigger1, effContTrigger2);
-                triggerVar    = GetTriggerSFError(effContTrigger1, effContTrigger2);
-            } else {
-                return kTRUE;
-            }            
-            
-=======
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
@@ -1259,7 +1128,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
 
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
             // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
@@ -1329,7 +1197,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
             leptonTwoRecoVar    = 0.05;
-
 
 
             if (triggered) {
@@ -1411,8 +1278,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
-
-
 
 
             if (triggered) {
@@ -1546,35 +1411,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, muonP4);
-<<<<<<< HEAD
-        jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-        jetOneTag      = jets[0]->csv;
-        jetOneFlavor   = jets[0]->hadronFlavor;
-        jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-        jetTwoTag      = jets[1]->csv;
-        jetTwoFlavor   = jets[1]->hadronFlavor;
-        jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-        jetThreeTag    = jets[2]->csv;
-        jetThreeFlavor = jets[2]->hadronFlavor;
-        jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-        jetFourTag     = jets[3]->csv;
-        jetFourFlavor  = jets[3]->hadronFlavor;
-
-
-        // trigger weights
-        bool triggered = false;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
-                triggered = true;
-                break;
-            }
-        }
-
-        if (!triggered) triggerLeptonStatus = 0;
-        if ( triggered) triggerLeptonStatus = 1;
-        
-
-=======
         if (nJets >= 4) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag      = jets[0]->csv;
@@ -1589,7 +1425,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
         }
->>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
+
+                // trigger weights
+        bool triggered = false;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
+                triggered = true;
+                break;
+            }
+        }
+
+        if (!triggered) triggerLeptonStatus = 0;
+        if ( triggered) triggerLeptonStatus = 1;
+        
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 

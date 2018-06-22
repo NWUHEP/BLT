@@ -411,8 +411,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 } else if (tauDecay.test(0) && tauCount == 1) {// tau->e, tau->h
                     hGenCat->Fill(7); 
                     genCategory = 7;
-                    hGenCat->Fill(8); 
                 } else if (tauDecay.test(1) && tauCount == 1) {// tau->mu, tau->h
+                    hGenCat->Fill(8); 
                     genCategory = 8;
                 } else if (tauCount == 0) {// tau->h, tau->h
                     hGenCat->Fill(9); 

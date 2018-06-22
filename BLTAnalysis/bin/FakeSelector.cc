@@ -49,7 +49,7 @@ void FakeSelector::Begin(TTree *tree)
     const std::string cmssw_base = getenv("CMSSW_BASE");
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
-    //triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+    triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
     triggerNames.push_back("HLT_IsoMu24_v*");
     triggerNames.push_back("HLT_IsoTkMu24_v*");
 
@@ -118,14 +118,6 @@ void FakeSelector::Begin(TTree *tree)
     outTree->Branch("leptonThreeMother", &leptonThreeMother);
     outTree->Branch("leptonThreeD0", &leptonThreeD0);
     outTree->Branch("leptonThreeDZ", &leptonThreeDZ);
-
-    // jets
-    outTree->Branch("jetOneP4", &jetOneP4);
-    outTree->Branch("jetOneTag", &jetOneTag);
-    outTree->Branch("jetOneFlavor", &jetOneFlavor);
-    outTree->Branch("jetTwoP4", &jetTwoP4);
-    outTree->Branch("jetTwoTag", &jetTwoTag);
-    outTree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
     // gen level objects
     outTree->Branch("genCategory", &genCategory);
@@ -418,7 +410,7 @@ Bool_t FakeSelector::Process(Long64_t entry)
                         ++nJets;
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "MVAT")) { 
+                    if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rng->Uniform(1.))) { 
                         ++nBJets;
                     } else {
                         ++nJets;
@@ -454,7 +446,7 @@ Bool_t FakeSelector::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
 
-    if (muons.size() >= 3 && electrons.size() == 0) { // mu+mu selection
+    if (muons.size() >= 3 && electrons.size() == 0) { // mumu+mu selection
         hTotalEvents->Fill(5);
 
         // pick muon pair that has a mass closest to the Z pole
@@ -585,45 +577,97 @@ Bool_t FakeSelector::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
+    } else if (electrons.size() == 2 && muons.size() == 1) { // ee+mu selection
+        hTotalEvents->Fill(5);
+
+        // pick muon pair that has a mass closest to the Z pole
+
+
+        // apply preselection and set tree vars
+        TLorentzVector electronOneP4, electronTwoP4, dielectronP4;
+        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 5.11e-6);
+        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 5.11e-6);
+        dielectronP4 = electronOneP4 + electronTwoP4;
+        if (
+                electrons[0]->pt < 30. 
+                || electrons[1]->pt < 10.
+                || fabs(dielectronP4.M() - 91) > 15
+                || electrons[0]->q == electrons[1]->q
+           )
+            return kTRUE;
+        hTotalEvents->Fill(6);
+
+        leptonOneP4     = electronOneP4;
+        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        leptonOneFlavor = 11*electrons[0]->q;
+        leptonOneDZ     = electrons[0]->dz;
+        leptonOneD0     = electrons[0]->d0;
+
+        leptonTwoP4     = electronTwoP4;
+        leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
+        leptonTwoFlavor = 11*electrons[1]->q;
+        leptonTwoDZ     = electrons[1]->dz;
+        leptonTwoD0     = electrons[1]->d0;
+
+        TLorentzVector muonP4;
+        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
+        leptonThreeP4     = muonP4;
+        leptonThreeIso    = GetMuonIsolation(muons[0]);
+        leptonThreeFlavor = muons[0]->q*13;
+        leptonThreeDZ     = muons[0]->dz;
+        leptonThreeD0     = muons[0]->d0;
+
+        if (!isData) {
+
+            EfficiencyContainer effCont1, effCont2;
+            effCont1 = weights->GetElectronRecoEff(leptonOneP4);
+            effCont2 = weights->GetElectronRecoEff(leptonTwoP4);
+
+            pair<float, float> effs, errs;
+            effs = effCont1.GetEff();
+            errs = effCont1.GetErr();
+            float leptonOneRecoWeight = effs.first/effs.second;
+
+            effs = effCont2.GetEff();
+            errs = effCont2.GetErr();
+            float leptonTwoRecoWeight = effs.first/effs.second;
+
+            // trigger weights with trigger matching
+            bitset<2> triggered;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, electrons[0]->hltMatchBits) && leptonOneP4.Pt() > 30)
+                    triggered.set(0);
+                if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && leptonTwoP4.Pt() > 30)
+                    triggered.set(1);
+            }
+
+            float triggerWeight = 1.;
+            if (triggered.all()) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonOneP4);
+                effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonTwoP4);
+                triggerWeight = GetTriggerSF(effCont1, effCont2);
+            } else if (triggered.test(0)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonOneP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+            } else if (triggered.test(1)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", leptonTwoP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+            } else {
+                return kTRUE;
+            }
+
+            // update event weight
+            eventWeight *= triggerWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+        }
     } else {
         return kTRUE;
     }
 
-    ///////////////////
-    // Fill jet info //
-    ///////////////////
-
-    if (params->selection != "mu4j" && params->selection != "e4j") { // jets are handled differently for the lepton + jet selection
-        if (jets.size() > 0) {
-            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-            jetOneTag    = jets[0]->csv;
-            jetOneFlavor = jets[0]->hadronFlavor;
-        } else {
-            jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetOneTag    = 0.;
-            jetOneFlavor = 0;
-        }
-
-        if (jets.size() > 1) {
-            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-            jetTwoTag    = jets[1]->csv;
-            jetTwoFlavor = jets[1]->hadronFlavor;
-        } else {
-            jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetTwoTag    = 0.;
-            jetTwoFlavor = 0;
-        } 
-    }
-
-    if (!isData && genParticles.size() == 2) {
-        genOneId = genParticles[0]->pdgId;
-        genOneP4.SetPtEtaPhiM(genParticles[0]->pt, genParticles[0]->eta, genParticles[0]->phi, genParticles[0]->mass); 
-        genTwoId = genParticles[1]->pdgId;
-        genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
-    } else {
-        genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
-        genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
-    }
 
     outTree->Fill();
     this->passedEvents++;

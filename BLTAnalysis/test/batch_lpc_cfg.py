@@ -5,19 +5,24 @@ import sys
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-path       = '/eos/uscms/store/group/lpcbacon/12a'
 executable = 'execBatch_lpc.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
+<<<<<<< HEAD
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't','ttboson', 'diboson'] #,'ttbar_theory'
 #mc_samples = ['ttbar_theory']
 #data_samples = []
+=======
+mc_samples   = ['zjets', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
+
+>>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
 ''' 
     Set job configurations.  
 '''
 
+path       = '/eos/uscms/store/group/lpcbacon/12a'
 data_dict = {}
 data_dict['single_mu'] = [
         cfg(data_name = 'muon_2016B_v1',
@@ -163,11 +168,16 @@ data_dict['mueg'] = [
            ),
         ]
 
+<<<<<<< HEAD
 
+=======
+path = '/eos/uscms/store/group/lpcbacon/12d'
+>>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
 mc_dict = {}
 path = '/eos/uscms/store/group/lpcbacon/12d'
 mc_dict['zjets'] = [
     # Drell-Yan
+<<<<<<< HEAD
     # cfg(data_name = 'DYJetsToLL_M-50',
     #     path     = '{0}/Summer16_DYJetsToLL_M-50_amcatnlo'.format(path),
     #     nJobs    = 50,
@@ -228,6 +238,68 @@ mc_dict['zjets'] = [
        nJobs    = 10,
        suffix   = 'z4jets_m-10to50'
       ),
+=======
+    #cfg(data_name = 'DYJetsToLL_M-50',
+    #    path     = '{0}/Summer16_DYJetsToLL_M-50_amcatnlo'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-50_alt'
+    #   ),
+    #cfg(data_name = 'DYJetsToLL_M-10to50',
+    #    path     = '{0}/Summer16_DYJetsToLL_M-10to50_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zjets_m-10to50_alt'
+    #   ),
+    cfg(data_name = 'DYJetsToLL_M-50',
+        path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 50,
+        suffix   = 'zjets_m-50'
+       ),
+    cfg(data_name = 'DYJetsToLL_M-10to50',
+        path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50'
+       ),
+    cfg(data_name = 'DY1JetsToLL_M-50',
+        path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50'
+       ),
+    cfg(data_name = 'DY1JetsToLL_M-10to50',
+        path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z1jets_m-10to50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-50',
+        path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-50'
+       ),
+    cfg(data_name = 'DY2JetsToLL_M-10to50',
+        path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z2jets_m-10to50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-50',
+        path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-50'
+       ),
+    cfg(data_name = 'DY3JetsToLL_M-10to50',
+        path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z3jets_m-10to50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-50',
+        path     = '{0}/DY4JetsToLL_M-50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-50'
+       ),
+    cfg(data_name = 'DY4JetsToLL_M-10to50',
+        path     = '{0}/DY4JetsToLL_M-10to50_madgraph'.format(path),
+        nJobs    = 10,
+        suffix   = 'z4jets_m-10to50'
+       ),
+>>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     ]
 
 path = '/eos/uscms/store/group/lpcbacon/12'
@@ -310,6 +382,7 @@ mc_dict['ttbar'] = [
         path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
+<<<<<<< HEAD
        )
     ]
 mc_dict['ttbar_theory'] = [
@@ -353,6 +426,54 @@ mc_dict['ttbar_theory'] = [
        nJobs    = 50,
        suffix   = 'ttbar_inclusive_hdampup'
        )
+=======
+       ),
+    #cfg(data_name = 'ttbar_inclusive_tunedown',
+    #    path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_tunedown'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_tuneup',
+    #    path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_tuneup'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_isrdown',
+    #    path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_isrdown'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_isrup',
+    #    path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_isrup'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_fsrdown',
+    #    path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_fsrdown'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_fsrup',
+    #    path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_fsrup'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_hdampdown',
+    #    path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_hdampdown'
+    #   ),
+    #cfg(data_name = 'ttbar_inclusive_hdampup',
+    #    path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_hdampup'
+    #    ),
+    #cfg(data_name = 'ttbar_inclusive_herwig',
+    #    path     = '{0}/Summer16_TT_powheg_herwig'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'ttbar_inclusive_herwig'
+    #    ),
+>>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     #cfg(data_name = 'ttbar_leptonic',
     #    path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
     #    nJobs    = 50,
@@ -443,10 +564,17 @@ mc_dict['diboson'] = [
         suffix   = 'zz_2l2q'
        ),
     cfg(data_name = 'ZZJetsTo4L',
+<<<<<<< HEAD
        path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
        nJobs    = 10,
        suffix   = 'zz_4l'
       ),
+=======
+        path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_4l'
+       ),
+>>>>>>> 75eabdb44ee1283255ea977c22550e296fa6b327
     ]
 
 batch_list = []

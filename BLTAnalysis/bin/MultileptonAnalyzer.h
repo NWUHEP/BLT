@@ -75,7 +75,7 @@ public:
     TRandom3 *rng;
 
     // electron scale and smear corrector (trash)
-    EnergyScaleCorrection *electronScaler;
+    EnergyScaleCorrection *electronScaler; 
 
     // Params and cuts
     std::unique_ptr<Parameters>         params;
@@ -90,7 +90,7 @@ public:
 
     // Branches in the output file
     // event data
-    UInt_t runNumber, lumiSection, nPV, nPartons;
+    UInt_t runNumber, lumiSection, nPV, nPartons,triggerLeptonStatus;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t nPU;

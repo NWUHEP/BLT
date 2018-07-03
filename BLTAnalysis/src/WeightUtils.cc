@@ -159,16 +159,60 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* f_hzz_muIdSF = new TFile(fileName.c_str(), "OPEN");
     _hzz_muIdSF = (TH2F*)f_hzz_muIdSF->Get("FINAL");
 
-    // electron trigger efficiencies
+    // double electron trigger efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg1_Ele23_HZZSelection_Tag35.root";
     TFile* f_elTrigSF_leg1 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleg_leg1_DATA = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffData2D");
-    _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D");
+    _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D"); 
 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
     TFile* f_elTrigSF_leg2 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleg_leg2_DATA = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffData2D");
     _eff_doubleg_leg2_MC   = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffMC2D");
+
+    // double muon trigger efficiencies
+   
+    // leg 1
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta0to09.root";
+    TFile* f_DoubleMuTrigSF_leg1_0 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg1_DATA[0] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_0->Get("eff_data");
+    _eff_doubleMu_leg1_MC[0]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_0->Get("eff_mc"); 
+
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta09to12.root";
+    TFile* f_DoubleMuTrigSF_leg1_1 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg1_DATA[1] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_1->Get("eff_data");
+    _eff_doubleMu_leg1_MC[1]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_1->Get("eff_mc"); 
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta12to21.root";
+    TFile* f_DoubleMuTrigSF_leg1_2 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg1_DATA[2] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_2->Get("eff_data");
+    _eff_doubleMu_leg1_MC[2]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_2->Get("eff_mc"); 
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta21to24.root";
+    TFile* f_DoubleMuTrigSF_leg1_3 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg1_DATA[3] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_3->Get("eff_data");
+    _eff_doubleMu_leg1_MC[3]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_3->Get("eff_mc"); 
+
+    // leg 2 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta0to09.root";
+    TFile* f_DoubleMuTrigSF_leg2_0 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg2_DATA[0] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_0->Get("eff_data");
+    _eff_doubleMu_leg2_MC[0]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_0->Get("eff_mc"); 
+
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta09to12.root";
+    TFile* f_DoubleMuTrigSF_leg2_1 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg2_DATA[1] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_1->Get("eff_data");
+    _eff_doubleMu_leg2_MC[1]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_1->Get("eff_mc"); 
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta12to21.root";
+    TFile* f_DoubleMuTrigSF_leg2_2 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg2_DATA[2] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_2->Get("eff_data");
+    _eff_doubleMu_leg2_MC[2]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_2->Get("eff_mc"); 
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta21to24.root";
+    TFile* f_DoubleMuTrigSF_leg2_3 = new TFile(fileName.c_str(), "OPEN");
+    _eff_doubleMu_leg2_DATA[3] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_3->Get("eff_data");
+    _eff_doubleMu_leg2_MC[3]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_3->Get("eff_mc"); 
 
     // electron reco efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
@@ -208,6 +252,12 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _mva_gammaSF_ID[1] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_1");
     _mva_gammaSF_ID[2] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_2");
     _mva_gammaSF_ID[3] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_3");
+
+    // photon r9 reweighting
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9_reweighting_2016.root";
+    TFile* f_photon_r9 = new TFile(fileName.c_str(), "OPEN"); 
+    _photon_r9_barrel = (TGraph *)f_photon_r9->Get("transffull5x5R9EB");
+    _photon_r9_endcap = (TGraph *)f_photon_r9->Get("transffull5x5R9EE");
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -269,6 +319,39 @@ std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerNa
             //effMC   = _eff_doubleg_leg2_MC->Interpolate(lepton.Eta(), lepton.Pt());
             effData = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, electron.calibPt));
             effMC = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, electron.calibPt));
+        }
+    }
+
+    if (effMC == 0) {
+        cout << "zero value for effMC" << endl;
+        effMC = 1;
+    }
+
+    return std::make_pair(effData, effMC);
+}
+
+std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const
+{
+    float effData = 1;
+    float effMC = 1;
+
+    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
+    int etaBin = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(muon.eta) > binningEta[i] && fabs(muon.eta) <= binningEta[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+
+    if (muon.pt < 200.) {
+        if (triggerName == "HLT_DoubleMuon_leg1") {
+            effData = _eff_doubleMu_leg1_DATA[etaBin]->Eval(muon.pt);
+            effMC = _eff_doubleMu_leg1_MC[etaBin]->Eval(muon.pt);
+        }
+        else if (triggerName == "HLT_DoubleMuon_leg2") {
+            effData = _eff_doubleMu_leg2_DATA[etaBin]->Eval(muon.pt);
+            effMC = _eff_doubleMu_leg2_MC[etaBin]->Eval(muon.pt);
         }
     }
 
@@ -451,3 +534,17 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
     
     return weight;
 }
+
+float WeightUtils::GetCorrectedPhotonR9(TPhoton& photon) const 
+{
+    float r9 = photon.r9;
+    if (fabs(photon.scEta) < 1.444)
+        r9 = _photon_r9_barrel->Eval(photon.r9);
+    else if (fabs(photon.scEta) > 1.566)
+        r9 = _photon_r9_endcap->Eval(photon.r9);
+    else
+        std::cout << "bad value of photon scEta: returning original r9" << std::endl;
+    
+    return r9;
+}
+

@@ -8,7 +8,8 @@ cfg        = bm.JobConfig
 selection = 'elelg'
 period     = '2016'
 #path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleMuon/'
-path       = '/eos/uscms/store/user/jbueghly/sync_data/'
+#path       = '/eos/uscms/store/user/jbueghly/sync_data/'
+path        = '/eos/uscms/store/group/lpcbacon/12d/'
 #path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleEG/'
 #path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/Charmonium/'
 #path       = '/eos/uscms/store/user/naodell/bacontuples/12_vertex/'
@@ -26,7 +27,9 @@ data_list.extend([
     # Double muon data
     #cfg(data_name = 'muon_2016B_v2',
     #    path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
+    #    #path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2_met_test'.format(path),
     #    nJobs    = 51,
+    #    #nJobs    = 52,
     #    suffix   = 'muon_2016B'
     #   ),
     #cfg(data_name = 'muon_2016C_v1',
@@ -217,13 +220,14 @@ mc_list.extend([
     #   ),
 
     cfg(data_name = 'DYJetsToLL_M-50', 
-        path      = '{0}/DYJetsToLL_M-50_amcatnlo_calib'.format(path),
+        path      = '{0}/DYJetsToLL_M-50_amcatnlo_all_gen_tmp'.format(path),
+        #path      = '{0}/DYJetsToLL_M-50_amcatnlo_met_test'.format(path),
         nJobs     = 51,
         suffix    = 'zjets_m-50_amc'
         ),
 
     cfg(data_name = 'ZGTo2LG', 
-        path      = '{0}/ZGTo2LG_amcatnlo_calib'.format(path),
+        path      = '{0}/ZGTo2LG_amcatnlo_all_gen'.format(path),
         nJobs     = 51,
         suffix    = 'zg_llg'
         ),
@@ -234,11 +238,11 @@ mc_list.extend([
     #    nJobs    = 50,
     #    suffix   = 'ttbar_lep'
     #   ),
-    #cfg(data_name = 'ttbar_inclusive',
-    #    path     = '{0}/TT_powheg'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive'
-    #   ),
+    cfg(data_name = 'ttbar_inclusive',
+        path     = '{0}/TT_powheg'.format(path),
+        nJobs    = 51,
+        suffix   = 'ttbar_inclusive'
+       ),
 #    cfg(data_name = 'ttbar_semileptonic',
 #        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
 #        nJobs    = 50,
@@ -280,47 +284,79 @@ mc_list.extend([
     #    suffix   = 'tbar_tw'
     #   ),
 
+    # W + jets
+    #cfg(data_name = 'W1JetsToLNu',
+    #    path     = '{0}/W1JetsToLNu_madgraph'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'w1jets'
+    #   ),
+    #cfg(data_name = 'W2JetsToLNu',
+    #    path     = '{0}/W2JetsToLNu_madgraph'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'w2jets'
+    #   ),
+    #cfg(data_name = 'W3JetsToLNu',
+    #    path     = '{0}/W3JetsToLNu_madgraph_tmp'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'w3jets'
+    #   ),
+    #cfg(data_name = 'W4JetsToLNu',
+    #    path     = '{0}/W4JetsToLNu_madgraph_tmp'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'w4jets'
+    #   ),
+
     # Diboson
     #cfg(data_name = 'WW',
     #    path     = '{0}/WWTo2L2Nu_powheg'.format(path),
     #    nJobs    = 10,
     #    suffix   = 'ww'
     #   ),
-    #cfg(data_name = 'WZJetsTo2L2Q',
-    #    path     = '{0}/WZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_2l2q'
-    #   ),
-    #cfg(data_name = 'WZJetsTo3LNu',
-    #    path     = '{0}/WZTo3LNu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'wz_3lnu'
-    #   ),
+    cfg(data_name = 'WZJetsTo2L2Q',
+        path     = '{0}/WZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 51,
+        suffix   = 'wz_2l2q'
+       ),
+    cfg(data_name = 'WZJetsTo3LNu',
+        path     = '{0}/WZTo3LNu_powheg'.format(path),
+        nJobs    = 27,
+        suffix   = 'wz_3lnu'
+       ),
     #cfg(data_name = 'ZZJetsTo2L2Nu',
     #    path     = '{0}/ZZTo2L2Nu_powheg'.format(path),
     #    nJobs    = 10,
     #    suffix   = 'zz_2l2nu'
     #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Q',
-    #    path     = '{0}/ZZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2q'
+    cfg(data_name = 'ZZJetsTo2L2Q',
+        path     = '{0}/ZZTo2L2Q_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_2l2q'
+       ),
+    cfg(data_name = 'ZZJetsTo4L',
+        path     = '{0}/ZZTo4L_amcatnlo'.format(path),
+        nJobs    = 10,
+        suffix   = 'zz_4l'
+       ),
+    #cfg(data_name = 'GluGluHToZZTo4L',
+    #    path     = '{0}/GluGlu_HToZZTo4L'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'gluglu_h_zz_4l'
     #   ),
-    #cfg(data_name = 'ZZJetsTo4L',
-    #    path     = '{0}/ZZTo4L_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_4l'
+    #cfg(data_name = 'VBFHToZZTo4L',
+    #    path     = '{0}/VBF_HToZZTo4L'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'vbf_h_zz_4l'
     #   ),
-#    cfg(data_name = 'GluGluHToZZTo4L',
-#        path     = '{0}/GluGluHToZZTo4L_powheg/all'.format(path),
-#        nJobs    = 10,
-#        suffix   = 'gluglu_h_zz_4l'
-#       ),
-#    cfg(data_name = 'VBFHToZZTo4L',
-#        path     = '{0}/VBF_HToZZTo4L_powheg/all'.format(path),
-#        nJobs    = 10,
-#        suffix   = 'vbf_h_zz_4l'
-#       ),
+    #cfg(data_name = 'GluGluHToZZTo2L2Q',
+    #    path     = '{0}/GluGluHToZZTo2L2Q_powheg'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'gluglu_h_zz_2l2q'
+    #   ),
+    #cfg(data_name = 'VBFHToZZTo2L2X',
+    #    path     = '{0}/VBF_HToZZTo2L2X'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'vbf_h_zz_2l2x'
+    #   ),
     ])
 
 path       = '/eos/uscms/store/user/jbueghly/sync_mc'

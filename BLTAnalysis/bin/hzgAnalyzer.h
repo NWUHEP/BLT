@@ -109,6 +109,25 @@ public:
     Float_t photonOneMVA;
     Bool_t passElectronVeto;
 
+    Bool_t isLeptonTag;
+
+    // fsr photon data
+    //UInt_t leptonOneFSRPhotons, leptonTwoFSRPhotons;
+    //TLorentzVector leptonOneFSRSum, leptonTwoFSRSum;
+    //TLorentzVector leptonOneFSRMatchP4, leptonTwoFSRMatchP4;
+    //Float_t leptonOneFSRIsoSum, leptonTwoFSRIsoSum;
+    //Float_t fsrPhotonOneMVA, fsrPhotonTwoMVA;
+    //Float_t fsrPhotonOneR9, fsrPhotonTwoR9;
+    //Float_t fsrPhotonOneIso, fsrPhotonTwoIso;
+    //Bool_t fsrPassElectronVetoOne, fsrPassElectronVetoTwo;
+    //TLorentzVector genFSRPhotonOneP4, genFSRPhotonTwoP4;
+    //TLorentzVector genTrueFSRPhoOneP4, genTrueFSRPhoTwoP4;
+    //Bool_t genFSRPhotonOneFHPFS, genFSRPhotonTwoFHPFS;
+    //Bool_t genFSRPhotonOneIPFS, genFSRPhotonTwoIPFS;
+    //Bool_t leptonOneHasFSRPhoton, leptonTwoHasFSRPhoton;
+    //Bool_t leptonOneHasRecoveredFSRPhoton, leptonTwoHasRecoveredFSRPhoton;
+    //Bool_t leptonOneHasFakeFSRPhoton, leptonTwoHasFakeFSRPhoton;
+
     // dilepton vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
     Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
@@ -117,7 +136,7 @@ public:
     // jet data
     TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
     Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
-    Float_t met, metPhi, ht, htPhi, htSum;
+    Float_t met, metPhi, metNC, metPhiNC, ht, htPhi, htSum;
 
     // generator level data
     TLorentzVector genLeptonOneP4, genLeptonTwoP4, genPhotonP4;
@@ -128,10 +147,11 @@ public:
     //TLorentzVector genOneP4, genTwoP4;
     //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
     Bool_t vetoDY;
-    Bool_t brianVetoDY;
+    //Bool_t brianVetoDY;
 
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
+    float GetPhotonIsolation(const baconhep::TPhoton*, float);
 
     //ClassDef(hzgAnalyzer,0);
 };

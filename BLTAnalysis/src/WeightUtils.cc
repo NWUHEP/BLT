@@ -307,18 +307,18 @@ std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerNa
     float effData = 1;
     float effMC = 1;
 
-    if (electron.calibPt < 200.) {
+    if (electron.pt < 200.) {
         if (triggerName == "HLT_DoubleEG_leg1") {
             //effData = _eff_doubleg_leg1_DATA->Interpolate(lepton.Eta(), lepton.Pt());
             //effMC   = _eff_doubleg_leg1_MC->Interpolate(lepton.Eta(), lepton.Pt());
-            effData = _eff_doubleg_leg1_DATA->GetBinContent(_eff_doubleg_leg1_DATA->FindBin(electron.scEta, electron.calibPt));
-            effMC = _eff_doubleg_leg1_MC->GetBinContent(_eff_doubleg_leg1_MC->FindBin(electron.scEta, electron.calibPt));
+            effData = _eff_doubleg_leg1_DATA->GetBinContent(_eff_doubleg_leg1_DATA->FindBin(electron.scEta, electron.pt));
+            effMC = _eff_doubleg_leg1_MC->GetBinContent(_eff_doubleg_leg1_MC->FindBin(electron.scEta, electron.pt));
         }
         else if (triggerName == "HLT_DoubleEG_leg2") {
             //effData = _eff_doubleg_leg2_DATA->Interpolate(lepton.Eta(), lepton.Pt());
             //effMC   = _eff_doubleg_leg2_MC->Interpolate(lepton.Eta(), lepton.Pt());
-            effData = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, electron.calibPt));
-            effMC = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, electron.calibPt));
+            effData = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, electron.pt));
+            effMC = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, electron.pt));
         }
     }
 
@@ -495,14 +495,14 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
     float binningPt[] = {7., 15., 20., 30., 40., 50., 60., 70., 80., 100., 120., 140., 160., 200.}; 
     int ptBin = 0;
     for (int i = 0; i < 13; ++i) {
-        if (fabs(electron.calibPt) > binningPt[i] && fabs(electron.calibPt) <= binningPt[i+1]) {
+        if (fabs(electron.pt) > binningPt[i] && fabs(electron.pt) <= binningPt[i+1]) {
             ptBin = i;
             break;
         }
     }
 
     float weight = 1;
-    if (electron.calibPt < 200.) {
+    if (electron.pt < 200.) {
         weight *= _eleSF_RECO->Eval(electron.scEta);
         weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
     }
@@ -515,14 +515,14 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
     float binningPt[] = {20., 35., 50., 90., 150.};
     int ptBin = 0;
     for (int i = 0; i < 4; ++i) {
-        if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
+        if (fabs(photon.pt) > binningPt[i] && fabs(photon.pt) <= binningPt[i+1]) {
             ptBin = i;
             break;
         }
     }
 
     float weight = 1;
-    if (photon.calibPt < 150.) {
+    if (photon.pt < 150.) {
         weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
     }
 

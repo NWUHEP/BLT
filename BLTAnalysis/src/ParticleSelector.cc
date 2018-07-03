@@ -165,7 +165,7 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
                 elPass = true;
         }
 
-    } else if (cutLevel.cutName == "hzzMVAID") {
+    /*} else if (cutLevel.cutName == "hzzMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->scEta) < cutLevel.eta[0]) {
                 if (el->mvaHZZ > cutLevel.mvaVal[0])
@@ -188,7 +188,7 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
                 if (el->mvaHZZ > cutLevel.mvaVal[5])
                     elPass = true;
             }
-        }
+        } */
 
     } else if (cutLevel.cutName == "hwwMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {

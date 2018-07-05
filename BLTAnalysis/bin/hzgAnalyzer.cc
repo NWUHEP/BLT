@@ -542,7 +542,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                    electron->scEta << ", " << electronP4.Phi() << "," << electron->d0 << "," << 
                    electron->dz << "," << electron->sip3d << "," << 
                    GetElectronIsolation(electron, fInfo->rhoJet) << ", " << 
-                   particleSelector->PassElectronMVA(electron, cuts->hzzMVAID) <<endl;
+                   particleSelector->PassElectronMVA(electron, cuts->HZZMVAElIDNoIso) <<endl;
         }
 
         if (
@@ -550,7 +550,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 && fabs(electron->scEta) < 2.5
                 //&& particleSelector->PassElectronID(electron, cuts->tightElID)
                 //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
-                && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
+                && particleSelector->PassElectronMVA(electron, cuts->HZZMVAElIDNoIso)
                 && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0

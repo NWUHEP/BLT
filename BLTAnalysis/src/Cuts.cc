@@ -157,8 +157,8 @@ Cuts::Cuts() {
     mvaPreElID.dr03HcalTowerSumEt[1]      = 0.2;
     mvaPreElID.numberOfLostHits[1]        = 0;
     
-    looseMVAElID.cutName                  = "looseMVAElID";
-    tightMVAElID.cutName                  = "tightMVAElID";
+    //looseMVAElID.cutName                  = "looseMVAElID";
+    //tightMVAElID.cutName                  = "tightMVAElID";
 
     looseElIso.cutName                    = "looseElIso";
     looseElIso.chIso04                    = 99999;
@@ -294,7 +294,14 @@ Cuts::Cuts() {
     looseMVAPhID.cutName                  = "looseMVAPhID";
     tightMVAPhID.cutName                  = "tightMVAPhID";
 
-    hzgMVAID.cutName                        = "hzgMVAID";
+    HZZMVAElIDNoIso.cutName             = "HZZMVAElIDNoIso";
+    wp90MVAElIDNoIso.cutName            = "wp90MVAElIDNoIso";
+    wp80MVAElIDNoIso.cutName            = "wp80MVAElIDNoIso";
+    HZZMVAElIDIso.cutName             = "HZZMVAElIDIso";
+    wp90MVAElIDIso.cutName            = "wp90MVAElIDIso";
+    wp80MVAElIDIso.cutName            = "wp80MVAElIDIso";
+
+    /*hzgMVAID.cutName                        = "hzgMVAID";
     hzgMVAID.mvaVal[0]                      = -0.9;
     hzgMVAID.mvaVal[1]                      = -0.5;
     hzgMVAID.mvaVal[2]                      = -99;
@@ -367,7 +374,7 @@ Cuts::Cuts() {
     hwwMVAID.sip[2]                         = -99;
     hwwMVAID.sip[3]                         = -99;
     hwwMVAID.sip[4]                         = -99;
-    hwwMVAID.sip[5]                         = -99;
+    hwwMVAID.sip[5]                         = -99; */
 
     vbfJetID.cutName                        = "vbfJetID";
     vbfJetID.betaStarC[0]                   = 0.2;

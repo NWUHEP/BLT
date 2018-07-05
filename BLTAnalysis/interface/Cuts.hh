@@ -110,7 +110,8 @@ public:
         float sip[6];
         int conversionVeto[6];
         std::string cutName;
-    } hzgMVAID, hzzMVAID, hwwMVAID, looseMVAElID, tightMVAElID;
+    } HZZMVAElIDNoIso, wp90MVAElIDNoIso, wp80MVAElIDNoIso,
+      HZZMVAElIDIso, wp90MVAElIDIso, wp80MVAElIDIso;
 
     struct vbfJetIDCuts {
         float betaStarC[2];

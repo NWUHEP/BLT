@@ -470,67 +470,121 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
 
     return pass;
 }
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName) const
+
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int mistagSyst, float rNumber) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
-    //float jetEta    = jet->eta;
-    float bTag      = jet->csv;
     int   jetFlavor = jet->hadronFlavor;
+    float bTag      = -1;
+
+    float binningPt[] = {30, 50, 70, 100, 140, 200, 300, 600};
+    int ptBin = 0;
+    for (int i = 0; i < 7; ++i) {
+        if (jetPt > binningPt[i] && jetPt <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }
 
     // Get b tag efficiency and mistag scale factor
-    float btagSF = 1.;
+    float btagSF   = 1.;
     float mistagSF = 1.;
+    float mcEff  = 1.;
     if (tagName == "CSVT") {
+        bTag = jet->csv;
         // These SF are provided by the b tag POG 
         if (bTag > 0.935) 
             isBTagged = true;
         btagSF   = 0.857294 + 3.75846e-05*jetPt; 
         mistagSF = 0.688619 + 260.84/(jetPt*jetPt); 
+
+        if (abs(jetFlavor) == 5) {
+            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
+            mcEff = bEff[ptBin];
+        } else if (abs(jetFlavor) == 4) {
+            mcEff = 0.03;
+        } else {
+            mcEff = 0.002;
+        }
     } else if (tagName == "MVAT") {
         // These SF are provided by the b tag POG 
+        bTag = jet->bmva;
         if (bTag > 0.9432) 
             isBTagged = true;
-        btagSF   = 0.52032*((1.+(0.370141*jetPt))/(1.+(0.196566*jetPt))); 
-        mistagSF = 0.985864+122.8/(jetPt*jetPt)+0.000416939*jetPt;
+
+        btagSF   = 0.517971*(1.+0.332528*jetPt) / (1. + 0.174914*jetPt); 
+        mistagSF = 0.985864 + 122.8/(jetPt*jetPt) + 0.000416939*jetPt;
+
+        if (abs(jetFlavor) == 5) {
+            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
+            mcEff = bEff[ptBin];
+
+            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
+            if (btagSyst == 1) {
+                btagSF += scale[ptBin];
+            } else if (btagSyst == -1) {
+                btagSF -= scale[ptBin];
+            }
+        } else if (abs(jetFlavor) == 4) {
+            mcEff = 0.03;
+            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
+            if (btagSyst == 1) {
+                btagSF += scale[ptBin];
+            } else if (btagSyst == -1) {
+                btagSF -= scale[ptBin];
+            }
+        } else {
+            mcEff = 0.002;
+            if (mistagSyst == 1) {
+                mistagSF *= (1 + (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            } else if (mistagSyst == -1) {
+                mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
+            }
+        }
     } else if (tagName == "MVAM") {
         // These SF are provided by the b tag POG 
+        bTag = jet->bmva;
         if (bTag > 0.4432) 
             isBTagged = true;
-        btagSF   = 0.885562 - 5.67668e-05*jetPt; 
-        mistagSF = 1.07108+-0.0015866*jetPt+3.06322e-06*jetPt*jetPt+-1.7438e-09*jetPt*jetPt*jetPt;
+        btagSF   = 0.600657*((1.+(0.753343*jetPt))/(1.+(0.472587*jetPt))); 
+        mistagSF = 1.11046 - 0.00042021*jetPt + 1.48012e-06*jetPt*jetPt - 8.44735e-10*jetPt*jetPt*jetPt;
+
+        if (abs(jetFlavor) == 5) {
+            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
+            mcEff = bEff[ptBin];
+        } else if (abs(jetFlavor) == 4) {
+            mcEff = 0.03;
+        } else {
+            mcEff = 0.002;
+        }
     }
 
-
     // Upgrade or downgrade jet
-    float rNumber = _rng->Uniform(1.);
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
-        float mcEff = 1.;
-        if (abs(jetFlavor) == 4) 
-            mcEff = 0.3;//_ctagEff->Eval(jetPt);
-        else if (abs(jetFlavor) == 5) 
-            mcEff = 0.6;//_btagEff->Eval(jetPt);
-
-        if(btagSF >= 1){  // use this if SF>1
-            if (!isBTagged) { //upgrade to tagged
+        if (btagSF > 1) {  // use this if SF>1
+            if (!isBTagged) { // upgrade to b tagged
                 float mistagRate = (1. - btagSF) / (1. - 1./mcEff);
-                if (rNumber < mistagRate) isBTagged 
-                = true;
+                if (rNumber < mistagRate) 
+                    isBTagged = true;
             }
-        } else if (btagSF < 1) { //downgrade tagged to untagged
-            if(isBTagged && rNumber > btagSF) 
-            isBTagged = false;
+        } else if (btagSF < 1) { // downgrade b tagged to untagged
+            if (isBTagged && rNumber > btagSF) 
+                isBTagged = false;
         }
     } else {
-        float mcEff = 0.003; //_misTagEff->Eval(jetPt);
-        if(mistagSF > 1){  // use this if SF>1
+        //cout << mistagSF << " " << mistagSyst << " " << isBTagged << " ";
+        if (mistagSF > 1) {  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagPercent = (1. - mistagSF) / (1. - (1./mcEff));
-                if (rNumber < mistagPercent) isBTagged = true;
+                float mistagRate = (1. - mistagSF) / (1. - 1./mcEff);
+                if (rNumber < mistagRate) 
+                    isBTagged = true;
             }
         } else if (mistagSF < 1) { //downgrade tagged to untagged
-            if (isBTagged && rNumber > mistagSF) isBTagged = false;
+            if (isBTagged && rNumber > mistagSF) 
+                isBTagged = false;
         }
+        //cout << isBTagged << endl;
     }
 
     return isBTagged;

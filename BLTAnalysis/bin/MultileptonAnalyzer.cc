@@ -608,7 +608,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         ++nJets;
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "MVAT")) { 
+                    if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rng->Uniform(1.))) { 
                         ++nBJets;
                     } else {
                         ++nJets;

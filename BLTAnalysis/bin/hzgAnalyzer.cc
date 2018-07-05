@@ -707,13 +707,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 sumJetPt += jetP4.Pt();
 
                 if (isData) {
-                    if (jet->bmva > 0.9432) { 
+                    if (jet->csv > 0.9693) {  // tight wp for CSVv2 btag
                         ++nBJets;
                     } else {
                         ++nJets;
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "MVAT")) { 
+                    if (particleSelector->BTagModifier(jet, "CSVT")) { 
                         ++nBJets;
                     } else {
                         ++nJets;

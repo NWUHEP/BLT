@@ -657,10 +657,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
 
-        if (isData) { // fix for broken bacon JEC
+        /*if (isData) { // fix for broken bacon JEC
             double jec = particleSelector->JetCorrector(jet, "NONE");
             jet->pt = jet->ptRaw*jec;
-        }
+        }*/
 
         // Prevent overlap of muons and jets
         TLorentzVector jetP4; 
@@ -694,7 +694,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (
                 jet->pt > 30 
                 && fabs(jet->eta) < 4.7
-                && particleSelector->PassJetID(jet, cuts->looseJetID)
+                && particleSelector->PassJetID(jet, cuts->tightJetID)
                 && !muOverlap 
                 && !elOverlap
                 && !phoOverlap

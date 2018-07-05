@@ -393,22 +393,22 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCut
     bool jetPass = false;
     if (fabs(jet->eta) <= 2.7) {
         if (
-                jet->neuHadFrac       < 0.99
-                && jet->neuEmFrac     < 0.99
+                jet->neuHadFrac       < 0.90
+                && jet->neuEmFrac     < 0.90
                 && jet->nParticles    > 1
            ) {
             if (fabs(jet->eta) <= 2.4) {
-                if (jet->chHadFrac > 0 && jet->nCharged > 0 && jet->chEmFrac < 0.99) 
+                if (jet->chHadFrac > 0 && jet->nCharged > 0) 
                     jetPass = true;
             } else {
                 jetPass = true;
             }
         }
     } else if (fabs(jet->eta) <= 3.0) { 
-        if (jet->neuEmFrac > 0.01 && jet->neuHadFrac < 0.98 && jet->nNeutrals > 2) 
+        if (jet->neuEmFrac > 0.02 && jet->neuEmFrac < 0.99 && jet->nNeutrals > 2) 
             jetPass = true;
     } else {
-        if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
+        if (jet->neuEmFrac < 0.9 && jet->neuHadFrac > 0.02 && jet->nNeutrals > 10) 
             jetPass = true;
     }
 

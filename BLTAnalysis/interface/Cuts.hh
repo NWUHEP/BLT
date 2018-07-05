@@ -129,7 +129,7 @@ public:
         float MUF;
         float CSV;
         std::string cutName;
-    } looseJetID, bJetID;
+    } looseJetID, tightJetID, bJetID;
 };
 
 #endif  // CUTS_HH

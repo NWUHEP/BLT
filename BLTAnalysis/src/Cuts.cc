@@ -384,7 +384,7 @@ Cuts::Cuts() {
     vbfJetID.dR2Mean[2]                     = 0.05;
     vbfJetID.dR2Mean[3]                     = 0.055;
 
-    looseJetID.cutName                      = "looseJetID";
+    /*looseJetID.cutName                      = "looseJetID";
     looseJetID.NHF                          = 0.99;
     looseJetID.NEMF                         = 0.99;
     looseJetID.NumConst                     = 1;
@@ -392,7 +392,9 @@ Cuts::Cuts() {
     looseJetID.CHF                          = 0;
     looseJetID.CHM                          = 0;
     looseJetID.CEMF                         = 0.99;
-    looseJetID.CSV                          = -99;
+    looseJetID.CSV                          = -99;*/
+
+    tightJetID.cutName                      = "tightJetId";
 
     bJetID.cutName                          = "bJetID";
     bJetID.NHF                              = 0.99;

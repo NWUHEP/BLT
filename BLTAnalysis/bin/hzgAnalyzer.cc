@@ -713,7 +713,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         ++nJets;
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "CSVT")) { 
+                    if (particleSelector->BTagModifier(jet, "CSVT", 0, 0, rng->Uniform(1.))) { 
                         ++nBJets;
                     } else {
                         ++nJets;

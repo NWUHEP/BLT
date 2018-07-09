@@ -309,46 +309,46 @@ mc_dict['ttbar'] = [
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
        ),
-    #cfg(data_name = 'ttbar_inclusive_tunedown',
-    #    path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_tunedown'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_tuneup',
-    #    path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_tuneup'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_isrdown',
-    #    path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_isrdown'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_isrup',
-    #    path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_isrup'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_fsrdown',
-    #    path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_fsrdown'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_fsrup',
-    #    path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_fsrup'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_hdampdown',
-    #    path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_hdampdown'
-    #   ),
-    #cfg(data_name = 'ttbar_inclusive_hdampup',
-    #    path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_inclusive_hdampup'
-    #    ),
+    cfg(data_name = 'ttbar_inclusive_tunedown',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_tunedown'
+       ),
+    cfg(data_name = 'ttbar_inclusive_tuneup',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_tuneup'
+       ),
+    cfg(data_name = 'ttbar_inclusive_isrdown',
+        path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_isrdown'
+       ),
+    cfg(data_name = 'ttbar_inclusive_isrup',
+        path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_isrup'
+       ),
+    cfg(data_name = 'ttbar_inclusive_fsrdown',
+        path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrdown'
+       ),
+    cfg(data_name = 'ttbar_inclusive_fsrup',
+        path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrup'
+       ),
+    cfg(data_name = 'ttbar_inclusive_hdampdown',
+        path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_hdampdown'
+       ),
+    cfg(data_name = 'ttbar_inclusive_hdampup',
+        path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_hdampup'
+        ),
     #cfg(data_name = 'ttbar_inclusive_herwig',
     #    path     = '{0}/Summer16_TT_powheg_herwig'.format(path),
     #    nJobs    = 50,

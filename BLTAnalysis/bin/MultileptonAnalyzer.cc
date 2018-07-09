@@ -293,7 +293,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
                 if (id >= 1001 && id <= 1009) {
                     qcdWeights.push_back(lheWeight);
-                } else if (id >= 2001 && id <= 2100) {		
+                } else if (id >= 2001 && id <= 2100) {      
                     pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
                 } else if (id == 2101 || id == 2102) {
                     alphaS = lheWeight;
@@ -678,9 +678,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
 
-        if( 
-                tau->pt > 18  
-                && abs(tau->eta) < 2.3 
+        // apply tau energy scale correction (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
+        if (!isData) {
+            if (tau->decaymode == 0) {
+                tau->pt *= 0.995;
+            } else if (tau->decaymode == 1) {
+                tau->pt *= 1.01;
+            } else if (tau->decaymode == 10) {
+                tau->pt *= 1.006;
+            }
+        }
+
+        if ( 
+                tau->pt > 18
+                && abs(tau->eta) < 2.3
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)

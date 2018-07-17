@@ -112,8 +112,9 @@ public :
 
     TFile                   *fCurrentFile;
     TH1D                    *hTotalEvents;
+    //TH1D                    *hPU;
 
-    ClassDef(BLTSelector,0);
+    ClassDef(BLTSelector,1);
 };
 
 #endif

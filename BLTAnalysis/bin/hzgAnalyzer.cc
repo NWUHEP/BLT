@@ -191,6 +191,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",30,0.5,30.5);
+    //hPU = new TH1D("TotalPU", "TotalPU", 100, 0., 100.);
 
     ReportPostBegin();
 }
@@ -354,7 +355,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         return kTRUE;
     hTotalEvents->Fill(3);
 
-
     /////////////////////
     // Fill event info //
     /////////////////////
@@ -368,11 +368,21 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     if (!isData) {
         nPU = fInfo->nPUmean;
         puWeight = weights->GetPUWeight(nPU); // pileup reweighting
+        //hPU->Fill(nPU);
         eventWeight *= puWeight;
     } else {
         nPU = 0;
 
-    }    
+    }
+
+    if (fabs(eventWeight) > 100.) {
+        cout << "super huge event weight: " << eventWeight
+             << " in event (" << runNumber << ", " 
+             << lumiSection << ", " << evtNumber << ")" << endl;
+        return kTRUE;
+    }
+
+    //cout << "event weight after pu reweighting = " << eventWeight << endl;
 
     ///////////////////
     // Select objects//
@@ -407,16 +417,25 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TMuon* muon = (TMuon*) fMuonArr->At(i);
         assert(muon);
 
-        // Apply rochester muon momentum corrections
+        // Apply rochester muon momentum corrections 
+        // FIX ME
         TLorentzVector muonP4;
         copy_p4(muon, MUON_MASS, muonP4);
         double muonSF = 1.;
         if (isData) {
             muonSF = muonCorr->kScaleDT(muon->q, muon->pt, muon->eta, muon->phi, 0, 0);
         } else {
+            int nTkRoccor = 6;
+            if (muon->nTkLayers > 5) 
+                nTkRoccor = muon->nTkLayers;
+            double rand1 = rng->Rndm();
+            double rand2 = rng->Rndm();
+            //cout << "inputs to kScaleAndSmearMC: " << muon->q << ", " << muon->pt << ", " 
+            //     << muon->eta << ", " << muon->phi << ", " << muon->nTkLayers << ", " 
+            //     << rand1 << ", " << rand2 << ", " << 0 << ", " << 0 << endl;
+            //cout << "rand1, rand2: " << rand1 << ", " << rand2 << endl;
             muonSF = muonCorr->kScaleAndSmearMC(muon->q, muon->pt, muon->eta, muon->phi,
-                    muon->nTkLayers, rng->Rndm(), rng->Rndm(), 
-                    0, 0);
+                    nTkRoccor, rand1, rand2, 0, 0); 
         }
 
         //if (sync_print_precut) {
@@ -426,7 +445,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         muon->pt = muonSF*muon->pt; 
         //if (sync_print_precut)
-        //    cout << muon->pt << endl;
+        //    cout << muon->pt << endl; 
         muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
 
         // Remove muons with very small deltaR
@@ -640,7 +659,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     } 
     sort(photons.begin(), photons.end(), sort_by_higher_pt<TPhoton>);
-    //sort(fsr_photons.begin(), fsr_photons.end(), sort_by_higher_pt<TPhoton>);
+    //sort(fsr_photons.begin(), fsr_photons.end(), sort_by_higher_pt<TPhoton>);  
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -795,10 +814,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoDZ     = muons[1]->dz;
         leptonTwoD0     = muons[1]->d0;
 
-        if (!isData) {
+        /*if (!isData) {
             eventWeight *= weights->GetHZZMuonIDEff(*muons[0]); 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[1]);
-        }
+        }*/
 
 
         int isGlobalOne = (muons[0]->typeBits & baconhep::kGlobal) > 0;
@@ -825,6 +844,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     muons[1]->nPixHits << "," << muons[1]->nTkLayers << "," << 
                     muons[1]->pt << "," << muons[1]->ptErr << "," << 
                     GetMuonIsolation(muons[1]) << endl;
+
     }
 
     else if (params->selection == "mumug") {

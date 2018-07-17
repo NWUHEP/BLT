@@ -461,11 +461,12 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     if (tagName == "CSVT") {
         bTag = jet->csv;
         // These SF are provided by the b tag POG 
-        if (bTag > 0.935) 
+        if (bTag > 0.9693) 
             isBTagged = true;
-        btagSF   = 0.857294 + 3.75846e-05*jetPt; 
-        mistagSF = 0.688619 + 260.84/(jetPt*jetPt); 
+        btagSF   = 0.91423*((1.+(0.00958053*jetPt))/(1.+(0.010132*jetPt)));
+        mistagSF = 0.943355+8.95816/(jetPt*jetPt)+0.000240703*jetPt;
 
+        // need to measure these efficiencies with MC truth info and update        
         if (abs(jetFlavor) == 5) {
             float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
             mcEff = bEff[ptBin];

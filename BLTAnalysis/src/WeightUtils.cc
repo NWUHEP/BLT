@@ -12,7 +12,8 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
     // PU weights
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2017_full.root";
     TFile* puFile = new TFile(fileName.c_str(), "OPEN");
     _puReweight = (TGraph*)puFile->Get("pileup_sf");
 

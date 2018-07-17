@@ -14,8 +14,8 @@ PERIOD=$5
 TOPDIR=$PWD
 
 # lpc
-export SCRAM_ARCH=slc6_amd64_gcc530
-export CMSSW_VERSION=CMSSW_8_0_20
+export SCRAM_ARCH=slc6_amd64_gcc630
+export CMSSW_VERSION=CMSSW_9_4_7
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 # nut3

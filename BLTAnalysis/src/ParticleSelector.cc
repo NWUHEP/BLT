@@ -508,7 +508,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     float btagSF   = 1.;
     float mistagSF = 1.;
     float mcEff  = 1.;
-    if (tagName == "CSVT") {
+    if (tagName == "CSVT") { // not up-to-date
         bTag = jet->csv;
         // These SF are provided by the b tag POG 
         if (bTag > 0.935) 
@@ -559,7 +559,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
                 mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
             }
         }
-    } else if (tagName == "MVAM") {
+    } else if (tagName == "MVAM") { // not up-to-date
         // These SF are provided by the b tag POG 
         bTag = jet->bmva;
         if (bTag > 0.4432) 

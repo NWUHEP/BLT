@@ -622,7 +622,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     sort(fail_muons.begin(), fail_muons.end(), sort_by_higher_pt<TMuon>);
 
     /* ELECTRONS */
-    vector<TElectron*> electrons;
+    vector<TElectron*> electrons, fail_electrons;
     vector<TLorentzVector> veto_electrons;
     //float eScale = 1.;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
@@ -644,10 +644,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 electron->pt > 10
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
            ) {
-            electrons.push_back(electron);
-            veto_electrons.push_back(electronP4);
+            if (particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)) {
+                electrons.push_back(electron);
+                veto_electrons.push_back(electronP4);
+            } else {
+                fail_electrons.push_back(electron);
+            }
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -1438,9 +1441,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else if (isData && fail_muons.size() == 1 && muons.size() == 0 && electrons.size() == 0) {
+    } else if (isData && fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
-        cout << nJets << "\t" << nBJets << "\t";
         // remove fake muon candidate from the jet collection
         unsigned ix = 0;
         for (const auto& jet: jets) {
@@ -1458,7 +1460,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             ++ix;  
         }
 
-        cout << nJets << "\t" << nBJets << endl;
         if (taus.size() >= 1) {
             channel = "mutau_fakes";
             eventCounts[channel]->Fill(1);
@@ -1514,6 +1515,95 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // Collect the highest pt jets in the event
             std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
             //jets = KinematicTopTag(jets, metP2, muonP4);
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        } else {
+            return kTRUE;
+        }
+    } else if (isData && fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
+
+        // remove fake electron candidate from the jet collection
+        unsigned ix = 0;
+        for (const auto& jet: jets) {
+            TLorentzVector jetP4, electronP4; 
+            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 0.1052);
+            if (jetP4.DeltaR(electronP4) < 0.4) {
+                --nJets;
+                if (jet->bmva > 0.9432) { 
+                    --nBJets;
+                } 
+                jets.erase(jets.begin() + ix);
+                break;
+            }
+            ++ix;  
+        }
+
+        if (taus.size() >= 1) {
+            channel = "etau_fakes";
+            eventCounts[channel]->Fill(1);
+            nElectrons = 1;
+
+            if (fail_electrons[0]->pt < 25)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            TLorentzVector electronP4, tauP4, dilepton;
+            electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 0.1052);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+            dilepton = electronP4 + tauP4;
+            if (dilepton.M() < 12)
+                return kTRUE;
+            eventCounts[channel]->Fill(3);
+
+            //if (nJets < 2 || nBJets < 1)
+            //    return kTRUE;
+            //eventCounts[channel]->Fill(4);
+
+            leptonOneP4     = electronP4;
+            leptonOneIso    = GetElectronIsolation(fail_electrons[0], fInfo->rhoJet);
+            leptonOneFlavor = 13*fail_electrons[0]->q;
+            leptonOneDZ     = fail_electrons[0]->dz;
+            leptonOneD0     = fail_electrons[0]->d0;
+
+            leptonTwoP4     = tauP4;
+            leptonTwoIso    = 0.;
+            leptonTwoFlavor = 15*taus[0]->q;
+            leptonTwoDZ     = taus[0]->dzLeadChHad;
+            leptonTwoD0     = taus[0]->d0LeadChHad;
+
+        } else if (nJets >= 4 && nBJets >= 1) {
+            channel = "e4j_fakes";
+            eventCounts[channel]->Fill(1);
+            nElectrons = 1;
+
+            // convert to TLorentzVectors
+            TLorentzVector electronP4;
+            electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 0.1052);
+            float electronIso = GetElectronIsolation(fail_electrons[0], fInfo->rhoJet);
+            if (fail_electrons[0]->pt < 25.)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            leptonOneP4     = electronP4;
+            leptonOneIso    = electronIso;
+            leptonOneFlavor = fail_electrons[0]->q*13;
+            leptonOneDZ     = fail_electrons[0]->dz;
+            leptonOneD0     = fail_electrons[0]->d0;
+
+            // Collect the highest pt jets in the event
+            std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+            //jets = KinematicTopTag(jets, metP2, electronP4);
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag      = jets[0]->csv;
             jetOneFlavor   = jets[0]->hadronFlavor;

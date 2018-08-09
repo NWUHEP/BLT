@@ -108,6 +108,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
                                         "etau", "mutau", 
                                         "e4j", "mu4j", 
                                         "mutau_fakes", "mu4j_fakes"
+                                        "etau_fakes", "e4j_fakes"
                                         };
     for (unsigned i = 0; i < channelNames.size(); ++i) {
         string channel = channelNames[i];
@@ -162,7 +163,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonTwoD0", &leptonTwoD0);
         tree->Branch("leptonTwoDZ", &leptonTwoDZ);
 
-        if (channel == "mutau" || channel == "etau" || channel == "mutau_fakes") {
+        if (channel == "mutau" || channel == "etau" || channel == "mutau_fakes" || channel == "etau_fakes") {
             //tree->Branch("tauChHadMult",  &tauChHadMult);
             //tree->Branch("tauPhotonMult", &tauPhotonMult);
             tree->Branch("tauDecayMode",  &tauDecayMode);
@@ -177,7 +178,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoTag", &jetTwoTag);
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
-        if (channel == "mu4j" || channel == "e4j" || channel == "mu4j_fakes") {
+        if (channel == "mu4j" || channel == "e4j" || channel == "mu4j_fakes" || channel == "e4j_fakes") {
             tree->Branch("jetThreeP4", &jetThreeP4);
             tree->Branch("jetThreeTag", &jetThreeTag);
             tree->Branch("jetThreeFlavor", &jetThreeFlavor);
@@ -654,6 +655,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
+    sort(fail_electrons.begin(), fail_electrons.end(), sort_by_higher_pt<TElectron>);
 
     /* TAUS */
     vector<TTau*> taus;
@@ -863,7 +865,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
+        if (nJetsCut < 2) //|| nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -956,7 +958,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
+        if (nJetsCut < 2) //|| nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1627,7 +1629,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Fill jet info //
     ///////////////////
 
-    if (channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes") { // jets are handled differently for the lepton + jet selection
+    if (channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes" && channel != "e4j_fakes") { // jets are handled differently for the lepton + jet selection
         if (jets.size() > 0) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag    = jets[0]->csv;

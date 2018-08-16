@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef HZGANALYZER_HH
-#define HZGANALYZER_HH
+#ifndef UPSILONGAMMAANALYZER_HH
+#define UPSILONGAMMAANALYZER_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -50,10 +50,10 @@
 #include <regex>
 
 
-class hzgAnalyzer: public BLTSelector {
+class upsilonGammaAnalyzer: public BLTSelector {
 public:
-    hzgAnalyzer();
-    ~hzgAnalyzer();
+    upsilonGammaAnalyzer();
+    ~upsilonGammaAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -90,12 +90,10 @@ public:
     Float_t eventWeight, triggerWeight, puWeight, nPU;
     Int_t genWeight;
     TVector3 rPV;
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    UInt_t nJets, nFwdJets, nCentralJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
-    // physics object Lorentz vectors
+    // lepton data
     TLorentzVector leptonOneP4, leptonTwoP4;
-
-    // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneMother, leptonTwoMother;
     Int_t leptonOneFlavor, leptonTwoFlavor;
@@ -109,30 +107,9 @@ public:
     Float_t photonOneMVA;
     Bool_t passElectronVeto;
 
-    Bool_t isLeptonTag;
-    Bool_t isDijetTag;
-
-    // fsr photon data
-    //UInt_t leptonOneFSRPhotons, leptonTwoFSRPhotons;
-    //TLorentzVector leptonOneFSRSum, leptonTwoFSRSum;
-    //TLorentzVector leptonOneFSRMatchP4, leptonTwoFSRMatchP4;
-    //Float_t leptonOneFSRIsoSum, leptonTwoFSRIsoSum;
-    //Float_t fsrPhotonOneMVA, fsrPhotonTwoMVA;
-    //Float_t fsrPhotonOneR9, fsrPhotonTwoR9;
-    //Float_t fsrPhotonOneIso, fsrPhotonTwoIso;
-    //Bool_t fsrPassElectronVetoOne, fsrPassElectronVetoTwo;
-    //TLorentzVector genFSRPhotonOneP4, genFSRPhotonTwoP4;
-    //TLorentzVector genTrueFSRPhoOneP4, genTrueFSRPhoTwoP4;
-    //Bool_t genFSRPhotonOneFHPFS, genFSRPhotonTwoFHPFS;
-    //Bool_t genFSRPhotonOneIPFS, genFSRPhotonTwoIPFS;
-    //Bool_t leptonOneHasFSRPhoton, leptonTwoHasFSRPhoton;
-    //Bool_t leptonOneHasRecoveredFSRPhoton, leptonTwoHasRecoveredFSRPhoton;
-    //Bool_t leptonOneHasFakeFSRPhoton, leptonTwoHasFakeFSRPhoton;
-
     // dilepton vertex data
-    TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
-    Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
-    Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
+    TVector3 dileptonVertex, dileptonVertexErr;
+    Float_t dileptonVertexChi2, dileptonVertexDOF, dileptonVertexProb;
 
     // jet data
     TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
@@ -144,18 +121,12 @@ public:
     Int_t genLeptonOneId, genLeptonTwoId;
     Bool_t genPhotonFHPFS, genPhotonIPFS;
 
-    //Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
-    //TLorentzVector genOneP4, genTwoP4;
-    //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
-    Bool_t vetoDY;
-    //Bool_t brianVetoDY;
-
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
     float GetPhotonIsolation(const baconhep::TPhoton*, float);
 
-    //ClassDef(hzgAnalyzer,0);
+    //ClassDef(upsilonGammaAnalyzer,0);
 };
 
 
-#endif  // HZGANALYZER_HH
+#endif  // UPSILONGAMMAANALYZER_HH

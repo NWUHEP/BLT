@@ -27,9 +27,7 @@ data_list.extend([
     # Double muon data
     #cfg(data_name = 'muon_2016B_v2',
     #    path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
-    #    #path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2_met_test'.format(path),
     #    nJobs    = 51,
-    #    #nJobs    = 52,
     #    suffix   = 'muon_2016B'
     #   ),
     #cfg(data_name = 'muon_2016C_v1',
@@ -376,6 +374,26 @@ sig_list.extend([
         path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
         nJobs     = 26,
         suffix    = 'hzg_vbf'
+        ),
+    cfg(data_name = 'hzg_wplus',
+        path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
+        nJobs     = 61,
+        suffix    = 'hzg_wh'
+        ),
+    cfg(data_name = 'hzg_wminus',
+        path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
+        nJobs     = 59,
+        suffix    = 'hzg_wh'
+        ),
+    cfg(data_name = 'hzg_zh',
+        path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
+        nJobs     = 60,
+        suffix    = 'hzg_zh'
+        ),
+    cfg(data_name = 'hzg_tth',
+        path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
+        nJobs     = 40, 
+        suffix    = 'hzg_tth'
         ),
     #cfg(data_name = 'zg_llg',
     #    path      = '{0}/ZGTo2LG_amcatnlo'.format(path),

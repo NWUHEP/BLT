@@ -45,6 +45,7 @@ cat input.txt
 #MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #zjpsiAnalyzerV2 input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 hzgAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#upsilonGammaAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
 cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

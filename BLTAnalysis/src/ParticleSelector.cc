@@ -5,6 +5,17 @@
 using namespace baconhep;
 using namespace std;
 
+// Why the fuck is this not part of the standard library!?
+vector<string> split(const string &s, char delim) {
+    stringstream ss(s);
+    string item;
+    vector<string> tokens;
+    while (getline(ss, item, delim)) {
+        tokens.push_back(item);
+    }
+    return tokens;
+}
+
 bool test_bits(unsigned int bits, unsigned int test) {
     return (bits & test) == test;
 }
@@ -16,37 +27,67 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     _rng = new TRandom3(1337);
 
     // offline jet corrections on-the-fly
-    std::string runPeriod = "H";
-    if (
-            parameters.datasetgroup == "muon_2016B" 
-            || parameters.datasetgroup == "muon_2016C" 
-            || parameters.datasetgroup == "muon_2016D"
-       ) {
-        runPeriod = "BCD";
-    } else if (parameters.datasetgroup == "muon_2016E" || parameters.datasetgroup == "muon_2016F") {
-        runPeriod = "EF";
-    } else if (parameters.datasetgroup == "muon_2016G") {
-        runPeriod = "G";
-    } else {
-        runPeriod = "H";
-    }
-
+    vector<string> ds = split(parameters.datasetgroup, '_');
+    string datasetname = ds[0];
     const std::string cmssw_base = getenv("CMSSW_BASE");
-    std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
-    std::cout << jecPath << std::endl;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecPath + "_L2Relative_AK4PFchs.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(jecPath + "_L1FastJet_AK4PFchs.txt");
+    if (datasetname == "muon" || datasetname == "electron") { // data 
+        // jet energy corrections
+        string runPeriod   = ds[1];
+        cout << datasetname << " " << runPeriod << endl;
+        if (runPeriod == "2016B" || runPeriod == "2016C" || runPeriod == "2016D") {
+            runPeriod = "BCD";
+        } else if (runPeriod == "2016E" || runPeriod == "2016F") {
+            runPeriod = "EF";
+        } else if (runPeriod == "2016G") {
+            runPeriod = "G";
+        } else if (runPeriod == "2016H") {
+            runPeriod = "H";
+        } 
 
-    vector<JetCorrectorParameters> vPar;
-    vPar.push_back(*L1JetPar);
-    vPar.push_back(*L2JetPar);
-    vPar.push_back(*L3JetPar);
-    vPar.push_back(*ResJetPar);
+        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
+        std::cout << jecPath << std::endl;
+        JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
+        JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
+        JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecPath + "_L2Relative_AK4PFchs.txt");
+        JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(jecPath + "_L1FastJet_AK4PFchs.txt");
 
-    _jetCorrector = new FactorizedJetCorrector(vPar);
+        vector<JetCorrectorParameters> vPar;
+        vPar.push_back(*L1JetPar);
+        vPar.push_back(*L2JetPar);
+        vPar.push_back(*L3JetPar);
+        vPar.push_back(*ResJetPar);
 
+        _jetCorrector = new FactorizedJetCorrector(vPar);
+
+        // jec uncertainties
+        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+
+    } else { // MC 
+        // jet energy corrections
+        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
+        std::cout << jecPath << std::endl;
+        JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
+        JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
+        JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(jecPath + "_L2Relative_AK4PFchs.txt");
+        JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(jecPath + "_L1FastJet_AK4PFchs.txt");
+
+        vector<JetCorrectorParameters> vPar;
+        vPar.push_back(*L1JetPar);
+        vPar.push_back(*L2JetPar);
+        vPar.push_back(*L3JetPar);
+        vPar.push_back(*ResJetPar);
+
+        _jetCorrector = new FactorizedJetCorrector(vPar);
+
+        // jec uncertainties
+        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+
+        // jet energy resolution
+        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
+        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
+    }
 }
 
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
@@ -600,4 +641,34 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     double correction = _jetCorrector->getCorrection();
 
     return correction;
+}
+
+double ParticleSelector::JetUncertainty(const baconhep::TJet* jet) const
+{
+    _jecUncertainty->setJetEta(jet->eta);
+    _jecUncertainty->setJetPt(jet->ptRaw);
+
+    double uncertainty = _jecUncertainty->getUncertainty(true);
+
+    return uncertainty;
+}
+
+pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* jet, int syst) const
+{
+    JME::JetParameters jetParams;
+    jetParams.setJetPt(jet->pt);
+    jetParams.setJetEta(jet->eta);
+    jetParams.setRho(_rhoFactor);
+
+    float jres = jetResolution.getResolution(jetParams);
+    float jsf = 1.;
+    if (syst == 1) {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams, Variation::UP);
+    } else if (syst == -1) {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams, Variation::DOWN);
+    } else {
+        jsf  = jetResolutionSF.getScaleFactor(jetParams);
+    }
+
+    return make_pair(jres, jsf);
 }

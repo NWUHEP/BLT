@@ -107,7 +107,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
                                         "e4j", "mu4j", 
-                                        "mutau_fakes", "mu4j_fakes"
+                                        "mutau_fakes", "mu4j_fakes",
                                         "etau_fakes", "e4j_fakes"
                                         };
     for (unsigned i = 0; i < channelNames.size(); ++i) {

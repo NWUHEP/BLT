@@ -101,8 +101,6 @@ void DileptonSelector::Begin(TTree *tree)
 
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
-    outHistName = params->get_output_treename("GenCategory");
-    hGenCat = new TH1D(outHistName.c_str(), "WW decay modes",30,0.5,30.5);
 
     vector<std::string> channelNames = {"mumu", "ee"};
     for (unsigned i = 0; i < channelNames.size(); ++i) {

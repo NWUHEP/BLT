@@ -35,7 +35,8 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+DileptonSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###

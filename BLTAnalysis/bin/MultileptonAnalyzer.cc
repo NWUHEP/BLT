@@ -713,7 +713,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     /* JETS */
     TClonesArray* jetCollection;
-    jetCollection = fAK4CHSArr;
+    jetCollection = fAK8CHSArr;
 
     std::vector<TJet*> jets;
     TLorentzVector hadronicP4;

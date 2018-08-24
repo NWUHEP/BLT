@@ -47,8 +47,8 @@ class WeightUtils: public TObject {
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
         pair<float, float>   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
-        float   GetMuonIDEff(TLorentzVector&) const; 
-        float   GetMuonISOEff(TLorentzVector&) const; 
+        float   GetMuonIDEff(TMuon&) const; 
+        float   GetMuonISOEff(TMuon&) const; 
         float   GetLooseMuonIDEff(TLorentzVector&) const;
         float   GetLooseMuonISOEff(TLorentzVector&) const;
         float   GetHZZMuonIDEff(TMuon&) const;
@@ -70,11 +70,14 @@ class WeightUtils: public TObject {
         TRandom3 *rng;
 
         TGraph  *_puReweight;
-        TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
-        TGraphAsymmErrors *_muSF_ID_DATA_BCDEF[4], *_muSF_ID_MC_BCDEF[4]; 
-        TGraphAsymmErrors *_muSF_ISO_DATA_BCDEF[4], *_muSF_ISO_MC_BCDEF[4]; 
-        TGraphAsymmErrors *_muSF_ID_DATA_GH[4], *_muSF_ID_MC_GH[4]; 
-        TGraphAsymmErrors *_muSF_ISO_DATA_GH[4], *_muSF_ISO_MC_GH[4]; 
+        //TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
+        TGraphAsymmErrors *_eff_IsoMu27_DATA[4]; 
+        TGraphAsymmErrors *_eff_IsoMu27_MC[4]; 
+        TH2F *_muSF_ID_DATA_BCDEF, *_muSF_ID_MC_BCDEF;  
+        TH2F *_muSF_ISO_DATA_BCDEF, *_muSF_ISO_MC_BCDEF;
+        //TGraphAsymmErrors *_muSF_ISO_DATA_BCDEF[4], *_muSF_ISO_MC_BCDEF[4]; 
+        //TGraphAsymmErrors *_muSF_ID_DATA_GH[4], *_muSF_ID_MC_GH[4]; 
+        //TGraphAsymmErrors *_muSF_ISO_DATA_GH[4], *_muSF_ISO_MC_GH[4]; 
         TGraphAsymmErrors *_muSF_Loose_ID_DATA_BCDEF[4], *_muSF_Loose_ID_MC_BCDEF[4]; 
         TGraphAsymmErrors *_muSF_Loose_ISO_DATA_BCDEF[4], *_muSF_Loose_ISO_MC_BCDEF[4]; 
         TGraphAsymmErrors *_muSF_Loose_ID_DATA_GH[4], *_muSF_Loose_ID_MC_GH[4]; 

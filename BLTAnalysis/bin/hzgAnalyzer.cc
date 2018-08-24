@@ -474,23 +474,24 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (     
                // tight muon ID and ISO
-           //    muonP4.Pt() > 5.
-           //    && fabs(muonP4.Eta()) < 2.4
-           //    && (muon->typeBits & baconhep::kPFMuon) 
-           //    && (muon->typeBits & baconhep::kGlobal) 
-           //    && muon->muNchi2    < 10.
-           //    && muon->nMatchStn  > 1
-           //    && muon->nPixHits   > 0
-           //    && fabs(muon->d0)   < 0.2
-           //    && fabs(muon->dz)   < 0.5
-           //    && muon->nTkLayers  > 5 
-           //    && muon->nValidHits > 0
-           //    //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.25
-           //){
-            //muons.push_back(muon);
-        //}
+               muonP4.Pt() > 5.
+               && fabs(muonP4.Eta()) < 2.4
+               && (muon->typeBits & baconhep::kPFMuon) 
+               && (muon->typeBits & baconhep::kGlobal) 
+               && muon->muNchi2    < 10.
+               && muon->nMatchStn  > 1
+               && muon->nPixHits   > 0
+               && fabs(muon->d0)   < 0.2
+               && fabs(muon->dz)   < 0.5
+               && muon->nTkLayers  > 5 
+               && muon->nValidHits > 0
+               //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.25
+               && GetMuonIsolation(muon)/muonP4.Pt() < 0.15 // temporary tight iso requirement
+           ){
+            muons.push_back(muon);
+        }
 
-                // h->ZZ->4l "tight" ID and pf_isorel < 0.35
+                /*// h->ZZ->4l "tight" ID and pf_isorel < 0.35
                 muonP4.Pt() > 5.
                 && fabs(muonP4.Eta()) < 2.4
                 && fabs(muon->d0) < 0.5
@@ -520,7 +521,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                            )
                             muons.push_back(muon);
                     }
-                }
+                } */
                     
 
         // muons for jet veto
@@ -784,11 +785,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TLorentzVector muonOneP4, muonTwoP4;
         muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, MUON_MASS);
         muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, MUON_MASS);
-        if (muonOneP4.Pt() < 20.0) 
+        if (muonOneP4.Pt() < 30.0) 
             return kTRUE;
         //cout << "passed pt1 cut" << endl;
         hTotalEvents->Fill(6);
-        if (muonTwoP4.Pt() < 10.0)
+        if (muonTwoP4.Pt() < 20.0)
             return kTRUE;
         //cout << "passed pt2 cut" << endl;
         hTotalEvents->Fill(7);
@@ -813,11 +814,42 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoFlavor = muons[1]->q*13;
         leptonTwoDZ     = muons[1]->dz;
         leptonTwoD0     = muons[1]->d0;
+            
+        //cout << "HLT match bits 1, 2: " << muons[0]->hltMatchBits << ", " << muons[1]->hltMatchBits << endl;
+        //cout << "muon one fired trigger = " << trigger->passObj("HLT_IsoMu27_v*", 1, muons[0]->hltMatchBits) << endl;
+        //cout << "muon two fired trigger = " << trigger->passObj("HLT_IsoMu27_v*", 1, muons[1]->hltMatchBits) << endl;
 
-        /*if (!isData) {
-            eventWeight *= weights->GetHZZMuonIDEff(*muons[0]); 
-            eventWeight *= weights->GetHZZMuonIDEff(*muons[1]);
-        }*/
+        if (!isData) {
+            //eventWeight *= weights->GetHZZMuonIDEff(*muons[0]); 
+            //eventWeight *= weights->GetHZZMuonIDEff(*muons[1]);
+            eventWeight *= weights->GetMuonIDEff(*muons[0]); 
+            eventWeight *= weights->GetMuonIDEff(*muons[1]);
+            eventWeight *= weights->GetMuonISOEff(*muons[0]);
+            eventWeight *= weights->GetMuonISOEff(*muons[1]);
+
+            //if (weights->GetMuonIDEff(*muons[0]) > 1)
+            //    cout << "ID 0 weight greater than 1" << endl;
+            //if (weights->GetMuonIDEff(*muons[1]) > 1)
+            //    cout << "ID 1 weight greater than 1" << endl;
+            //if (weights->GetMuonISOEff(*muons[0]) > 1) {
+            //    cout << "ISO 0 weight greater than 1" << endl;
+            //    //cout << "muon eta, pt: " << muons[0]->eta << ", " << muons[0]->pt << endl;
+            //    //cout << "iso weight 0 = " << weights->GetMuonISOEff(*muons[0]) << endl;
+            //}
+            //if (weights->GetMuonISOEff(*muons[1]) > 1) {
+            //    cout << "ISO 1 weight greater than 1" << endl;
+            //    //cout << "muon eta, pt: " << muons[1]->eta << ", " << muons[1]->pt << endl;
+            //    //cout << "iso weight 1 = " << weights->GetMuonISOEff(*muons[1]) << endl;
+            //}
+
+            pair<float, float> trigEff1 = weights->GetTriggerEffWeight("HLT_IsoMu27_v*", leptonOneP4);
+            pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu27_v*", leptonTwoP4);
+            triggerWeight = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
+            //if (triggerWeight > 1)
+            //    cout << "triggerWeight greater than 1" << endl;
+
+            eventWeight *= triggerWeight;
+        }
 
 
         int isGlobalOne = (muons[0]->typeBits & baconhep::kGlobal) > 0;
@@ -1231,8 +1263,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[muonOneIndex]); 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[muonTwoIndex]);
-            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            eventWeight *= weights->GetMuonISOEff(*muons[muonOneIndex]);
+            eventWeight *= weights->GetMuonISOEff(*muons[muonTwoIndex]);
 
             pair<float, float> eff11 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonOneIndex]);
             pair<float, float> eff12 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonTwoIndex]);
@@ -1291,6 +1325,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoFlavor = electrons[1]->q*11;
         leptonTwoDZ     = electrons[1]->dz;
         leptonTwoD0     = electrons[1]->d0;
+        
+        //cout << "HLT match bits 1, 2: " << electrons[0]->hltMatchBits << ", " << electrons[1]->hltMatchBits << endl;
+        //cout << "electron one fired trigger = " << trigger->passObj("HLT_Ele32_WPTight_Gsf_L1DoubleEG_v*", 1, electrons[0]->hltMatchBits) << endl;
+        //cout << "electron two fired trigger = " << trigger->passObj("HLT_Ele32_WPTight_Gsf_L1DoubleEG_v*", 1, electrons[1]->hltMatchBits) << endl;
            
         if (!isData) {
 

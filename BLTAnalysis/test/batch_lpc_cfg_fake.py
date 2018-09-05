@@ -2,21 +2,22 @@
 import BLT.BLTAnalysis.BatchMaster as bm
 
 import sys
+# FakeSelector /eos/uscms/store/group/lpcbacon/12d/DYJetsToLL_M-50_madgraph/Output_0.root 10000 DYJetsToLL_M-50 DYJetsToLL_M-50 single_lepton 2016 1
 
-# to run interactively
-# MultileptonAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
-# MultileptonAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_000.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+# FakeSelector /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016B-03Feb2017_ver1-v1/ 100000 muon_2016B_v1 muon_2016B_v1 single_lepton 2016 1
+# FakeSelector /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_000.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
-executable = 'execBatch_lpc.sh'
+executable = 'execBatch_lpc_fake.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't','ttboson', 'diboson','ttbar_theory']
-#mc_samples = ['ttbar_theory']
-#data_samples = []
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't','diboson','ttbar_theory']
+
+
+
 
 ''' 
     Set job configurations.  
@@ -172,35 +173,16 @@ mc_dict = {}
 path = '/eos/uscms/store/group/lpcbacon/12d'
 mc_dict['zjets'] = [
     # Drell-Yan
-    cfg(data_name = 'DYJetsToLL_M-50_amcatnlo',
-        path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo',
-        nJobs    = 50,
-        suffix   = 'zjets_m-50_amcatnlo'
-       ),
-    cfg(data_name = 'DYJetsToLL_M-10to50_amcatnlo',
-        path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-10to50_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'zjets_m-10to50_amcatnlo'
-       ),
-
-    cfg(data_name = 'DYToLL_0J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z0jets_m-50_amcatnlo'
-       ),
-
-    cfg(data_name = 'DYToLL_1J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z1jets_m-50_amcatnlo'
-       ),
-    cfg(data_name = 'DYToLL_2J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z2jets_m-50_amcatnlo'
-       ),
-
-
+    # cfg(data_name = 'DYJetsToLL_M-50',
+    #     path     = '{0}/Summer16_DYJetsToLL_M-50_amcatnlo'.format(path),
+    #     nJobs    = 50,
+    #     suffix   = 'zjets_m-50'
+    #    ),
+    # cfg(data_name = 'DYJetsToLL_M-10to50',
+    #     path     = '{0}/Summer16_DYJetsToLL_M-10to50_amcatnlo'.format(path),
+    #     nJobs    = 10,
+    #     suffix   = 'zjets_m-10to50'
+    #    ),
     cfg(data_name = 'DYJetsToLL_M-50',
        path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
        nJobs    = 50,
@@ -211,7 +193,6 @@ mc_dict['zjets'] = [
        nJobs    = 50,
        suffix   = 'zjets_m-10to50'
       ),
-
     cfg(data_name = 'DY1JetsToLL_M-50',
        path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
        nJobs    = 10,
@@ -334,20 +315,22 @@ mc_dict['ttbar'] = [
         path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
-       ),
-    # leptonic top
-    cfg(data_name = 'ttbar_2l2nu',
-        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-        nJobs    = 50,
-        suffix   = 'ttbar_2l2nu'
-       ),
-    # leptonic top
-    cfg(data_name = 'ttbar_semilepton',
-        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-        nJobs    = 50,
-        suffix   = 'ttbar_semilepton'
        )
+    # # leptonic top
+    # cfg(data_name = 'ttbar_2l2nu',
+    #     path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+    #     nJobs    = 50,
+    #     suffix   = 'ttbar_2l2nu'
+    #    ),
+    
+    # # semileptonic top
+    # cfg(data_name = 'ttbar_semilepton',
+    #     path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+    #     nJobs    = 50,
+    #     suffix   = 'ttbar_semilepton'
+    #     )
     ]
+
 mc_dict['ttbar_theory'] = [
     cfg(data_name = 'ttbar_inclusive_tunedown',
        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
@@ -496,3 +479,4 @@ batch = bm.BatchMaster(config_list = batch_list,
                        location    = 'lpc'
                      )
 batch.submit_to_batch()
+

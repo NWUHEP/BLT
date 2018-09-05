@@ -14,8 +14,9 @@
 
 
 
-#ifndef FAKESELECTOR_HH
-#define FAKESELECTOR_HH
+
+#ifndef TauSelector_HH
+#define TauSelector_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -51,10 +52,10 @@
 #include <regex>
 
 
-class FakeSelector: public BLTSelector {
+class TauSelector: public BLTSelector {
 public:
-    FakeSelector();
-    ~FakeSelector();
+    TauSelector();
+    ~TauSelector();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -68,10 +69,11 @@ public:
 
     // Lumi mask
     RunLumiRangeMap lumiMask;
-
+    
     // rochester muon corrections
     RoccoR *muonCorr;
     TRandom3 *rng;
+
 
     // Params and cuts
     std::unique_ptr<Parameters>         params;
@@ -86,54 +88,28 @@ public:
 
     // Branches in the output file
     // event data
-    UInt_t runNumber, lumiSection, nPV, nPartons;
+    UInt_t runNumber, lumiSection;
     ULong64_t evtNumber;
-    Bool_t triggerStatus;
-    Float_t nPU;
-    TVector3 rPV;
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    UInt_t nBJets,nJets,nMuons,nElectrons,nTaus,nMistaus;
 
     // weights and uncertainties
     Float_t eventWeight;
 
     // physics object Lorentz vectors
-    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4;
+    // TLorentzVector tauOneP4, tauTwoP4;
+
+
+    Float_t tauOnePt, tauTwoPt, tauOneEta, tauTwoEta;
 
     // Additional lepton data
-    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonThreeIsoPass;
-    Int_t leptonOneMother, leptonTwoMother, leptonThreeMother; 
-    Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor;
-    Float_t leptonOneD0, leptonTwoD0, leptonThreeD0;
-    Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ;
+    Int_t tauOneFlavor, tauTwoFlavor, tauOneIso, tauTwoIso, tauOneDecayMode, tauTwoDecayMode;
+    Float_t tauOneIsoMVA,tauOnePuppiChHadIso,tauOnePuppiGammaIso,tauOnePuppiNeuHadIso;
+    Float_t tauTwoIsoMVA,tauTwoPuppiChHadIso,tauTwoPuppiGammaIso,tauTwoPuppiNeuHadIso;
 
 
-    // jet data
-    TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
-    Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
-    Int_t jetOneFlavor, jetTwoFlavor, jetThreeFlavor, jetFourFlavor;
-    Float_t met, metPhi, ht, htPhi, htSum;
-
-    // generator level data
-    Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
-    TLorentzVector genOneP4, genTwoP4;
-
-    Int_t tauDecayMode;
-    Float_t tauMVA, tauMVAOld, tauIso3Hits;
-    Float_t taupuppiChHadIso,taupuppiGammaIso,taupuppiNeuHadIso;
-    Float_t taupuppiChHadIsoNoLep,taupuppiGammaIsoNoLep,taupuppiNeuHadIsoNoLep;
-
-
-    float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
-    float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
-    //vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
-    //int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
-    //vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
-
-    //ClassDef(FakeSelector,0);
 };
 
 
-#endif  // FAKESELECTOR_HH
+#endif  // TauSelector_HH

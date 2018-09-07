@@ -14,8 +14,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't','diboson','ttbar_theory']
-
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
 
 
@@ -173,16 +172,35 @@ mc_dict = {}
 path = '/eos/uscms/store/group/lpcbacon/12d'
 mc_dict['zjets'] = [
     # Drell-Yan
-    # cfg(data_name = 'DYJetsToLL_M-50',
-    #     path     = '{0}/Summer16_DYJetsToLL_M-50_amcatnlo'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'zjets_m-50'
-    #    ),
-    # cfg(data_name = 'DYJetsToLL_M-10to50',
-    #     path     = '{0}/Summer16_DYJetsToLL_M-10to50_amcatnlo'.format(path),
-    #     nJobs    = 10,
-    #     suffix   = 'zjets_m-10to50'
-    #    ),
+    cfg(data_name = 'DYJetsToLL_M-50_amcatnlo',
+        path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo',
+        nJobs    = 50,
+        suffix   = 'zjets_m-50_amcatnlo'
+       ),
+    cfg(data_name = 'DYJetsToLL_M-10to50_amcatnlo',
+        path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-10to50_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'zjets_m-10to50_amcatnlo'
+       ),
+
+    cfg(data_name = 'DYToLL_0J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z0jets_m-50_amcatnlo'
+       ),
+
+    cfg(data_name = 'DYToLL_1J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50_amcatnlo'
+       ),
+    cfg(data_name = 'DYToLL_2J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z2jets_m-50_amcatnlo'
+       ),
+
+
     cfg(data_name = 'DYJetsToLL_M-50',
        path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
        nJobs    = 50,
@@ -193,6 +211,7 @@ mc_dict['zjets'] = [
        nJobs    = 50,
        suffix   = 'zjets_m-10to50'
       ),
+
     cfg(data_name = 'DY1JetsToLL_M-50',
        path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
        nJobs    = 10,
@@ -315,22 +334,20 @@ mc_dict['ttbar'] = [
         path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
+       ),
+    # leptonic top
+    cfg(data_name = 'ttbar_2l2nu',
+        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_2l2nu'
+       ),
+    # leptonic top
+    cfg(data_name = 'ttbar_semilepton',
+        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_semilepton'
        )
-    # # leptonic top
-    # cfg(data_name = 'ttbar_2l2nu',
-    #     path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_2l2nu'
-    #    ),
-    
-    # # semileptonic top
-    # cfg(data_name = 'ttbar_semilepton',
-    #     path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_semilepton'
-    #     )
     ]
-
 mc_dict['ttbar_theory'] = [
     cfg(data_name = 'ttbar_inclusive_tunedown',
        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
@@ -467,6 +484,7 @@ mc_dict['diboson'] = [
        suffix   = 'zz_4l'
       ),
     ]
+
 
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 

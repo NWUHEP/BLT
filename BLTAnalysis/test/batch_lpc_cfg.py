@@ -14,7 +14,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't','ttboson', 'diboson','ttbar_theory']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 #mc_samples = ['ttbar_theory']
 #data_samples = []
 

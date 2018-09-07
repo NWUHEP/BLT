@@ -693,7 +693,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                //&& (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwLT)
+                
+                && (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwLT)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {

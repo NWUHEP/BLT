@@ -94,7 +94,7 @@ public:
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // weights and uncertainties
-    Float_t eventWeight;
+    Float_t eventWeight,genWeight;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4;

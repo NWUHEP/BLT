@@ -860,9 +860,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonOneP4;
         leptonOneIso    = muonOneIso;
@@ -958,9 +958,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1158,9 +1158,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2)// || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2)// || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1240,9 +1240,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2)//|| nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2)//|| nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);

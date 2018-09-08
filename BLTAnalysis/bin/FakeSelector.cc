@@ -101,6 +101,7 @@ void FakeSelector::Begin(TTree *tree)
         tree->Branch("nPartons", &nPartons);
         tree->Branch("rPV", &rPV);
         tree->Branch("eventWeight", &eventWeight);
+        tree->Branch("genWeight", &genWeight);
 
         // met and ht
         tree->Branch("met", &met);
@@ -205,6 +206,15 @@ Bool_t FakeSelector::Process(Long64_t entry)
         } else {
             weights->SetDataPeriod("2016GH");
         }
+
+
+        // save gen weight for amc@nlo Drell-Yan sample
+        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
+        if (genWeight < 0) {
+            hTotalEvents->Fill(10);
+        }
+
+
 
         float topSF = 1.;
         unsigned count = 0;

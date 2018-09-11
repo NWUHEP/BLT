@@ -55,9 +55,12 @@ void hzgAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
     }
     else if (params->selection == "ee" || params->selection == "elelg") {
-        //triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+    }
+    else if (params->selection == "tautau") { // select one muon plus one hadronic tau (for now)
+        triggerNames.push_back("HLT_IsoMu24_v*");
+        triggerNames.push_back("HLT_IsoTkMu24_v*");
     }
         
     // Weight utility class
@@ -128,39 +131,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("photonOneMVA", &photonOneMVA);
     outTree->Branch("passElectronVeto", &passElectronVeto);
 
-    // fsr photons
-    /*outTree->Branch("leptonOneFSRPhotons", &leptonOneFSRPhotons);
-    outTree->Branch("leptonOneFSRSum", &leptonOneFSRSum);
-    outTree->Branch("leptonOneFSRMatchP4", &leptonOneFSRMatchP4);
-    outTree->Branch("leptonOneFSRIsoSum", &leptonOneFSRIsoSum);
-    outTree->Branch("fsrPhotonOneMVA", &fsrPhotonOneMVA);
-    outTree->Branch("fsrPhotonOneR9", &fsrPhotonOneR9);
-    outTree->Branch("fsrPhotonOneIso", &fsrPhotonOneIso);
-    outTree->Branch("fsrPassElectronVetoOne", &fsrPassElectronVetoOne);
-    outTree->Branch("genFSRPhotonOneP4", &genFSRPhotonOneP4);
-    outTree->Branch("genTrueFSRPhoOneP4", &genTrueFSRPhoOneP4);
-    outTree->Branch("genFSRPhotonOneFHPFS", &genFSRPhotonOneFHPFS);
-    outTree->Branch("genFSRPhotonOneIPFS", &genFSRPhotonOneIPFS);
-    outTree->Branch("leptonOneHasFSRPhoton", &leptonOneHasFSRPhoton);
-    outTree->Branch("leptonOneHasRecoveredFSRPhoton", &leptonOneHasRecoveredFSRPhoton);
-    outTree->Branch("leptonOneHasFakeFSRPhoton", &leptonOneHasFakeFSRPhoton);
-    
-    outTree->Branch("leptonTwoFSRPhotons", &leptonTwoFSRPhotons);
-    outTree->Branch("leptonTwoFSRSum", &leptonTwoFSRSum);
-    outTree->Branch("leptonTwoFSRMatchP4", &leptonTwoFSRMatchP4);
-    outTree->Branch("leptonTwoFSRIsoSum", &leptonTwoFSRIsoSum);
-    outTree->Branch("fsrPhotonTwoMVA", &fsrPhotonTwoMVA);
-    outTree->Branch("fsrPhotonTwoR9", &fsrPhotonTwoR9);
-    outTree->Branch("fsrPhotonTwoIso", &fsrPhotonTwoIso);
-    outTree->Branch("fsrPassElectronVetoTwo", &fsrPassElectronVetoTwo);
-    outTree->Branch("genFSRPhotonTwoP4", &genFSRPhotonTwoP4);
-    outTree->Branch("genTrueFSRPhoTwoP4", &genTrueFSRPhoTwoP4);
-    outTree->Branch("genFSRPhotonTwoFHPFS", &genFSRPhotonTwoFHPFS);
-    outTree->Branch("genFSRPhotonTwoIPFS", &genFSRPhotonTwoIPFS);
-    outTree->Branch("leptonTwoHasFSRPhoton", &leptonTwoHasFSRPhoton);
-    outTree->Branch("leptonTwoHasRecoveredFSRPhoton", &leptonTwoHasRecoveredFSRPhoton);
-    outTree->Branch("leptonTwoHasFakeFSRPhoton", &leptonTwoHasFakeFSRPhoton); */
-
     // lepton vertices
     outTree->Branch("dileptonVertexOne", &dileptonVertexOne);
     outTree->Branch("dileptonVertexErrOne", &dileptonVertexErrOne);
@@ -183,7 +153,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("genPhotonFHPFS", &genPhotonFHPFS);
     outTree->Branch("genPhotonIPFS", &genPhotonIPFS);
     outTree->Branch("vetoDY", &vetoDY);
-    //outTree->Branch("brianVetoDY", &brianVetoDY);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -244,11 +213,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     // Generator objects // 
     ///////////////////////
 
-    //brianVetoDY = false; 
-    //vector<TGenParticle*> genParticles;
     vector<TGenParticle*> genLeptons;
     vector<TGenParticle*> genPhotons;
-    //vector<TGenParticle*> genFSRPhotons;
     if (!isData) {
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
@@ -266,59 +232,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 ++count;
             }
 
-            // saving leptons 
-            //if ((abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13) && particle->isPromptFinalState) 
-            //    genLeptons.push_back(particle);
-            //
             if ((fabs(particle->pdgId) == 11 || fabs(particle->pdgId) == 13) and particle->parent > 0) {
                 TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
                 if (fabs(mother->pdgId) == 23) 
                     genLeptons.push_back(particle);
             }
                 
-
-            // saving photons
-            //if (abs(particle->pdgId) == 22 && (particle->isPromptFinalState || particle->fromHardProcessFinalState))
-            //    genPhotons.push_back(particle);
-            //
-            
-            //if (abs(particle->pdgId) == 22 && particle->parent > 0) {
-            //    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //    while (abs(mother->pdgId) == 22) {
-            //        particle = mother;
-            //        if (particle->parent > 0)
-            //            mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //        else
-            //            break;
-            //    }
-            //    genPhotons.push_back(particle);
-            //}
-            
-            // Brian's DY photon veto
-            //if (fabs(particle->pdgId) == 22 && particle->parent > 0) {
-            //    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //    if (fabs(mother->pdgId) < 22 && particle->pt > 5) {
-            //        TLorentzVector particleP4;
-            //        TLorentzVector motherP4;
-            //        particleP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass); 
-            //        motherP4.SetPtEtaPhiM(mother->pt, mother->eta, mother->phi, mother->mass); 
-            //        if (particleP4.DeltaR(motherP4) > 0.3) 
-            //            brianVetoDY = true;
-            //    }                    
-            //}
-           
-           
-           if (fabs(particle->pdgId) == 22) {
-               genPhotons.push_back(particle);
-               //TGenParticle* phoMom = (TGenParticle*) fGenParticleArr->At(particle->parent);
-               //if (fabs(phoMom->pdgId) == 13)
-               //    genFSRPhotons.push_back(particle);
-           }
- 
-                
+            // saving photons     
+            if (fabs(particle->pdgId) == 22) 
+                genPhotons.push_back(particle);    
 
             }
-
 
             nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
 
@@ -348,10 +272,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     }
 
     if (!passTrigger)// && isData)
-    //if (!passTrigger && isData)
         return kTRUE;
     hTotalEvents->Fill(3);
-
 
     /////////////////////
     // Fill event info //
@@ -369,7 +291,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         eventWeight *= puWeight;
     } else {
         nPU = 0;
-
     }    
 
     ///////////////////
@@ -427,7 +348,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             cout << muon->pt << endl;
         muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
 
-        // Remove muons with very small deltaR
+        // Remove muons with very small deltaR // THIS IS NOT YET USED
         float minDeltaR = 1e6;
         for (unsigned j=0; j < muons.size(); ++j) {
             TLorentzVector tmpMuonP4;
@@ -451,23 +372,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                    GetMuonIsolation(muon) << ", " << muon->trkIso << endl;
         }
 
-        if (     
+        if (   /*  
                // tight muon ID and ISO
-           //    muonP4.Pt() > 5.
-           //    && fabs(muonP4.Eta()) < 2.4
-           //    && (muon->typeBits & baconhep::kPFMuon) 
-           //    && (muon->typeBits & baconhep::kGlobal) 
-           //    && muon->muNchi2    < 10.
-           //    && muon->nMatchStn  > 1
-           //    && muon->nPixHits   > 0
-           //    && fabs(muon->d0)   < 0.2
-           //    && fabs(muon->dz)   < 0.5
-           //    && muon->nTkLayers  > 5 
-           //    && muon->nValidHits > 0
-           //    //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.25
-           //){
-            //muons.push_back(muon);
-        //}
+               muonP4.Pt() > 5.
+               && fabs(muonP4.Eta()) < 2.4
+               && (muon->typeBits & baconhep::kPFMuon) 
+               && (muon->typeBits & baconhep::kGlobal) 
+               && muon->muNchi2    < 10.
+               && muon->nMatchStn  > 1
+               && muon->nPixHits   > 0
+               && fabs(muon->d0)   < 0.2
+               && fabs(muon->dz)   < 0.5
+               && muon->nTkLayers  > 5 
+               && muon->nValidHits > 0
+               //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+           ){
+            muons.push_back(muon);
+        } */
 
                 // h->ZZ->4l "tight" ID and pf_isorel < 0.35
                 muonP4.Pt() > 5.
@@ -546,8 +467,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (
                 electron->calibPt > 7
                 && fabs(electron->scEta) < 2.5
-                //&& particleSelector->PassElectronID(electron, cuts->tightElID)
-                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
                 && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
                 && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
@@ -562,8 +481,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     /* TAUS */
     vector<TTau*> taus;
+    vector<TLorentzVector> veto_taus;
     for (int i=0; i < fTauArr->GetEntries(); i++) {
-         TTau *tau = (TTau*) fTauArr->At(i);
+        TTau *tau = (TTau*) fTauArr->At(i);
         assert(tau);
 
         TLorentzVector tauP4; 
@@ -572,35 +492,48 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // Prevent overlap of muons and jets
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
-            if (tauP4.DeltaR(mu) < 0.4) {
+            if (tauP4.DeltaR(mu) < 0.3) {
                 muOverlap = true;
                 break;
             }
         }
         bool elOverlap = false;
         for (const auto& el: veto_electrons) {
-            if (tauP4.DeltaR(el) < 0.4) {
+            if (tauP4.DeltaR(el) < 0.3) {
                 elOverlap = true;
                 break;
             }
         }
 
-        if( // Selection adopted from Stany's tau counting selection for ttDM
-                tau->pt > 18  
-                && abs(tau->eta) < 2.3 
+        // apply tau energy scale correction (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
+        if (!isData) {
+            if (tau->decaymode == 0) {
+                tau->pt *= 0.995;
+            } else if (tau->decaymode == 1) {
+                tau->pt *= 1.01;
+            } else if (tau->decaymode == 10) {
+                tau->pt *= 1.006;
+            }
+        }
+
+        if ( 
+                tau->pt > 18
+                && abs(tau->eta) < 2.3
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByLooseCombinedIsolationDBSumPtCorr3Hits)
+                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3newDMwLT)
+                && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
+                && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {
             taus.push_back(tau);
+            veto_taus.push_back(tauP4);
         }
     }
     sort(taus.begin(), taus.end(), sort_by_higher_pt<TTau>);
 
     /* PHOTONS */
     vector <TPhoton*> photons;
-    //vector <TPhoton*> fsr_photons;
     vector<TLorentzVector> veto_photons;
     for (int i=0; i<fPhotonArr->GetEntries(); i++) {
         TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
@@ -615,30 +548,19 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                  << ", " << photon->passElectronVeto << endl;
         }
 
-    if (
-            // ID conditions
-            photon->pt > 10
-            && fabs(photon->scEta) < 2.5 
-            && (fabs(photon->scEta) <= 1.4442 || fabs(photon->scEta) >= 1.566)
-            && particleSelector->PassPhotonMVA(photon, cuts->looseMVAPhID)
-            && photon->passElectronVeto
-        ) {
-        photons.push_back(photon);
-        veto_photons.push_back(photonP4);
-    }
-
-    // FSR photons
-    /*if (
-            photon->calibPt > 2 
-            && fabs(photon->scEta) < 2.4
-            && GetPhotonIsolation(photon, fInfo->rhoJet) < 1.8
-       ) {
-        fsr_photons.push_back(photon);
-    }*/
-
+        if (
+                // ID conditions
+                photon->pt > 10
+                && fabs(photon->scEta) < 2.5 
+                && (fabs(photon->scEta) <= 1.4442 || fabs(photon->scEta) >= 1.566)
+                && particleSelector->PassPhotonMVA(photon, cuts->looseMVAPhID)
+                && photon->passElectronVeto
+            ) {
+            photons.push_back(photon);
+            veto_photons.push_back(photonP4);
+        }
     } 
     sort(photons.begin(), photons.end(), sort_by_higher_pt<TPhoton>);
-    //sort(fsr_photons.begin(), fsr_photons.end(), sort_by_higher_pt<TPhoton>);
 
     /* JETS */
     TClonesArray* jetCollection;
@@ -731,6 +653,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }
     }
+
     //std::sort(jets.begin(), jets.end(), sort_by_btag);
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
 

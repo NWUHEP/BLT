@@ -58,7 +58,7 @@ void hzgAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
     }
-    else if (params->selection == "tautau") { // select one muon plus one hadronic tau (for now)
+    else if (params->selection == "tautaug") { // select one muon plus one hadronic tau (for now)
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
     }
@@ -121,6 +121,9 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoD0", &leptonTwoD0);
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+ 
+    outTree->Branch("tauDecayMode", &tauDecayMode);
+    outTree->Branch("tauMVA", &tauMVA);
 
     outTree->Branch("isLeptonTag", &isLeptonTag);
     outTree->Branch("isDijetTag", &isDijetTag);
@@ -854,7 +857,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             TLorentzVector tempDilepton;
             TLorentzVector tempLLG;
             tempPhoton.SetPtEtaPhiM(photons[i]->calibPt, photons[i]->eta, photons[i]->phi, 0.);
-            //tempPhoton.SetPtEtaPhiM(photons[i]->pt, photons[i]->eta, photons[i]->phi, 0.);
             tempDilepton = leptonOneP4 + leptonTwoP4;
             tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
             float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
@@ -877,7 +879,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 photonIndex = i;
                 break;
             }
-            //cout << "photon " << i << " valid: " << hasValidPhoton << endl;
         }
 
         if (!hasValidPhoton)
@@ -888,7 +889,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             cout << "passed the photon selection" << endl;
 
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
-        //photonOneP4.SetPtEtaPhiM(photons[photonIndex]->pt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
         hTotalEvents->Fill(10);
@@ -962,186 +962,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
         }
-
-        //cout << "total number of leptons in the event: " << nMuons + nElectrons << endl;
-        //cout << "isLeptonTag: " << isLeptonTag << endl;
-
-        // FSR photon recovery
-        /*float minDROne = 100.;
-        float minDRTwo = 100.;
-        int fsrPhoOneIndex = -1;
-        int fsrPhoTwoIndex = -1;
-        
-        leptonOneFSRPhotons = 0;
-        leptonTwoFSRPhotons = 0;
-        leptonOneFSRSum.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonTwoFSRSum.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonOneFSRMatchP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonTwoFSRMatchP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonOneFSRIsoSum = 0.;
-        leptonTwoFSRIsoSum = 0.;
-
-        // check truth information; does either lepton have a true FSR photon?
-        leptonOneHasFSRPhoton = false;
-        leptonTwoHasFSRPhoton = false;
-        leptonOneHasRecoveredFSRPhoton = false;
-        leptonTwoHasRecoveredFSRPhoton = false;
-        leptonOneHasFakeFSRPhoton = false;
-        leptonTwoHasFakeFSRPhoton = false;
-        int genFSRPhoOneIndex = -1;
-        int genFSRPhoTwoIndex = -1;
-        genTrueFSRPhoOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genTrueFSRPhoTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        if (!isData) {
-            for (unsigned int i = 0; i < genFSRPhotons.size(); i++) {
-                TGenParticle* thisFSRPho = genFSRPhotons.at(i);
-                TGenParticle* thisFSRPhoMom = (TGenParticle*)fGenParticleArr->At(thisFSRPho->parent);
-                TLorentzVector genMuonP4;
-                genMuonP4.SetPtEtaPhiM(thisFSRPhoMom->pt, thisFSRPhoMom->eta, thisFSRPhoMom->phi, thisFSRPhoMom->mass);
-                if (genMuonP4.DeltaR(leptonOneP4) < 0.3) {
-                    leptonOneHasFSRPhoton = true;
-                    genFSRPhoOneIndex = i;
-                    genTrueFSRPhoOneP4.SetPtEtaPhiM(thisFSRPho->pt, thisFSRPho->eta, thisFSRPho->phi, thisFSRPho->mass);
-                }
-                else {
-                    if (genMuonP4.DeltaR(leptonTwoP4) < 0.3) {
-                    leptonTwoHasFSRPhoton = true;
-                    genFSRPhoTwoIndex = i;
-                    genTrueFSRPhoTwoP4.SetPtEtaPhiM(thisFSRPho->pt, thisFSRPho->eta, thisFSRPho->phi, thisFSRPho->mass);
-                    }
-                }
-            }
-        }
-
-        cout << "lepton 1 hasFSRPhoton = " << leptonOneHasFSRPhoton << endl;
-        cout << "lepton 2 hasFSRPhoton = " << leptonTwoHasFSRPhoton << endl;
-        cout << "number of reco fsr candidates = " << fsr_photons.size() << endl;
-        // apply FSR photon recovery algorithm at reco level
-        for (unsigned int i = 0; i < fsr_photons.size(); ++i) {
-            TPhoton *pho = fsr_photons.at(i);
-            TLorentzVector thisFSRPhoP4;
-            thisFSRPhoP4.SetPtEtaPhiM(pho->calibPt, pho->eta, pho->phi, 0.);
-            if (thisFSRPhoP4.DeltaR(photonOneP4) < 0.01) // reject the selected prompt photon
-                continue;
-
-            float phoLepOneDR = thisFSRPhoP4.DeltaR(leptonOneP4);
-            float phoLepTwoDR = thisFSRPhoP4.DeltaR(leptonTwoP4);
-
-            cout << "phoLepOneDR, phoLepTwoDR = " << phoLepOneDR << ", " << phoLepTwoDR << ", " << endl;
-            cout << "thisFSRPhoP4.Et() squared = " << pow(thisFSRPhoP4.Et(), 2) << endl;
-
-            //lepton 1
-            if ((phoLepOneDR/pow(thisFSRPhoP4.Et(), 2)) < 0.012 && phoLepOneDR < 0.5) {
-                ++leptonOneFSRPhotons;
-                leptonOneFSRSum += thisFSRPhoP4;
-                if (phoLepOneDR > 0.01 && phoLepOneDR < 0.4)
-                    leptonOneFSRIsoSum += GetPhotonIsolation(pho, fInfo->rhoJet);
-                if (phoLepOneDR/pow(thisFSRPhoP4.Et(), 2) < minDROne) {
-                    leptonOneFSRMatchP4 = thisFSRPhoP4;
-                    fsrPhoOneIndex = i;
-                    minDROne = phoLepOneDR/pow(thisFSRPhoP4.Et(), 2);
-                }
-            }
-            
-            //lepton 2
-            if ((phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2)) < 0.012 && phoLepTwoDR < 0.5) {
-                ++leptonTwoFSRPhotons;
-                leptonTwoFSRSum += thisFSRPhoP4;
-                if (phoLepTwoDR > 0.01 && phoLepTwoDR < 0.4)
-                    leptonTwoFSRIsoSum += GetPhotonIsolation(pho, fInfo->rhoJet);
-                if (phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2) < minDRTwo) {
-                    leptonTwoFSRMatchP4 = thisFSRPhoP4;
-                    fsrPhoTwoIndex = i;
-                    minDRTwo = phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2);
-                }
-            }
-        } 
-     
-        genFSRPhotonOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genFSRPhotonTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genFSRPhotonOneFHPFS = 0;
-        genFSRPhotonTwoFHPFS = 0;
-        genFSRPhotonOneIPFS = 0;
-        genFSRPhotonTwoIPFS = 0;
-        if (fsrPhoOneIndex > 0) {
-            fsrPhotonOneMVA = fsr_photons[fsrPhoOneIndex]->mva;
-            fsrPassElectronVetoOne = fsr_photons[fsrPhoOneIndex]->passElectronVeto;  
-            fsrPhotonOneIso = GetPhotonIsolation(fsr_photons[fsrPhoOneIndex], fInfo->rhoJet);
-            if (!isData)
-                fsrPhotonOneR9 = weights->GetCorrectedPhotonR9(*fsr_photons[fsrPhoOneIndex]);
-            else 
-                fsrPhotonOneR9 = fsr_photons[fsrPhoOneIndex]->r9;
-
-            // find the matching gen photon
-            float min_fsr_dr_one = 1000.;
-            for (unsigned int i = 0; i < genPhotons.size(); i++) {
-                TLorentzVector tmpGenFSRPhoOne;
-                tmpGenFSRPhoOne.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                float this_fsr_dr_one = tmpGenFSRPhoOne.DeltaR(leptonOneFSRMatchP4);
-                if (this_fsr_dr_one < min_fsr_dr_one) {
-                    genFSRPhotonOneP4.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                    genFSRPhotonOneFHPFS = genPhotons[i]->fromHardProcessFinalState;
-                    genFSRPhotonOneIPFS = genPhotons[i]->isPromptFinalState;
-                    min_fsr_dr_one = this_fsr_dr_one;
-                    if (min_fsr_dr_one < 0.3) { // we have a match; check if consistent with FSR
-                        if (genFSRPhoOneIndex > 0) {                        
-                            TGenParticle *genPho = genFSRPhotons.at(genFSRPhoOneIndex);
-                            TLorentzVector trueFSRPhoton;
-                            trueFSRPhoton.SetPtEtaPhiM(genPho->pt, genPho->eta, genPho->phi, genPho->mass);
-                            if (trueFSRPhoton.DeltaR(genFSRPhotonOneP4) < 0.01)
-                                leptonOneHasRecoveredFSRPhoton = true;
-                            else
-                                leptonOneHasFakeFSRPhoton = true;
-                            break;
-                        }
-                    }        
-                }
-            } 
-        }
-
-       
-        if (fsrPhoTwoIndex > 0) {
-            fsrPhotonTwoMVA = fsr_photons[fsrPhoTwoIndex]->mva;
-            fsrPassElectronVetoTwo = fsr_photons[fsrPhoTwoIndex]->passElectronVeto;  
-            fsrPhotonTwoIso = GetPhotonIsolation(fsr_photons[fsrPhoTwoIndex], fInfo->rhoJet);
-            if (!isData)
-                fsrPhotonTwoR9 = weights->GetCorrectedPhotonR9(*fsr_photons[fsrPhoTwoIndex]);
-            else 
-                fsrPhotonTwoR9 = fsr_photons[fsrPhoTwoIndex]->r9;
-            
-            // find the matching gen photon
-            float min_fsr_dr_two = 1000.;
-            for (unsigned int i = 0; i < genPhotons.size(); i++) {
-                TLorentzVector tmpGenFSRPhoTwo;
-                tmpGenFSRPhoTwo.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                float this_fsr_dr_two = tmpGenFSRPhoTwo.DeltaR(leptonTwoFSRMatchP4);
-                if (this_fsr_dr_two < min_fsr_dr_two) {
-                    genFSRPhotonTwoP4.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                    genFSRPhotonTwoFHPFS = genPhotons[i]->fromHardProcessFinalState;
-                    genFSRPhotonTwoIPFS = genPhotons[i]->isPromptFinalState;
-                    min_fsr_dr_two = this_fsr_dr_two;
-                    if (min_fsr_dr_two < 0.3) { // we have a match; check if consistent with FSR
-                        if (genFSRPhoTwoIndex > 0) {                        
-                            TGenParticle *genPho = genFSRPhotons.at(genFSRPhoTwoIndex);
-                            TLorentzVector trueFSRPhoton;
-                            trueFSRPhoton.SetPtEtaPhiM(genPho->pt, genPho->eta, genPho->phi, genPho->mass);
-                            if (trueFSRPhoton.DeltaR(genFSRPhotonTwoP4) < 0.01)
-                                leptonTwoHasRecoveredFSRPhoton = true;
-                            else 
-                                leptonTwoHasFakeFSRPhoton = true;
-                            break;
-                        }
-                    }        
-                }
-            } 
-        }
-
-        //if (fsrPhoOneIndex > 0) 
-        //    cout << "lepton 1 hasFSRPhoton, hasRecoveredFSRPhoton, hasFakeFSRPhoton: " << 
-        //            leptonOneHasFSRPhoton << ", " << leptonOneHasRecoveredFSRPhoton << ", " << leptonOneHasFakeFSRPhoton << endl;
-        //if (fsrPhoTwoIndex > 0)
-        //    cout << "lepton 2 hasFSRPhoton, hasRecoveredFSRPhoton, hasFakeFSRPhoton: " << 
-        //            leptonTwoHasFSRPhoton << ", " << leptonTwoHasRecoveredFSRPhoton << ", " << leptonTwoHasFakeFSRPhoton << endl; */
         
         if (sync_print_precut) {
             cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
@@ -1149,24 +969,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << ", "
                  << (leptonOneP4 + leptonTwoP4).M() << ", " << leptonOneP4.DeltaR(photonOneP4) << ", " << leptonTwoP4.DeltaR(photonOneP4) << endl;
         }
-
-        //float m_ll = (leptonOneP4 + leptonTwoP4).M();
-        //float m_llg = (leptonOneP4 + leptonTwoP4 + photonOneP4).M();
-        //if (photonOneP4.Et() < 0.14*m_llg)
-        //    return kTRUE;
-        //hTotalEvents->Fill(9);
-        //if (leptonOneP4.DeltaR(photonOneP4) < 0.4)
-        //    return kTRUE;
-        //hTotalEvents->Fill(10);
-        //if (leptonTwoP4.DeltaR(photonOneP4) < 0.4)
-        //    return kTRUE;
-        //hTotalEvents->Fill(11);
-        //if (m_ll + m_llg < 185.0)
-        //    return kTRUE;
-        //hTotalEvents->Fill(12);
-        //if (m_ll < 100.0 || m_ll > 180.0)
-        //    return kTRUE;
-        //hTotalEvents->Fill(13);
  
         leptonOneIso    = GetMuonIsolation(muons[muonOneIndex]);
         leptonOneFlavor = muons[muonOneIndex]->q*13;
@@ -1193,8 +995,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[muonOneIndex]); 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[muonTwoIndex]);
-            eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
+            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
 
             pair<float, float> eff11 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonOneIndex]);
             pair<float, float> eff12 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonTwoIndex]);
@@ -1203,22 +1005,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
             float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
             triggerWeight = eff_data/eff_mc;
-            //cout << "triggerWeight: " << triggerWeight << endl;
-            //cout << "event weight before trigger: " << eventWeight << endl;
             eventWeight *= triggerWeight;
-            //cout << "event weight after trigger: " << eventWeight << endl;
             
             eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
-        
-            // photon r9 reweighting
-            //if (fabs(photons[photonIndex]->scEta) < 1.444)
-            //    photonOneR9 = 1.0045*photonOneR9 + 0.0010;
-            //else
-            //    photonOneR9 = 1.0086*photonOneR9 - 0.0007; 
         }
+
         if (sync_print_precut) {
             cout << "event still alive after event weights" << endl;
         }
+
     } // end mumug selection
     
     else if (params->selection == "ee") {
@@ -1259,10 +1054,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[0]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[1]); 
 
-            //pair<float, float> eff11 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonOneP4);
-            //pair<float, float> eff12 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonTwoP4);
-            //pair<float, float> eff21 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonOneP4);
-            //pair<float, float> eff22 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonTwoP4);
             pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[0]);
             pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[1]);
             pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[0]);
@@ -1270,7 +1061,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
             float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
             triggerWeight = eff_data/eff_mc;
-            //eventWeight *= triggerWeight;
+            eventWeight *= triggerWeight;
 
         }
     }
@@ -1390,7 +1181,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             this_dr1 << ", " << this_dr2 << endl;
                 }
             }
-            //cout << "photon " << i << " valid: " << hasValidPhoton << endl;
         }
 
         if (!hasValidPhoton)
@@ -1399,7 +1189,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (sync_print_precut)
             cout << "valid photon" << endl;
 
-        //photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
@@ -1493,135 +1282,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }
         
-        /*// FSR photon recovery
-        float minDROne = 100.;
-        float minDRTwo = 100.;
-        int fsrPhoOneIndex = -1;
-        int fsrPhoTwoIndex = -1;
-
-        leptonOneFSRPhotons = 0;
-        leptonTwoFSRPhotons = 0;
-        leptonOneFSRSum.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonTwoFSRSum.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonOneFSRMatchP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonTwoFSRMatchP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        leptonOneFSRIsoSum = 0.;
-        leptonTwoFSRIsoSum = 0.;
-    
-        for (unsigned int i = 0; i < fsr_photons.size(); ++i) {
-            TPhoton *pho = fsr_photons.at(i);
-            TLorentzVector thisFSRPhoP4;
-            thisFSRPhoP4.SetPtEtaPhiM(pho->calibPt, pho->eta, pho->phi, 0.);
-            if (thisFSRPhoP4.DeltaR(photonOneP4) < 0.01)
-                continue;
-
-            float phoLepOneDR = thisFSRPhoP4.DeltaR(leptonOneP4);
-            float phoLepTwoDR = thisFSRPhoP4.DeltaR(leptonTwoP4);
-            //lepton 1
-            if ((phoLepOneDR/pow(thisFSRPhoP4.Et(), 2)) < 0.012 && phoLepOneDR < 0.5) {
-                ++leptonOneFSRPhotons;
-                leptonOneFSRSum += thisFSRPhoP4;
-                if ((phoLepOneDR > 0.08 || electrons[electronOneIndex]->scEta < 1.479) && phoLepOneDR < 0.4)
-                    leptonOneFSRIsoSum += GetPhotonIsolation(pho, fInfo->rhoJet);
-                if (phoLepOneDR/pow(thisFSRPhoP4.Et(), 2) < minDROne) {
-                    leptonOneFSRMatchP4 = thisFSRPhoP4;
-                    fsrPhoOneIndex = i;
-                    minDROne = phoLepOneDR/pow(thisFSRPhoP4.Et(), 2);
-                }
-            }
-            
-            //lepton 2
-            if ((phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2)) < 0.012 && phoLepTwoDR < 0.5) {
-                ++leptonTwoFSRPhotons;
-                leptonTwoFSRSum += thisFSRPhoP4;
-                if ((phoLepTwoDR > 0.08 || electrons[electronTwoIndex]->scEta < 1.479) && phoLepTwoDR < 0.4)
-                    leptonTwoFSRIsoSum += GetPhotonIsolation(pho, fInfo->rhoJet);
-                if (phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2) < minDRTwo) {
-                    leptonTwoFSRMatchP4 = thisFSRPhoP4;
-                    fsrPhoTwoIndex = i;
-                    minDRTwo = phoLepTwoDR/pow(thisFSRPhoP4.Et(), 2);
-                }
-            }
-        }
-       
-        genFSRPhotonOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genFSRPhotonTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genFSRPhotonOneFHPFS = 0;
-        genFSRPhotonTwoFHPFS = 0;
-        genFSRPhotonOneIPFS = 0;
-        genFSRPhotonTwoIPFS = 0;
-        if (fsrPhoOneIndex > 0) {
-            fsrPhotonOneMVA = fsr_photons[fsrPhoOneIndex]->mva;
-            fsrPassElectronVetoOne = fsr_photons[fsrPhoOneIndex]->passElectronVeto;  
-            fsrPhotonOneIso = GetPhotonIsolation(fsr_photons[fsrPhoOneIndex], fInfo->rhoJet);
-            if (!isData)
-                fsrPhotonOneR9 = weights->GetCorrectedPhotonR9(*fsr_photons[fsrPhoOneIndex]);
-            else 
-                fsrPhotonOneR9 = fsr_photons[fsrPhoOneIndex]->r9;
-            
-            // find the matching gen photon
-            float min_fsr_dr_one = 1000.;
-            for (unsigned int i = 0; i < genPhotons.size(); i++) {
-                TLorentzVector tmpGenFSRPhoOne;
-                tmpGenFSRPhoOne.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                float this_fsr_dr_one = tmpGenFSRPhoOne.DeltaR(leptonOneFSRMatchP4);
-                if (this_fsr_dr_one < min_fsr_dr_one) {
-                    genFSRPhotonOneP4.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                    genFSRPhotonOneFHPFS = genPhotons[i]->fromHardProcessFinalState;
-                    genFSRPhotonOneIPFS = genPhotons[i]->isPromptFinalState;
-                    min_fsr_dr_one = this_fsr_dr_one;
-                }
-            } 
-        }
-       
-        if (fsrPhoTwoIndex > 0) {
-            fsrPhotonTwoMVA = fsr_photons[fsrPhoTwoIndex]->mva;
-            fsrPassElectronVetoTwo = fsr_photons[fsrPhoTwoIndex]->passElectronVeto;  
-            fsrPhotonTwoIso = GetPhotonIsolation(fsr_photons[fsrPhoTwoIndex], fInfo->rhoJet);
-            if (!isData)
-                fsrPhotonTwoR9 = weights->GetCorrectedPhotonR9(*fsr_photons[fsrPhoTwoIndex]);
-            else 
-                fsrPhotonTwoR9 = fsr_photons[fsrPhoTwoIndex]->r9;
-            
-            // find the matching gen photon
-            float min_fsr_dr_two = 1000.;
-            for (unsigned int i = 0; i < genPhotons.size(); i++) {
-                TLorentzVector tmpGenFSRPhoTwo;
-                tmpGenFSRPhoTwo.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                float this_fsr_dr_two = tmpGenFSRPhoTwo.DeltaR(leptonTwoFSRMatchP4);
-                if (this_fsr_dr_two < min_fsr_dr_two) {
-                    genFSRPhotonTwoP4.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
-                    genFSRPhotonTwoFHPFS = genPhotons[i]->fromHardProcessFinalState;
-                    genFSRPhotonTwoIPFS = genPhotons[i]->isPromptFinalState;
-                    min_fsr_dr_two = this_fsr_dr_two;
-                }
-            } 
-        } */
-        
         if (sync_print_precut) {
             cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
             cout << leptonOneP4.Pt() << ", " << leptonOneP4.Eta() << ", " << leptonOneP4.Phi() << ", " 
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << ", "
                  << (leptonOneP4 + leptonTwoP4).M() << ", " << leptonOneP4.DeltaR(photonOneP4) << ", " << leptonTwoP4.DeltaR(photonOneP4) << endl;
         }
-
-        //float m_ll = (leptonOneP4 + leptonTwoP4).M();
-        //float m_llg = (leptonOneP4 + leptonTwoP4 + photonOneP4).M();
-        //if (photonOneP4.Et() < 0.14*m_llg)
-        //    return kTRUE;
-        //hTotalEvents->Fill(9);
-        //if (leptonOneP4.DeltaR(photonOneP4) < 0.4)
-        //    return kTRUE;
-        //hTotalEvents->Fill(10);
-        //if (leptonTwoP4.DeltaR(photonOneP4) < 0.4)
-        //    return kTRUE;
-        //hTotalEvents->Fill(11);
-        //if (m_ll + m_llg < 185.0)
-        //    return kTRUE;
-        //hTotalEvents->Fill(12);
-        //if (m_ll < 100.0 || m_ll > 180.0)
-        //    return kTRUE;
-        //hTotalEvents->Fill(13);
  
         leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
         leptonOneFlavor = electrons[electronOneIndex]->q*11;
@@ -1648,10 +1314,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 
 
-            //pair<float, float> eff11 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonOneP4);
-            //pair<float, float> eff12 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg1", leptonTwoP4);
-            //pair<float, float> eff21 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonOneP4);
-            //pair<float, float> eff22 = weights->GetTriggerEffWeight("HLT_DoubleEG_leg2", leptonTwoP4);
             pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
             pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
             pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
@@ -1659,17 +1321,125 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
             float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
             triggerWeight = eff_data/eff_mc;
-            //eventWeight *= triggerWeight;
+            eventWeight *= triggerWeight;
             
             eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
         
-            // photon r9 reweighting
-            //if (fabs(photons[photonIndex]->scEta) < 1.444)
-            //    photonOneR9 = 1.0045*photonOneR9 + 0.0010;
-            //else
-            //    photonOneR9 = 1.0086*photonOneR9 - 0.0007;
         } 
     } // end elelg selection
+
+    else if (params->selection == "tautaug") {
+        if (muons.size() != 1) // avoid multi-muon events (DY contamination)
+            return kTRUE;
+        hTotalEvents->Fill(5);
+        if (taus.size() < 1)
+            return kTRUE;
+        hTotalEvents->Fill(6);
+        if (photons.size() < 1)
+            return kTRUE;
+        hTotalEvents->Fill(7);
+
+        if (muons[0]->pt <= 19.) 
+            return kTRUE;
+        hTotalEvents->Fill(8);
+
+        TLorentzVector muonP4;
+        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, MUON_MASS);
+
+        unsigned int tau_index = 0;
+        for (unsigned int i = 0; i < taus.size(); ++i) {
+            if (taus[i]->q != muons[0]->q && taus[i]->pt > 20.) {
+                tau_index = i;
+                break;
+            }
+        }
+
+        if (taus[tau_index]->pt <= 20.)
+            return kTRUE;
+        hTotalEvents->Fill(9);
+
+        TLorentzVector tauP4;
+        tauP4.SetPtEtaPhiM(taus[tau_index]->pt, taus[tau_index]->eta, taus[tau_index]->phi, taus[tau_index]->m);
+
+        if (photons[0]->calibPt <= 15.)
+            return kTRUE;
+        hTotalEvents->Fill(10);
+
+        // muon transverse mass cut to reject ttbar and w+jets
+     
+        // event passed the selection; fill output variables
+        photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
+        photonOneMVA = photons[0]->mva;
+        passElectronVeto = photons[0]->passElectronVeto;  
+        if (!isData)
+            photonOneR9 = weights->GetCorrectedPhotonR9(*photons[0]);
+        else 
+            photonOneR9 = photons[0]->r9;
+
+        // DY photon overlap removal
+        vetoDY = false;
+        for (unsigned int i = 0; i < genPhotons.size(); ++i) {
+            TGenParticle *pho = genPhotons.at(i);
+            if (pho->fromHardProcessFinalState || pho->isPromptFinalState) {
+                TLorentzVector thisGenPhotonP4;
+                thisGenPhotonP4.SetPtEtaPhiM(pho->pt, pho->eta, pho->phi, 0.);
+                if (thisGenPhotonP4.DeltaR(photonOneP4) < 0.1) {
+                    vetoDY = true;
+                    break;
+                }
+            }
+        }
+
+        tauDecayMode    = taus[tau_index]->decaymode;
+        tauMVA          = taus[tau_index]->rawIsoMVA3newDMwLT;
+
+        if (muonP4.Pt() > tauP4.Pt()) {
+            leptonOneP4     = muonP4;
+            leptonOneIso    = GetMuonIsolation(muons[0]);
+            leptonOneFlavor = muons[0]->q*13;
+            leptonOneDZ     = muons[0]->dz;
+            leptonOneD0     = muons[0]->d0;
+
+            leptonTwoP4     = tauP4;
+            leptonTwoIso    = 0.;
+            leptonTwoFlavor = 15*taus[tau_index]->q;
+            leptonTwoDZ     = taus[tau_index]->dzLeadChHad;
+            leptonTwoD0     = taus[tau_index]->d0LeadChHad;
+        }
+        else {
+            leptonOneP4     = tauP4;
+            leptonOneIso    = 0.;
+            leptonOneFlavor = 15*taus[tau_index]->q;
+            leptonOneDZ     = taus[tau_index]->dzLeadChHad;
+            leptonOneD0     = taus[tau_index]->d0LeadChHad;
+
+            leptonTwoP4     = muonP4;
+            leptonTwoIso    = GetMuonIsolation(muons[0]);
+            leptonTwoFlavor = muons[0]->q*13;
+            leptonTwoDZ     = muons[0]->dz;
+            leptonTwoD0     = muons[0]->d0;
+        }
+    
+        isDijetTag = false; // to ensure proper jet filling
+
+        // MC event weights
+        if (!isData) {
+
+            eventWeight *= weights->GetHZZMuonIDEff(*muons[0]); 
+            //eventWeight *= weights->GetMuonISOEff(muonP4);
+            eventWeight *= weights->GetPhotonMVAIdEff(*photons[0]);
+            eventWeight *= 0.95; // flat tau id scale factor
+
+            float eff_data = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4).first; 
+            float eff_mc = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4).second; 
+            triggerWeight = eff_data/eff_mc;
+            eventWeight *= triggerWeight;
+            cout << "eventWeight = " << eventWeight << endl;
+            
+        }
+
+    } // end tautaug selection
+
 
     ///////////////////
     // Fill jet info //
@@ -1705,12 +1475,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         genLeptonTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
     }
 
-    //cout << "new event with " << genPhotons.size() << " gen photons" << endl;
     if (!isData && genPhotons.size() > 0) {
         float min_phot_dr = 1000.;
         for (unsigned int i = 0; i < genPhotons.size(); i++) {
-            //cout << "genPhotonFHPFS = " << genPhotons[i]->fromHardProcessFinalState << endl;
-            //cout << "genPhotonIPFS = " << genPhotons[i]->isPromptFinalState << endl;
             TLorentzVector tmpGenPhot;
             tmpGenPhot.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
             float this_dr = tmpGenPhot.DeltaR(photonOneP4);

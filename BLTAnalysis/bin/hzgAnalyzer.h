@@ -103,6 +103,11 @@ public:
     Float_t leptonOneDZ, leptonTwoDZ;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
 
+    // tau data
+    Int_t tauDecayMode;
+    Float_t tauMVA; 
+    //UInt_t tauPhotonMult, tauChHadMult;
+
     // photon data
     TLorentzVector photonOneP4;
     Float_t photonOneR9;
@@ -111,23 +116,6 @@ public:
 
     Bool_t isLeptonTag;
     Bool_t isDijetTag;
-
-    // fsr photon data
-    //UInt_t leptonOneFSRPhotons, leptonTwoFSRPhotons;
-    //TLorentzVector leptonOneFSRSum, leptonTwoFSRSum;
-    //TLorentzVector leptonOneFSRMatchP4, leptonTwoFSRMatchP4;
-    //Float_t leptonOneFSRIsoSum, leptonTwoFSRIsoSum;
-    //Float_t fsrPhotonOneMVA, fsrPhotonTwoMVA;
-    //Float_t fsrPhotonOneR9, fsrPhotonTwoR9;
-    //Float_t fsrPhotonOneIso, fsrPhotonTwoIso;
-    //Bool_t fsrPassElectronVetoOne, fsrPassElectronVetoTwo;
-    //TLorentzVector genFSRPhotonOneP4, genFSRPhotonTwoP4;
-    //TLorentzVector genTrueFSRPhoOneP4, genTrueFSRPhoTwoP4;
-    //Bool_t genFSRPhotonOneFHPFS, genFSRPhotonTwoFHPFS;
-    //Bool_t genFSRPhotonOneIPFS, genFSRPhotonTwoIPFS;
-    //Bool_t leptonOneHasFSRPhoton, leptonTwoHasFSRPhoton;
-    //Bool_t leptonOneHasRecoveredFSRPhoton, leptonTwoHasRecoveredFSRPhoton;
-    //Bool_t leptonOneHasFakeFSRPhoton, leptonTwoHasFakeFSRPhoton;
 
     // dilepton vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
@@ -148,7 +136,6 @@ public:
     //TLorentzVector genOneP4, genTwoP4;
     //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
     Bool_t vetoDY;
-    //Bool_t brianVetoDY;
 
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);

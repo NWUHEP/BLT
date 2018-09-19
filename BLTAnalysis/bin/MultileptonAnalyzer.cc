@@ -706,14 +706,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
           ) {
             taus.push_back(tau);
             veto_taus.push_back(tauP4);
+            //cout << tau->m << ", " << tau->decaymode << endl;
         }
     }
     sort(taus.begin(), taus.end(), sort_by_higher_pt<TTau>);
 
-
     /* JETS */
     TClonesArray* jetCollection;
-    jetCollection = fAK8CHSArr;
+    jetCollection = fAK4CHSArr;
 
     std::vector<TJet*> jets;
     TLorentzVector hadronicP4;
@@ -728,12 +728,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
 
-
         float gRand = 1.;
+        float jerc = 1.;
         if (!isData) { // apply jet energy resolution corrections to simulation
             pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 0);
             gRand = rng->Gaus(0, resPair.first);
-            float jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
             jet->pt = jet->pt*jerc;
         }
 
@@ -782,7 +782,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         } 
                     }
                 } else {
-                    JetCounting(jet, gRand);
+                    JetCounting(jet, jerc, gRand);
                 }
 
                 if (jet->pt > 30) {
@@ -800,9 +800,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
     }
-    std::sort(jets.begin(), jets.end(), sort_by_btag);
 
-    //cout << nBJets << ", " << nBJetsMistagUp << ", " << nBJetsMistagDown << endl;
+    std::sort(jets.begin(), jets.end(), sort_by_btag);
 
     // use the highest jet multiplicities given all systematic variations
     unsigned nJetList[] = {nJets, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown};
@@ -814,6 +813,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                             nBJetsMistagUp, nBJetsMistagDown
                            };
     nBJetsCut = *std::max_element(nBJetList, nBJetList+sizeof(nBJetList)/sizeof(unsigned));
+
+    //if ((nJetsJESUp > nJets && nJetsJESDown > nJets) || (nJetsJESUp > nJets && nJetsJESDown > nJets)) {
+    //    cout << nJets << ", " << nJetsJESUp << ", " << nJetsJESDown << endl;
+    //}
 
     /* MET */
     met    = fInfo->pfMETC;
@@ -1144,7 +1147,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector electronP4, tauP4, dilepton;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
-        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
         dilepton = electronP4 + tauP4;
         if (dilepton.M() < 12)
             return kTRUE;
@@ -1220,7 +1223,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector muonP4, tauP4, dilepton;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
         dilepton = muonP4 + tauP4;
         if (dilepton.M() < 12)
             return kTRUE;
@@ -1443,7 +1446,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else if (isData && fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
+    } else if (fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
         // remove fake muon candidate from the jet collection
         unsigned ix = 0;
@@ -1473,7 +1476,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             TLorentzVector muonP4, tauP4, dilepton;
             muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
-            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
             dilepton = muonP4 + tauP4;
             if (dilepton.M() < 12)
                 return kTRUE;
@@ -1495,7 +1498,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (nJets >= 4 && nBJets >= 1) {
+        } else if (isData && nJets >= 4 && nBJets >= 1) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
             nMuons = 1;
@@ -1532,7 +1535,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } else {
             return kTRUE;
         }
-    } else if (isData && fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
+    } else if (fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
         // remove fake electron candidate from the jet collection
         unsigned ix = 0;
@@ -1562,7 +1565,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             TLorentzVector electronP4, tauP4, dilepton;
             electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 0.1052);
-            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.776);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
             dilepton = electronP4 + tauP4;
             if (dilepton.M() < 12)
                 return kTRUE;
@@ -1584,7 +1587,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (nJets >= 4 && nBJets >= 1) {
+        } else if (isData && nJets >= 4 && nBJets >= 1) {
             channel = "e4j_fakes";
             eventCounts[channel]->Fill(1);
             nElectrons = 1;
@@ -1884,9 +1887,10 @@ void MultileptonAnalyzer::ResetJetCounters()
     nBJetsMistagUp = nBJetsMistagDown = 0;
 }
 
-void MultileptonAnalyzer::JetCounting(TJet* jet, float resRand)
+void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
+    //cout << jetPt << " ";
 
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {
@@ -1899,7 +1903,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float resRand)
         if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, rNumber)) ++nBJetsBTagUp;
              
         // b tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, rNumber))  ++nBJetsBTagDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, rNumber)) ++nBJetsBTagDown;
 
         // misttag up
         if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, rNumber)) ++nBJetsMistagUp;
@@ -1911,7 +1915,8 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float resRand)
     // JES up
     double jec = particleSelector->JetCorrector(jet, "NONE");
     float jecUnc = particleSelector->JetUncertainty(jet);
-    jet->pt = jet->ptRaw*jec*(1 + jecUnc);
+    jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
+    //cout << jet->pt << " ";
     if (jet->pt > 30) {
         ++nJetsJESUp;
         if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
@@ -1920,13 +1925,16 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float resRand)
     }
 
     // JES down
-    jet->pt = jet->ptRaw*jec*(1 - jecUnc);
+    jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
+    //cout << jet->pt << endl;
     if (jet->pt > 30) {
         ++nJetsJESDown;
         if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
             ++nBJetsJESDown;
         } 
     }
+
+    //cout << jet->ptRaw << " " << jerc_nominal << " " << jec << " " << jecUnc << endl;
 
     // JER up
     pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 1);

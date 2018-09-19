@@ -151,7 +151,7 @@ public:
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
-    void JetCounting(TJet* jet, float);
+    void JetCounting(TJet* jet, float, float);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

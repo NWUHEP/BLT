@@ -100,7 +100,7 @@ public:
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // modified multiplicities for jet related uncertainties
-    unsigned nJetsCut, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown;
+    unsigned nJetsCut,nJetsCut2, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown;
     unsigned nBJetsCut, nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
     unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
@@ -152,7 +152,7 @@ public:
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
-    void JetCounting(TJet* jet, float);
+    void JetCounting(TJet* jet, float , float);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

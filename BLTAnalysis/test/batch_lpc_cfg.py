@@ -179,79 +179,79 @@ mc_dict['zjets'] = [
        ),
     cfg(data_name = 'DYJetsToLL_M-10to50_amcatnlo',
         path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-10to50_amcatnlo',
-        nJobs    = 10,
+        nJobs    = 50,
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
 
-    cfg(data_name = 'DYToLL_0J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z0jets_m-50_amcatnlo'
-       ),
+    # cfg(data_name = 'DYToLL_0J_amcatnlo',
+    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
+    #     nJobs    = 10,
+    #     suffix   = 'z0jets_m-50_amcatnlo'
+    #    ),
 
-    cfg(data_name = 'DYToLL_1J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z1jets_m-50_amcatnlo'
-       ),
-    cfg(data_name = 'DYToLL_2J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z2jets_m-50_amcatnlo'
-       ),
+    # cfg(data_name = 'DYToLL_1J_amcatnlo',
+    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
+    #     nJobs    = 10,
+    #     suffix   = 'z1jets_m-50_amcatnlo'
+    #    ),
+    # cfg(data_name = 'DYToLL_2J_amcatnlo',
+    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
+    #     nJobs    = 10,
+    #     suffix   = 'z2jets_m-50_amcatnlo'
+    #    ),
 
 
-    cfg(data_name = 'DYJetsToLL_M-50',
-       path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
-       nJobs    = 50,
-       suffix   = 'zjets_m-50'
-      ),
-    cfg(data_name = 'DYJetsToLL_M-10to50',
-       path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
-       nJobs    = 50,
-       suffix   = 'zjets_m-10to50'
-      ),
+    # cfg(data_name = 'DYJetsToLL_M-50',
+    #    path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-50'
+    #   ),
+    # cfg(data_name = 'DYJetsToLL_M-10to50',
+    #    path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'zjets_m-10to50'
+    #   ),
 
-    cfg(data_name = 'DY1JetsToLL_M-50',
-       path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z1jets_m-50'
-      ),
-    cfg(data_name = 'DY1JetsToLL_M-10to50',
-       path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z1jets_m-10to50'
-      ),
-    cfg(data_name = 'DY2JetsToLL_M-50',
-       path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z2jets_m-50'
-      ),
-    cfg(data_name = 'DY2JetsToLL_M-10to50',
-       path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z2jets_m-10to50'
-      ),
-    cfg(data_name = 'DY3JetsToLL_M-50',
-       path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z3jets_m-50'
-      ),
-    cfg(data_name = 'DY3JetsToLL_M-10to50',
-       path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z3jets_m-10to50'
-      ),
-    cfg(data_name = 'DY4JetsToLL_M-50',
-       path     = '{0}/DY4JetsToLL_M-50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z4jets_m-50'
-      ),
-    cfg(data_name = 'DY4JetsToLL_M-10to50',
-       path     = '{0}/DY4JetsToLL_M-10to50_madgraph'.format(path),
-       nJobs    = 10,
-       suffix   = 'z4jets_m-10to50'
-      ),
+    # cfg(data_name = 'DY1JetsToLL_M-50',
+    #    path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z1jets_m-50'
+    #   ),
+    # cfg(data_name = 'DY1JetsToLL_M-10to50',
+    #    path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z1jets_m-10to50'
+    #   ),
+    # cfg(data_name = 'DY2JetsToLL_M-50',
+    #    path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z2jets_m-50'
+    #   ),
+    # cfg(data_name = 'DY2JetsToLL_M-10to50',
+    #    path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z2jets_m-10to50'
+    #   ),
+    # cfg(data_name = 'DY3JetsToLL_M-50',
+    #    path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z3jets_m-50'
+    #   ),
+    # cfg(data_name = 'DY3JetsToLL_M-10to50',
+    #    path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z3jets_m-10to50'
+    #   ),
+    # cfg(data_name = 'DY4JetsToLL_M-50',
+    #    path     = '{0}/DY4JetsToLL_M-50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z4jets_m-50'
+    #   ),
+    # cfg(data_name = 'DY4JetsToLL_M-10to50',
+    #    path     = '{0}/DY4JetsToLL_M-10to50_madgraph'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'z4jets_m-10to50'
+    #   ),
     ]
 
 path = '/eos/uscms/store/group/lpcbacon/12'

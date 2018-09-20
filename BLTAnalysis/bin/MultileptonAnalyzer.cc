@@ -82,6 +82,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // Weight utility class
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
+
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
     string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
@@ -106,7 +107,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
-                                        "e4j", "mu4j", 
+                                        "e4j", "mu4j", "tau4j",
                                         "mutau_fakes", "mu4j_fakes",
                                         "etau_fakes", "e4j_fakes"
                                         };
@@ -163,7 +164,10 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonTwoD0", &leptonTwoD0);
         tree->Branch("leptonTwoDZ", &leptonTwoDZ);
 
-        if (channel == "mutau" || channel == "etau" || channel == "mutau_fakes" || channel == "etau_fakes") {
+        if (channel == "mutau" || channel == "etau" 
+                || channel == "mutau_fakes" || channel == "etau_fakes"
+                || channel == "tau4j"
+                ) {
             //tree->Branch("tauChHadMult",  &tauChHadMult);
             //tree->Branch("tauPhotonMult", &tauPhotonMult);
             tree->Branch("tauDecayMode",  &tauDecayMode);
@@ -178,7 +182,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoTag", &jetTwoTag);
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
-        if (channel == "mu4j" || channel == "e4j" || channel == "mu4j_fakes" || channel == "e4j_fakes") {
+        if (channel == "mu4j" || channel == "mu4j_fakes" 
+                || channel == "e4j" || channel == "e4j_fakes"
+                || channel == "tau4j") {
             tree->Branch("jetThreeP4", &jetThreeP4);
             tree->Branch("jetThreeTag", &jetThreeTag);
             tree->Branch("jetThreeFlavor", &jetThreeFlavor);
@@ -1366,7 +1372,88 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
+    } /*else if (muons.size() == 0 && electrons.size() == 0 && taus.size() >= 1) { // tau+h selection (TEST SELECTION)
+        channel = "tau4j";
+        eventCounts[channel]->Fill(1);
+
+        // convert to TLorentzVectors
+        TLorentzVector tauP4;
+        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 0.1052);
+        if (taus[0]->pt < 20.)
+            return kTRUE;
+        eventCounts[channel]->Fill(2);
+
+        //if (tauIso/tauP4.Pt() > 0.15 )
+        //    return kTRUE;
+        eventCounts[channel]->Fill(3);
+
+        if (nJetsCut < 4 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
+
+        if (jets[0]->pt > 45 && jets[1]->pt > 45 && jets[2]->pt > 45 && jets[3]->pt > 45)
+            return kTRUE;
+        eventCounts[channel]->Fill(5);
+
+        leptonOneP4     = tauP4;
+        leptonOneIso    = 0.;
+        leptonOneFlavor = 15*taus[0]->q;
+        leptonOneDZ     = taus[0]->dzLeadChHad;
+        leptonOneD0     = taus[0]->d0LeadChHad;
+        tauDecayMode    = taus[0]->decaymode;
+        tauMVA          = taus[0]->rawIsoMVA3newDMwLT;
+
+        // Collect the highest pt jets in the event
+        std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+        //jets = KinematicTopTag(jets, metP2, tauP4);
+        if (nJets >= 4) {
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        }
+        if (!isData) {
+            leptonOneMother = GetGenMotherId(genParticles, tauP4);
+
+            // reconstruction weights
+            EfficiencyContainer effCont1, effCont2;
+            leptonOneRecoWeight = 0.95;
+            leptonOneRecoVar    = pow(0.95*0.05, 2);
+            leptonTwoRecoWeight = 0.;
+            leptonTwoRecoVar    = 0.;
+
+            // trigger weights (not implemented: will use multijet trigger)
+            //bool triggered = false;
+            //for (const auto& name: passTriggerNames) {
+            //    if (trigger->passObj(name, 1, taus[0]->hltMatchBits)) {
+            //        triggered = true;
+            //        break;
+            //    }
+            //}
+
+            //if (triggered) {
+            //    effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", tauP4);
+            //    effs = effCont1.GetEff();
+            //    errs = effCont1.GetErr();
+            //    triggerWeight = effs.first/effs.second;
+            //    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            //} else {
+            //    return kTRUE;
+            //}
+
+            // update event weight
+            //eventWeight *= triggerWeight;
+            eventWeight *= leptonOneRecoWeight;
+        }
+    }*/ else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
         channel = "mu4j";
         eventCounts[channel]->Fill(1);
 
@@ -1632,7 +1719,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Fill jet info //
     ///////////////////
 
-    if (channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes" && channel != "e4j_fakes") { // jets are handled differently for the lepton + jet selection
+    if (channel != " tau4j" && channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes" && channel != "e4j_fakes") { // jets are handled differently for the lepton + jet selection
         if (jets.size() > 0) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag    = jets[0]->csv;

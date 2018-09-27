@@ -689,7 +689,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
 
         if( 
-                tau->pt > 18  
+                tau->pt > 20  
                 && abs(tau->eta) < 2.3 
                 && !muOverlap
                 && !elOverlap
@@ -840,15 +840,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     string channel = "";
     if (    electrons.size() == 0 && muons.size() == 2 && taus.size() == 0  ){ // mu+mu selection
+        
     
-        if (nJetsCut >= 2 ){ // && nBJetsCut >= 1
-            channel = "mumu";
-        } else if (nJetsCut2 ==0 ){
-            //channel = "mumu0";
-            return kTRUE;
-        } else {
-            return kTRUE;
-        }
+        // if (nJetsCut >= 2 && nBJetsCut >= 1 ){ //
+        //     channel = "mumu";
+        // } else if (nJetsCut2 ==0 ){
+        //     //channel = "mumu0";
+        //     return kTRUE;
+        // } else {
+        //     return kTRUE;
+        // }
+
+        channel = "mumu";
         eventCounts[channel]->Fill(1);
 
         // convert to TLorentzVectors
@@ -867,9 +870,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonOneP4;
         leptonOneIso    = muonOneIso;
@@ -951,14 +954,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
 
-        if (nJetsCut >= 2 ){// && nBJetsCut >= 1){
-            channel = "ee";
-        } else if (nJetsCut2 == 0 ){
-            //channel = "ee0";
-            return kTRUE;
-        } else {
-            return kTRUE;
-        }
+        // if (nJetsCut >= 2 ){// && nBJetsCut >= 1){
+        //     channel = "ee";
+        // } else if (nJetsCut2 == 0 ){
+        //     //channel = "ee0";
+        //     return kTRUE;
+        // } else {
+        //     return kTRUE;
+        // }
+
+        channel = "ee";
         eventCounts[channel]->Fill(1);
 
 
@@ -974,9 +979,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1054,6 +1059,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(1);
 
         // trigger matching for thresholds
+        
         float muPtThreshold = 10.;
         float elPtThreshold = 10.;
         if (
@@ -1159,7 +1165,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (electrons.size() == 1 && muons.size() == 0 && taus.size() == 1) { // e+tau selection
-        channel = "etau";
+        
+
         // if (nJetsCut >= 2 && nBJetsCut >= 1){
         //     channel = "etau";
         // } else if (nJetsCut2 == 0 ){
@@ -1169,6 +1176,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //     return kTRUE;
         // }
 
+        channel = "etau";
         eventCounts[channel]->Fill(1);
 
         if (electrons[0]->pt < 30 || !electronTriggered)
@@ -1183,9 +1191,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2)// || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2)// || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1250,7 +1258,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         }
     } else if (electrons.size() == 0 && muons.size() == 1 && taus.size() == 1) { // mu+tau selection
-        channel = "mutau";
+        
         // if (nJetsCut >= 2 && nBJetsCut >= 1){
         //     channel = "mutau";
         // } else if (nJetsCut2 == 0 ){
@@ -1259,6 +1267,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // } else {
         //     return kTRUE;
         // }
+
+        channel = "mutau";
         eventCounts[channel]->Fill(1);
 
         if (muons[0]->pt < 25 || !muonTriggered)
@@ -1273,9 +1283,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2)//|| nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2)//|| nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);

@@ -581,25 +581,31 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
         if (btagSF > 1) {  // use this if SF>1
             if (!isBTagged) { // upgrade to b tagged
-                float mistagRate = (1. - btagSF) / (1. - 1./mcEff);
-                if (rNumber < mistagRate) 
+                float tagRate = (1. - btagSF) / (1. - 1./mcEff);
+                if (rNumber < tagRate) 
                     isBTagged = true;
             }
         } else if (btagSF < 1) { // downgrade b tagged to untagged
-            if (isBTagged && rNumber > btagSF) 
-                isBTagged = false;
+            if (isBTagged) {
+                float tagRate = 1. - btagSF; 
+                if (rNumber < tagRate) 
+                    isBTagged = false;
+            }
         }
     } else {
         //cout << mistagSF << " " << mistagSyst << " " << isBTagged << " ";
         if (mistagSF > 1) {  // use this if SF>1
             if (!isBTagged) { //upgrade to tagged
-                float mistagRate = (1. - mistagSF) / (1. - 1./mcEff);
-                if (rNumber < mistagRate) 
+                float tagRate = (1. - mistagSF) / (1. - 1./mcEff);
+                if (rNumber < tagRate) 
                     isBTagged = true;
             }
         } else if (mistagSF < 1) { //downgrade tagged to untagged
-            if (isBTagged && rNumber > mistagSF) 
-                isBTagged = false;
+            if (isBTagged) {
+                float tagRate = 1. - btagSF; 
+                if (rNumber < tagRate) 
+                    isBTagged = false;
+            }
         }
         //cout << isBTagged << endl;
     }

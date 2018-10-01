@@ -525,8 +525,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
 
-    if (!passTrigger)
-        return kTRUE;
+    //if (!passTrigger)
+    //    return kTRUE;
     hTotalEvents->Fill(3);
 
 
@@ -844,12 +844,90 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nElectrons = electrons.size();
     nTaus      = taus.size();
 
+    string channel = "";
+    if (muons.size() == 0 && electrons.size() == 0 && taus.size() >= 1) { // tau+h selection (TEST SELECTION)
+        channel = "tau4j";
+        eventCounts[channel]->Fill(1);
+
+        // convert to TLorentzVectors
+        TLorentzVector tauP4;
+        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 0.1052);
+        if (taus[0]->pt < 20.)
+            return kTRUE;
+        eventCounts[channel]->Fill(2);
+
+        //if (tauIso/tauP4.Pt() > 0.15 )
+        //    return kTRUE;
+        eventCounts[channel]->Fill(3);
+
+        if (nJetsCut < 4 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
+
+        leptonOneP4     = tauP4;
+        leptonOneIso    = 0.;
+        leptonOneFlavor = 15*taus[0]->q;
+        leptonOneDZ     = taus[0]->dzLeadChHad;
+        leptonOneD0     = taus[0]->d0LeadChHad;
+        tauDecayMode    = taus[0]->decaymode;
+        tauMVA          = taus[0]->rawIsoMVA3newDMwLT;
+
+        // Collect the highest pt jets in the event
+        std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+        //jets = KinematicTopTag(jets, metP2, tauP4);
+        if (nJets >= 4) {
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+            jetFourTag     = jets[3]->csv;
+            jetFourFlavor  = jets[3]->hadronFlavor;
+        }
+        if (!isData) {
+            //leptonOneMother = GetGenMotherId(genParticles, tauP4);
+
+            // reconstruction weights
+            leptonOneRecoWeight = 0.95;
+            leptonOneRecoVar    = pow(0.95*0.05, 2);
+            leptonTwoRecoWeight = 0.;
+            leptonTwoRecoVar    = 0.;
+
+            // trigger weights (not implemented: will use multijet trigger)
+            //bool triggered = false;
+            //for (const auto& name: passTriggerNames) {
+            //    if (trigger->passObj(name, 1, taus[0]->hltMatchBits)) {
+            //        triggered = true;
+            //        break;
+            //    }
+            //}
+
+            //if (triggered) {
+            //    effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", tauP4);
+            //    effs = effCont1.GetEff();
+            //    errs = effCont1.GetErr();
+            //    triggerWeight = effs.first/effs.second;
+            //    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            //} else {
+            //    return kTRUE;
+            //}
+
+            // update event weight
+            //eventWeight *= triggerWeight;
+            eventWeight *= leptonOneRecoWeight;
+        }
+    } // TESTING
+
     // trigger selections
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end() 
         || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
 
-    string channel = "";
     if (muons.size() == 2 && electrons.size() == 0 && taus.size() == 0) { // mu+mu selection
         channel = "mumu";
         eventCounts[channel]->Fill(1);
@@ -1372,88 +1450,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
         }
-    } /*else if (muons.size() == 0 && electrons.size() == 0 && taus.size() >= 1) { // tau+h selection (TEST SELECTION)
-        channel = "tau4j";
-        eventCounts[channel]->Fill(1);
-
-        // convert to TLorentzVectors
-        TLorentzVector tauP4;
-        tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 0.1052);
-        if (taus[0]->pt < 20.)
-            return kTRUE;
-        eventCounts[channel]->Fill(2);
-
-        //if (tauIso/tauP4.Pt() > 0.15 )
-        //    return kTRUE;
-        eventCounts[channel]->Fill(3);
-
-        if (nJetsCut < 4 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
-
-        if (jets[0]->pt > 45 && jets[1]->pt > 45 && jets[2]->pt > 45 && jets[3]->pt > 45)
-            return kTRUE;
-        eventCounts[channel]->Fill(5);
-
-        leptonOneP4     = tauP4;
-        leptonOneIso    = 0.;
-        leptonOneFlavor = 15*taus[0]->q;
-        leptonOneDZ     = taus[0]->dzLeadChHad;
-        leptonOneD0     = taus[0]->d0LeadChHad;
-        tauDecayMode    = taus[0]->decaymode;
-        tauMVA          = taus[0]->rawIsoMVA3newDMwLT;
-
-        // Collect the highest pt jets in the event
-        std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
-        //jets = KinematicTopTag(jets, metP2, tauP4);
-        if (nJets >= 4) {
-            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-            jetOneTag      = jets[0]->csv;
-            jetOneFlavor   = jets[0]->hadronFlavor;
-            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-            jetTwoTag      = jets[1]->csv;
-            jetTwoFlavor   = jets[1]->hadronFlavor;
-            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-            jetThreeTag    = jets[2]->csv;
-            jetThreeFlavor = jets[2]->hadronFlavor;
-            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-            jetFourTag     = jets[3]->csv;
-            jetFourFlavor  = jets[3]->hadronFlavor;
-        }
-        if (!isData) {
-            leptonOneMother = GetGenMotherId(genParticles, tauP4);
-
-            // reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            leptonOneRecoWeight = 0.95;
-            leptonOneRecoVar    = pow(0.95*0.05, 2);
-            leptonTwoRecoWeight = 0.;
-            leptonTwoRecoVar    = 0.;
-
-            // trigger weights (not implemented: will use multijet trigger)
-            //bool triggered = false;
-            //for (const auto& name: passTriggerNames) {
-            //    if (trigger->passObj(name, 1, taus[0]->hltMatchBits)) {
-            //        triggered = true;
-            //        break;
-            //    }
-            //}
-
-            //if (triggered) {
-            //    effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", tauP4);
-            //    effs = effCont1.GetEff();
-            //    errs = effCont1.GetErr();
-            //    triggerWeight = effs.first/effs.second;
-            //    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            //} else {
-            //    return kTRUE;
-            //}
-
-            // update event weight
-            //eventWeight *= triggerWeight;
-            eventWeight *= leptonOneRecoWeight;
-        }
-    }*/ else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
+    }  else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
         channel = "mu4j";
         eventCounts[channel]->Fill(1);
 
@@ -1482,6 +1479,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, muonP4);
+ 
         if (nJets >= 4) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag      = jets[0]->csv;
@@ -1496,6 +1494,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
         }
+
         if (!isData) {
             leptonOneMother = GetGenMotherId(genParticles, muonP4);
 

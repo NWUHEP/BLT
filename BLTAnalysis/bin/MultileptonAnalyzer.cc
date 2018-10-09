@@ -238,6 +238,13 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
     }
 
+    // initialize jet counters
+    vector<unsigned> counters(particleSelector->GetJECSourceNames().size(), 0);
+    nJetsJESUp    = counters;
+    nJetsJESDown  = counters;
+    nBJetsJESUp   = counters;
+    nBJetsJESDown = counters;
+
     ReportPostBegin();
 }
 
@@ -525,8 +532,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     }
 
-    //if (!passTrigger)
-    //    return kTRUE;
+    if (!passTrigger)
+        return kTRUE;
     hTotalEvents->Fill(3);
 
 
@@ -554,6 +561,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     } else {
         return kTRUE;
     }
+
     hTotalEvents->Fill(4);
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
@@ -810,15 +818,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(jets.begin(), jets.end(), sort_by_btag);
 
     // use the highest jet multiplicities given all systematic variations
-    unsigned nJetList[] = {nJets, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown};
-    nJetsCut = *std::max_element(nJetList, nJetList+sizeof(nJetList)/sizeof(unsigned));
+    vector<unsigned> nJetList {nJets, nJetsJERUp, nJetsJERDown};
+    nJetList.insert(nJetList.end(), nJetsJESUp.begin(), nJetsJESUp.end());
+    nJetList.insert(nJetList.end(), nJetsJESDown.begin(), nJetsJESDown.end());
+    nJetsCut = *max_element(begin(nJetList), end(nJetList));
 
-    unsigned nBJetList[] = {nBJets, nBJetsJESUp, nBJetsJESDown, 
-                            nBJetsJERUp, nBJetsJERDown, 
-                            nBJetsBTagUp, nBJetsBTagDown, 
-                            nBJetsMistagUp, nBJetsMistagDown
-                           };
-    nBJetsCut = *std::max_element(nBJetList, nBJetList+sizeof(nBJetList)/sizeof(unsigned));
+    vector<unsigned> nBJetList {nBJets, nBJetsJERUp, nBJetsJERDown, 
+                                nBJetsBTagUp, nBJetsBTagDown, 
+                                nBJetsMistagUp, nBJetsMistagDown
+                               };
+
+    nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
+    nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
+    nBJetsCut = *max_element(begin(nBJetList), end(nBJetList));
 
     //if ((nJetsJESUp > nJets && nJetsJESDown > nJets) || (nJetsJESUp > nJets && nJetsJESDown > nJets)) {
     //    cout << nJets << ", " << nJetsJESUp << ", " << nJetsJESDown << endl;
@@ -1965,12 +1977,15 @@ void MultileptonAnalyzer::ResetJetCounters()
 {
     nJets = nBJets = nFwdJets = 0;
     nJetsCut       = nBJetsCut        = 0;
-    nJetsJESUp     = nJetsJESDown     = 0;
     nJetsJERUp     = nJetsJERDown     = 0;
-    nBJetsJESUp    = nBJetsJESDown    = 0;
     nBJetsJERUp    = nBJetsJERDown    = 0;
     nBJetsBTagUp   = nBJetsBTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
+
+    std::fill(nJetsJESUp.begin(), nJetsJESUp.end(), 0);
+    std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
+    std::fill(nBJetsJESUp.begin(), nBJetsJESUp.end(), 0);
+    std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
 }
 
 void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
@@ -2000,24 +2015,28 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
 
     // JES up
     double jec = particleSelector->JetCorrector(jet, "NONE");
-    float jecUnc = particleSelector->JetUncertainty(jet);
-    jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
-    //cout << jet->pt << " ";
-    if (jet->pt > 30) {
-        ++nJetsJESUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
-            ++nBJetsJESUp;
-        } 
-    }
+    unsigned count = 0;
+    for (const auto& name: particleSelector->GetJECSourceNames()) {
+        float jecUnc = particleSelector->JetUncertainty(jet, name);
+        jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
+        if (jet->pt > 30) {
+            ++nJetsJESUp[count];
+            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+                ++nBJetsJESUp[count];
+            } 
+        }
 
-    // JES down
-    jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
-    //cout << jet->pt << endl;
-    if (jet->pt > 30) {
-        ++nJetsJESDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
-            ++nBJetsJESDown;
-        } 
+        // JES down
+        jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
+        //cout << jet->pt << endl;
+        if (jet->pt > 30) {
+            ++nJetsJESDown[count];
+            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+                ++nBJetsJESDown[count];
+            }
+        }
+        //cout << name << ": " << jecUnc << endl;
+        count++;
     }
 
     //cout << jet->ptRaw << " " << jerc_nominal << " " << jec << " " << jecUnc << endl;

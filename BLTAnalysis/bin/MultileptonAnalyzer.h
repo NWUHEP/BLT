@@ -99,8 +99,9 @@ public:
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // modified multiplicities for jet related uncertainties
-    unsigned nJetsCut, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown;
-    unsigned nBJetsCut, nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
+    vector<unsigned> nJetsJESUp, nJetsJESDown, nBJetsJESUp, nBJetsJESDown;
+    unsigned nJetsCut, nJetsJERUp, nJetsJERDown;
+    unsigned nBJetsCut, nBJetsJERUp, nBJetsJERDown;
     unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
     // weights and uncertainties

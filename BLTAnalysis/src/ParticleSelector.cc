@@ -24,7 +24,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     this->_parameters = parameters;
     this->_cuts = cuts;
 
-    _rng = new TRandom3(1337);
+    this->_rng = new TRandom3(1337);
 
     // offline jet corrections on-the-fly
     vector<string> ds = split(parameters.datasetgroup, '_');
@@ -42,7 +42,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
             runPeriod = "G";
         } else if (runPeriod == "2016H") {
             runPeriod = "H";
-        } 
+        }
 
         std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
         std::cout << jecPath << std::endl;
@@ -60,8 +60,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         _jetCorrector = new FactorizedJetCorrector(vPar);
 
         // jec uncertainties
-        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
-        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+        //JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        //_jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
 
     } else { // MC 
         // jet energy corrections
@@ -80,9 +80,11 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
         _jetCorrector = new FactorizedJetCorrector(vPar);
 
-        // jec uncertainties
-        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
-        _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+        for (const auto& name: _jecNames) {
+           JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", name);
+           _jecUncertaintyMap[name] = new JetCorrectionUncertainty(*jecUnc);
+        } 
+
 
         // jet energy resolution
         jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
@@ -625,8 +627,9 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     return correction;
 }
 
-double ParticleSelector::JetUncertainty(const baconhep::TJet* jet) const
+double ParticleSelector::JetUncertainty(const baconhep::TJet* jet, string srcName) const
 {
+    JetCorrectionUncertainty* _jecUncertainty = _jecUncertaintyMap.at(srcName);
     _jecUncertainty->setJetEta(jet->eta);
     _jecUncertainty->setJetPt(jet->ptRaw);
 

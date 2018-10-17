@@ -2013,10 +2013,11 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
         if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, rNumber)) ++nBJetsMistagDown;
     }
 
-    // JES up
     double jec = particleSelector->JetCorrector(jet, "NONE");
     unsigned count = 0;
     for (const auto& name: particleSelector->GetJECSourceNames()) {
+
+        // JES up
         float jecUnc = particleSelector->JetUncertainty(jet, name);
         jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
         if (jet->pt > 30) {

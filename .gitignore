@@ -8,7 +8,8 @@ __init__.py
 *.py[cod]
 
 # ROOT
-*.root
+BLTAnalysis/bin/*.root
+BLTAnalysis/test/*.root
 
 # Stuff
 *~

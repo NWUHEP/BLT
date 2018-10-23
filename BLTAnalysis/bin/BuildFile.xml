@@ -7,3 +7,6 @@
 <bin file="zjpsiGenAnalyzer.cc" name="zjpsiGenAnalyzer"></bin>
 <bin file="hzgAnalyzer.cc" name="hzgAnalyzer"></bin>
 <bin file="upsilonGammaAnalyzer.cc" name="upsilonGammaAnalyzer"></bin>
+<bin file="gbrTrainAnalyzer.cc" name="gbrTrainAnalyzer"></bin>
+<bin file="train_muons.cc" name="train_muons"></bin>
+<bin file="train_electrons.cc" name="train_electrons"></bin>

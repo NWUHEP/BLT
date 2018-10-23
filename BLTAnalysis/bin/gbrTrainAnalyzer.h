@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef HZGANALYZER_HH
-#define HZGANALYZER_HH
+#ifndef GBRTRAINANALYZER_HH
+#define GBRTRAINANALYZER_HH
 
 // Analysis tools
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
@@ -52,11 +52,10 @@
 #define MZ 91.1876
 #define WZ 2.4952
 
-
-class hzgAnalyzer: public BLTSelector {
+class gbrTrainAnalyzer: public BLTSelector {
 public:
-    hzgAnalyzer();
-    ~hzgAnalyzer();
+    gbrTrainAnalyzer();
+    ~gbrTrainAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -65,7 +64,8 @@ public:
     void   ReportPostTerminate();
 
     TFile *outFile;
-    TTree *outTree;
+    std::map<string, TTree*> outTrees;
+    std::map<string, TH1D*> eventCounts;
 
     // Lumi mask
     RunLumiRangeMap lumiMask;
@@ -91,13 +91,17 @@ public:
     ULong64_t evtNumber;
     Bool_t triggerStatus;
     Float_t eventWeight, triggerWeight, puWeight, nPU;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
     Int_t genWeight;
     TVector3 rPV;
     UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    Float_t rho;
 
     // physics object Lorentz vectors
     TLorentzVector leptonOneP4, leptonTwoP4;
     TLorentzVector leptonOneP4KinFit, leptonTwoP4KinFit;
+    Float_t leptonOnePt, leptonOneEta, leptonOneEnergy, leptonOneERes;
+    Float_t leptonTwoPt, leptonTwoEta, leptonTwoEnergy, leptonTwoERes;
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso;
@@ -105,12 +109,29 @@ public:
     Int_t leptonOneFlavor, leptonTwoFlavor;
     Float_t leptonOneD0, leptonTwoD0;
     Float_t leptonOneDZ, leptonTwoDZ;
-    Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
-    
+    Float_t leptonOnePFIsoCH, leptonOnePFIsoNH, leptonOnePFIsoPho, leptonOnePFIsoPU;
+    Float_t leptonTwoPFIsoCH, leptonTwoPFIsoNH, leptonTwoPFIsoPho, leptonTwoPFIsoPU;
+
     // GBR MVA results
     Float_t leptonOneMean, leptonOneSigma, leptonOneAlphaL, leptonOneAlphaR, leptonOnePowerL, leptonOnePowerR;
     Float_t leptonTwoMean, leptonTwoSigma, leptonTwoAlphaL, leptonTwoAlphaR, leptonTwoPowerL, leptonTwoPowerR;
-    Float_t leptonOneProbPrefit, leptonTwoProbPrefit, leptonOneProbPostfit, leptonTwoProbPostfit;
+
+    // muon data
+    Float_t leptonOneTkNChi2, leptonOneMuNChi2;
+    Float_t leptonTwoTkNChi2, leptonTwoMuNChi2;
+    UInt_t leptonOneNTkLayers, leptonOneNPixHits, leptonOneNValidHits, leptonOneNMatchStn;
+    UInt_t leptonTwoNTkLayers, leptonTwoNPixHits, leptonTwoNValidHits, leptonTwoNMatchStn;
+
+    // electron data
+    Float_t leptonOneScEta, leptonTwoScEta;
+    Float_t leptonOneScPhi, leptonTwoScPhi;
+    Float_t leptonOneR9, leptonTwoR9;
+    Float_t leptonOneE1x5OverE, leptonTwoE1x5OverE;
+    Float_t leptonOneE2x5OverE, leptonTwoE2x5OverE;
+    Float_t leptonOneE5x5OverE, leptonTwoE5x5OverE;
+    Float_t leptonOneFBrem, leptonTwoFBrem;
+    Float_t leptonOneHOverE, leptonTwoHOverE;
+    Float_t leptonOneSigmaIEtaIEta, leptonTwoSigmaIEtaIEta;
 
     // tau data
     Int_t tauDecayMode;
@@ -153,7 +174,7 @@ public:
     void EvalElectronEnergyResolution(std::map<string, float>, float&, float&, float&, float&, float&, float&);
     void find_optimized(double*, double&, double&);
 
-    //ClassDef(hzgAnalyzer,0);
+    //ClassDef(gbrTrainAnalyzer,0);
 };
 
 double GetDoubleSidedCB(double x, double mean, double sigma, double alphaL,
@@ -216,5 +237,4 @@ Double_t NegativeProbability(Double_t* x, Double_t* p)
    return -probZ * prob1 * prob2;
 }
 
-
-#endif  // HZGANALYZER_HH
+#endif  // GBRTRAINANALYZER_HH

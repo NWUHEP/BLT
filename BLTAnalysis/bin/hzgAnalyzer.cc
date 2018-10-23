@@ -3,6 +3,14 @@
 #include <fstream>
 #include <math.h>
 
+#include <TSystem.h>
+#include <TF2.h>
+#include <RooRealVar.h>
+#include <RooWorkspace.h>
+
+// prints a message and exits gracefully
+#define FATAL(msg) do { fprintf(stderr, "FATAL: %s\n", msg); gSystem->Exit(1); } while (0)
+
 //
 // See header file for class documentation
 //
@@ -107,20 +115,38 @@ void hzgAnalyzer::Begin(TTree *tree)
 
     // leptons
     outTree->Branch("leptonOneP4", &leptonOneP4);
+    outTree->Branch("leptonOneP4KinFit", &leptonOneP4KinFit);
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
     outTree->Branch("leptonOneMother", &leptonOneMother);
     outTree->Branch("leptonOneD0", &leptonOneD0);
     outTree->Branch("leptonOneDZ", &leptonOneDZ);
     outTree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
+    outTree->Branch("leptonOneMean", &leptonOneMean);
+    outTree->Branch("leptonOneSigma", &leptonOneSigma);
+    outTree->Branch("leptonOneAlphaL", &leptonOneAlphaL);
+    outTree->Branch("leptonOneAlphaR", &leptonOneAlphaR);
+    outTree->Branch("leptonOnePowerL", &leptonOnePowerL);
+    outTree->Branch("leptonOnePowerR", &leptonOnePowerR);
+    outTree->Branch("leptonOneProbPrefit", &leptonOneProbPrefit);
+    outTree->Branch("leptonOneProbPostfit", &leptonOneProbPostfit);
 
     outTree->Branch("leptonTwoP4", &leptonTwoP4);
+    outTree->Branch("leptonTwoP4KinFit", &leptonTwoP4KinFit);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoMother", &leptonTwoMother);
     outTree->Branch("leptonTwoD0", &leptonTwoD0);
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+    outTree->Branch("leptonTwoMean", &leptonTwoMean);
+    outTree->Branch("leptonTwoSigma", &leptonTwoSigma);
+    outTree->Branch("leptonTwoAlphaL", &leptonTwoAlphaL);
+    outTree->Branch("leptonTwoAlphaR", &leptonTwoAlphaR);
+    outTree->Branch("leptonTwoPowerL", &leptonTwoPowerL);
+    outTree->Branch("leptonTwoPowerR", &leptonTwoPowerR);
+    outTree->Branch("leptonTwoProbPrefit", &leptonTwoProbPrefit);
+    outTree->Branch("leptonTwoProbPostfit", &leptonTwoProbPostfit);
  
     outTree->Branch("tauDecayMode", &tauDecayMode);
     outTree->Branch("tauMVA", &tauMVA);
@@ -990,6 +1016,101 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (sync_print_precut) {
             cout << "event is still alive" << endl;
         }
+            
+        float muonOneMean, muonOneSigma, muonOneAlphaL, muonOneAlphaR, muonOnePowerL, muonOnePowerR;
+        float muonTwoMean, muonTwoSigma, muonTwoAlphaL, muonTwoAlphaR, muonTwoPowerL, muonTwoPowerR;
+        std::map<string, float> mva_input_floats;
+        std::map<string, int> mva_input_ints;
+            
+        // BDT eval for muon one
+        mva_input_floats["rho"] = fInfo->rhoJet;
+        mva_input_floats["muEnergy"] = leptonOneP4.E();
+        mva_input_floats["muEta"] = muons[muonOneIndex]->eta;
+        mva_input_floats["muTkChi2"] = muons[muonOneIndex]->tkNchi2;
+        mva_input_ints["muNumberOfValidTrkLayers"] = muons[muonOneIndex]->nTkLayers;
+        mva_input_ints["muNumberOfValidPixelHits"] = muons[muonOneIndex]->nPixHits;
+        mva_input_ints["muNumberOfValidMuonHits"] = muons[muonOneIndex]->nValidHits;
+        mva_input_ints["muStations"] = muons[muonOneIndex]->nMatchStn;
+        mva_input_floats["muPFIsoR04_CH"] = muons[muonOneIndex]->chHadIso;
+        mva_input_floats["muPFIsoR04_NH"] = muons[muonOneIndex]->neuHadIso;
+        mva_input_floats["muPFIsoR04_Pho"] = muons[muonOneIndex]->gammaIso;
+        mva_input_floats["muPFIsoR04_PU"] = muons[muonOneIndex]->puIso;
+        EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonOneMean, muonOneSigma, 
+                                 muonOneAlphaL, muonOnePowerL, muonOneAlphaR, muonOnePowerR);
+
+        leptonOneMean = muonOneMean;
+        leptonOneSigma = muonOneSigma;
+        leptonOneAlphaL = muonOneAlphaL;
+        leptonOneAlphaR = muonOneAlphaR;
+        leptonOnePowerL = muonOnePowerL;
+        leptonOnePowerR = muonOnePowerR;
+        
+        // BDT eval for muon two
+        mva_input_floats["muEnergy"] = leptonTwoP4.E();
+        mva_input_floats["muEta"] = muons[muonTwoIndex]->eta;
+        mva_input_floats["muTkChi2"] = muons[muonTwoIndex]->tkNchi2;
+        mva_input_ints["muNumberOfValidTrkLayers"] = muons[muonTwoIndex]->nTkLayers;
+        mva_input_ints["muNumberOfValidPixelHits"] = muons[muonTwoIndex]->nPixHits;
+        mva_input_ints["muNumberOfValidMuonHits"] = muons[muonTwoIndex]->nValidHits;
+        mva_input_ints["muStations"] = muons[muonTwoIndex]->nMatchStn;
+        mva_input_floats["muPFIsoR14_CH"] = muons[muonTwoIndex]->chHadIso;
+        mva_input_floats["muPFIsoR14_NH"] = muons[muonTwoIndex]->neuHadIso;
+        mva_input_floats["muPFIsoR14_Pho"] = muons[muonTwoIndex]->gammaIso;
+        mva_input_floats["muPFIsoR14_PU"] = muons[muonTwoIndex]->puIso;
+        EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonTwoMean, muonTwoSigma, 
+                                 muonTwoAlphaL, muonTwoPowerL, muonTwoAlphaR, muonTwoPowerR);
+        
+        leptonTwoMean = muonTwoMean;
+        leptonTwoSigma = muonTwoSigma;
+        leptonTwoAlphaL = muonTwoAlphaL;
+        leptonTwoAlphaR = muonTwoAlphaR;
+        leptonTwoPowerL = muonTwoPowerL;
+        leptonTwoPowerR = muonTwoPowerR;
+            
+        // Kinematic Fit
+        TVector3 v1, v2;
+        v1.SetPtEtaPhi(muons[muonOneIndex]->pt, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi);
+        v2.SetPtEtaPhi(muons[muonTwoIndex]->pt, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi);
+        Double_t p[16];
+        p[0] = MUON_MASS*MUON_MASS;
+        p[1] = cos(v1.Angle(v2));
+        p[2] = muons[muonOneIndex]->pt*cosh(muons[muonOneIndex]->eta);
+        p[3] = muons[muonTwoIndex]->pt*cosh(muons[muonTwoIndex]->eta);
+        p[4] = muonOneMean;
+        p[5] = muonOneSigma;
+        p[6] = muonOneAlphaL;
+        p[7] = muonOnePowerL;
+        p[8] = muonOneAlphaR;
+        p[9] = muonOnePowerR;
+        p[10] = muonTwoMean;
+        p[11] = muonTwoSigma;
+        p[12] = muonTwoAlphaL;
+        p[13] = muonTwoPowerL;
+        p[14] = muonTwoAlphaR;
+        p[15] = muonTwoPowerR;
+        
+        double prefitProb1 = GetDoubleSidedCB(leptonOneP4.E()/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
+        double prefitProb2 = GetDoubleSidedCB(leptonTwoP4.E()/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
+        leptonOneProbPrefit = prefitProb1;
+        leptonTwoProbPrefit = prefitProb2;
+
+        double e1, e2;
+        find_optimized(p, e1, e2);
+   
+        double postfitProb1 = GetDoubleSidedCB(e1/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
+        double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
+        leptonOneProbPostfit = postfitProb1;
+        leptonTwoProbPostfit = postfitProb2;
+
+        double muonOnePtKinFit = e1/cosh(muons[muonOneIndex]->eta);
+        double muonTwoPtKinFit = e2/cosh(muons[muonTwoIndex]->eta);
+
+        TLorentzVector muonOneP4KinFit, muonTwoP4KinFit;
+        muonOneP4KinFit.SetPtEtaPhiM(muonOnePtKinFit, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi, MUON_MASS);
+        muonTwoP4KinFit.SetPtEtaPhiM(muonTwoPtKinFit, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi, MUON_MASS);
+
+        leptonOneP4KinFit = muonOneP4KinFit;
+        leptonTwoP4KinFit = muonTwoP4KinFit;
 
         if (!isData) {
 
@@ -1308,6 +1429,106 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (sync_print_precut)
             cout << "photon r9 = " << photonOneR9 << endl;
+            
+        float electronOneMean, electronOneSigma, electronOneAlphaL, electronOneAlphaR, electronOnePowerL, electronOnePowerR;
+        float electronTwoMean, electronTwoSigma, electronTwoAlphaL, electronTwoAlphaR, electronTwoPowerL, electronTwoPowerR;
+        std::map<string, float> mva_inputs;
+
+        // BDT eval for electron one
+        mva_inputs["rho"] = fInfo->rhoJet;
+        mva_inputs["elEnergy"] = leptonOneP4.E();
+        mva_inputs["elScEta"] = electrons[electronOneIndex]->scEta;
+        mva_inputs["elScPhi"] = electrons[electronOneIndex]->scPhi;
+        mva_inputs["elR9"] = electrons[electronOneIndex]->r9;
+        mva_inputs["elE1x5OverE"] = electrons[electronOneIndex]->e1x5/leptonOneP4.E();
+        mva_inputs["elE2x5OverE"] = electrons[electronOneIndex]->e2x5/leptonOneP4.E();
+        mva_inputs["elE5x5OverE"] = electrons[electronOneIndex]->e5x5/leptonOneP4.E();
+        mva_inputs["elFBrem"] = electrons[electronOneIndex]->fbrem;
+        mva_inputs["elHOverE"] = electrons[electronOneIndex]->hovere;
+        mva_inputs["elSigmaIEtaIEta"] = electrons[electronOneIndex]->sieie;
+        mva_inputs["elPFIsoR04_CH"] = electrons[electronOneIndex]->chHadIso;
+        mva_inputs["elPFIsoR04_NH"] = electrons[electronOneIndex]->neuHadIso;
+        mva_inputs["elPFIsoR04_Pho"] = electrons[electronOneIndex]->gammaIso;
+        mva_inputs["elPFIsoR04_PU"] = electrons[electronOneIndex]->puIso;
+        EvalElectronEnergyResolution(mva_inputs, electronOneMean, electronOneSigma, 
+                                     electronOneAlphaL, electronOnePowerL, electronOneAlphaR, electronOnePowerR);
+        
+        leptonOneMean = electronOneMean;
+        leptonOneSigma = electronOneSigma;
+        leptonOneAlphaL = electronOneAlphaL;
+        leptonOneAlphaR = electronOneAlphaR;
+        leptonOnePowerL = electronOnePowerL;
+        leptonOnePowerR = electronOnePowerR;
+
+        // BDT eval for electron two
+        mva_inputs["elEnergy"] = leptonTwoP4.E();
+        mva_inputs["elScEta"] = electrons[electronTwoIndex]->scEta;
+        mva_inputs["elScPhi"] = electrons[electronTwoIndex]->scPhi;
+        mva_inputs["elR9"] = electrons[electronTwoIndex]->r9;
+        mva_inputs["elE1x5OverE"] = electrons[electronTwoIndex]->e1x5/leptonTwoP4.E();
+        mva_inputs["elE2x5OverE"] = electrons[electronTwoIndex]->e2x5/leptonTwoP4.E();
+        mva_inputs["elE5x5OverE"] = electrons[electronTwoIndex]->e5x5/leptonTwoP4.E();
+        mva_inputs["elFBrem"] = electrons[electronTwoIndex]->fbrem;
+        mva_inputs["elHOverE"] = electrons[electronTwoIndex]->hovere;
+        mva_inputs["elSigmaIEtaIEta"] = electrons[electronTwoIndex]->sieie;
+        mva_inputs["elPFIsoR04_CH"] = electrons[electronTwoIndex]->chHadIso;
+        mva_inputs["elPFIsoR04_NH"] = electrons[electronTwoIndex]->neuHadIso;
+        mva_inputs["elPFIsoR04_Pho"] = electrons[electronTwoIndex]->gammaIso;
+        mva_inputs["elPFIsoR04_PU"] = electrons[electronTwoIndex]->puIso;
+        EvalElectronEnergyResolution(mva_inputs, electronTwoMean, electronTwoSigma, 
+                                     electronTwoAlphaL, electronTwoPowerL, electronTwoAlphaR, electronTwoPowerR);
+        
+        leptonTwoMean = electronTwoMean;
+        leptonTwoSigma = electronTwoSigma;
+        leptonTwoAlphaL = electronTwoAlphaL;
+        leptonTwoAlphaR = electronTwoAlphaR;
+        leptonTwoPowerL = electronTwoPowerL;
+        leptonTwoPowerR = electronTwoPowerR;
+
+        // Kinematic Fit
+        TVector3 v1, v2;
+        v1.SetPtEtaPhi(electrons[electronOneIndex]->calibPt, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi);
+        v2.SetPtEtaPhi(electrons[electronTwoIndex]->calibPt, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi);
+        Double_t p[16];
+        p[0] = ELE_MASS*ELE_MASS;
+        p[1] = cos(v1.Angle(v2));
+        p[2] = electrons[electronOneIndex]->calibPt*cosh(electrons[electronOneIndex]->eta);
+        p[3] = electrons[electronTwoIndex]->calibPt*cosh(electrons[electronTwoIndex]->eta);
+        p[4] = electronOneMean;
+        p[5] = electronOneSigma;
+        p[6] = electronOneAlphaL;
+        p[7] = electronOnePowerL;
+        p[8] = electronOneAlphaR;
+        p[9] = electronOnePowerR;
+        p[10] = electronTwoMean;
+        p[11] = electronTwoSigma;
+        p[12] = electronTwoAlphaL;
+        p[13] = electronTwoPowerL;
+        p[14] = electronTwoAlphaR;
+        p[15] = electronTwoPowerR;
+        
+        double prefitProb1 = GetDoubleSidedCB(leptonOneP4.E()/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
+        double prefitProb2 = GetDoubleSidedCB(leptonTwoP4.E()/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
+        leptonOneProbPrefit = prefitProb1;
+        leptonTwoProbPrefit = prefitProb2;
+
+        double e1, e2;
+        find_optimized(p, e1, e2);
+        
+        double postfitProb1 = GetDoubleSidedCB(e1/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
+        double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
+        leptonOneProbPostfit = postfitProb1;
+        leptonTwoProbPostfit = postfitProb2;
+
+        double electronOnePtKinFit = e1/cosh(electrons[electronOneIndex]->eta);
+        double electronTwoPtKinFit = e2/cosh(electrons[electronTwoIndex]->eta);
+
+        TLorentzVector electronOneP4KinFit, electronTwoP4KinFit;
+        electronOneP4KinFit.SetPtEtaPhiM(electronOnePtKinFit, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi, ELE_MASS);
+        electronTwoP4KinFit.SetPtEtaPhiM(electronTwoPtKinFit, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi, ELE_MASS);
+
+        leptonOneP4KinFit = electronOneP4KinFit;
+        leptonTwoP4KinFit = electronTwoP4KinFit; 
 
         if (!isData) {
 
@@ -1339,7 +1560,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (muons[0]->pt <= 19.) 
+        if (muons[0]->pt <= 25.) 
             return kTRUE;
         hTotalEvents->Fill(8);
 
@@ -1583,4 +1804,215 @@ float hzgAnalyzer::GetPhotonIsolation(const baconhep::TPhoton* pho, const float 
     float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
 
     return combIso;
+}
+
+void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_floats, std::map<string, int> mva_input_ints, 
+                                                float &mean, float &sigma, float &alphaL, float &powerL, float &alphaR, float &powerR) 
+{
+    // Evaluates and returns the estimate of muon energy resolution function.
+    // semi-parametric MVAs' inputs and outputs
+    static RooRealVar* invar[99]; // [varnum]
+    static RooAbsReal* mvaMean = NULL;
+    static RooAbsReal* mvaSigma;
+    static RooAbsReal* mvaAlphaL;
+    static RooAbsReal* mvaAlphaR;
+
+    // one-time MVA initialization: get trainings
+    if (!mvaMean) {
+        // current working directory
+        TDirectory* wd = gDirectory;
+        
+        const std::string cmssw_base = getenv("CMSSW_BASE");
+        string fileName;
+        fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_training.root";
+        TFile f(fileName.c_str());
+        if (f.IsZombie())
+            FATAL("TFile::Open() failed");
+
+        // cd back into previous current working directory
+        if (wd) wd->cd();
+        else gDirectory = 0;
+
+        RooWorkspace* ws = dynamic_cast<RooWorkspace*>(f.Get("ws_mva_muons"));
+        if (!ws) FATAL("TFile::Get() failed");
+
+        invar[0] = ws->var("var01");
+        invar[1] = ws->var("var02");
+        invar[2] = ws->var("var03");
+        invar[3] = ws->var("var04");
+        invar[4] = ws->var("var05");
+        invar[5] = ws->var("var06");
+        invar[6] = ws->var("var07");
+        invar[7] = ws->var("var08");
+        invar[8] = ws->var("var09");
+        invar[9] = ws->var("var10");
+        invar[10] = ws->var("var11");
+        invar[11] = ws->var("var12");
+
+        mvaMean = ws->function("limMean");
+        mvaSigma = ws->function("limSigma");
+        mvaAlphaL = ws->function("limAlphaL");
+        mvaAlphaR = ws->function("limAlphaR");
+
+    } // one-time initialization
+
+    // load necessary tree branches
+    float rho                      = mva_input_floats["rho"];
+    float muEnergy                 = mva_input_floats["muEnergy"];
+    float muEta                    = mva_input_floats["muEta"];
+    float muChi2NDF                = mva_input_floats["muTkChi2"];
+    Int_t muNumberOfValidTrkLayers = mva_input_ints["muNumberOfValidTrkLayers"];
+    Int_t muNumberOfValidPixelHits = mva_input_ints["muNumberOfValidPixelHits"];
+    Int_t muNumberOfValidMuonHits  = mva_input_ints["muNumberOfValidMuonHits"];
+    Int_t muStations               = mva_input_ints["muStations"];
+    float muPFIsoR04_CH            = mva_input_floats["muPFIsoR04_CH"];
+    float muPFIsoR04_NH            = mva_input_floats["muPFIsoR04_NH"];
+    float muPFIsoR04_Pho           = mva_input_floats["muPFIsoR04_Pho"];
+    float muPFIsoR04_PU            = mva_input_floats["muPFIsoR04_PU"];
+
+    // set input variables associated with the GBRLikelihood trainings
+    *invar[0] = rho;
+    *invar[1] = muEnergy;
+    *invar[2] = muEta;
+    *invar[3] = muChi2NDF;
+    *invar[4] = muNumberOfValidTrkLayers;
+    *invar[5] = muNumberOfValidPixelHits;
+    *invar[6] = muNumberOfValidMuonHits;
+    *invar[7] = muStations;
+    *invar[8] = muPFIsoR04_CH;
+    *invar[9] = muPFIsoR04_NH;
+    *invar[10] = muPFIsoR04_Pho;
+    *invar[11] = muPFIsoR04_PU;
+
+    mean = mvaMean->getVal();
+    sigma = mvaSigma->getVal();
+    alphaL = mvaAlphaL->getVal();
+    alphaR = mvaAlphaR->getVal();
+
+    // NOTE: negative = infinite; powers were fixed at the training level
+    powerL = -1;
+    powerR = -1;
+
+}
+
+void hzgAnalyzer::EvalElectronEnergyResolution(std::map<string, float> mva_inputs, float &mean, float &sigma, 
+                                                    float &alphaL, float &powerL, float &alphaR, float &powerR) 
+{
+    // Evaluates and returns the estimate of muon energy resolution function.
+    // semi-parametric MVAs' inputs and outputs
+    static RooRealVar* invar[99]; // [varnum]
+    static RooAbsReal* mvaMean = NULL;
+    static RooAbsReal* mvaSigma;
+    static RooAbsReal* mvaAlphaL;
+    static RooAbsReal* mvaAlphaR;
+    static RooAbsReal* mvaPowerL;
+    static RooAbsReal* mvaPowerR;
+
+    // one-time MVA initialization: get trainings
+    if (!mvaMean) {
+        // current working directory
+        TDirectory* wd = gDirectory;
+        
+        const std::string cmssw_base = getenv("CMSSW_BASE");
+        string fileName;
+        fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_training.root";
+        TFile f(fileName.c_str());
+        if (f.IsZombie())
+            FATAL("TFile::Open() failed");
+
+        // cd back into previous current working directory
+        if (wd) wd->cd();
+        else gDirectory = 0;
+
+        RooWorkspace* ws = dynamic_cast<RooWorkspace*>(f.Get("ws_mva_electrons"));
+        if (!ws) FATAL("TFile::Get() failed");
+
+        invar[0] = ws->var("var01");
+        invar[1] = ws->var("var02");
+        invar[2] = ws->var("var03");
+        invar[3] = ws->var("var04");
+        invar[4] = ws->var("var05");
+        invar[5] = ws->var("var06");
+        invar[6] = ws->var("var07");
+        invar[7] = ws->var("var08");
+        invar[8] = ws->var("var09");
+        invar[9] = ws->var("var10");
+        invar[10] = ws->var("var11");
+        invar[11] = ws->var("var12");
+        invar[12] = ws->var("var13");
+        invar[13] = ws->var("var14");
+        invar[14] = ws->var("var15");
+
+        mvaMean = ws->function("limMean");
+        mvaSigma = ws->function("limSigma");
+        mvaAlphaL = ws->function("limAlphaL");
+        mvaAlphaR = ws->function("limAlphaR");
+        mvaPowerL = ws->function("limPowerL");
+        mvaPowerR = ws->function("limPowerR");
+
+    } // one-time initialization
+
+    // load necessary tree branches
+    float rho = mva_inputs["rho"];
+    float elEnergy = mva_inputs["elEnergy"];
+    float elScEta = mva_inputs["elScEta"];
+    float elScPhi = mva_inputs["elScPhi"];
+    float elR9 = mva_inputs["elR9"];
+    float elE1x5OverE = mva_inputs["elE1x5OverE"];
+    float elE2x5OverE = mva_inputs["elE2x5OverE"];
+    float elE5x5OverE = mva_inputs["elE5x5OverE"];
+    float elFBrem = mva_inputs["elFBrem"];
+    float elHOverE = mva_inputs["elHOverE"];
+    float elSigmaIEtaIEta = mva_inputs["elSigmaIEtaIEta"];
+    float elPFIsoR04_CH = mva_inputs["elPFIsoR04_CH"];
+    float elPFIsoR04_NH = mva_inputs["elPFIsoR04_NH"];
+    float elPFIsoR04_Pho = mva_inputs["elPFIsoR04_Pho"];
+    float elPFIsoR04_PU = mva_inputs["elPFIsoR04_PU"];
+
+    // set input variables associated with the GBRLikelihood trainings
+    *invar[0] = rho;
+    *invar[1] = elEnergy;
+    *invar[2] = elScEta;
+    *invar[3] = elScPhi;
+    *invar[4] = elR9;
+    *invar[5] = elE1x5OverE;
+    *invar[6] = elE2x5OverE;
+    *invar[7] = elE5x5OverE;
+    *invar[8] = elFBrem;
+    *invar[9] = elHOverE;
+    *invar[10] = elSigmaIEtaIEta;
+    *invar[11] = elPFIsoR04_CH;
+    *invar[12] = elPFIsoR04_NH;
+    *invar[13] = elPFIsoR04_Pho;
+    *invar[14] = elPFIsoR04_PU;
+
+    mean = mvaMean->getVal();
+    sigma = mvaSigma->getVal();
+    alphaL = mvaAlphaL->getVal();
+    alphaR = mvaAlphaR->getVal();
+    powerL = mvaPowerL->getVal();
+    powerR = mvaPowerR->getVal();
+}
+
+void hzgAnalyzer::find_optimized(double* p, double &e1, double& e2)
+{
+   // Returns best-fitted (most probable) energies.
+
+   static TF2* fun = NULL;
+
+   // one-time initialization
+   if (!fun) {
+      fun = new TF2("fun", NegativeProbability, 1, 2000, 1, 2000, 16);
+      fun->SetNpx(50);
+      fun->SetNpy(50);
+   }
+
+   for (int i = 0; i < 16; i++)
+      fun->SetParameter(i, p[i]);
+
+   // limit the search range by +-3sigma regions
+   fun->SetRange(p[2] * (1 - 3 * p[5]), p[3] * (1 - 3 * p[11]),
+                 p[2] * (1 + 3 * p[5]), p[3] * (1 + 3 * p[11]));
+
+   fun->GetMinimumXY(e1, e2);
 }

@@ -139,17 +139,22 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* elTriggerFile_GH = new TFile(fileName.c_str(), "OPEN");
     _elSF_Trigger_GH = (TH2D*)elTriggerFile_GH->Get("Ele27_WPTight_Gsf");
 
-    // electron reco efficiencies
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_low_RecoSF_Legacy2016.root";
-    TFile* f_eleRecoSF_1 = new TFile(fileName.c_str(), "OPEN"); 
-    _eleSF_RECO[0] = (TGraphErrors*)f_eleRecoSF_1->Get("grSF1D_0");
+    // electron reco efficiencies 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
+    TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
+    
+    // (these are for the legacy rereco and will look bad with the 12a ntuples (Feb17 rereco)
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_low_RecoSF_Legacy2016.root";
+    //TFile* f_eleRecoSF_1 = new TFile(fileName.c_str(), "OPEN"); 
+    //_eleSF_RECO[0] = (TGraphErrors*)f_eleRecoSF_1->Get("grSF1D_0");
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root";
-    TFile* f_eleRecoSF_2 = new TFile(fileName.c_str(), "OPEN"); 
-    _eleSF_RECO[1] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_0");
-    _eleSF_RECO[2] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_1");
-    _eleSF_RECO[3] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_2");
-    _eleSF_RECO[4] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_3");
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root";
+    //TFile* f_eleRecoSF_2 = new TFile(fileName.c_str(), "OPEN"); 
+    //_eleSF_RECO[1] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_0");
+    //_eleSF_RECO[2] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_1");
+    //_eleSF_RECO[3] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_2");
+    //_eleSF_RECO[4] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_3");
 
     // electron id efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
@@ -309,26 +314,26 @@ EfficiencyContainer WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
 EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
 {
     float binningPtID[] = {10., 20., 35., 50., 90., 9999.};
-    float binningPtRECO[] = {10., 20., 45., 75., 100., 9999.};
     int ptBinID = 0;
-    int ptBinRECO = 0;
+    //float binningPtRECO[] = {10., 20., 45., 75., 100., 9999.};
+    //int ptBinRECO = 0;
     for (int i = 0; i < 5; ++i) {
         if (fabs(electron.Pt()) > binningPtID[i] && fabs(electron.Pt()) <= binningPtID[i+1]) {
             ptBinID = i;
             break;
         }
-        if (fabs(electron.Pt()) > binningPtRECO[i] && fabs(electron.Pt()) <= binningPtID[i+1]) {
-            ptBinRECO = i;
-            break;
-        }
+        //if (fabs(electron.Pt()) > binningPtRECO[i] && fabs(electron.Pt()) <= binningPtID[i+1]) {
+        //    ptBinRECO = i;
+        //    break;
+        //}
     }
 
     float sfId   = _eleSF_ID[ptBinID]->Eval(electron.Eta());
-    float sfReco = _eleSF_RECO[ptBinRECO]->Eval(electron.Eta());
+    float sfReco = _eleSF_RECO->Eval(electron.Eta());
 
     int etaBin;
-    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_RECO[ptBinRECO], electron.Eta()); 
-    float errReco = _eleSF_RECO[ptBinRECO]->GetErrorY(etaBin);
+    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_RECO, electron.Eta()); 
+    float errReco = _eleSF_RECO->GetErrorY(etaBin);
 
     etaBin = GetBinNumber<TGraphErrors*>(_eleSF_ID[ptBinID], electron.Eta()); 
     float errId  = _eleSF_ID[ptBinID]->GetErrorY(etaBin);

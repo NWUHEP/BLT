@@ -78,7 +78,7 @@ class WeightUtils: public TObject {
         TGraphAsymmErrors *_muSF_ISO_DATA_GH[4], *_muSF_ISO_MC_GH[4]; 
 
         // electron RECO/ID scale factors (what about ISO?)
-        TGraphErrors *_eleSF_RECO[5], *_eleSF_ID[5];
+        TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
 
         // electron trigger efficiencies (the bins for 2.1 < |eta| < 2.4 are copies of the 1.6 to 2.1 bins 
         TH2D *_elSF_Trigger_BCDEF, *_elSF_Trigger_GH;

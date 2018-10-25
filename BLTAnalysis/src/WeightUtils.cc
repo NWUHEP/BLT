@@ -185,9 +185,9 @@ float WeightUtils::GetPUWeight(float nPU)
 EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
     float effData = 1;
-    float errData = 1;
+    float errData = 0;
     float effMC   = 1;
-    float errMC   = 1;
+    float errMC   = 0;
     if (triggerName == "HLT_IsoMu24_v*") {
         float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
         int etaBin = 0;
@@ -214,19 +214,36 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             errMC   = _muSF_IsoMu24_MC_GH[etaBin]->GetErrorY(ptBin);
         }
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
-        if (_dataPeriod == "2016BtoF") {
-            int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());
-            effData = _elSF_Trigger_BCDEF->GetBinContent(bin);
-            effMC = 1.;
-            errData = _elSF_Trigger_BCDEF->GetBinError(bin);
-            errMC   = 0.;
-        } else if (_dataPeriod == "2016GH") {
-            int bin = _elSF_Trigger_GH->FindBin(lepton.Pt(), lepton.Eta());
-            effData = _elSF_Trigger_GH->GetBinContent(bin);
-            effMC = 1.;
-            errData = _elSF_Trigger_GH->GetBinError(bin);
-            errMC   = 0.;
+        // figure this one out; it no work
+        //if (_dataPeriod == "2016BtoF") {
+        //    int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());
+        //    effData = _elSF_Trigger_BCDEF->GetBinContent(bin);
+        //    errData = _elSF_Trigger_BCDEF->GetBinError(bin);
+        //} else if (_dataPeriod == "2016GH") {
+        //    int bin = _elSF_Trigger_GH->FindBin(lepton.Pt(), lepton.Eta());
+        //    effData = _elSF_Trigger_GH->GetBinContent(bin);
+        //    errData = _elSF_Trigger_GH->GetBinError(bin);
+        //}
+
+        int etaBin = 0;
+        int ptBin = 0;
+        for (int i = 0; i < 13; ++i) {
+            if (lepton.Eta() > _eleEtaBins[i] && lepton.Eta() <= _eleEtaBins[i+1]) {
+                etaBin = i;
+                break;
+            }
         }
+        for (int i = 0; i < 8; ++i) {
+            if (lepton.Pt() > _elePtBins[i] && lepton.Pt() <= _elePtBins[i+1]) {
+                ptBin = i;
+                break;
+            }
+        }
+        effData = _ele_trigEff_data[etaBin][ptBin];
+        effMC   = _ele_trigEff_mc[etaBin][ptBin];
+        errData = 0.005*_ele_trigEff_data[etaBin][ptBin];
+        errMC   = 0.005*_ele_trigEff_mc[etaBin][ptBin];
+
     }
 
     EfficiencyContainer effCont(effData, effMC, errData, errMC);
@@ -291,8 +308,8 @@ EfficiencyContainer WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
 
 EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
 {
-    float binningPtID[] = {10., 20., 35., 50., 90., 999.};
-    float binningPtRECO[] = {10., 20., 45., 75., 100., 999.};
+    float binningPtID[] = {10., 20., 35., 50., 90., 9999.};
+    float binningPtRECO[] = {10., 20., 45., 75., 100., 9999.};
     int ptBinID = 0;
     int ptBinRECO = 0;
     for (int i = 0; i < 5; ++i) {
@@ -305,6 +322,7 @@ EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) co
             break;
         }
     }
+
     float sfId   = _eleSF_ID[ptBinID]->Eval(electron.Eta());
     float sfReco = _eleSF_RECO[ptBinRECO]->Eval(electron.Eta());
 

@@ -537,7 +537,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
             float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
             mcEff = bEff[ptBin];
 
-            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
+            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
             if (btagSyst == 1) {
                 btagSF += scale[ptBin];
             } else if (btagSyst == -1) {
@@ -545,7 +545,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
             }
         } else if (abs(jetFlavor) == 4) {
             mcEff = 0.03;
-            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
+            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
             if (btagSyst == 1) {
                 btagSF += scale[ptBin];
             } else if (btagSyst == -1) {

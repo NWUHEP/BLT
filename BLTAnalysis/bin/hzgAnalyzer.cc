@@ -103,7 +103,9 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
     outTree->Branch("nPartons", &nPartons);
-    outTree->Branch("rPV", &rPV);
+    outTree->Branch("xPV", &xPV);
+    outTree->Branch("yPV", &yPV);
+    outTree->Branch("zPV", &zPV);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -114,39 +116,27 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("htSum", &htSum);
 
     // leptons
-    outTree->Branch("leptonOneP4", &leptonOneP4);
-    outTree->Branch("leptonOneP4KinFit", &leptonOneP4KinFit);
+    outTree->Branch("leptonOnePt", &leptonOnePt);
+    outTree->Branch("leptonOneEta", &leptonOneEta);
+    outTree->Branch("leptonOnePhi", &leptonOnePhi);
+    //outTree->Branch("leptonOneP4KinFit", &leptonOneP4KinFit);
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
     outTree->Branch("leptonOneMother", &leptonOneMother);
     outTree->Branch("leptonOneD0", &leptonOneD0);
     outTree->Branch("leptonOneDZ", &leptonOneDZ);
     outTree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
-    outTree->Branch("leptonOneMean", &leptonOneMean);
-    outTree->Branch("leptonOneSigma", &leptonOneSigma);
-    outTree->Branch("leptonOneAlphaL", &leptonOneAlphaL);
-    outTree->Branch("leptonOneAlphaR", &leptonOneAlphaR);
-    outTree->Branch("leptonOnePowerL", &leptonOnePowerL);
-    outTree->Branch("leptonOnePowerR", &leptonOnePowerR);
-    outTree->Branch("leptonOneProbPrefit", &leptonOneProbPrefit);
-    outTree->Branch("leptonOneProbPostfit", &leptonOneProbPostfit);
 
-    outTree->Branch("leptonTwoP4", &leptonTwoP4);
-    outTree->Branch("leptonTwoP4KinFit", &leptonTwoP4KinFit);
+    outTree->Branch("leptonTwoPt", &leptonTwoPt);
+    outTree->Branch("leptonTwoEta", &leptonTwoEta);
+    outTree->Branch("leptonTwoPhi", &leptonTwoPhi);
+    //outTree->Branch("leptonTwoP4KinFit", &leptonTwoP4KinFit);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoMother", &leptonTwoMother);
     outTree->Branch("leptonTwoD0", &leptonTwoD0);
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
-    outTree->Branch("leptonTwoMean", &leptonTwoMean);
-    outTree->Branch("leptonTwoSigma", &leptonTwoSigma);
-    outTree->Branch("leptonTwoAlphaL", &leptonTwoAlphaL);
-    outTree->Branch("leptonTwoAlphaR", &leptonTwoAlphaR);
-    outTree->Branch("leptonTwoPowerL", &leptonTwoPowerL);
-    outTree->Branch("leptonTwoPowerR", &leptonTwoPowerR);
-    outTree->Branch("leptonTwoProbPrefit", &leptonTwoProbPrefit);
-    outTree->Branch("leptonTwoProbPostfit", &leptonTwoProbPostfit);
  
     outTree->Branch("tauDecayMode", &tauDecayMode);
     outTree->Branch("tauMVA", &tauMVA);
@@ -155,30 +145,37 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("isDijetTag", &isDijetTag);
 
     // photons
-    outTree->Branch("photonOneP4", &photonOneP4);
+    outTree->Branch("photonOnePt", &photonOnePt);
+    outTree->Branch("photonOneEta", &photonOneEta);
+    outTree->Branch("photonOnePhi", &photonOnePhi);
     outTree->Branch("photonOneR9", &photonOneR9);
     outTree->Branch("photonOneMVA", &photonOneMVA);
+    outTree->Branch("photonOneERes", &photonOneERes);
     outTree->Branch("passElectronVeto", &passElectronVeto);
 
-    // lepton vertices
-    outTree->Branch("dileptonVertexOne", &dileptonVertexOne);
-    outTree->Branch("dileptonVertexErrOne", &dileptonVertexErrOne);
-    outTree->Branch("dileptonVertexChi2One", &dileptonVertexChi2One);
-    outTree->Branch("dileptonVertexDOFOne", &dileptonVertexDOFOne);
-
     // jets
-    outTree->Branch("jetOneP4", &jetOneP4);
+    outTree->Branch("jetOnePt", &jetOnePt);
+    outTree->Branch("jetOneEta", &jetOneEta);
+    outTree->Branch("jetOnePhi", &jetOnePhi);
     outTree->Branch("jetOneTag", &jetOneTag);
-    outTree->Branch("jetTwoP4", &jetTwoP4);
+    outTree->Branch("jetTwoPt", &jetTwoPt);
+    outTree->Branch("jetTwoEta", &jetTwoEta);
+    outTree->Branch("jetTwoPhi", &jetTwoPhi);
     outTree->Branch("jetTwoTag", &jetTwoTag);
 
     // gen level objects 
 
-    outTree->Branch("genLeptonOneP4", &genLeptonOneP4);
+    outTree->Branch("genLeptonOnePt", &genLeptonOnePt);
+    outTree->Branch("genLeptonOneEta", &genLeptonOneEta);
+    outTree->Branch("genLeptonOnePhi", &genLeptonOnePhi);
     outTree->Branch("genLeptonOneId", &genLeptonOneId);
-    outTree->Branch("genLeptonTwoP4", &genLeptonTwoP4);
+    outTree->Branch("genLeptonTwoPt", &genLeptonTwoPt);
+    outTree->Branch("genLeptonTwoEta", &genLeptonTwoEta);
+    outTree->Branch("genLeptonTwoPhi", &genLeptonTwoPhi);
     outTree->Branch("genLeptonTwoId", &genLeptonTwoId);
-    outTree->Branch("genPhotonP4", &genPhotonP4);
+    outTree->Branch("genPhotonPt", &genPhotonPt);
+    outTree->Branch("genPhotonEta", &genPhotonEta);
+    outTree->Branch("genPhotonPhi", &genPhotonPhi);
     outTree->Branch("genPhotonFHPFS", &genPhotonFHPFS);
     outTree->Branch("genPhotonIPFS", &genPhotonIPFS);
     outTree->Branch("vetoDY", &vetoDY);
@@ -190,7 +187,87 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("nPhotons", &nPhotons);
     outTree->Branch("nJets", &nJets);
     outTree->Branch("nFwdJets", &nFwdJets);
+    outTree->Branch("nCentralJets", &nCentralJets);
     outTree->Branch("nBJets", &nBJets);
+    
+    // dilepton
+    outTree->Branch("dileptonPt", &dileptonPt);
+    outTree->Branch("dileptonEta", &dileptonEta);
+    outTree->Branch("dileptonPhi", &dileptonPhi);
+    outTree->Branch("dileptonM", &dileptonM);
+    outTree->Branch("dileptonDEta", &dileptonDEta);
+    outTree->Branch("dileptonDPhi", &dileptonDPhi);
+    outTree->Branch("dileptonDR", &dileptonDR);
+
+    // dilepton vertices
+    //outTree->Branch("dileptonVertexOne", &dileptonVertexOne);
+    //outTree->Branch("dileptonVertexErrOne", &dileptonVertexErrOne);
+    //outTree->Branch("dileptonVertexChi2One", &dileptonVertexChi2One);
+    //outTree->Branch("dileptonVertexDOFOne", &dileptonVertexDOFOne);
+    
+    // dijet
+    outTree->Branch("dijetPt", &dijetPt);
+    outTree->Branch("dijetEta", &dijetEta);
+    outTree->Branch("dijetPhi", &dijetPhi);
+    outTree->Branch("dijetM", &dijetM);
+    outTree->Branch("dijetDEta", &dijetDEta);
+    outTree->Branch("dijetDPhi", &dijetDPhi);
+    outTree->Branch("dijetDR", &dijetDR);
+
+    // jet, lepton
+    outTree->Branch("l1j1DEta", &l1j1DEta);
+    outTree->Branch("l1j1DPhi", &l1j1DPhi);
+    outTree->Branch("l1j1DR", &l1j1DR);
+    outTree->Branch("l1j2DEta", &l1j2DEta);
+    outTree->Branch("l1j2DPhi", &l1j2DPhi);
+    outTree->Branch("l1j2DR", &l1j2DR);
+    outTree->Branch("l2j1DEta", &l2j1DEta);
+    outTree->Branch("l2j1DPhi", &l2j1DPhi);
+    outTree->Branch("l2j1DR", &l2j1DR);
+    outTree->Branch("l2j2DEta", &l2j2DEta);
+    outTree->Branch("l2j2DPhi", &l2j2DPhi);
+    outTree->Branch("l2j2DR", &l2j2DR);
+
+    // jet, photon
+    outTree->Branch("j1PhotonDEta", &j1PhotonDEta);
+    outTree->Branch("j1PhotonDPhi", &j1PhotonDPhi);
+    outTree->Branch("j1PhotonDR", &j1PhotonDR);
+    outTree->Branch("j2PhotonDEta", &j2PhotonDEta);
+    outTree->Branch("j2PhotonDPhi", &j2PhotonDPhi);
+    outTree->Branch("j2PhotonDR", &j2PhotonDR);
+    outTree->Branch("jPhotonDRMax", &jPhotonDRMax);
+    outTree->Branch("jPhotonDRMin", &jPhotonDRMin);
+
+    // three body
+    outTree->Branch("llgPt", &llgPt);
+    outTree->Branch("llgEta", &llgEta);
+    outTree->Branch("llgPhi", &llgPhi);
+    outTree->Branch("llgM", &llgM);
+    outTree->Branch("llgPtOverM", &llgPtOverM);
+    outTree->Branch("l1PhotonDEta", &l1PhotonDEta);
+    outTree->Branch("l1PhotonDPhi", &l1PhotonDPhi);
+    outTree->Branch("l1PhotonDR", &l1PhotonDR);
+    outTree->Branch("l2PhotonDEta", &l2PhotonDEta);
+    outTree->Branch("l2PhotonDPhi", &l2PhotonDPhi);
+    outTree->Branch("l2PhotonDR", &l2PhotonDR);
+    outTree->Branch("lPhotonDRMax", &lPhotonDRMax);
+    outTree->Branch("lPhotonDRMin", &lPhotonDRMin);
+    outTree->Branch("dileptonPhotonDEta", &dileptonPhotonDEta);
+    outTree->Branch("dileptonPhotonDPhi", &dileptonPhotonDPhi);
+    outTree->Branch("dileptonPhotonDR", &dileptonPhotonDR);
+    outTree->Branch("ptt", &ptt);
+    outTree->Branch("zgBigTheta", &zgBigTheta);
+    outTree->Branch("zgLittleTheta", &zgLittleTheta);
+    outTree->Branch("zgPhi", &zgPhi);
+    outTree->Branch("genBigTheta", &genBigTheta);
+    outTree->Branch("genLittleTheta", &genLittleTheta);
+    outTree->Branch("genPhi", &genPhi);
+
+    // other 
+    outTree->Branch("llgJJDEta", &llgJJDEta);
+    outTree->Branch("llgJJDPhi", &llgJJDPhi);
+    outTree->Branch("llgJJDR", &llgJJDR);
+    outTree->Branch("zepp", &zepp);
 
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
@@ -225,7 +302,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             << " Event: " << fInfo->evtNum 
             << std::endl;
    
-    bool sync_print = false;
+    //bool sync_print = false;
     bool sync_print_precut = false;
 
     if (sync_print_precut) {          
@@ -333,7 +410,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TVector3 pv;
         thePV = (TVertex *)fPVArr->At(0);
         copy_xyz((TVertex*) fPVArr->At(0), pv);
-        rPV = pv; 
+        xPV = pv.X();
+        yPV = pv.Y();
+        zPV = pv.Z();
         particleSelector->SetPV(pv);
     } else {
         return kTRUE;
@@ -655,6 +734,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
            ) {
             
             jets.push_back(jet);
+            ++nJets;
 
             if (fabs(jet->eta) <= 2.4) { 
                 hadronicP4 += jetP4;
@@ -664,13 +744,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     if (jet->bmva > 0.9432) { 
                         ++nBJets;
                     } else {
-                        ++nJets;
+                        ++nCentralJets;
                     }
                 } else {
                     if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rng->Uniform(1.))) { 
                         ++nBJets;
                     } else {
-                        ++nJets;
+                        ++nCentralJets;
                     }
                 }
             } else {
@@ -711,7 +791,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nTaus      = taus.size();
     nPhotons   = photons.size();
 
-    if (params->selection == "mumu") {
+    /*if (params->selection == "mumu") {
         
         if (muons.size() < 2)
             return kTRUE;
@@ -780,16 +860,18 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     muons[1]->nPixHits << "," << muons[1]->nTkLayers << "," << 
                     muons[1]->pt << "," << muons[1]->ptErr << "," << 
                     GetMuonIsolation(muons[1]) << endl;
-    }
+    }*/
 
-    else if (params->selection == "mumug") {
+    //else if (params->selection == "mumug") {
+    if (params->selection == "mumug") {
         if (muons.size() < 2) 
             return kTRUE;
         hTotalEvents->Fill(5);
         if (photons.size() < 1)
             return kTRUE;
         hTotalEvents->Fill(6);
-        
+       
+        TLorentzVector leptonOneP4, leptonTwoP4;
         unsigned int muonOneIndex = 0;
         unsigned int muonTwoIndex = 1;
         bool hasValidPair = false;
@@ -846,6 +928,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << endl;
         }
 
+        TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
+
         // trigger matching:
         bool mu1_fired_leg1 = false;
         bool mu1_fired_leg2 = false;
@@ -880,24 +964,26 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         for (unsigned int i = 0; i < photons.size(); ++i) {
             TLorentzVector tempPhoton;
-            TLorentzVector tempDilepton;
+            //TLorentzVector tempDilepton;
             TLorentzVector tempLLG;
             tempPhoton.SetPtEtaPhiM(photons[i]->calibPt, photons[i]->eta, photons[i]->phi, 0.);
-            tempDilepton = leptonOneP4 + leptonTwoP4;
-            tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
+            //tempDilepton = leptonOneP4 + leptonTwoP4;
+            //tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
+            tempLLG = dileptonP4 + tempPhoton;
             float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
             float this_dr2 = leptonTwoP4.DeltaR(tempPhoton);
-            if (sync_print_precut) {
+            /*if (sync_print_precut) {
                 cout << "photon pt, et/m, z_mass, h_mass, dr1, dr2" << endl;
                 cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " 
                      << tempDilepton.M() << ", " << tempLLG.M() << ", " 
                      << this_dr1 << ", " << this_dr2 << endl;
-            }
+            }*/
 
             if (
                 tempPhoton.Pt() > 15.0 &&
                 tempPhoton.Et()/tempLLG.M() > (15.0/110.0) &&
-                tempDilepton.M() + tempLLG.M() > 185.0 &&
+                //tempDilepton.M() + tempLLG.M() > 185.0 &&
+                dileptonP4.M() + tempLLG.M() > 185.0 &&
                 tempLLG.M() > 100. && tempLLG.M() < 180. &&
                 this_dr1 > 0.4 && this_dr2 > 0.4
                 ) {
@@ -914,10 +1000,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (sync_print_precut)
             cout << "passed the photon selection" << endl;
 
+        TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
         hTotalEvents->Fill(10);
+
+        TLorentzVector llgP4 = dileptonP4 + photonOneP4;
 
         // DY photon overlap removal
         vetoDY = false;
@@ -961,7 +1050,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         // checking for dijet tag
         isDijetTag = false;
-        TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
+        TLorentzVector jetOneP4, jetTwoP4;
+        //TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
         if (!isLeptonTag) {
             if (jets.size() > 1) {
                 for (unsigned int i = 0; i < jets.size(); ++i) {
@@ -971,13 +1061,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         tempJetOne.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
                         tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
                         TLorentzVector tempDijet = tempJetOne + tempJetTwo;
-                        float zeppen = llg.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
+                        float zeppen = llgP4.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
                         if (    tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
                             &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
                             &&  fabs(zeppen) <= 2.5 && tempDijet.M() >= 500.
-                            &&  fabs(tempDijet.DeltaPhi(llg)) >= 2.4
+                            &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
                            ) {
                             isDijetTag = true;
                             jetOneP4.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
@@ -988,25 +1078,91 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
         }
+
+        if (isDijetTag) {
+            jetOnePt = jetOneP4.Pt();
+            jetOneEta = jetOneP4.Eta();
+            jetOnePhi = jetOneP4.Phi();
+            jetOneM   = jetOneP4.M();
+            
+            jetTwoPt = jetTwoP4.Pt();
+            jetTwoEta = jetTwoP4.Eta();
+            jetTwoPhi = jetTwoP4.Phi();
+            jetTwoM   = jetTwoP4.M();
+
+            TLorentzVector dijet = jetOneP4 + jetTwoP4;
+            dijetPt = dijet.Pt();
+            dijetEta = dijet.Eta();
+            dijetPhi = dijet.Phi();
+            dijetM = dijet.M();
+            dijetDEta = fabs(jetOneP4.Eta() - jetTwoP4.Eta());
+            dijetDPhi = fabs(jetOneP4.DeltaPhi(jetTwoP4));
+            dijetDR = jetOneP4.DeltaR(jetTwoP4);
+
+            l1j1DEta = fabs(leptonOneP4.Eta() - jetOneP4.Eta());
+            l1j1DPhi = fabs(leptonOneP4.DeltaPhi(jetOneP4));
+            l1j1DR = leptonOneP4.DeltaR(jetOneP4);
+            l1j2DEta = fabs(leptonOneP4.Eta() - jetTwoP4.Eta());
+            l1j2DPhi = fabs(leptonOneP4.DeltaPhi(jetTwoP4));
+            l1j2DR = leptonOneP4.DeltaR(jetTwoP4);
+            l2j1DEta = fabs(leptonTwoP4.Eta() - jetOneP4.Eta());
+            l2j1DPhi = fabs(leptonTwoP4.DeltaPhi(jetOneP4));
+            l2j1DR = leptonTwoP4.DeltaR(jetOneP4);
+            l2j2DEta = fabs(leptonTwoP4.Eta() - jetTwoP4.Eta());
+            l2j2DPhi = fabs(leptonTwoP4.DeltaPhi(jetTwoP4));
+            l2j2DR = leptonTwoP4.DeltaR(jetTwoP4);
+
+            j1PhotonDEta = fabs(jetOneP4.Eta() - photonOneP4.Eta());
+            j1PhotonDPhi = fabs(jetOneP4.DeltaPhi(photonOneP4));
+            j1PhotonDR = jetOneP4.DeltaR(photonOneP4);
+            j2PhotonDEta = fabs(jetTwoP4.Eta() - photonOneP4.Eta());
+            j2PhotonDPhi = fabs(jetTwoP4.DeltaPhi(photonOneP4));
+            j2PhotonDR = jetTwoP4.DeltaR(photonOneP4);
         
+            if (j1PhotonDR > j2PhotonDR) {
+                jPhotonDRMax = j1PhotonDR;
+                jPhotonDRMin = j2PhotonDR; 
+            }
+            else {
+                jPhotonDRMax = j2PhotonDR;
+                jPhotonDRMin = j1PhotonDR;
+            }
+            
+            zepp = llgP4.Eta() - (jetOneP4.Eta() + jetTwoP4.Eta())/2.;
+            llgJJDEta = fabs(llgP4.Eta() - dijet.Eta());
+            llgJJDPhi = fabs(llgP4.DeltaPhi(dijet));
+            llgJJDR = llgP4.DeltaR(dijet);
+
+        }
+ 
         if (sync_print_precut) {
             cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
             cout << leptonOneP4.Pt() << ", " << leptonOneP4.Eta() << ", " << leptonOneP4.Phi() << ", " 
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << ", "
                  << (leptonOneP4 + leptonTwoP4).M() << ", " << leptonOneP4.DeltaR(photonOneP4) << ", " << leptonTwoP4.DeltaR(photonOneP4) << endl;
         }
- 
+
+        leptonOnePt     = leptonOneP4.Pt();
+        leptonOneEta     = leptonOneP4.Eta();
+        leptonOnePhi     = leptonOneP4.Phi();
         leptonOneIso    = GetMuonIsolation(muons[muonOneIndex]);
         leptonOneFlavor = muons[muonOneIndex]->q*13;
         leptonOneDZ     = muons[muonOneIndex]->dz;
         leptonOneD0     = muons[muonOneIndex]->d0;
             
+        leptonTwoPt     = leptonTwoP4.Pt();
+        leptonTwoEta     = leptonTwoP4.Eta();
+        leptonTwoPhi     = leptonTwoP4.Phi();
         leptonTwoIso    = GetMuonIsolation(muons[muonTwoIndex]);
         leptonTwoFlavor = muons[muonTwoIndex]->q*13;
         leptonTwoDZ     = muons[muonTwoIndex]->dz;
         leptonTwoD0     = muons[muonTwoIndex]->d0;
 
+        photonOnePt  = photonOneP4.Pt();
+        photonOneEta  = photonOneP4.Eta();
+        photonOnePhi  = photonOneP4.Phi();
         photonOneMVA = photons[photonIndex]->mva;
+        photonOneERes = photons[photonIndex]->eRes;
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
         if (!isData)
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
@@ -1016,102 +1172,143 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (sync_print_precut) {
             cout << "event is still alive" << endl;
         }
-            
-        float muonOneMean, muonOneSigma, muonOneAlphaL, muonOneAlphaR, muonOnePowerL, muonOnePowerR;
-        float muonTwoMean, muonTwoSigma, muonTwoAlphaL, muonTwoAlphaR, muonTwoPowerL, muonTwoPowerR;
-        std::map<string, float> mva_input_floats;
-        std::map<string, int> mva_input_ints;
-            
-        // BDT eval for muon one
-        mva_input_floats["rho"] = fInfo->rhoJet;
-        mva_input_floats["muEnergy"] = leptonOneP4.E();
-        mva_input_floats["muEta"] = muons[muonOneIndex]->eta;
-        mva_input_floats["muTkChi2"] = muons[muonOneIndex]->tkNchi2;
-        mva_input_ints["muNumberOfValidTrkLayers"] = muons[muonOneIndex]->nTkLayers;
-        mva_input_ints["muNumberOfValidPixelHits"] = muons[muonOneIndex]->nPixHits;
-        mva_input_ints["muNumberOfValidMuonHits"] = muons[muonOneIndex]->nValidHits;
-        mva_input_ints["muStations"] = muons[muonOneIndex]->nMatchStn;
-        mva_input_floats["muPFIsoR04_CH"] = muons[muonOneIndex]->chHadIso;
-        mva_input_floats["muPFIsoR04_NH"] = muons[muonOneIndex]->neuHadIso;
-        mva_input_floats["muPFIsoR04_Pho"] = muons[muonOneIndex]->gammaIso;
-        mva_input_floats["muPFIsoR04_PU"] = muons[muonOneIndex]->puIso;
-        EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonOneMean, muonOneSigma, 
-                                 muonOneAlphaL, muonOnePowerL, muonOneAlphaR, muonOnePowerR);
 
-        leptonOneMean = muonOneMean;
-        leptonOneSigma = muonOneSigma;
-        leptonOneAlphaL = muonOneAlphaL;
-        leptonOneAlphaR = muonOneAlphaR;
-        leptonOnePowerL = muonOnePowerL;
-        leptonOnePowerR = muonOnePowerR;
-        
-        // BDT eval for muon two
-        mva_input_floats["muEnergy"] = leptonTwoP4.E();
-        mva_input_floats["muEta"] = muons[muonTwoIndex]->eta;
-        mva_input_floats["muTkChi2"] = muons[muonTwoIndex]->tkNchi2;
-        mva_input_ints["muNumberOfValidTrkLayers"] = muons[muonTwoIndex]->nTkLayers;
-        mva_input_ints["muNumberOfValidPixelHits"] = muons[muonTwoIndex]->nPixHits;
-        mva_input_ints["muNumberOfValidMuonHits"] = muons[muonTwoIndex]->nValidHits;
-        mva_input_ints["muStations"] = muons[muonTwoIndex]->nMatchStn;
-        mva_input_floats["muPFIsoR14_CH"] = muons[muonTwoIndex]->chHadIso;
-        mva_input_floats["muPFIsoR14_NH"] = muons[muonTwoIndex]->neuHadIso;
-        mva_input_floats["muPFIsoR14_Pho"] = muons[muonTwoIndex]->gammaIso;
-        mva_input_floats["muPFIsoR14_PU"] = muons[muonTwoIndex]->puIso;
-        EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonTwoMean, muonTwoSigma, 
-                                 muonTwoAlphaL, muonTwoPowerL, muonTwoAlphaR, muonTwoPowerR);
-        
-        leptonTwoMean = muonTwoMean;
-        leptonTwoSigma = muonTwoSigma;
-        leptonTwoAlphaL = muonTwoAlphaL;
-        leptonTwoAlphaR = muonTwoAlphaR;
-        leptonTwoPowerL = muonTwoPowerL;
-        leptonTwoPowerR = muonTwoPowerR;
-            
-        // Kinematic Fit
-        TVector3 v1, v2;
-        v1.SetPtEtaPhi(muons[muonOneIndex]->pt, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi);
-        v2.SetPtEtaPhi(muons[muonTwoIndex]->pt, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi);
-        Double_t p[16];
-        p[0] = MUON_MASS*MUON_MASS;
-        p[1] = cos(v1.Angle(v2));
-        p[2] = muons[muonOneIndex]->pt*cosh(muons[muonOneIndex]->eta);
-        p[3] = muons[muonTwoIndex]->pt*cosh(muons[muonTwoIndex]->eta);
-        p[4] = muonOneMean;
-        p[5] = muonOneSigma;
-        p[6] = muonOneAlphaL;
-        p[7] = muonOnePowerL;
-        p[8] = muonOneAlphaR;
-        p[9] = muonOnePowerR;
-        p[10] = muonTwoMean;
-        p[11] = muonTwoSigma;
-        p[12] = muonTwoAlphaL;
-        p[13] = muonTwoPowerL;
-        p[14] = muonTwoAlphaR;
-        p[15] = muonTwoPowerR;
-        
-        double prefitProb1 = GetDoubleSidedCB(leptonOneP4.E()/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
-        double prefitProb2 = GetDoubleSidedCB(leptonTwoP4.E()/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
-        leptonOneProbPrefit = prefitProb1;
-        leptonTwoProbPrefit = prefitProb2;
+        dileptonPt = dileptonP4.Pt();
+        dileptonEta = dileptonP4.Eta();
+        dileptonPhi = dileptonP4.Phi();
+        dileptonM = dileptonP4.M();
+        dileptonDEta = fabs(leptonOneP4.Eta() - leptonTwoP4.Eta());
+        dileptonDPhi = fabs(leptonOneP4.DeltaPhi(leptonTwoP4));
+        dileptonDR = leptonOneP4.DeltaR(leptonTwoP4);
 
-        double e1, e2;
-        find_optimized(p, e1, e2);
+        llgPt = llgP4.Pt();
+        llgEta = llgP4.Eta();
+        llgPhi = llgP4.Phi();
+        llgM = llgP4.M();
+        llgPtOverM = llgP4.Pt()/llgP4.M();
+        
+        l1PhotonDEta = fabs(leptonOneP4.Eta() - photonOneP4.Eta());
+        l1PhotonDPhi = fabs(leptonOneP4.DeltaPhi(photonOneP4));
+        l1PhotonDR = leptonOneP4.DeltaR(photonOneP4);
+        l2PhotonDEta = fabs(leptonTwoP4.Eta() - photonOneP4.Eta());
+        l2PhotonDPhi = fabs(leptonTwoP4.DeltaPhi(photonOneP4));
+        l2PhotonDR = leptonTwoP4.DeltaR(photonOneP4);
+        
+        if (l1PhotonDR > l2PhotonDR) {
+            lPhotonDRMax = l1PhotonDR;
+            lPhotonDRMin = l2PhotonDR; 
+        }
+        else {
+            lPhotonDRMax = l2PhotonDR;
+            lPhotonDRMin = l1PhotonDR;
+        }
+
+        dileptonPhotonDEta = fabs(dileptonP4.Eta() - photonOneP4.Eta());
+        dileptonPhotonDPhi = fabs(dileptonP4.DeltaPhi(photonOneP4));
+        dileptonPhotonDR = dileptonP4.DeltaR(photonOneP4);
+        ptt = 2*fabs(dileptonP4.Px()*photonOneP4.Py() - photonOneP4.Px()*dileptonP4.Py())/llgP4.Pt();
+
+        /*// calculate angles
+        TVector3 Xframe = llgP4.BoostVector();
+        TVector3 Z1frame = dileptonP4.BoostVector();
+
+        // "partons"
+        TLorentzVector kq, kqbar, veckq_in_Xframe, veckqbar_in_Xframe;
+        kq.SetPxPyPzE(0., 0., (llgP4.E() + llgP4.Pz())/2., (llgP4.E() + llgP4.Pz())/2.);
+        kqbar.SetPxPyPzE(0., 0., (llgP4.Pz() - llgP4.E())/2., (llgP4.E() - llgP4.Pz())/2.);
+        veckq_in_Xframe = kq;
+        veckqbar_in_Xframe = kqbar;
+        veckq_in_Xframe.Boost(-1*Xframe);
+        veckqbar_in_Xframe.Boost(-1*Xframe);
    
-        double postfitProb1 = GetDoubleSidedCB(e1/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
-        double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
-        leptonOneProbPostfit = postfitProb1;
-        leptonTwoProbPostfit = postfitProb2;
+        // Z vectors
+        TLorentzVector vecz_in_Xframe = dileptonP4;
+        TLorentzVector vecg_in_Xframe = photonOneP4;
+        TLorentzVector vecz_in_Z1frame = dileptonP4;
+        vecz_in_Xframe.Boost(-1*Xframe);
+        vecg_in_Xframe.Boost(-1*Xframe);
+        vecz_in_Z1frame.Boost(-1*Z1frame);
 
-        double muonOnePtKinFit = e1/cosh(muons[muonOneIndex]->eta);
-        double muonTwoPtKinFit = e2/cosh(muons[muonTwoIndex]->eta);
+        // coord system in the CM frame
+        TVector3 uz_in_Xframe = vecz_in_Xframe.Vect().Unit();
+        TVector3 uy_in_Xframe = (veckq_in_Xframe.Vect().Unit().Cross(uz_in_Xframe.Unit())).Unit();
+        TVector3 ux_in_Xframe = (uy_in_Xframe.Unit().Cross(uz_in_Xframe.Unit())).Unit();
+        TRotation rotation;
+        rotation = rotation.RotateAxes(ux_in_Xframe, uy_in_Xframe, uz_in_Xframe).Inverse();
 
-        TLorentzVector muonOneP4KinFit, muonTwoP4KinFit;
-        muonOneP4KinFit.SetPtEtaPhiM(muonOnePtKinFit, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi, MUON_MASS);
-        muonTwoP4KinFit.SetPtEtaPhiM(muonTwoPtKinFit, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi, MUON_MASS);
+        // for going to the Z frames from the CM frame, boost after transform
+        TLorentzVector vecz_in_Xframe_newcoords = vecz_in_Xframe;
+        vecz_in_Xframe_newcoords.Transform(rotation);
+        TVector3 Z1frame_from_Xframe_newcoords = vecz_in_Xframe_newcoords.BoostVector();
 
-        leptonOneP4KinFit = muonOneP4KinFit;
-        leptonTwoP4KinFit = muonTwoP4KinFit;
+        // define the positive and negative leptons
+        TLorentzVector l_minus, l_plus; 
+        if (leptonOneFlavor > 0) {
+            l_minus = leptonOneP4;
+            l_plus = leptonTwoP4;
+        }
+        else {
+            l_minus = leptonTwoP4;
+            l_plus = leptonOneP4;
+        }
+       
+        // little theta, phi in Z1 frame; first boost to CM, then redefine coords
+        TLorentzVector veclm_in_Z1frame = l_minus;
+        TLorentzVector veclp_in_Z1frame = l_plus;
+        veclm_in_Z1frame.Boost(-1*Xframe);
+        veclm_in_Z1frame.Transform(rotation);
+        veclp_in_Z1frame.Boost(-1*Xframe);
+        veclp_in_Z1frame.Transform(rotation);
 
+        // then boost to Z1
+        veclm_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
+        veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
+
+        // now get angles
+        zgPhi = veclm_in_Z1frame.Phi();
+        zgLittleTheta = veclm_in_Z1frame.CosTheta();
+
+        if (zgPhi < 0) 
+            zgPhi += 2*M_PI;
+
+        // Big Theta in X frame
+        TLorentzVector veczg_in_Xframe = llgP4;
+        veczg_in_Xframe.Transform(rotation);
+
+        TLorentzVector veczg_in_Xframe_newcoords = llgP4;
+        veczg_in_Xframe_newcoords.Transform(rotation);
+        zgBigTheta = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();*/
+
+        // calculate angles like Ming-Yan
+        TLorentzVector l_minus, l_plus; 
+        if (leptonOneFlavor > 0) {
+            l_minus = leptonOneP4;
+            l_plus = leptonTwoP4;
+        }
+        else {
+            l_minus = leptonTwoP4;
+            l_plus = leptonOneP4;
+        }
+        
+        TVector3 llgFrame = -1*llgP4.BoostVector();
+        dileptonP4.Boost(llgFrame);
+        l_minus.Boost(llgFrame);
+        l_minus.Boost(dileptonP4.BoostVector());
+        zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
+        zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
+        
+        TVector3 ppAxis(0, 0, 1);
+        TVector3 zAxis = dileptonP4.Vect().Unit();
+        TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
+        TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
+
+        TRotation rotation;
+        rotation = rotation.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+
+        dileptonP4.Transform(rotation);
+        l_minus.Transform(rotation);
+        zgPhi = l_minus.Phi();
+            
         if (!isData) {
 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[muonOneIndex]); 
@@ -1137,7 +1334,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     } // end mumug selection
     
-    else if (params->selection == "ee") {
+    /*else if (params->selection == "ee") {
         if (electrons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -1185,7 +1382,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
         }
-    }
+    } */
     
     else if (params->selection == "elelg") {
         if (electrons.size() < 2) 
@@ -1198,7 +1395,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         hTotalEvents->Fill(6);
         if (sync_print_precut)
         cout << "at least one photon present" << endl;
-        
+      
+        TLorentzVector leptonOneP4, leptonTwoP4;
         unsigned int electronOneIndex = 0;
         unsigned int electronTwoIndex = 1;
         bool hasValidPair = false;
@@ -1264,28 +1462,32 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << endl;
         }
         
+        TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
+       
         bool hasValidPhoton = false;
         unsigned int photonIndex = 0;
 
         for (unsigned int i = 0; i < photons.size(); ++i) {
             TLorentzVector tempPhoton;
-            TLorentzVector tempDilepton;
+            //TLorentzVector tempDilepton;
             TLorentzVector tempLLG;
             tempPhoton.SetPtEtaPhiM(photons[i]->calibPt, photons[i]->eta, photons[i]->phi, 0.);
-            tempDilepton = leptonOneP4 + leptonTwoP4;
-            tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
+            //tempDilepton = leptonOneP4 + leptonTwoP4;
+            //tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
+            tempLLG = dileptonP4 + tempPhoton;
             float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
             float this_dr2 = leptonTwoP4.DeltaR(tempPhoton);
-            if (sync_print_precut) {
+            /*if (sync_print_precut) {
                 cout << "photon pt, et/m, z_mass, h_mass, dr1, dr2" << endl;
                 cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " 
                      << tempDilepton.M() << ", " << tempLLG.M() << ", " 
                      << this_dr1 << ", " << this_dr2 << endl;
-            }
+            }*/
             if (
                 tempPhoton.Pt() > 15.0 &&
                 tempPhoton.Et()/tempLLG.M() > (15.0/110.0) &&
-                tempDilepton.M() + tempLLG.M() > 185.0 &&
+                //tempDilepton.M() + tempLLG.M() > 185.0 &&
+                dileptonP4.M() + tempLLG.M() > 185.0 &&
                 tempLLG.M() > 100. && tempLLG.M() < 180. &&
                 this_dr1 > 0.4 && this_dr2 > 0.4
                 ) {
@@ -1293,7 +1495,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 photonIndex = i;
                 break;
             }
-            else {
+            /*else {
                 if (sync_print_precut) {
                     cout << "photon variables in the loop" << endl;
                     cout << "pt, et/m_llg, mass_sum, llg_mass, dr1, dr2" << endl;
@@ -1301,7 +1503,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             tempDilepton.M() + tempLLG.M() << ", " << tempLLG.M() << ", " << 
                             this_dr1 << ", " << this_dr2 << endl;
                 }
-            }
+            }*/
         }
 
         if (!hasValidPhoton)
@@ -1310,10 +1512,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (sync_print_precut)
             cout << "valid photon" << endl;
 
+        TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
         hTotalEvents->Fill(9);
+        
+        TLorentzVector llgP4 = dileptonP4 + photonOneP4;
         
         // DY photon overlap removal
         vetoDY = false;
@@ -1357,7 +1562,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         
         // checking for dijet tag
         isDijetTag = false;
-        TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
+        TLorentzVector jetOneP4, jetTwoP4;
+        //TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
         if (!isLeptonTag) {
             if (sync_print_precut) 
                 cout << "event is not lepton tagged; checking dijet tag" << endl;
@@ -1371,7 +1577,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         tempJetOne.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
                         tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
                         TLorentzVector tempDijet = tempJetOne + tempJetTwo;
-                        float zeppen = llg.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
+                        float zeppen = llgP4.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
                         if (sync_print_precut) {
                             std::cout << "relevant variables for dijet tag, jets: " << i << ", " << j << endl;
                             std::cout << "pt1, eta1, phi1, pt2, eta2, phi2: " << tempJetOne.Pt() << ", "
@@ -1382,14 +1588,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                                       << tempJetTwo.DeltaR(leptonOneP4) << ", " << tempJetTwo.DeltaR(leptonTwoP4) << ", "
                                       << tempJetOne.DeltaR(photonOneP4) << ", " << tempJetTwo.DeltaR(photonOneP4) << ", "
                                       << fabs(tempJetOne.Eta() - tempJetTwo.Eta()) << ", " << zeppen << ", "
-                                      << tempDijet.M() << ", " << fabs(tempDijet.DeltaPhi(llg)) << endl;
+                                      << tempDijet.M() << ", " << fabs(tempDijet.DeltaPhi(llgP4)) << endl;
                         }
                         if (    tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
                             &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
                             &&  fabs(zeppen) <= 2.5 && tempDijet.M() >= 500.
-                            &&  fabs(tempDijet.DeltaPhi(llg)) >= 2.4
+                            &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
                            ) {
                             isDijetTag = true;
                             if (sync_print_precut)
@@ -1403,24 +1609,89 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }
         
+        if (isDijetTag) {
+            jetOnePt = jetOneP4.Pt();
+            jetOneEta = jetOneP4.Eta();
+            jetOnePhi = jetOneP4.Phi();
+            jetOneM   = jetOneP4.M();
+            
+            jetTwoPt = jetTwoP4.Pt();
+            jetTwoEta = jetTwoP4.Eta();
+            jetTwoPhi = jetTwoP4.Phi();
+            jetTwoM   = jetTwoP4.M();
+
+            TLorentzVector dijet = jetOneP4 + jetTwoP4;
+            dijetPt = dijet.Pt();
+            dijetEta = dijet.Eta();
+            dijetPhi = dijet.Phi();
+            dijetM = dijet.M();
+            dijetDEta = fabs(jetOneP4.Eta() - jetTwoP4.Eta());
+            dijetDPhi = fabs(jetOneP4.DeltaPhi(jetTwoP4));
+            dijetDR = jetOneP4.DeltaR(jetTwoP4);
+
+            l1j1DEta = fabs(leptonOneP4.Eta() - jetOneP4.Eta());
+            l1j1DPhi = fabs(leptonOneP4.DeltaPhi(jetOneP4));
+            l1j1DR = leptonOneP4.DeltaR(jetOneP4);
+            l1j2DEta = fabs(leptonOneP4.Eta() - jetTwoP4.Eta());
+            l1j2DPhi = fabs(leptonOneP4.DeltaPhi(jetTwoP4));
+            l1j2DR = leptonOneP4.DeltaR(jetTwoP4);
+            l2j1DEta = fabs(leptonTwoP4.Eta() - jetOneP4.Eta());
+            l2j1DPhi = fabs(leptonTwoP4.DeltaPhi(jetOneP4));
+            l2j1DR = leptonTwoP4.DeltaR(jetOneP4);
+            l2j2DEta = fabs(leptonTwoP4.Eta() - jetTwoP4.Eta());
+            l2j2DPhi = fabs(leptonTwoP4.DeltaPhi(jetTwoP4));
+            l2j2DR = leptonTwoP4.DeltaR(jetTwoP4);
+            
+            j1PhotonDEta = fabs(jetOneP4.Eta() - photonOneP4.Eta());
+            j1PhotonDPhi = fabs(jetOneP4.DeltaPhi(photonOneP4));
+            j1PhotonDR = jetOneP4.DeltaR(photonOneP4);
+            j2PhotonDEta = fabs(jetTwoP4.Eta() - photonOneP4.Eta());
+            j2PhotonDPhi = fabs(jetTwoP4.DeltaPhi(photonOneP4));
+            j2PhotonDR = jetTwoP4.DeltaR(photonOneP4);
+        
+            if (j1PhotonDR > j2PhotonDR) {
+                jPhotonDRMax = j1PhotonDR;
+                jPhotonDRMin = j2PhotonDR; 
+            }
+            else {
+                jPhotonDRMax = j2PhotonDR;
+                jPhotonDRMin = j1PhotonDR;
+            }
+            
+            zepp = llgP4.Eta() - (jetOneP4.Eta() + jetTwoP4.Eta())/2.;
+            llgJJDEta = fabs(llgP4.Eta() - dijet.Eta());
+            llgJJDPhi = fabs(llgP4.DeltaPhi(dijet));
+            llgJJDR = llgP4.DeltaR(dijet);
+        }
+        
         if (sync_print_precut) {
             cout << "lepton1_pt, lepton1_eta, lepton1_phi, lepton2_pt, lepton2_eta, lepton2_phi, dilepton_mass, dr1, dr2" << endl;
             cout << leptonOneP4.Pt() << ", " << leptonOneP4.Eta() << ", " << leptonOneP4.Phi() << ", " 
                  << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << ", "
                  << (leptonOneP4 + leptonTwoP4).M() << ", " << leptonOneP4.DeltaR(photonOneP4) << ", " << leptonTwoP4.DeltaR(photonOneP4) << endl;
         }
- 
+
+        leptonOnePt     = leptonOneP4.Pt();
+        leptonOneEta     = leptonOneP4.Eta();
+        leptonOnePhi     = leptonOneP4.Phi();
         leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
         leptonOneFlavor = electrons[electronOneIndex]->q*11;
         leptonOneDZ     = electrons[electronOneIndex]->dz;
         leptonOneD0     = electrons[electronOneIndex]->d0;
             
+        leptonTwoPt     = leptonTwoP4.Pt();
+        leptonTwoEta     = leptonTwoP4.Eta();
+        leptonTwoPhi     = leptonTwoP4.Phi();
         leptonTwoIso    = GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
         leptonTwoFlavor = electrons[electronTwoIndex]->q*11;
         leptonTwoDZ     = electrons[electronTwoIndex]->dz;
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
 
+        photonOnePt  = photonOneP4.Pt();
+        photonOneEta  = photonOneP4.Eta();
+        photonOnePhi  = photonOneP4.Phi();
         photonOneMVA = photons[photonIndex]->mva;
+        photonOneERes = photons[photonIndex]->eRes;
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
         if (!isData)
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
@@ -1429,107 +1700,143 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (sync_print_precut)
             cout << "photon r9 = " << photonOneR9 << endl;
+        
+        dileptonPt = dileptonP4.Pt();
+        dileptonEta = dileptonP4.Eta();
+        dileptonPhi = dileptonP4.Phi();
+        dileptonM = dileptonP4.M();
+        dileptonDEta = fabs(leptonOneP4.Eta() - leptonTwoP4.Eta());
+        dileptonDPhi = fabs(leptonOneP4.DeltaPhi(leptonTwoP4));
+        dileptonDR = leptonOneP4.DeltaR(leptonTwoP4);
+
+        llgPt = llgP4.Pt();
+        llgEta = llgP4.Eta();
+        llgPhi = llgP4.Phi();
+        llgM = llgP4.M();
+        llgPtOverM = llgP4.Pt()/llgP4.M();
+        
+        l1PhotonDEta = fabs(leptonOneP4.Eta() - photonOneP4.Eta());
+        l1PhotonDPhi = fabs(leptonOneP4.DeltaPhi(photonOneP4));
+        l1PhotonDR = leptonOneP4.DeltaR(photonOneP4);
+        l2PhotonDEta = fabs(leptonTwoP4.Eta() - photonOneP4.Eta());
+        l2PhotonDPhi = fabs(leptonTwoP4.DeltaPhi(photonOneP4));
+        l2PhotonDR = leptonTwoP4.DeltaR(photonOneP4);
+
+        if (l1PhotonDR > l2PhotonDR) {
+            lPhotonDRMax = l1PhotonDR;
+            lPhotonDRMin = l2PhotonDR; 
+        }
+        else {
+            lPhotonDRMax = l2PhotonDR;
+            lPhotonDRMin = l1PhotonDR;
+        }
+
+        dileptonPhotonDEta = fabs(dileptonP4.Eta() - photonOneP4.Eta());
+        dileptonPhotonDPhi = fabs(dileptonP4.DeltaPhi(photonOneP4));
+        dileptonPhotonDR = dileptonP4.DeltaR(photonOneP4);
+        ptt = 2*fabs(dileptonP4.Px()*photonOneP4.Py() - photonOneP4.Px()*dileptonP4.Py())/llgP4.Pt();
+        
+        /*// calculate angles
+        TVector3 Xframe = llgP4.BoostVector();
+        TVector3 Z1frame = dileptonP4.BoostVector();
+
+        // "partons"
+        TLorentzVector kq, kqbar, veckq_in_Xframe, veckqbar_in_Xframe;
+        kq.SetPxPyPzE(0., 0., (llgP4.E() + llgP4.Pz())/2., (llgP4.E() + llgP4.Pz())/2.);
+        kqbar.SetPxPyPzE(0., 0., (llgP4.Pz() - llgP4.E())/2., (llgP4.E() - llgP4.Pz())/2.);
+        veckq_in_Xframe = kq;
+        veckqbar_in_Xframe = kqbar;
+        veckq_in_Xframe.Boost(-1*Xframe);
+        veckqbar_in_Xframe.Boost(-1*Xframe);
+   
+        // Z vectors
+        TLorentzVector vecz_in_Xframe = dileptonP4;
+        TLorentzVector vecg_in_Xframe = photonOneP4;
+        TLorentzVector vecz_in_Z1frame = dileptonP4;
+        vecz_in_Xframe.Boost(-1*Xframe);
+        vecg_in_Xframe.Boost(-1*Xframe);
+        vecz_in_Z1frame.Boost(-1*Z1frame);
+
+        // coord system in the CM frame
+        TVector3 uz_in_Xframe = vecz_in_Xframe.Vect().Unit();
+        TVector3 uy_in_Xframe = (veckq_in_Xframe.Vect().Unit().Cross(uz_in_Xframe.Unit())).Unit();
+        TVector3 ux_in_Xframe = (uy_in_Xframe.Unit().Cross(uz_in_Xframe.Unit())).Unit();
+        TRotation rotation;
+        rotation = rotation.RotateAxes(ux_in_Xframe, uy_in_Xframe, uz_in_Xframe).Inverse();
+
+        // for going to the Z frames from the CM frame, boost after transform
+        TLorentzVector vecz_in_Xframe_newcoords = vecz_in_Xframe;
+        vecz_in_Xframe_newcoords.Transform(rotation);
+        TVector3 Z1frame_from_Xframe_newcoords = vecz_in_Xframe_newcoords.BoostVector();
+
+        // define the positive and negative leptons
+        TLorentzVector l_minus, l_plus; 
+        if (leptonOneFlavor > 0) {
+            l_minus = leptonOneP4;
+            l_plus = leptonTwoP4;
+        }
+        else {
+            l_minus = leptonTwoP4;
+            l_plus = leptonOneP4;
+        }
+       
+        // little theta, phi in Z1 frame; first boost to CM, then redefine coords
+        TLorentzVector veclm_in_Z1frame = l_minus;
+        TLorentzVector veclp_in_Z1frame = l_plus;
+        veclm_in_Z1frame.Boost(-1*Xframe);
+        veclm_in_Z1frame.Transform(rotation);
+        veclp_in_Z1frame.Boost(-1*Xframe);
+        veclp_in_Z1frame.Transform(rotation);
+
+        // then boost to Z1
+        veclm_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
+        veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
+
+        // now get angles
+        zgPhi = veclm_in_Z1frame.Phi();
+        zgLittleTheta = veclm_in_Z1frame.CosTheta();
+
+        if (zgPhi < 0) 
+            zgPhi += 2*M_PI;
+
+        // Big Theta in X frame
+        TLorentzVector veczg_in_Xframe = llgP4;
+        veczg_in_Xframe.Transform(rotation);
+
+        TLorentzVector veczg_in_Xframe_newcoords = llgP4;
+        veczg_in_Xframe_newcoords.Transform(rotation);
+        zgBigTheta = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();*/
+    
+        // calculate angles like Ming-Yan
+        TLorentzVector l_minus, l_plus; 
+        if (leptonOneFlavor > 0) {
+            l_minus = leptonOneP4;
+            l_plus = leptonTwoP4;
+        }
+        else {
+            l_minus = leptonTwoP4;
+            l_plus = leptonOneP4;
+        }
+        
+        TVector3 llgFrame = -1*llgP4.BoostVector();
+        dileptonP4.Boost(llgFrame);
+        l_minus.Boost(llgFrame);
+        l_minus.Boost(dileptonP4.BoostVector());
+        zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
+        zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
+        
+        TVector3 ppAxis(0, 0, 1);
+        TVector3 zAxis = dileptonP4.Vect().Unit();
+        TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
+        TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
+
+        TRotation rotation;
+        rotation = rotation.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+
+        dileptonP4.Transform(rotation);
+        l_minus.Transform(rotation);
+        zgPhi = l_minus.Phi();
             
-        float electronOneMean, electronOneSigma, electronOneAlphaL, electronOneAlphaR, electronOnePowerL, electronOnePowerR;
-        float electronTwoMean, electronTwoSigma, electronTwoAlphaL, electronTwoAlphaR, electronTwoPowerL, electronTwoPowerR;
-        std::map<string, float> mva_inputs;
-
-        // BDT eval for electron one
-        mva_inputs["rho"] = fInfo->rhoJet;
-        mva_inputs["elEnergy"] = leptonOneP4.E();
-        mva_inputs["elScEta"] = electrons[electronOneIndex]->scEta;
-        mva_inputs["elScPhi"] = electrons[electronOneIndex]->scPhi;
-        mva_inputs["elR9"] = electrons[electronOneIndex]->r9;
-        mva_inputs["elE1x5OverE"] = electrons[electronOneIndex]->e1x5/leptonOneP4.E();
-        mva_inputs["elE2x5OverE"] = electrons[electronOneIndex]->e2x5/leptonOneP4.E();
-        mva_inputs["elE5x5OverE"] = electrons[electronOneIndex]->e5x5/leptonOneP4.E();
-        mva_inputs["elFBrem"] = electrons[electronOneIndex]->fbrem;
-        mva_inputs["elHOverE"] = electrons[electronOneIndex]->hovere;
-        mva_inputs["elSigmaIEtaIEta"] = electrons[electronOneIndex]->sieie;
-        mva_inputs["elPFIsoR04_CH"] = electrons[electronOneIndex]->chHadIso;
-        mva_inputs["elPFIsoR04_NH"] = electrons[electronOneIndex]->neuHadIso;
-        mva_inputs["elPFIsoR04_Pho"] = electrons[electronOneIndex]->gammaIso;
-        mva_inputs["elPFIsoR04_PU"] = electrons[electronOneIndex]->puIso;
-        EvalElectronEnergyResolution(mva_inputs, electronOneMean, electronOneSigma, 
-                                     electronOneAlphaL, electronOnePowerL, electronOneAlphaR, electronOnePowerR);
-        
-        leptonOneMean = electronOneMean;
-        leptonOneSigma = electronOneSigma;
-        leptonOneAlphaL = electronOneAlphaL;
-        leptonOneAlphaR = electronOneAlphaR;
-        leptonOnePowerL = electronOnePowerL;
-        leptonOnePowerR = electronOnePowerR;
-
-        // BDT eval for electron two
-        mva_inputs["elEnergy"] = leptonTwoP4.E();
-        mva_inputs["elScEta"] = electrons[electronTwoIndex]->scEta;
-        mva_inputs["elScPhi"] = electrons[electronTwoIndex]->scPhi;
-        mva_inputs["elR9"] = electrons[electronTwoIndex]->r9;
-        mva_inputs["elE1x5OverE"] = electrons[electronTwoIndex]->e1x5/leptonTwoP4.E();
-        mva_inputs["elE2x5OverE"] = electrons[electronTwoIndex]->e2x5/leptonTwoP4.E();
-        mva_inputs["elE5x5OverE"] = electrons[electronTwoIndex]->e5x5/leptonTwoP4.E();
-        mva_inputs["elFBrem"] = electrons[electronTwoIndex]->fbrem;
-        mva_inputs["elHOverE"] = electrons[electronTwoIndex]->hovere;
-        mva_inputs["elSigmaIEtaIEta"] = electrons[electronTwoIndex]->sieie;
-        mva_inputs["elPFIsoR04_CH"] = electrons[electronTwoIndex]->chHadIso;
-        mva_inputs["elPFIsoR04_NH"] = electrons[electronTwoIndex]->neuHadIso;
-        mva_inputs["elPFIsoR04_Pho"] = electrons[electronTwoIndex]->gammaIso;
-        mva_inputs["elPFIsoR04_PU"] = electrons[electronTwoIndex]->puIso;
-        EvalElectronEnergyResolution(mva_inputs, electronTwoMean, electronTwoSigma, 
-                                     electronTwoAlphaL, electronTwoPowerL, electronTwoAlphaR, electronTwoPowerR);
-        
-        leptonTwoMean = electronTwoMean;
-        leptonTwoSigma = electronTwoSigma;
-        leptonTwoAlphaL = electronTwoAlphaL;
-        leptonTwoAlphaR = electronTwoAlphaR;
-        leptonTwoPowerL = electronTwoPowerL;
-        leptonTwoPowerR = electronTwoPowerR;
-
-        // Kinematic Fit
-        TVector3 v1, v2;
-        v1.SetPtEtaPhi(electrons[electronOneIndex]->calibPt, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi);
-        v2.SetPtEtaPhi(electrons[electronTwoIndex]->calibPt, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi);
-        Double_t p[16];
-        p[0] = ELE_MASS*ELE_MASS;
-        p[1] = cos(v1.Angle(v2));
-        p[2] = electrons[electronOneIndex]->calibPt*cosh(electrons[electronOneIndex]->eta);
-        p[3] = electrons[electronTwoIndex]->calibPt*cosh(electrons[electronTwoIndex]->eta);
-        p[4] = electronOneMean;
-        p[5] = electronOneSigma;
-        p[6] = electronOneAlphaL;
-        p[7] = electronOnePowerL;
-        p[8] = electronOneAlphaR;
-        p[9] = electronOnePowerR;
-        p[10] = electronTwoMean;
-        p[11] = electronTwoSigma;
-        p[12] = electronTwoAlphaL;
-        p[13] = electronTwoPowerL;
-        p[14] = electronTwoAlphaR;
-        p[15] = electronTwoPowerR;
-        
-        double prefitProb1 = GetDoubleSidedCB(leptonOneP4.E()/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
-        double prefitProb2 = GetDoubleSidedCB(leptonTwoP4.E()/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
-        leptonOneProbPrefit = prefitProb1;
-        leptonTwoProbPrefit = prefitProb2;
-
-        double e1, e2;
-        find_optimized(p, e1, e2);
-        
-        double postfitProb1 = GetDoubleSidedCB(e1/p[2], p[4], p[5], p[6], p[7], p[8], p[9]); 
-        double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
-        leptonOneProbPostfit = postfitProb1;
-        leptonTwoProbPostfit = postfitProb2;
-
-        double electronOnePtKinFit = e1/cosh(electrons[electronOneIndex]->eta);
-        double electronTwoPtKinFit = e2/cosh(electrons[electronTwoIndex]->eta);
-
-        TLorentzVector electronOneP4KinFit, electronTwoP4KinFit;
-        electronOneP4KinFit.SetPtEtaPhiM(electronOnePtKinFit, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi, ELE_MASS);
-        electronTwoP4KinFit.SetPtEtaPhiM(electronTwoPtKinFit, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi, ELE_MASS);
-
-        leptonOneP4KinFit = electronOneP4KinFit;
-        leptonTwoP4KinFit = electronTwoP4KinFit; 
-
         if (!isData) {
 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
@@ -1589,7 +1896,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // muon transverse mass cut to reject ttbar and w+jets
      
         // event passed the selection; fill output variables
+        TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[0]->calibPt, photons[0]->eta, photons[0]->phi, 0.);
+        photonOnePt = photonOneP4.Pt();
+        photonOneEta = photonOneP4.Eta();
+        photonOnePhi = photonOneP4.Phi();
         photonOneMVA = photons[0]->mva;
         passElectronVeto = photons[0]->passElectronVeto;  
         if (!isData)
@@ -1615,26 +1926,34 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         tauMVA          = taus[tau_index]->rawIsoMVA3newDMwLT;
 
         if (muonP4.Pt() > tauP4.Pt()) {
-            leptonOneP4     = muonP4;
+            leptonOnePt     = muonP4.Pt();
+            leptonOneEta     = muonP4.Eta();
+            leptonOnePhi     = muonP4.Phi();
             leptonOneIso    = GetMuonIsolation(muons[0]);
             leptonOneFlavor = muons[0]->q*13;
             leptonOneDZ     = muons[0]->dz;
             leptonOneD0     = muons[0]->d0;
 
-            leptonTwoP4     = tauP4;
+            leptonTwoPt     = tauP4.Pt();
+            leptonTwoEta     = tauP4.Eta();
+            leptonTwoPhi     = tauP4.Phi();
             leptonTwoIso    = 0.;
             leptonTwoFlavor = 15*taus[tau_index]->q;
             leptonTwoDZ     = taus[tau_index]->dzLeadChHad;
             leptonTwoD0     = taus[tau_index]->d0LeadChHad;
         }
         else {
-            leptonOneP4     = tauP4;
+            leptonOnePt     = tauP4.Pt();
+            leptonOneEta     = tauP4.Eta();
+            leptonOnePhi     = tauP4.Phi();
             leptonOneIso    = 0.;
             leptonOneFlavor = 15*taus[tau_index]->q;
             leptonOneDZ     = taus[tau_index]->dzLeadChHad;
             leptonOneD0     = taus[tau_index]->d0LeadChHad;
 
-            leptonTwoP4     = muonP4;
+            leptonTwoPt     = muonP4.Pt();
+            leptonTwoEta     = muonP4.Eta();
+            leptonTwoPhi     = muonP4.Phi();
             leptonTwoIso    = GetMuonIsolation(muons[0]);
             leptonTwoFlavor = muons[0]->q*13;
             leptonTwoDZ     = muons[0]->dz;
@@ -1669,34 +1988,57 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     if (!isDijetTag) {
         if (jets.size() > 0) {
-            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOnePt = jets[0]->pt;
+            jetOneEta = jets[0]->eta;
+            jetOnePhi = jets[0]->phi;
+            jetOneM = jets[0]->mass;
             jetOneTag    = jets[0]->csv;
         } else {
-            jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+            jetOnePt = 0.;
+            jetOneEta = 0.;
+            jetOnePhi = 0.;
+            jetOneM = 0.;
             jetOneTag    = 0.;
         }
 
         if (jets.size() > 1) {
-            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoPt = jets[1]->pt;
+            jetTwoEta = jets[1]->eta;
+            jetTwoPhi = jets[1]->phi;
+            jetTwoM = jets[1]->mass;
             jetTwoTag    = jets[1]->csv;
         } else {
-            jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+            jetTwoPt = 0.;
+            jetTwoEta = 0.;
+            jetTwoPhi = 0.;
+            jetTwoM = 0.;
             jetTwoTag    = 0.;
         }
     }
  
     if (!isData && genLeptons.size() == 2) {
         genLeptonOneId = genLeptons[0]->pdgId;
-        genLeptonOneP4.SetPtEtaPhiM(genLeptons[0]->pt, genLeptons[0]->eta, genLeptons[0]->phi, genLeptons[0]->mass);
+        genLeptonOnePt = genLeptons[0]->pt;
+        genLeptonOneEta = genLeptons[0]->eta;
+        genLeptonOnePhi = genLeptons[0]->phi;
         genLeptonTwoId = genLeptons[1]->pdgId;
-        genLeptonTwoP4.SetPtEtaPhiM(genLeptons[1]->pt, genLeptons[1]->eta, genLeptons[1]->phi, genLeptons[1]->mass);
+        genLeptonTwoPt = genLeptons[1]->pt;
+        genLeptonTwoEta = genLeptons[1]->eta;
+        genLeptonTwoPhi = genLeptons[1]->phi;   
     }
     else {
-        genLeptonOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-        genLeptonTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+        genLeptonOnePt = 0.;
+        genLeptonOneEta = 0.;
+        genLeptonOnePhi = 0.;
+        genLeptonTwoPt = 0.;
+        genLeptonTwoEta = 0.;
+        genLeptonTwoPhi = 0.;
     }
 
+    TLorentzVector genPhotonP4;
     if (!isData && genPhotons.size() > 0) {
+        TLorentzVector photonOneP4;
+        photonOneP4.SetPtEtaPhiM(photonOnePt, photonOneEta, photonOnePhi, 0.);
         float min_phot_dr = 1000.;
         for (unsigned int i = 0; i < genPhotons.size(); i++) {
             TLorentzVector tmpGenPhot;
@@ -1709,6 +2051,55 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 min_phot_dr = this_dr;
             }
         }
+        genPhotonPt = genPhotonP4.Pt();
+        genPhotonEta = genPhotonP4.Eta();
+        genPhotonPhi = genPhotonP4.Phi();
+    }
+    else {
+        genPhotonPt = 0.;
+        genPhotonEta = 0.;
+        genPhotonPhi = 0.;
+    }
+        
+    // gen angles
+    if (!isData && genLeptons.size() == 2 && genPhotons.size() > 0) {        
+        TLorentzVector l_minus, l_plus; 
+        if (genLeptonOneId > 0) {
+            l_minus.SetPtEtaPhiM(genLeptonOnePt, genLeptonOneEta, genLeptonOnePhi, genLeptons[0]->mass);
+            l_plus.SetPtEtaPhiM(genLeptonTwoPt, genLeptonTwoEta, genLeptonTwoPhi, genLeptons[1]->mass);
+        }
+        else {
+            l_minus.SetPtEtaPhiM(genLeptonTwoPt, genLeptonTwoEta, genLeptonTwoPhi, genLeptons[1]->mass);
+            l_plus.SetPtEtaPhiM(genLeptonOnePt, genLeptonOneEta, genLeptonOnePhi, genLeptons[0]->mass);
+        }
+     
+        TLorentzVector dileptonP4Gen, llgP4Gen;
+        dileptonP4Gen = l_minus + l_plus;
+        llgP4Gen = dileptonP4Gen + genPhotonP4;
+
+        TVector3 llgFrame = -1*llgP4Gen.BoostVector();
+        dileptonP4Gen.Boost(llgFrame);
+        l_minus.Boost(llgFrame);
+        l_minus.Boost(dileptonP4Gen.BoostVector());
+        genLittleTheta = cos(dileptonP4Gen.Angle(l_minus.Vect()));
+        genBigTheta = cos(dileptonP4Gen.Angle(llgP4Gen.Vect()));
+        
+        TVector3 ppAxis(0, 0, 1);
+        TVector3 zAxis = dileptonP4Gen.Vect().Unit();
+        TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
+        TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
+
+        TRotation rotation;
+        rotation = rotation.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+
+        dileptonP4Gen.Transform(rotation);
+        l_minus.Transform(rotation);
+        genPhi = l_minus.Phi();
+    }
+    else {
+        genLittleTheta = -9.;
+        genBigTheta = -9.;
+        genPhi = -9.;
     }
 
     outTree->Fill();
@@ -1804,215 +2195,4 @@ float hzgAnalyzer::GetPhotonIsolation(const baconhep::TPhoton* pho, const float 
     float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
 
     return combIso;
-}
-
-void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_floats, std::map<string, int> mva_input_ints, 
-                                                float &mean, float &sigma, float &alphaL, float &powerL, float &alphaR, float &powerR) 
-{
-    // Evaluates and returns the estimate of muon energy resolution function.
-    // semi-parametric MVAs' inputs and outputs
-    static RooRealVar* invar[99]; // [varnum]
-    static RooAbsReal* mvaMean = NULL;
-    static RooAbsReal* mvaSigma;
-    static RooAbsReal* mvaAlphaL;
-    static RooAbsReal* mvaAlphaR;
-
-    // one-time MVA initialization: get trainings
-    if (!mvaMean) {
-        // current working directory
-        TDirectory* wd = gDirectory;
-        
-        const std::string cmssw_base = getenv("CMSSW_BASE");
-        string fileName;
-        fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_training.root";
-        TFile f(fileName.c_str());
-        if (f.IsZombie())
-            FATAL("TFile::Open() failed");
-
-        // cd back into previous current working directory
-        if (wd) wd->cd();
-        else gDirectory = 0;
-
-        RooWorkspace* ws = dynamic_cast<RooWorkspace*>(f.Get("ws_mva_muons"));
-        if (!ws) FATAL("TFile::Get() failed");
-
-        invar[0] = ws->var("var01");
-        invar[1] = ws->var("var02");
-        invar[2] = ws->var("var03");
-        invar[3] = ws->var("var04");
-        invar[4] = ws->var("var05");
-        invar[5] = ws->var("var06");
-        invar[6] = ws->var("var07");
-        invar[7] = ws->var("var08");
-        invar[8] = ws->var("var09");
-        invar[9] = ws->var("var10");
-        invar[10] = ws->var("var11");
-        invar[11] = ws->var("var12");
-
-        mvaMean = ws->function("limMean");
-        mvaSigma = ws->function("limSigma");
-        mvaAlphaL = ws->function("limAlphaL");
-        mvaAlphaR = ws->function("limAlphaR");
-
-    } // one-time initialization
-
-    // load necessary tree branches
-    float rho                      = mva_input_floats["rho"];
-    float muEnergy                 = mva_input_floats["muEnergy"];
-    float muEta                    = mva_input_floats["muEta"];
-    float muChi2NDF                = mva_input_floats["muTkChi2"];
-    Int_t muNumberOfValidTrkLayers = mva_input_ints["muNumberOfValidTrkLayers"];
-    Int_t muNumberOfValidPixelHits = mva_input_ints["muNumberOfValidPixelHits"];
-    Int_t muNumberOfValidMuonHits  = mva_input_ints["muNumberOfValidMuonHits"];
-    Int_t muStations               = mva_input_ints["muStations"];
-    float muPFIsoR04_CH            = mva_input_floats["muPFIsoR04_CH"];
-    float muPFIsoR04_NH            = mva_input_floats["muPFIsoR04_NH"];
-    float muPFIsoR04_Pho           = mva_input_floats["muPFIsoR04_Pho"];
-    float muPFIsoR04_PU            = mva_input_floats["muPFIsoR04_PU"];
-
-    // set input variables associated with the GBRLikelihood trainings
-    *invar[0] = rho;
-    *invar[1] = muEnergy;
-    *invar[2] = muEta;
-    *invar[3] = muChi2NDF;
-    *invar[4] = muNumberOfValidTrkLayers;
-    *invar[5] = muNumberOfValidPixelHits;
-    *invar[6] = muNumberOfValidMuonHits;
-    *invar[7] = muStations;
-    *invar[8] = muPFIsoR04_CH;
-    *invar[9] = muPFIsoR04_NH;
-    *invar[10] = muPFIsoR04_Pho;
-    *invar[11] = muPFIsoR04_PU;
-
-    mean = mvaMean->getVal();
-    sigma = mvaSigma->getVal();
-    alphaL = mvaAlphaL->getVal();
-    alphaR = mvaAlphaR->getVal();
-
-    // NOTE: negative = infinite; powers were fixed at the training level
-    powerL = -1;
-    powerR = -1;
-
-}
-
-void hzgAnalyzer::EvalElectronEnergyResolution(std::map<string, float> mva_inputs, float &mean, float &sigma, 
-                                                    float &alphaL, float &powerL, float &alphaR, float &powerR) 
-{
-    // Evaluates and returns the estimate of muon energy resolution function.
-    // semi-parametric MVAs' inputs and outputs
-    static RooRealVar* invar[99]; // [varnum]
-    static RooAbsReal* mvaMean = NULL;
-    static RooAbsReal* mvaSigma;
-    static RooAbsReal* mvaAlphaL;
-    static RooAbsReal* mvaAlphaR;
-    static RooAbsReal* mvaPowerL;
-    static RooAbsReal* mvaPowerR;
-
-    // one-time MVA initialization: get trainings
-    if (!mvaMean) {
-        // current working directory
-        TDirectory* wd = gDirectory;
-        
-        const std::string cmssw_base = getenv("CMSSW_BASE");
-        string fileName;
-        fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_training.root";
-        TFile f(fileName.c_str());
-        if (f.IsZombie())
-            FATAL("TFile::Open() failed");
-
-        // cd back into previous current working directory
-        if (wd) wd->cd();
-        else gDirectory = 0;
-
-        RooWorkspace* ws = dynamic_cast<RooWorkspace*>(f.Get("ws_mva_electrons"));
-        if (!ws) FATAL("TFile::Get() failed");
-
-        invar[0] = ws->var("var01");
-        invar[1] = ws->var("var02");
-        invar[2] = ws->var("var03");
-        invar[3] = ws->var("var04");
-        invar[4] = ws->var("var05");
-        invar[5] = ws->var("var06");
-        invar[6] = ws->var("var07");
-        invar[7] = ws->var("var08");
-        invar[8] = ws->var("var09");
-        invar[9] = ws->var("var10");
-        invar[10] = ws->var("var11");
-        invar[11] = ws->var("var12");
-        invar[12] = ws->var("var13");
-        invar[13] = ws->var("var14");
-        invar[14] = ws->var("var15");
-
-        mvaMean = ws->function("limMean");
-        mvaSigma = ws->function("limSigma");
-        mvaAlphaL = ws->function("limAlphaL");
-        mvaAlphaR = ws->function("limAlphaR");
-        mvaPowerL = ws->function("limPowerL");
-        mvaPowerR = ws->function("limPowerR");
-
-    } // one-time initialization
-
-    // load necessary tree branches
-    float rho = mva_inputs["rho"];
-    float elEnergy = mva_inputs["elEnergy"];
-    float elScEta = mva_inputs["elScEta"];
-    float elScPhi = mva_inputs["elScPhi"];
-    float elR9 = mva_inputs["elR9"];
-    float elE1x5OverE = mva_inputs["elE1x5OverE"];
-    float elE2x5OverE = mva_inputs["elE2x5OverE"];
-    float elE5x5OverE = mva_inputs["elE5x5OverE"];
-    float elFBrem = mva_inputs["elFBrem"];
-    float elHOverE = mva_inputs["elHOverE"];
-    float elSigmaIEtaIEta = mva_inputs["elSigmaIEtaIEta"];
-    float elPFIsoR04_CH = mva_inputs["elPFIsoR04_CH"];
-    float elPFIsoR04_NH = mva_inputs["elPFIsoR04_NH"];
-    float elPFIsoR04_Pho = mva_inputs["elPFIsoR04_Pho"];
-    float elPFIsoR04_PU = mva_inputs["elPFIsoR04_PU"];
-
-    // set input variables associated with the GBRLikelihood trainings
-    *invar[0] = rho;
-    *invar[1] = elEnergy;
-    *invar[2] = elScEta;
-    *invar[3] = elScPhi;
-    *invar[4] = elR9;
-    *invar[5] = elE1x5OverE;
-    *invar[6] = elE2x5OverE;
-    *invar[7] = elE5x5OverE;
-    *invar[8] = elFBrem;
-    *invar[9] = elHOverE;
-    *invar[10] = elSigmaIEtaIEta;
-    *invar[11] = elPFIsoR04_CH;
-    *invar[12] = elPFIsoR04_NH;
-    *invar[13] = elPFIsoR04_Pho;
-    *invar[14] = elPFIsoR04_PU;
-
-    mean = mvaMean->getVal();
-    sigma = mvaSigma->getVal();
-    alphaL = mvaAlphaL->getVal();
-    alphaR = mvaAlphaR->getVal();
-    powerL = mvaPowerL->getVal();
-    powerR = mvaPowerR->getVal();
-}
-
-void hzgAnalyzer::find_optimized(double* p, double &e1, double& e2)
-{
-   // Returns best-fitted (most probable) energies.
-
-   static TF2* fun = NULL;
-
-   // one-time initialization
-   if (!fun) {
-      fun = new TF2("fun", NegativeProbability, 1, 2000, 1, 2000, 16);
-      fun->SetNpx(50);
-      fun->SetNpy(50);
-   }
-
-   for (int i = 0; i < 16; i++)
-      fun->SetParameter(i, p[i]);
-
-   // limit the search range by +-3sigma regions
-   fun->SetRange(p[2] * (1 - 3 * p[5]), p[3] * (1 - 3 * p[11]),
-                 p[2] * (1 + 3 * p[5]), p[3] * (1 + 3 * p[11]));
-
-   fun->GetMinimumXY(e1, e2);
 }

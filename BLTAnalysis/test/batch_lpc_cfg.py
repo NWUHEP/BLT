@@ -9,8 +9,8 @@ executable = 'execBatch_lpc.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'zjets', 'diboson', 't', 'wjets']#, 'qcd']
+data_samples = []#'single_mu', 'single_el']
+mc_samples   = ['ttbar']#, 'zjets', 'diboson', 't', 'wjets']#, 'qcd']
 
 data_dict = {}
 mc_dict = {}

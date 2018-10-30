@@ -18,14 +18,21 @@ export SCRAM_ARCH=slc6_amd64_gcc530
 export CMSSW_VERSION=CMSSW_8_0_20
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-#scram project CMSSW $CMSSW_VERSION
-#cd $CMSSW_VERSION/src
-#eval `scram runtime -sh`
-
+# temporary fix
 tar -xzf source.tar.gz
-cd $CMSSW_VERSION/src/
-scramv1 b ProjectRename
+mv $CMSSW_VERSION tmp
+scram project CMSSW $CMSSW_VERSION
+cp -r tmp/src/* $CMSSW_VERSION/src
+cd $CMSSW_VERSION/src
+eval `scram runtime -sh`
+
+# this used to work, now it don't
+#tar -xzf source.tar.gz
+#cd $CMSSW_VERSION/src/
+#scramv1 b ProjectRename
+
 cmsenv
+scram b -j8
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
@@ -35,8 +42,8 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-#DileptonSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#DileptonSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###

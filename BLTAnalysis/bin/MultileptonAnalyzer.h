@@ -103,6 +103,7 @@ public:
     unsigned nJetsCut, nJetsJERUp, nJetsJERDown;
     unsigned nBJetsCut, nBJetsJERUp, nBJetsJERDown;
     unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
+    unsigned nBJetsCTagUp, nBJetsCTagDown;
 
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;

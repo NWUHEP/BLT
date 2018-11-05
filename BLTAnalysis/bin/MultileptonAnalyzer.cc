@@ -1980,6 +1980,7 @@ void MultileptonAnalyzer::ResetJetCounters()
     nJetsJERUp     = nJetsJERDown     = 0;
     nBJetsJERUp    = nBJetsJERDown    = 0;
     nBJetsBTagUp   = nBJetsBTagDown   = 0;
+    nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
 
     std::fill(nJetsJESUp.begin(), nJetsJESUp.end(), 0);
@@ -1998,19 +1999,25 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
 
         // nominal
         ++nJets;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) ++nBJets;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) ++nBJets;
 
         // b tag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, rNumber)) ++nBJetsBTagUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, 0, rNumber)) ++nBJetsBTagUp;
              
         // b tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, rNumber)) ++nBJetsBTagDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, 0, rNumber)) ++nBJetsBTagDown;
+
+        // c tag up
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, 0, rNumber)) ++nBJetsCTagUp;
+             
+        // c tag down
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, 0, rNumber)) ++nBJetsCTagDown;
 
         // misttag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, rNumber)) ++nBJetsMistagUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 1, rNumber)) ++nBJetsMistagUp;
         
         // mistag down
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, rNumber)) ++nBJetsMistagDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, -1, rNumber)) ++nBJetsMistagDown;
     }
 
     double jec = particleSelector->JetCorrector(jet, "NONE");
@@ -2022,7 +2029,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
         jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
         if (jet->pt > 30) {
             ++nJetsJESUp[count];
-            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
                 ++nBJetsJESUp[count];
             } 
         }
@@ -2032,7 +2039,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
         //cout << jet->pt << endl;
         if (jet->pt > 30) {
             ++nJetsJESDown[count];
-            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
                 ++nBJetsJESDown[count];
             }
         }
@@ -2048,7 +2055,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     jet->pt = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
             ++nBJetsJERUp;
         }     
     }
@@ -2059,7 +2066,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     jet->pt     = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
             ++nBJetsJERDown;
         } 
     }

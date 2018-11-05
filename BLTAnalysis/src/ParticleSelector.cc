@@ -490,7 +490,7 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int mistagSyst, float rNumber) const
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int ctagSyst, int mistagSyst, float rNumber) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
@@ -549,9 +549,9 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
 
             mcEff = 0.03;
             float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
-            if (btagSyst == 1) {
+            if (ctagSyst == 1) {
                 btagSF += scale[ptBin];
-            } else if (btagSyst == -1) {
+            } else if (ctagSyst == -1) {
                 btagSF -= scale[ptBin];
             }
         } else {

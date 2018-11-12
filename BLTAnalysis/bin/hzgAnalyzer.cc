@@ -319,7 +319,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             << std::endl;
    
     //bool sync_print = false;
-    bool sync_print_precut = true;
+    bool sync_print_precut = false;
 
     if (sync_print_precut) {          
         //ULong64_t myEventNumber = 4368674045;
@@ -2212,20 +2212,27 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             eventWeight *= elIDWeightOne;
             eventWeight *= elIDWeightTwo;
 
-            pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
-            pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
-            pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
-            pair<float, float> eff22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
+            //pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
+            //pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
+            //pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
+            //pair<float, float> eff22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
+            
+            float sf11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
+            float sf12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
+            float sf21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
+            float sf22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
 
-            float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
-            float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
+            //float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
+            //float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
+            float prod1 = sf11*sf22;
+            float prod2 = sf21*sf12;
             if (prod1 > prod2) {
-                elTrigWeightOne = eff11.first/eff11.second;
-                elTrigWeightTwo = eff22.first/eff22.second;
+                elTrigWeightOne = sf11;
+                elTrigWeightTwo = sf22;
             }
             else {
-                elTrigWeightOne = eff21.first/eff21.second;
-                elTrigWeightTwo = eff12.first/eff12.second;
+                elTrigWeightOne = sf21;
+                elTrigWeightTwo = sf12;
             }
 
             triggerWeight = elTrigWeightOne*elTrigWeightTwo;

@@ -164,11 +164,13 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* f_elTrigSF_leg1 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleg_leg1_DATA = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffData2D");
     _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D"); 
+    _sf_doubleg_leg1 = (TH2F *)f_elTrigSF_leg1->Get("EGamma_SF2D");
 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
     TFile* f_elTrigSF_leg2 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleg_leg2_DATA = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffData2D");
     _eff_doubleg_leg2_MC   = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffMC2D");
+    _sf_doubleg_leg2 = (TH2F *)f_elTrigSF_leg2->Get("EGamma_SF2D");
 
     // double muon trigger efficiencies
    
@@ -314,7 +316,7 @@ std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLor
     return std::make_pair(effData, effMC);
 }
 
-std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
+/*std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
 {
     float effData = 1;
     float effMC = 1;
@@ -340,6 +342,19 @@ std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerNa
     }
 
     return std::make_pair(effData, effMC);
+}*/
+
+float WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
+{
+    float weight = 1.;
+    float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
+
+    if (triggerName == "HLT_DoubleEG_leg1") 
+        weight *= _sf_doubleg_leg1->GetBinContent(_sf_doubleg_leg1->FindBin(electron.scEta, tmpElePt));
+    else if (triggerName == "HLT_DoubleEG_leg2") 
+        weight *= _sf_doubleg_leg2->GetBinContent(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
+
+    return weight;
 }
 
 /*std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const

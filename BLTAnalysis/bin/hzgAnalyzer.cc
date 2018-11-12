@@ -96,10 +96,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("evtNumber", &evtNumber, "eventNumber/l");
     outTree->Branch("lumiSection", &lumiSection);
     outTree->Branch("triggerStatus", &triggerStatus);
-    outTree->Branch("eventWeight", &eventWeight);
-    outTree->Branch("puWeight", &puWeight);
-    outTree->Branch("genWeight", &genWeight);
-    outTree->Branch("triggerWeight", &triggerWeight);
     outTree->Branch("nPV", &nPV);
     outTree->Branch("nPU", &nPU);
     outTree->Branch("nPartons", &nPartons);
@@ -114,6 +110,21 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("ht", &ht);
     outTree->Branch("htPhi", &htPhi);
     outTree->Branch("htSum", &htSum);
+
+    // weights
+    outTree->Branch("genWeight", &genWeight);
+    outTree->Branch("eventWeight", &eventWeight);
+    outTree->Branch("puWeight", &puWeight);
+    outTree->Branch("triggerWeight", &triggerWeight);
+    outTree->Branch("elIDWeightOne", &elIDWeightOne);
+    outTree->Branch("elIDWeightTwo", &elIDWeightTwo);
+    outTree->Branch("elTrigWeightOne", &elTrigWeightOne);
+    outTree->Branch("elTrigWeightTwo", &elTrigWeightTwo);
+    outTree->Branch("muonIDWeightOne", &muonIDWeightOne);
+    outTree->Branch("muonIDWeightTwo", &muonIDWeightTwo);
+    outTree->Branch("muonTrigWeightOne", &muonTrigWeightOne);
+    outTree->Branch("muonTrigWeightTwo", &muonTrigWeightTwo);
+    outTree->Branch("photonIDWeight", &photonIDWeight);
 
     // leptons
     outTree->Branch("leptonOnePt", &leptonOnePt);
@@ -145,6 +156,7 @@ void hzgAnalyzer::Begin(TTree *tree)
 
     outTree->Branch("isLeptonTag", &isLeptonTag);
     outTree->Branch("isDijetTag", &isDijetTag);
+    outTree->Branch("isTightDijetTag", &isTightDijetTag);
 
     // photons
     outTree->Branch("photonOnePt", &photonOnePt);
@@ -1051,13 +1063,21 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     isLeptonTag = true;
             }
         }
-
+        
         // checking for dijet tag
         isDijetTag = false;
+        isTightDijetTag = false;
+        unsigned int jetOneIndex = 0;
+        unsigned int jetTwoIndex = 0;
+        unsigned int purityLevel = 0;
         TLorentzVector jetOneP4, jetTwoP4;
         //TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
         if (!isLeptonTag) {
-            if (jets.size() > 1) {
+            if (sync_print_precut) 
+                cout << "event is not lepton tagged; checking dijet tag" << endl;
+            if (jets.size() > 1)  {
+                if (sync_print_precut)
+                    cout << "event has at least two jets" << endl;
                 for (unsigned int i = 0; i < jets.size(); ++i) {
                     for (unsigned int j = i+1; j < jets.size(); ++j) {
                         TLorentzVector tempJetOne;
@@ -1066,7 +1086,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
                         TLorentzVector tempDijet = tempJetOne + tempJetTwo;
                         float zeppen = llgP4.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
-                        if (    tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                        if (    purityLevel < 5  
+                            &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
                             &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
@@ -1074,16 +1095,67 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
                            ) {
                             isDijetTag = true;
-                            jetOneP4.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
-                            jetTwoP4.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
+                            isTightDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 5;
                             break;
                         }
+                        else if (   purityLevel < 4 
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
+                                &&  fabs(zeppen) <= 2.5
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 4;
+                        }
+                        else if (   purityLevel < 3 
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 3;
+                        }
+                        else if (   purityLevel < 2
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 2;
+                        }
+                        else if (   purityLevel < 1
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 1;
+                        }
+                                
                     }
                 }
             }
         }
 
         if (isDijetTag) {
+            jetOneP4.SetPtEtaPhiM(jets[jetOneIndex]->pt, jets[jetOneIndex]->eta, jets[jetOneIndex]->phi, jets[jetOneIndex]->mass);
+            jetTwoP4.SetPtEtaPhiM(jets[jetTwoIndex]->pt, jets[jetTwoIndex]->eta, jets[jetTwoIndex]->phi, jets[jetTwoIndex]->mass);
             jetOnePt = jetOneP4.Pt();
             jetOneEta = jetOneP4.Eta();
             jetOnePhi = jetOneP4.Phi();
@@ -1409,8 +1481,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             
         if (!isData) {
 
-            eventWeight *= weights->GetHZZMuonIDEff(*muons[muonOneIndex]); 
-            eventWeight *= weights->GetHZZMuonIDEff(*muons[muonTwoIndex]);
+            muonIDWeightOne = weights->GetHZZMuonIDEff(*muons[muonOneIndex]); 
+            muonIDWeightTwo = weights->GetHZZMuonIDEff(*muons[muonTwoIndex]);
+            eventWeight *= muonIDWeightOne;
+            eventWeight *= muonIDWeightTwo;
             //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
             //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
 
@@ -1418,12 +1492,34 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             pair<float, float> eff12 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonTwoIndex]);
             pair<float, float> eff21 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg2", *muons[muonOneIndex]);
             pair<float, float> eff22 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg2", *muons[muonTwoIndex]);
-            float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
-            float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
-            triggerWeight = eff_data/eff_mc;
+            
+            if (leptonTwoPt < 20.) {
+                muonTrigWeightOne = eff11.first/eff11.second;
+                muonTrigWeightTwo = eff22.first/eff22.second;
+            }
+            else {
+                float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
+                float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
+                if (prod1 > prod2) {
+                    muonTrigWeightOne = eff11.first/eff11.second;
+                    muonTrigWeightTwo = eff22.first/eff22.second;
+                }
+                else {
+                    muonTrigWeightOne = eff21.first/eff21.second;
+                    muonTrigWeightTwo = eff12.first/eff12.second;
+                }
+            }
+
+            triggerWeight = muonTrigWeightOne*muonTrigWeightTwo;
             eventWeight *= triggerWeight;
             
-            eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
+            //float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
+            //float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
+            //triggerWeight = eff_data/eff_mc;
+            //eventWeight *= triggerWeight; 
+           
+            photonIDWeight = weights->GetPhotonMVAIdEff(*photons[photonIndex]); 
+            eventWeight *= photonIDWeight;
         }
 
         if (sync_print_precut) {
@@ -1660,6 +1756,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         
         // checking for dijet tag
         isDijetTag = false;
+        isTightDijetTag = false;
+        unsigned int jetOneIndex = 0;
+        unsigned int jetTwoIndex = 0;
+        unsigned int purityLevel = 0;
         TLorentzVector jetOneP4, jetTwoP4;
         //TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
         if (!isLeptonTag) {
@@ -1676,19 +1776,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
                         TLorentzVector tempDijet = tempJetOne + tempJetTwo;
                         float zeppen = llgP4.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
-                        if (sync_print_precut) {
-                            std::cout << "relevant variables for dijet tag, jets: " << i << ", " << j << endl;
-                            std::cout << "pt1, eta1, phi1, pt2, eta2, phi2: " << tempJetOne.Pt() << ", "
-                                      << tempJetOne.Eta() << ", " << tempJetOne.Phi() << ", " 
-                                      << tempJetTwo.Pt() << ", " << tempJetTwo.Eta() << ", " << tempJetTwo.Phi() << endl;
-                            std::cout << "drj1l1, drj1l2, drj2l1, drj2l2, drj1g, drj2g, dEta, zeppen, m_dijet, dphi: "
-                                      << tempJetOne.DeltaR(leptonOneP4) << ", " << tempJetOne.DeltaR(leptonTwoP4) << ", "
-                                      << tempJetTwo.DeltaR(leptonOneP4) << ", " << tempJetTwo.DeltaR(leptonTwoP4) << ", "
-                                      << tempJetOne.DeltaR(photonOneP4) << ", " << tempJetTwo.DeltaR(photonOneP4) << ", "
-                                      << fabs(tempJetOne.Eta() - tempJetTwo.Eta()) << ", " << zeppen << ", "
-                                      << tempDijet.M() << ", " << fabs(tempDijet.DeltaPhi(llgP4)) << endl;
-                        }
-                        if (    tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                        if (    purityLevel < 5  
+                            &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
                             &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
@@ -1696,18 +1785,68 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
                            ) {
                             isDijetTag = true;
-                            if (sync_print_precut)
-                                cout << "event passes the dijet tag" << endl;
-                            jetOneP4.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
-                            jetTwoP4.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
+                            isTightDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 5;
                             break;
                         }
+                        else if (   purityLevel < 4 
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
+                                &&  fabs(zeppen) <= 2.5
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 4;
+                        }
+                        else if (   purityLevel < 3 
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 3;
+                        }
+                        else if (   purityLevel < 2
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 2;
+                        }
+                        else if (   purityLevel < 1
+                                &&  tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetOne.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetTwo.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                                &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                                ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            purityLevel = 1;
+                        }
+                                
                     }
                 }
             }
         }
+
         
         if (isDijetTag) {
+            jetOneP4.SetPtEtaPhiM(jets[jetOneIndex]->pt, jets[jetOneIndex]->eta, jets[jetOneIndex]->phi, jets[jetOneIndex]->mass);
+            jetTwoP4.SetPtEtaPhiM(jets[jetTwoIndex]->pt, jets[jetTwoIndex]->eta, jets[jetTwoIndex]->phi, jets[jetTwoIndex]->mass);
             jetOnePt = jetOneP4.Pt();
             jetOneEta = jetOneP4.Eta();
             jetOnePhi = jetOneP4.Phi();
@@ -2038,19 +2177,37 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             
         if (!isData) {
 
-            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
-            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 
+            elIDWeightOne = weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
+            elIDWeightTwo = weights->GetHZZElectronRecoIdEff(*electrons[electronOneIndex]); 
+            eventWeight *= elIDWeightOne;
+            eventWeight *= elIDWeightTwo;
 
             pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
             pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
             pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
             pair<float, float> eff22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
-            float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
-            float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
-            triggerWeight = eff_data/eff_mc;
+
+            float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
+            float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
+            if (prod1 > prod2) {
+                elTrigWeightOne = eff11.first/eff11.second;
+                elTrigWeightTwo = eff22.first/eff22.second;
+            }
+            else {
+                elTrigWeightOne = eff21.first/eff21.second;
+                elTrigWeightTwo = eff12.first/eff12.second;
+            }
+
+            triggerWeight = elTrigWeightOne*elTrigWeightTwo;
             eventWeight *= triggerWeight;
-            
-            eventWeight *= weights->GetPhotonMVAIdEff(*photons[photonIndex]);
+
+            //float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
+            //float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
+            //riggerWeight = eff_data/eff_mc;
+            //eventWeight *= triggerWeight;
+           
+            photonIDWeight = weights->GetPhotonMVAIdEff(*photons[photonIndex]); 
+            eventWeight *= photonIDWeight;
         
         } 
     } // end elelg selection

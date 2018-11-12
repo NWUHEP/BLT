@@ -89,10 +89,18 @@ public:
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
     Bool_t triggerStatus;
-    Float_t eventWeight, triggerWeight, puWeight, nPU;
-    Int_t genWeight;
+    Float_t nPU;
     Float_t xPV, yPV, zPV;
     UInt_t nJets, nCentralJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+   
+    // weights
+    Int_t genWeight;
+    Float_t eventWeight, triggerWeight, puWeight;
+    Float_t elIDWeightOne, elIDWeightTwo;
+    Float_t elTrigWeightOne, elTrigWeightTwo;
+    Float_t muonIDWeightOne, muonIDWeightTwo;
+    Float_t muonTrigWeightOne, muonTrigWeightTwo;
+    Float_t photonIDWeight;
 
     // physics object Lorentz vectors
     Float_t leptonOnePt, leptonOneEta, leptonOnePhi;
@@ -122,6 +130,7 @@ public:
 
     Bool_t isLeptonTag;
     Bool_t isDijetTag;
+    Bool_t isTightDijetTag;
 
     // jet data
     Float_t jetOnePt, jetOneEta, jetOnePhi, jetOneM;

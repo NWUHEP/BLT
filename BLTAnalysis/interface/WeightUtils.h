@@ -85,6 +85,7 @@ class WeightUtils: public TObject {
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5], *_hzz_eleSF_ID[13];
 
         TGraphErrors *_mva_gammaSF_ID[5];
+        TH2F *_mva_gammaSF;
 
         TGraph *_photon_r9_barrel, *_photon_r9_endcap;
 

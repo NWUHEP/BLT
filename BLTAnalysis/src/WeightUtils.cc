@@ -252,6 +252,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _mva_gammaSF_ID[1] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_1");
     _mva_gammaSF_ID[2] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_2");
     _mva_gammaSF_ID[3] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_3");
+    _mva_gammaSF = (TH2F *)f_mva_gammaIdSF->Get("EGamma_SF2D");
 
     // photon r9 reweighting
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9_reweighting_2016.root";
@@ -512,24 +513,25 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
 
 float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
 {
-    float binningPt[] = {20., 35., 50., 90., 150.};
+    /*float binningPt[] = {20., 35., 50., 90., 150.};
     int ptBin = 0;
     for (int i = 0; i < 4; ++i) {
         if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
             ptBin = i;
             break;
         }
-    }
+    }*/
 
     float weight = 1;
-    if (photon.calibPt < 150.) {
-        weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
-    }
+    //if (photon.calibPt < 150.) {
+    //    weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
+    //}
+    weight *= _mva_gammaSF->GetBinContent(_mva_gammaSF->FindBin(photon.scEta, photon.pt));
 
     // electron veto scale factor
-    if (fabs(photon.scEta) < 1.444)
+    if (fabs(photon.scEta) <= 1.49)
         weight *= 0.9938;
-    else if (fabs(photon.scEta) > 1.566)
+    else if (fabs(photon.scEta) > 1.49)
         weight *= 0.9875;
     
     return weight;

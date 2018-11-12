@@ -46,7 +46,8 @@ class WeightUtils: public TObject {
         float   GetPUWeight(float);
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
         pair<float, float>   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
-        pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
+        //pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
+        float   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
         float   GetLooseMuonIDEff(TLorentzVector&) const;
@@ -81,8 +82,11 @@ class WeightUtils: public TObject {
         TGraphAsymmErrors *_muSF_Loose_ISO_DATA_GH[4], *_muSF_Loose_ISO_MC_GH[4]; 
         TGraphAsymmErrors *_eff_doubleMu_leg1_DATA[4], *_eff_doubleMu_leg1_MC[4];
         TGraphAsymmErrors *_eff_doubleMu_leg2_DATA[4], *_eff_doubleMu_leg2_MC[4];
+        TH1F *_sf_doubleMu_leg1[4];
+        TH1F *_sf_doubleMu_leg2[4];
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5], *_hzz_eleSF_ID[13];
+        TH2F *_eleSF_RECO_2D, *_hzz_eleSF_ID_2D;
 
         TGraphErrors *_mva_gammaSF_ID[5];
         TH2F *_mva_gammaSF;

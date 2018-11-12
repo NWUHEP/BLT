@@ -177,47 +177,56 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* f_DoubleMuTrigSF_leg1_0 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg1_DATA[0] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_0->Get("eff_data");
     _eff_doubleMu_leg1_MC[0]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_0->Get("eff_mc"); 
+    _sf_doubleMu_leg1[0] = (TH1F *)f_DoubleMuTrigSF_leg1_0->Get("scale_factor");
 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta09to12.root";
     TFile* f_DoubleMuTrigSF_leg1_1 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg1_DATA[1] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_1->Get("eff_data");
     _eff_doubleMu_leg1_MC[1]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_1->Get("eff_mc"); 
+    _sf_doubleMu_leg1[1] = (TH1F *)f_DoubleMuTrigSF_leg1_1->Get("scale_factor");
     
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta12to21.root";
     TFile* f_DoubleMuTrigSF_leg1_2 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg1_DATA[2] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_2->Get("eff_data");
     _eff_doubleMu_leg1_MC[2]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_2->Get("eff_mc"); 
+    _sf_doubleMu_leg1[2] = (TH1F *)f_DoubleMuTrigSF_leg1_2->Get("scale_factor");
     
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu17Leg_Eta21to24.root";
     TFile* f_DoubleMuTrigSF_leg1_3 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg1_DATA[3] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_3->Get("eff_data");
     _eff_doubleMu_leg1_MC[3]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg1_3->Get("eff_mc"); 
+    _sf_doubleMu_leg1[3] = (TH1F *)f_DoubleMuTrigSF_leg1_3->Get("scale_factor");
 
     // leg 2 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta0to09.root";
     TFile* f_DoubleMuTrigSF_leg2_0 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg2_DATA[0] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_0->Get("eff_data");
     _eff_doubleMu_leg2_MC[0]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_0->Get("eff_mc"); 
+    _sf_doubleMu_leg2[0] = (TH1F *)f_DoubleMuTrigSF_leg2_0->Get("scale_factor");
 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta09to12.root";
     TFile* f_DoubleMuTrigSF_leg2_1 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg2_DATA[1] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_1->Get("eff_data");
     _eff_doubleMu_leg2_MC[1]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_1->Get("eff_mc"); 
+    _sf_doubleMu_leg2[1] = (TH1F *)f_DoubleMuTrigSF_leg2_1->Get("scale_factor");
     
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta12to21.root";
     TFile* f_DoubleMuTrigSF_leg2_2 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg2_DATA[2] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_2->Get("eff_data");
     _eff_doubleMu_leg2_MC[2]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_2->Get("eff_mc"); 
+    _sf_doubleMu_leg2[2] = (TH1F *)f_DoubleMuTrigSF_leg2_2->Get("scale_factor");
     
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doublemuon_trigger/sf_Mu8Leg_Eta21to24.root";
     TFile* f_DoubleMuTrigSF_leg2_3 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleMu_leg2_DATA[3] = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_3->Get("eff_data");
     _eff_doubleMu_leg2_MC[3]   = (TGraphAsymmErrors*)f_DoubleMuTrigSF_leg2_3->Get("eff_mc"); 
+    _sf_doubleMu_leg2[3] = (TH1F *)f_DoubleMuTrigSF_leg2_3->Get("scale_factor");
 
     // electron reco efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
+    _eleSF_RECO_2D = (TH2F *)f_eleRecoSF->Get("EGamma_SF2D");
 
     // electron id efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
@@ -244,6 +253,8 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _hzz_eleSF_ID[10] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_10");
     _hzz_eleSF_ID[11] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_11");
     _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");
+
+    _hzz_eleSF_ID_2D = (TH2F *)f_hzz_eleIdSF->Get("EGamma_SF2D");
 
     // photon mva id (90%) efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_id/photon_mva_id_2016.root";
@@ -331,8 +342,9 @@ std::pair<float,float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerNa
     return std::make_pair(effData, effMC);
 }
 
-std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const
+/*std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const
 {
+    float tmpMuPt = (muon.pt < 200.) ? muon.pt : 199.;
     float effData = 1;
     float effMC = 1;
 
@@ -345,15 +357,17 @@ std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string trigger
         }
     }
 
-    if (muon.pt < 200.) {
-        if (triggerName == "HLT_DoubleMuon_leg1") {
-            effData = _eff_doubleMu_leg1_DATA[etaBin]->Eval(muon.pt);
-            effMC = _eff_doubleMu_leg1_MC[etaBin]->Eval(muon.pt);
-        }
-        else if (triggerName == "HLT_DoubleMuon_leg2") {
-            effData = _eff_doubleMu_leg2_DATA[etaBin]->Eval(muon.pt);
-            effMC = _eff_doubleMu_leg2_MC[etaBin]->Eval(muon.pt);
-        }
+    if (triggerName == "HLT_DoubleMuon_leg1") {
+        effData = _eff_doubleMu_leg1_DATA[etaBin]->Eval(muon.pt);
+        effMC = _eff_doubleMu_leg1_MC[etaBin]->Eval(muon.pt);
+        //effData = _eff_doubleMu_leg1_DATA[etaBin]->FindBin(tmpMuPt);
+        //effMC = _eff_doubleMu_leg1_MC[etaBin]->FindBin(tmpMuPt);
+    }
+    else if (triggerName == "HLT_DoubleMuon_leg2") {
+        effData = _eff_doubleMu_leg2_DATA[etaBin]->Eval(muon.pt);
+        effMC = _eff_doubleMu_leg2_MC[etaBin]->Eval(muon.pt);
+        //effData = _eff_doubleMu_leg2_DATA[etaBin]->FindBin(tmpMuPt);
+        //effMC = _eff_doubleMu_leg2_MC[etaBin]->FindBin(tmpMuPt);
     }
 
     if (effMC == 0) {
@@ -362,6 +376,28 @@ std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string trigger
     }
 
     return std::make_pair(effData, effMC);
+}*/
+
+float WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const
+{
+    float weight = 1.;
+    float tmpMuPt = (muon.pt < 200.) ? muon.pt : 199.;
+
+    float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
+    int etaBin = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(muon.eta) > binningEta[i] && fabs(muon.eta) <= binningEta[i+1]) {
+            etaBin = i;
+            break;
+        }
+    }
+
+    if (triggerName == "HLT_DoubleMuon_leg1") 
+        weight *= _sf_doubleMu_leg1[etaBin]->GetBinContent(_sf_doubleMu_leg1[etaBin]->FindBin(tmpMuPt));
+    else if (triggerName == "HLT_DoubleMuon_leg2") 
+        weight *= _sf_doubleMu_leg2[etaBin]->GetBinContent(_sf_doubleMu_leg2[etaBin]->FindBin(tmpMuPt));
+
+    return weight;
 }
 
 float WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
@@ -495,20 +531,22 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
 
 float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const 
 {
-    float binningPt[] = {7., 15., 20., 30., 40., 50., 60., 70., 80., 100., 120., 140., 160., 200.}; 
+    //float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
+    float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
+    /*float binningPt[] = {7., 15., 20., 30., 40., 50., 60., 70., 80., 100., 120., 140., 160., 200.}; 
     int ptBin = 0;
     for (int i = 0; i < 13; ++i) {
-        if (fabs(electron.calibPt) > binningPt[i] && fabs(electron.calibPt) <= binningPt[i+1]) {
+        if (tmpElePt > binningPt[i] && tmpElePt <= binningPt[i+1]) {
             ptBin = i;
             break;
         }
-    }
+    }*/
 
     float weight = 1;
-    if (electron.calibPt < 200.) {
-        weight *= _eleSF_RECO->Eval(electron.scEta);
-        weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
-    }
+    weight *= _eleSF_RECO_2D->GetBinContent(_eleSF_RECO_2D->FindBin(electron.scEta, 50.));
+    weight *= _hzz_eleSF_ID_2D->GetBinContent(_hzz_eleSF_ID_2D->FindBin(electron.scEta, tmpElePt));
+    //weight *= _eleSF_RECO->Eval(electron.scEta);
+    //weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
     
     return weight;
 }

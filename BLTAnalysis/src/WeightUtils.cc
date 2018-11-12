@@ -463,8 +463,10 @@ float WeightUtils::GetLooseMuonISOEff(TLorentzVector& muon) const
 float WeightUtils::GetHZZMuonIDEff(TMuon& muon) const
 {
     float weight = 1;
-    if (muon.pt < 200.) 
-        weight *= _hzz_muIdSF->Interpolate(muon.eta, muon.pt);
+    float tmpMuPt = (muon.pt < 200.) ? muon.pt : 199.;
+    
+    //weight *= _hzz_muIdSF->Interpolate(muon.eta, muon.pt);
+    weight *= _hzz_muIdSF->GetBinContent(_hzz_muIdSF->FindBin(muon.eta, tmpMuPt));
     
     return weight;
 }

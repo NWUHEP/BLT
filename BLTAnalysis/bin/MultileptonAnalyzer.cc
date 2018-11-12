@@ -223,6 +223,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("nBJetsJERDown", &nBJetsJERDown);
         tree->Branch("nBJetsBTagUp", &nBJetsBTagUp);
         tree->Branch("nBJetsBTagDown", &nBJetsBTagDown);
+        tree->Branch("nBJetsCTagUp", &nBJetsCTagUp);
+        tree->Branch("nBJetsCTagDown", &nBJetsCTagDown);
         tree->Branch("nBJetsMistagUp", &nBJetsMistagUp);
         tree->Branch("nBJetsMistagDown", &nBJetsMistagDown);
 
@@ -714,7 +716,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3newDMwLT)
+                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3oldDMwLT)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
           ) {

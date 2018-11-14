@@ -113,7 +113,7 @@ public:
     float pdfWeight, alphaS;
 
     // physics object Lorentz vectors
-    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, tauP4;
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
@@ -123,9 +123,8 @@ public:
     Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
 
     // tau variables
-    Int_t tauDecayMode;
-    UInt_t tauPhotonMult, tauChHadMult;
-    Float_t tauMVA;
+    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
+    Float_t tauMVA, tauPuppiChHadIso, tauPuppiGammaIso, tauPuppiNeuHadIso;
 
     // dimuon vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
@@ -150,6 +149,7 @@ public:
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>, vector<baconhep::TJet*>, bool );
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float , float);

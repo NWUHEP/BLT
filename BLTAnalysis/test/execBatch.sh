@@ -24,15 +24,14 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 #source /software/tier3/osg/cmsset_default.sh 
 
 # Setup CMSSW environment
-#scram project CMSSW $CMSSW_VERSION
-#cd $CMSSW_VERSION/src
-#eval `scram runtime -sh`
+eval `scramv1 project CMSSW $CMSSW_VERSION`
+cd $CMSSW_VERSION
 
-#cp $TOPDIR/source.tar.gz .
+cp $TOPDIR/source.tar.gz .
 tar -xzf source.tar.gz
-cd $CMSSW_VERSION/src/
-scramv1 b ProjectRename
-cmsenv
+cd src
+eval `scramv1 runtime -sh`
+
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 

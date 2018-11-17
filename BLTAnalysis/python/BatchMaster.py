@@ -109,7 +109,12 @@ class BatchMaster():
             exit()
         else:
             cmssw_version = os.getenv('CMSSW_BASE').split('/')[-1]
-            os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/.. {1}'.format(self._stage_dir, cmssw_version))
+            #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/.. {1} --exclude="*.scram"'.format(self._stage_dir, cmssw_version))
+            #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE src --exclude="*.scram"'.format(self._stage_dir))
+            #os.system('tar czf {0}/source.tar.gz * --exclude="*.scram"'.format(self._stage_dir, cmssw_version))
+            os.chdir('{0}'.format(os.getenv('CMSSW_BASE')))
+            os.system('tar czf {0}/src/BLT/BLTAnalysis/test/{1}/source.tar.gz * --exclude="*.scram"'.format(os.getenv('CMSSW_BASE'), self._stage_dir))
+            os.chdir('{0}/src/BLT/BLTAnalysis/test'.format(os.getenv('CMSSW_BASE')))
 
         subprocess.call('cp {0} {1}'.format(self._executable, self._stage_dir), shell=True)
         os.chdir(self._stage_dir)

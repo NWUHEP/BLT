@@ -107,7 +107,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
                                         "etau", "mutau", 
                                         "e4j", "mu4j", 
                                         "e4j_fakes", "mu4j_fakes",
-                                        "emu_tau"
+                                        "mumu_tau","ee_tau","emu_tau"
                                         //"mumu0", "ee0","etau0", "mutau0"
                                         };
     for (unsigned i = 0; i < channelNames.size(); ++i) {
@@ -166,7 +166,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
             tree->Branch("leptonTwoDZ", &leptonTwoDZ);
         }
 
-        if (channel == "mutau" || channel == "etau" || channel == "emu_tau") {
+        if (channel == "mutau" || channel == "etau" || channel == "mumu_tau"|| channel == "ee_tau"|| channel == "emu_tau") {
 
             tree->Branch("tauDecayMode",     &tauDecayMode);
             tree->Branch("tauMVA",           &tauMVA);
@@ -177,7 +177,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
             tree->Branch("tauGenFlavor",     &tauGenFlavor);
             tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
 
-            if (channel == "emu_tau"){
+            if (channel == "mumu_tau"|| channel == "ee_tau"|| channel == "emu_tau"){
                 tree->Branch("tauP4", &tauP4);
             }
         }
@@ -740,15 +740,33 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
 
+
+
         // apply tau energy scale correction (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
         if (!isData) {
-            if (tau->decaymode == 0) {
-                tau->pt *= 0.995;
-            } else if (tau->decaymode == 1) {
-                tau->pt *= 1.01;
-            } else if (tau->decaymode == 10) {
-                tau->pt *= 1.006;
+
+            bool genTauHadOverlap = false;
+            // check if can be tagged as hadronic tau
+            for (unsigned i = 0; i < genTausHad.size(); ++i) {
+                TLorentzVector genP4;
+                genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
+                if (tauP4.DeltaR(genP4) < 0.3) {
+                    genTauHadOverlap = true;
+                    break;
+                }
             }
+
+            // apply the tau energy scale correction only for true tau ID
+            if (genTauHadOverlap) {
+                if (tau->decaymode == 0) {
+                    tau->pt *= 0.995;
+                } else if (tau->decaymode == 1) {
+                    tau->pt *= 1.01;
+                } else if (tau->decaymode == 10) {
+                    tau->pt *= 1.006;
+                }
+            }
+
         }
 
 
@@ -906,7 +924,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
 
     string channel = "";
-    if (    electrons.size() == 0 && muons.size() == 2 && taus.size() == 0  ){ // mu+mu selection
+    if        (electrons.size() == 0 && muons.size() == 2 && taus.size() == 0 ){ // mu+mu selection
         
     
         // if (nJetsCut >= 2 && nBJetsCut >= 1 ){ //
@@ -1258,9 +1276,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2)// || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2)// || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1353,9 +1371,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2)//|| nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2)//|| nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
@@ -1406,6 +1424,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
+            leptonTwoRecoVar    = 0.05;
 
 
             if (triggered) {
@@ -1764,6 +1783,253 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight;
+        }
+    } else if (electrons.size() == 0 && muons.size() == 2 && taus.size() == 1) { // mu+mu+tau selection
+        
+    
+        // if (nJetsCut >= 2 && nBJetsCut >= 1 ){ //
+        //     channel = "mumu";
+        // } else if (nJetsCut2 ==0 ){
+        //     //channel = "mumu0";
+        //     return kTRUE;
+        // } else {
+        //     return kTRUE;
+        // }
+
+        channel = "mumu_tau";
+        eventCounts[channel]->Fill(1);
+
+        // convert to TLorentzVectors
+        TLorentzVector muonOneP4, muonTwoP4, dimuonP4;
+        muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
+        muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.1052);
+        dimuonP4 = muonOneP4 + muonTwoP4;
+
+        float muonOneIso = GetMuonIsolation(muons[0]);
+        float muonTwoIso = GetMuonIsolation(muons[1]);
+        if (    !muonTriggered)
+            return kTRUE;
+        eventCounts[channel]->Fill(2);
+
+        if (muons[0]->pt < 25. || muons[1]->pt < 10.)
+            return kTRUE;
+        eventCounts[channel]->Fill(3);
+
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
+
+        leptonOneP4     = muonOneP4;
+        leptonOneIso    = muonOneIso;
+        leptonOneFlavor = muons[0]->q*13;
+        leptonOneDZ     = muons[0]->dz;
+        leptonOneD0     = muons[0]->d0;
+
+        leptonTwoP4     = muonTwoP4;
+        leptonTwoIso    = muonTwoIso;
+        leptonTwoFlavor = muons[1]->q*13;
+        leptonTwoDZ     = muons[1]->dz;
+        leptonTwoD0     = muons[1]->d0;
+
+        // trigger weights with trigger matching
+        bitset<2> triggered;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, muons[0]->hltMatchBits) && muonOneP4.Pt() > 25)
+                triggered.set(0);
+            if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
+                triggered.set(1);
+        }
+
+        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
+        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+
+        ////////////////////////////////////////
+        // tau reconstruct info
+        TLorentzVector tau0P4;
+        tau0P4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.77682);
+
+        tauP4             = tau0P4;
+
+        tauDecayMode      = taus[0]->decaymode;
+        tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
+        tauPuppiChHadIso  = taus[0]->puppiChHadIso;
+        tauPuppiGammaIso  = taus[0]->puppiGammaIso;
+        tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
+        ////////////////////////////////////////
+
+        if (!isData) {
+            leptonOneMother = GetGenMotherId(genParticles, muonOneP4);
+            leptonTwoMother = GetGenMotherId(genParticles, muonTwoP4);
+            tauGenFlavor    = GetTauGenFlavor(tau0P4, genTausHad, vetoedJets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tau0P4, genTausHad, vetoedJets, true);  // useHadronFlavor = true
+
+            // reconstruction weights
+            EfficiencyContainer effCont1, effCont2;
+            effCont1 = weights->GetMuonRecoEff(muonOneP4);
+            effCont2 = weights->GetMuonRecoEff(muonTwoP4);
+
+            pair<float, float> effs, errs;
+            effs = effCont1.GetEff();
+            errs = effCont1.GetErr();
+            leptonOneRecoWeight = effs.first/effs.second;
+            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effs = effCont2.GetEff();
+            errs = effCont2.GetErr();
+            leptonTwoRecoWeight = effs.first/effs.second;
+            leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            // trigger weights with trigger matching:
+            //
+            // check if lepton could pass the trigger threshold and is matched
+            // to a trigger object.  When both muons pass the trigger, use the
+            // efficiency for detecting either
+
+            if (triggered.all()) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+                effCont2      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                triggerWeight = GetTriggerSF(effCont1, effCont2);
+                triggerVar    = GetTriggerSFError(effCont1, effCont2);
+            } else if (triggered.test(0)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else if (triggered.test(1)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else {
+                return kTRUE;
+            }
+
+            // update the event weight
+            eventWeight *= triggerWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+        }
+    } else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 1) { // e+e selection
+
+        // if (nJetsCut >= 2 ){// && nBJetsCut >= 1){
+        //     channel = "ee";
+        // } else if (nJetsCut2 == 0 ){
+        //     //channel = "ee0";
+        //     return kTRUE;
+        // } else {
+        //     return kTRUE;
+        // }
+
+        channel = "ee_tau";
+        eventCounts[channel]->Fill(1);
+
+
+        if (electrons[0]->pt < 30 || electrons[1]->pt < 10 || !electronTriggered)
+            return kTRUE;
+        eventCounts[channel]->Fill(2);
+
+        TLorentzVector electronOneP4, electronTwoP4, dielectronP4;
+        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6);
+        dielectronP4 = electronOneP4 + electronTwoP4;
+        if (dielectronP4.M() < 12.)
+            return kTRUE;
+        eventCounts[channel]->Fill(3);
+
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
+
+        leptonOneP4     = electronOneP4;
+        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        leptonOneFlavor = 11*electrons[0]->q;
+        leptonOneDZ     = electrons[0]->dz;
+        leptonOneD0     = electrons[0]->d0;
+
+        leptonTwoP4     = electronTwoP4;
+        leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
+        leptonTwoFlavor = 11*electrons[1]->q;
+        leptonTwoDZ     = electrons[1]->dz;
+        leptonTwoD0     = electrons[1]->d0;
+
+        // trigger weights with trigger matching
+        bitset<2> triggered;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits) && electronOneP4.Pt() > 30)
+                triggered.set(0);
+            if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
+                triggered.set(1);
+        }
+
+        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
+        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+
+
+        ////////////////////////////////////////
+        // tau reconstruct info
+        TLorentzVector tau0P4;
+        tau0P4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, 1.77682);
+
+        tauP4             = tau0P4;
+
+        tauDecayMode      = taus[0]->decaymode;
+        tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
+        tauPuppiChHadIso  = taus[0]->puppiChHadIso;
+        tauPuppiGammaIso  = taus[0]->puppiGammaIso;
+        tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
+        ////////////////////////////////////////
+
+        if (!isData) {
+            leptonOneMother = GetGenMotherId(genParticles, electronOneP4);
+            leptonTwoMother = GetGenMotherId(genParticles, electronTwoP4);
+            tauGenFlavor    = GetTauGenFlavor(tau0P4, genTausHad, vetoedJets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tau0P4, genTausHad, vetoedJets, true);  // useHadronFlavor = true
+
+            EfficiencyContainer effCont1, effCont2;
+            effCont1 = weights->GetElectronRecoEff(electronOneP4);
+            effCont2 = weights->GetElectronRecoEff(electronTwoP4);
+
+            pair<float, float> effs, errs;
+            effs = effCont1.GetEff();
+            errs = effCont1.GetErr();
+            leptonOneRecoWeight = effs.first/effs.second;
+            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effs = effCont2.GetEff();
+            errs = effCont2.GetErr();
+            leptonTwoRecoWeight = effs.first/effs.second;
+            leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+
+            if (triggered.all()) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
+                effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
+                triggerWeight = GetTriggerSF(effCont1, effCont2);
+                triggerVar    = GetTriggerSFError(effCont1, effCont2);
+            } else if (triggered.test(0)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else if (triggered.test(1)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else {
+                return kTRUE;
+            }
+
+            // update event weight
+            eventWeight *= triggerWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (electrons.size() == 1 && muons.size() == 1 && taus.size() == 1) { // e+mu+tau
         channel = "emu_tau";

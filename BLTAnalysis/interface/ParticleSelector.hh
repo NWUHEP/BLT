@@ -29,6 +29,9 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "JetMETCorrections/Modules/interface/JetResolution.h"
 
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"
+
 using namespace std;
 
 class ParticleSelector {
@@ -93,6 +96,18 @@ private:
                               "TimePtEta", "FlavorQCD",
                               "Total"
                              };
+
+    // For getting b tag scale factors and their uncertainties
+    BTagCalibration btag_calibrator;
+    BTagCalibrationReader btag_reader;
+    vector<string> _btagUncSources {
+                                    "bfragmentation", "btempcorr", "cb",
+                                    "cfragmentation", "dmux", "gluonsplitting",
+                                    "jes", "jetaway", "ksl",
+                                    "l2c", "ltothers", "mudr",
+                                    "mupt", "sampledependence", "pileup",
+                                    "ptrel", "statistic"
+                                   };
 };
 
 #endif  // PARTICLESELECTOR_HH

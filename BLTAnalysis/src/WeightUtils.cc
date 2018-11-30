@@ -313,33 +313,30 @@ EfficiencyContainer WeightUtils::GetMuonRecoEff(TLorentzVector& muon) const
 
 EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) const
 {
-    float binningPtID[] = {10., 20., 35., 50., 90., 9999.};
-    int ptBinID = 0;
-    //float binningPtRECO[] = {10., 20., 45., 75., 100., 9999.};
-    //int ptBinRECO = 0;
+    int etaBin = GetBinNumber<TGraphErrors*>(_eleSF_RECO, electron.Eta());
+    float sf   = _eleSF_RECO->Eval(electron.Eta());
+    float err  = _eleSF_RECO->GetErrorY(etaBin);
+    
+    EfficiencyContainer effCont(sf, 1., err, 0.);
+    return effCont;
+}
+
+EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) const
+{
+    float binningPt[] = {10., 20., 35., 50., 90., 9999.};
+    int ptBin = 0;
     for (int i = 0; i < 5; ++i) {
-        if (fabs(electron.Pt()) > binningPtID[i] && fabs(electron.Pt()) <= binningPtID[i+1]) {
-            ptBinID = i;
+        if (fabs(electron.Pt()) > binningPt[i] && fabs(electron.Pt()) <= binningPt[i+1]) {
+            ptBin = i;
             break;
         }
-        //if (fabs(electron.Pt()) > binningPtRECO[i] && fabs(electron.Pt()) <= binningPtID[i+1]) {
-        //    ptBinRECO = i;
-        //    break;
-        //}
     }
 
-    float sfId   = _eleSF_ID[ptBinID]->Eval(electron.Eta());
-    float sfReco = _eleSF_RECO->Eval(electron.Eta());
-
-    int etaBin;
-    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_RECO, electron.Eta()); 
-    float errReco = _eleSF_RECO->GetErrorY(etaBin);
-
-    etaBin = GetBinNumber<TGraphErrors*>(_eleSF_ID[ptBinID], electron.Eta()); 
-    float errId  = _eleSF_ID[ptBinID]->GetErrorY(etaBin);
-    float sfErr = sfReco*sfId*(pow(errReco/sfReco, 2) + pow(errId/sfId, 2));
+    int etaBin = GetBinNumber<TGraphErrors*>(_eleSF_ID[ptBin], electron.Eta());
+    float sf   = _eleSF_ID[ptBin]->Eval(electron.Eta());
+    float err  = _eleSF_ID[ptBin]->GetErrorY(etaBin);
     
-    EfficiencyContainer effCont(sfReco*sfId, 1., sfErr, 0.);
+    EfficiencyContainer effCont(sf, 1., err, 0.);
     return effCont;
 }
 

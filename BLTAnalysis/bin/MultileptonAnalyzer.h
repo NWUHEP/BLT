@@ -107,8 +107,9 @@ public:
 
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;
-    Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t triggerVar, puVar, topPtVar;
+    Float_t leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
 
     vector<float> qcdWeights;
     float pdfWeight, alphaS;
@@ -117,21 +118,17 @@ public:
     TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
 
     // Additional lepton data
-    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
-    Int_t leptonOneMother, leptonTwoMother, leptonThreeMother, leptonFourMother; 
-    Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
-    Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
-    Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
+    Float_t leptonOneIso, leptonTwoIso;
+    Int_t leptonOneGenId, leptonTwoGenId; 
+    Int_t leptonOneMother, leptonTwoMother; 
+    Int_t leptonOneFlavor, leptonTwoFlavor;
+    Float_t leptonOneD0, leptonTwoD0;
+    Float_t leptonOneDZ, leptonTwoDZ;
 
     // tau variables
     Int_t tauDecayMode;
     UInt_t tauPhotonMult, tauChHadMult;
     Float_t tauMVA;
-
-    // dimuon vertex data
-    TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
-    Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
-    Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
 
     // jet data
     TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
@@ -150,7 +147,7 @@ public:
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
-    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+    pair<int, int> GetGenId(vector<baconhep::TGenParticle*>, vector<int>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float, float);

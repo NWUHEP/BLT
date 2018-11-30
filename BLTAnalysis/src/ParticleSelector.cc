@@ -512,7 +512,6 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     float mcEff  = 1.;
     if (tagName == "CSVT") { // not up-to-date
         bTag = jet->csv;
-        // These SF are provided by the b tag POG 
         if (bTag > 0.935) 
             isBTagged = true;
         btagSF   = 0.857294 + 3.75846e-05*jetPt; 
@@ -527,7 +526,6 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
             mcEff = 0.002;
         }
     } else if (tagName == "MVAT") {
-        // These SF are provided by the b tag POG 
         bTag = jet->bmva;
         if (bTag > 0.9432) 
             isBTagged = true;
@@ -562,23 +560,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
                 mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
             }
         }
-    } else if (tagName == "MVAM") { // not up-to-date
-        // These SF are provided by the b tag POG 
-        bTag = jet->bmva;
-        if (bTag > 0.4432) 
-            isBTagged = true;
-        btagSF   = 0.600657*((1.+(0.753343*jetPt))/(1.+(0.472587*jetPt))); 
-        mistagSF = 1.11046 - 0.00042021*jetPt + 1.48012e-06*jetPt*jetPt - 8.44735e-10*jetPt*jetPt*jetPt;
-
-        if (abs(jetFlavor) == 5) {
-            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
-            mcEff = bEff[ptBin];
-        } else if (abs(jetFlavor) == 4) {
-            mcEff = 0.03;
-        } else {
-            mcEff = 0.002;
-        }
-    }
+    } 
 
     // Upgrade or downgrade jet
     if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {

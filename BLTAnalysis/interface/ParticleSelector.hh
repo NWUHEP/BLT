@@ -63,7 +63,7 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
-    bool BTagModifier(const baconhep::TJet* jet, string, int, int, int, float) const;
+    bool BTagModifier(const baconhep::TJet* jet, string, string, float) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
     double JetUncertainty(const baconhep::TJet* jet, string) const;
     pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
@@ -98,15 +98,22 @@ private:
                              };
 
     // For getting b tag scale factors and their uncertainties
-    BTagCalibration btag_calibrator;
-    BTagCalibrationReader btag_reader;
+    BTagCalibration *btagCalibrator, *mistagCalibrator;
+    BTagCalibrationReader *btagReader, *mistagReader;
     vector<string> _btagUncSources {
-                                    "bfragmentation", "btempcorr", "cb",
-                                    "cfragmentation", "dmux", "gluonsplitting",
-                                    "jes", "jetaway", "ksl",
-                                    "l2c", "ltothers", "mudr",
-                                    "mupt", "sampledependence", "pileup",
-                                    "ptrel", "statistic"
+                                    "up", "down",
+                                    "up_bfragmentation", "up_btempcorr", "up_cb",
+                                    "up_cfragmentation", "up_dmux", "up_gluonsplitting",
+                                    "up_jes", "up_jetaway", "up_ksl", "up_l2c", 
+                                    "up_ltothers", "up_mudr",
+                                    "up_mupt", "up_sampledependence", "up_pileup",
+                                    "up_ptrel", "up_statistic",
+                                    "down_bfragmentation", "down_btempcorr", "down_cb",
+                                    "down_cfragmentation", "down_dmux", "down_gluonsplitting",
+                                    "down_jes", "down_jetaway", "down_ksl", "down_l2c", 
+                                    "down_ltothers", "down_mudr", 
+                                    "down_mupt", "down_sampledependence", "down_pileup", 
+                                    "down_ptrel", "down_statistic"
                                    };
 };
 

@@ -14,7 +14,7 @@ const float PSIMASS = 3.096;
 bool P4SortCondition(TLorentzVector p1, TLorentzVector p2) {return (p1.Pt() > p2.Pt());} 
 bool sort_by_btag(const baconhep::TJet* lhs, const baconhep::TJet* rhs) 
 {
-    return lhs->bmva > rhs->bmva;
+    return lhs->csv > rhs->csv;
 }
 
 
@@ -334,9 +334,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
 
             //if (abs(particle->pdgId) == 6) {
-            //    cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
-            //    cout << "\t" << particle->pt << ", " << particle->eta;
-            //    cout << endl;
+                //cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
+                //cout << "\t" << particle->pt << ", " << particle->eta;
+                //cout << endl;
             //}
 
             // parton counting for jet-binned Drell-Yan samples
@@ -807,7 +807,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 if (isData) {
                     if (jet->pt > 30) {
                         ++nJets;
-                        if (jet->bmva > 0.9432) { 
+                        if (jet->csv > 0.8484) { 
                             ++nBJets;
                         } 
                     }
@@ -1678,7 +1678,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
             if (jetP4.DeltaR(muonP4) < 0.4) {
                 --nJets;
-                if (jet->bmva > 0.9432) { 
+                if (jet->csv > 0.8484) { 
                     --nBJets;
                 } 
                 jets.erase(jets.begin() + ix);
@@ -1767,7 +1767,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 0.1052);
             if (jetP4.DeltaR(electronP4) < 0.4) {
                 --nJets;
-                if (jet->bmva > 0.9432) { 
+                if (jet->csv > 0.8484) { 
                     --nBJets;
                 } 
                 jets.erase(jets.begin() + ix);
@@ -2124,25 +2124,55 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
 
         // nominal
         ++nJets;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) ++nBJets;
+        if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) {
+            ++nBJets;
 
-        // b tag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, 0, rNumber)) ++nBJetsBTagUp;
-             
-        // b tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, 0, rNumber)) ++nBJetsBTagDown;
+            if (jet->hadronFlavor == 5) {
+                ++nBJetsCTagUp;
+                ++nBJetsCTagDown;
+                ++nBJetsMistagUp;
+                ++nBJetsMistagDown;
+            } else if (jet->hadronFlavor == 4) {
+                ++nBJetsBTagUp;
+                ++nBJetsBTagDown;
+                ++nBJetsMistagUp;
+                ++nBJetsMistagDown;
+            } else {
+                ++nBJetsBTagUp;
+                ++nBJetsBTagDown;
+                ++nBJetsCTagUp;
+                ++nBJetsCTagDown;
+            }
+        }
 
-        // c tag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, 0, rNumber)) ++nBJetsCTagUp;
-             
-        // c tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, 0, rNumber)) ++nBJetsCTagDown;
+        if (jet->hadronFlavor == 5) {
+            // b tag up
+            if (particleSelector->BTagModifier(jet, "CSVM", "up", rNumber)) 
+                ++nBJetsBTagUp;
+                 
+            // b tag down
+            if (particleSelector->BTagModifier(jet, "CSVM", "down", rNumber)) 
+                ++nBJetsBTagDown;
 
-        // misttag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 1, rNumber)) ++nBJetsMistagUp;
-        
-        // mistag down
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, -1, rNumber)) ++nBJetsMistagDown;
+        } else if (jet->hadronFlavor == 4){
+            // c tag up
+            if (particleSelector->BTagModifier(jet, "CSVM", "up", rNumber)) 
+                ++nBJetsCTagUp;
+                 
+            // c tag down
+            if (particleSelector->BTagModifier(jet, "CSVM", "down", rNumber)) 
+                ++nBJetsCTagDown;
+
+        } else { 
+            // mistag up
+            if (particleSelector->BTagModifier(jet, "CSVM", "up", rNumber)) 
+                ++nBJetsMistagUp;
+                 
+            // mistag down
+            if (particleSelector->BTagModifier(jet, "CSVM", "down", rNumber)) 
+                ++nBJetsMistagDown;
+
+        }
     }
 
     double jec = particleSelector->JetCorrector(jet, "NONE");
@@ -2154,7 +2184,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
         jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
         if (jet->pt > 30) {
             ++nJetsJESUp[count];
-            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
+            if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
                 ++nBJetsJESUp[count];
             } 
         }
@@ -2164,7 +2194,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
         //cout << jet->pt << endl;
         if (jet->pt > 30) {
             ++nJetsJESDown[count];
-            if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
+            if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
                 ++nBJetsJESDown[count];
             }
         }
@@ -2180,7 +2210,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     jet->pt = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
             ++nBJetsJERUp;
         }     
     }
@@ -2191,7 +2221,7 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     jet->pt     = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
             ++nBJetsJERDown;
         } 
     }

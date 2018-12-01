@@ -1,5 +1,6 @@
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 
+
 #include <iostream>
 
 using namespace baconhep;
@@ -89,6 +90,17 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         // jet energy resolution
         jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
         jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
+
+        // b tag scale factor and uncertainty payload files
+        btagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
+        btagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", _btagUncSources);
+        btagReader->load(*btagCalibrator, BTagEntry::FLAV_B, "mujets");    
+        btagReader->load(*btagCalibrator, BTagEntry::FLAV_C, "mujets");    
+
+        // mistag scale factor and uncertainty payload files
+        mistagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Moriond17_B_H.csv");
+        mistagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        mistagReader->load(*mistagCalibrator, BTagEntry::FLAV_UDSG, "incl");    
     }
 }
 
@@ -490,7 +502,7 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int ctagSyst, int mistagSyst, float rNumber) const
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, string systName, float rNumber) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
@@ -510,21 +522,24 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
     float btagSF   = 1.;
     float mistagSF = 1.;
     float mcEff  = 1.;
-    if (tagName == "CSVT") { // not up-to-date
+    if (tagName == "CSVM") { // not up-to-date
         bTag = jet->csv;
-        if (bTag > 0.935) 
+        if (bTag > 0.8484) 
             isBTagged = true;
-        btagSF   = 0.857294 + 3.75846e-05*jetPt; 
-        mistagSF = 0.688619 + 260.84/(jetPt*jetPt); 
 
         if (abs(jetFlavor) == 5) {
+            btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+
             float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
             mcEff = bEff[ptBin];
         } else if (abs(jetFlavor) == 4) {
-            mcEff = 0.03;
+            btagSF = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+            mcEff  = 0.03;
         } else {
-            mcEff = 0.002;
+            mistagSF = mistagReader->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+            mcEff    = 0.002;
         }
+
     } else if (tagName == "MVAT") {
         bTag = jet->bmva;
         if (bTag > 0.9432) 
@@ -538,25 +553,25 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, i
             mcEff = bEff[ptBin];
 
             float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
-            if (btagSyst == 1) {
+            if (systName == "up") {
                 btagSF += scale[ptBin];
-            } else if (btagSyst == -1) {
+            } else if (systName == "down") {
                 btagSF -= scale[ptBin];
             }
         } else if (abs(jetFlavor) == 4) {
 
             mcEff = 0.03;
             float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
-            if (ctagSyst == 1) {
+            if (systName == "up") {
                 btagSF += scale[ptBin];
-            } else if (ctagSyst == -1) {
+            } else if (systName == "down") {
                 btagSF -= scale[ptBin];
             }
         } else {
             mcEff = 0.002;
-            if (mistagSyst == 1) {
+            if (systName == "up") {
                 mistagSF *= (1 + (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            } else if (mistagSyst == -1) {
+            } else if (systName == "down") {
                 mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
             }
         }

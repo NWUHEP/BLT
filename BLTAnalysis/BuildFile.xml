@@ -1,6 +1,8 @@
 <use name="BaconAna/DataFormats"/>
 <use name="BaconAna/Utils"/>
 <use name="CondFormats/JetMETObjects"/>
+<use name="CondFormats/BTauObjects"/>
+<use name="CondTools/BTau"/>
 <use name="JetMETCorrections/Modules"/>
 <use name="root"/>
 <use name="rootcore"/>

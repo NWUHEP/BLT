@@ -247,11 +247,19 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     }
 
     // initialize jet counters
+    nJetsCut     = nBJetsCut      = 0;
+    nJetsJERUp   = nJetsJERDown   = nBJetsJERUp    = nBJetsJERDown    = 0;
+    nBJetsCTagUp = nBJetsCTagDown = nBJetsMistagUp = nBJetsMistagDown = 0;
+
     vector<unsigned> counters(particleSelector->GetJECSourceNames().size(), 0);
     nJetsJESUp    = counters;
     nJetsJESDown  = counters;
     nBJetsJESUp   = counters;
     nBJetsJESDown = counters;
+
+    vector<unsigned> bcounters(particleSelector->GetBTagSourceNames().size(), 0);
+    nBJetsBTagUp   = bcounters;
+    nBJetsBTagDown = bcounters;
 
     ReportPostBegin();
 }
@@ -840,12 +848,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nJetsCut = *max_element(begin(nJetList), end(nJetList));
 
     vector<unsigned> nBJetList {nBJets, nBJetsJERUp, nBJetsJERDown, 
-                                nBJetsBTagUp, nBJetsBTagDown, 
                                 nBJetsMistagUp, nBJetsMistagDown
                                };
 
     nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
     nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
+    nBJetList.insert(nBJetList.end(), nBJetsBTagUp.begin(), nBJetsBTagUp.end());
+    nBJetList.insert(nBJetList.end(), nBJetsBTagDown.begin(), nBJetsBTagDown.end());
     nBJetsCut = *max_element(begin(nBJetList), end(nBJetList));
 
     //if ((nJetsJESUp > nJets && nJetsJESDown > nJets) || (nJetsJESUp > nJets && nJetsJESDown > nJets)) {
@@ -2104,7 +2113,6 @@ void MultileptonAnalyzer::ResetJetCounters()
     nJetsCut       = nBJetsCut        = 0;
     nJetsJERUp     = nJetsJERDown     = 0;
     nBJetsJERUp    = nBJetsJERDown    = 0;
-    nBJetsBTagUp   = nBJetsBTagDown   = 0;
     nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
 
@@ -2112,6 +2120,8 @@ void MultileptonAnalyzer::ResetJetCounters()
     std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
     std::fill(nBJetsJESUp.begin(), nBJetsJESUp.end(), 0);
     std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
+    std::fill(nBJetsBTagUp.begin(), nBJetsBTagUp.end(), 0);
+    std::fill(nBJetsBTagDown.begin(), nBJetsBTagDown.end(), 0);
 }
 
 void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
@@ -2133,26 +2143,40 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
                 ++nBJetsMistagUp;
                 ++nBJetsMistagDown;
             } else if (jet->hadronFlavor == 4) {
-                ++nBJetsBTagUp;
-                ++nBJetsBTagDown;
                 ++nBJetsMistagUp;
                 ++nBJetsMistagDown;
+
+                unsigned bcount = 0;
+                for (const auto& name: particleSelector->GetBTagSourceNames()) {
+                    ++nBJetsBTagUp[bcount];
+                    ++nBJetsBTagDown[bcount];
+                    bcount++;
+                }
             } else {
-                ++nBJetsBTagUp;
-                ++nBJetsBTagDown;
                 ++nBJetsCTagUp;
                 ++nBJetsCTagDown;
+
+                unsigned bcount = 0;
+                for (const auto& name: particleSelector->GetBTagSourceNames()) {
+                    ++nBJetsBTagUp[bcount];
+                    ++nBJetsBTagDown[bcount];
+                    bcount++;
+                }
             }
         }
 
         if (jet->hadronFlavor == 5) {
-            // b tag up
-            if (particleSelector->BTagModifier(jet, "CSVM", "up", rNumber)) 
-                ++nBJetsBTagUp;
-                 
-            // b tag down
-            if (particleSelector->BTagModifier(jet, "CSVM", "down", rNumber)) 
-                ++nBJetsBTagDown;
+            unsigned bcount = 0;
+            for (const auto& name: particleSelector->GetBTagSourceNames()) {
+                // b tag up
+                if (particleSelector->BTagModifier(jet, "CSVM", "up_" + name, rNumber)) 
+                    ++nBJetsBTagUp[bcount];
+                     
+                // b tag down
+                if (particleSelector->BTagModifier(jet, "CSVM", "down_" + name, rNumber)) 
+                    ++nBJetsBTagDown[bcount];
+                bcount++;
+            }
 
         } else if (jet->hadronFlavor == 4){
             // c tag up

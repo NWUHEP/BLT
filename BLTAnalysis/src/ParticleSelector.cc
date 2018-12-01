@@ -92,8 +92,24 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
 
         // b tag scale factor and uncertainty payload files
+        vector<string> btagUncSources {
+                                       "up", "down",
+                                       "up_bfragmentation", "up_btempcorr", "up_cb",
+                                       "up_cfragmentation", "up_dmux", "up_gluonsplitting",
+                                       "up_jes", "up_jetaway", "up_ksl", "up_l2c", 
+                                       "up_ltothers", "up_mudr",
+                                       "up_mupt", "up_sampledependence", "up_pileup",
+                                       "up_ptrel", "up_statistic",
+                                       "down_bfragmentation", "down_btempcorr", "down_cb",
+                                       "down_cfragmentation", "down_dmux", "down_gluonsplitting",
+                                       "down_jes", "down_jetaway", "down_ksl", "down_l2c", 
+                                       "down_ltothers", "down_mudr", 
+                                       "down_mupt", "down_sampledependence", "down_pileup", 
+                                       "down_ptrel", "down_statistic"
+                                      };
+
         btagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
-        btagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", _btagUncSources);
+        btagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", btagUncSources);
         btagReader->load(*btagCalibrator, BTagEntry::FLAV_B, "mujets");    
         btagReader->load(*btagCalibrator, BTagEntry::FLAV_C, "mujets");    
 

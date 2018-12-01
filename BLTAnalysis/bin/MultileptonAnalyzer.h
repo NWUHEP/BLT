@@ -100,10 +100,10 @@ public:
 
     // modified multiplicities for jet related uncertainties
     vector<unsigned> nJetsJESUp, nJetsJESDown, nBJetsJESUp, nBJetsJESDown;
-    unsigned nJetsCut, nJetsJERUp, nJetsJERDown;
-    unsigned nBJetsCut, nBJetsJERUp, nBJetsJERDown;
-    unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
-    unsigned nBJetsCTagUp, nBJetsCTagDown;
+    vector<unsigned> nBJetsBTagUp, nBJetsBTagDown;
+    unsigned nJetsCut, nBJetsCut;
+    unsigned nJetsJERUp, nJetsJERDown, nBJetsJERUp, nBJetsJERDown;
+    unsigned nBJetsCTagUp, nBJetsCTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
     // weights and uncertainties
     Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;

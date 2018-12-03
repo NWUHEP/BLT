@@ -96,7 +96,7 @@ public:
     Bool_t triggerStatus;
     Float_t nPU;
     TVector3 rPV;
-    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    UInt_t nJets, nFwdJets, nBJets, nBJetsRaw, nMuons, nElectrons, nTaus, nPhotons;
 
     // modified multiplicities for jet related uncertainties
     vector<unsigned> nJetsJESUp, nJetsJESDown, nBJetsJESUp, nBJetsJESDown;

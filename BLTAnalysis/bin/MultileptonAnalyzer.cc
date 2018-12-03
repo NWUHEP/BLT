@@ -216,6 +216,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("nJets", &nJets);
         tree->Branch("nFwdJets", &nFwdJets);
         tree->Branch("nBJets", &nBJets);
+        tree->Branch("nBJetsRaw", &nBJetsRaw);
 
         // jet counters for systematics
         tree->Branch("nJetsJESUp", &nJetsJESUp);
@@ -247,7 +248,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     }
 
     // initialize jet counters
-    nJetsCut     = nBJetsCut      = 0;
+    nJets = nBJets = nBJetsRaw = 0;
+    nJetsCut     = nBJetsCut = 0;
     nJetsJERUp   = nJetsJERDown   = nBJetsJERUp    = nBJetsJERDown    = 0;
     nBJetsCTagUp = nBJetsCTagDown = nBJetsMistagUp = nBJetsMistagDown = 0;
 
@@ -821,6 +823,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     }
                 } else {
                     JetCounting(jet, jerc, gRand);
+                    if (jet->pt > 30 && jet->csv > 0.8484) { 
+                        ++nBJetsRaw;
+                    } 
                 }
 
                 if (jet->pt > 30) {
@@ -842,20 +847,27 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::sort(jets.begin(), jets.end(), sort_by_btag);
 
     // use the highest jet multiplicities given all systematic variations
-    vector<unsigned> nJetList {nJets, nJetsJERUp, nJetsJERDown};
-    nJetList.insert(nJetList.end(), nJetsJESUp.begin(), nJetsJESUp.end());
-    nJetList.insert(nJetList.end(), nJetsJESDown.begin(), nJetsJESDown.end());
-    nJetsCut = *max_element(begin(nJetList), end(nJetList));
+    if (!isData) {
+        vector<unsigned> nJetList {nJets, nJetsJERUp, nJetsJERDown};
+        nJetList.insert(nJetList.end(), nJetsJESUp.begin(), nJetsJESUp.end());
+        nJetList.insert(nJetList.end(), nJetsJESDown.begin(), nJetsJESDown.end());
+        nJetsCut = *max_element(begin(nJetList), end(nJetList));
 
-    vector<unsigned> nBJetList {nBJets, nBJetsJERUp, nBJetsJERDown, 
-                                nBJetsMistagUp, nBJetsMistagDown
-                               };
+        vector<unsigned> nBJetList {nBJets, nBJetsRaw,
+                                    nBJetsJERUp, nBJetsJERDown, 
+                                    nBJetsMistagUp, nBJetsMistagDown,
+                                    nBJetsCTagUp, nBJetsCTagDown
+                                   };
 
-    nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
-    nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
-    nBJetList.insert(nBJetList.end(), nBJetsBTagUp.begin(), nBJetsBTagUp.end());
-    nBJetList.insert(nBJetList.end(), nBJetsBTagDown.begin(), nBJetsBTagDown.end());
-    nBJetsCut = *max_element(begin(nBJetList), end(nBJetList));
+        nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
+        nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
+        nBJetList.insert(nBJetList.end(), nBJetsBTagUp.begin(), nBJetsBTagUp.end());
+        nBJetList.insert(nBJetList.end(), nBJetsBTagDown.begin(), nBJetsBTagDown.end());
+        nBJetsCut = *max_element(begin(nBJetList), end(nBJetList));
+    } else {
+        nJetsCut = nJets;
+        nBJetsCut = nBJets;
+    }
 
     //if ((nJetsJESUp > nJets && nJetsJESDown > nJets) || (nJetsJESUp > nJets && nJetsJESDown > nJets)) {
     //    cout << nJets << ", " << nJetsJESUp << ", " << nJetsJESDown << endl;

@@ -124,7 +124,7 @@ public:
 
     // tau variables
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
-    Float_t tauMVA, tauPuppiChHadIso, tauPuppiGammaIso, tauPuppiNeuHadIso, tauVetoedJetPT, tauVetoedJetPTUnc;
+    Float_t tauMVA, tauPuppiChHadIso, tauPuppiGammaIso, tauPuppiNeuHadIso, tauVetoedJetPt, tauVetoedJetPtUnc;
 
     // dimuon vertex data
     TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
@@ -150,7 +150,7 @@ public:
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
     int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>, vector<baconhep::TJet*>, bool );
-    pair<float, float> GetTauVetoedJetPT(TLorentzVector, vector<TJet*> );
+    pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float , float);

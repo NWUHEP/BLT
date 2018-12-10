@@ -177,8 +177,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
             tree->Branch("tauGenFlavor",     &tauGenFlavor);
             tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
             
-            tree->Branch("tauVetoedJetPT",   &tauVetoedJetPT);
-            tree->Branch("tauVetoedJetPTUnc",&tauVetoedJetPTUnc);
+            tree->Branch("tauVetoedJetPT",   &tauVetoedJetPt);
+            tree->Branch("tauVetoedJetPTUnc",&tauVetoedJetPtUnc);
             
 
             if (channel == "mumu_tau"|| channel == "ee_tau"|| channel == "emu_tau"){
@@ -1319,10 +1319,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         tauPuppiGammaIso  = taus[0]->puppiGammaIso;
         tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
 
-        pair <float, float> tauVetoedJetPTPair;
-        tauVetoedJetPTPair= GetTauVetoedJetPT(tauP4, vetoedJets);
-        tauVetoedJetPT    = tauVetoedJetPTPair.first;
-        tauVetoedJetPTUnc = tauVetoedJetPTPair.second;
+        pair <float, float> tauVetoedJetPtPair;
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPt    = tauVetoedJetPtPair.first;
+        tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
+        // cout<<tauVetoedJetPt<<"+/-"<<tauVetoedJetPtUnc<<endl;
 
 
 
@@ -1421,10 +1422,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         tauPuppiGammaIso  = taus[0]->puppiGammaIso;
         tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
 
-        pair <float, float> tauVetoedJetPTPair;
-        tauVetoedJetPTPair= GetTauVetoedJetPT(tauP4, vetoedJets);
-        tauVetoedJetPT    = tauVetoedJetPTPair.first;
-        tauVetoedJetPTUnc = tauVetoedJetPTPair.second;
+        pair <float, float> tauVetoedJetPtPair;
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPt    = tauVetoedJetPtPair.first;
+        tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
+
+        // cout<<tauVetoedJetPt<<"+/-"<<tauVetoedJetPtUnc<<endl;
 
 
 
@@ -1890,10 +1893,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         tauPuppiGammaIso  = taus[0]->puppiGammaIso;
         tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
         
-        pair <float, float> tauVetoedJetPTPair;
-        tauVetoedJetPTPair= GetTauVetoedJetPT(tauP4, vetoedJets);
-        tauVetoedJetPT    = tauVetoedJetPTPair.first;
-        tauVetoedJetPTUnc = tauVetoedJetPTPair.second;
+        pair <float, float> tauVetoedJetPtPair;
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPt    = tauVetoedJetPtPair.first;
+        tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
 
         ////////////////////////////////////////
 
@@ -1950,7 +1953,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
-    } else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 1) { // e+e selection
+    } else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 1) { // e+e+tau selection
 
         // if (nJetsCut >= 2 ){// && nBJetsCut >= 1){
         //     channel = "ee";
@@ -2021,10 +2024,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         tauPuppiGammaIso  = taus[0]->puppiGammaIso;
         tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
 
-        pair <float, float> tauVetoedJetPTPair;
-        tauVetoedJetPTPair= GetTauVetoedJetPT(tauP4, vetoedJets);
-        tauVetoedJetPT    = tauVetoedJetPTPair.first;
-        tauVetoedJetPTUnc = tauVetoedJetPTPair.second;
+        pair <float, float> tauVetoedJetPtPair;
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPt    = tauVetoedJetPtPair.first;
+        tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
 
         ////////////////////////////////////////
 
@@ -2148,10 +2151,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         tauPuppiGammaIso  = taus[0]->puppiGammaIso;
         tauPuppiNeuHadIso = taus[0]->puppiNeuHadIso;
 
-        pair <float, float> tauVetoedJetPTPair;
-        tauVetoedJetPTPair= GetTauVetoedJetPT(tauP4, vetoedJets);
-        tauVetoedJetPT    = tauVetoedJetPTPair.first;
-        tauVetoedJetPTUnc = tauVetoedJetPTPair.second;
+        pair <float, float> tauVetoedJetPtPair;
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPt    = tauVetoedJetPtPair.first;
+        tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
         ////////////////////////////////////////
 
         if (!isData) {
@@ -2383,19 +2386,20 @@ int MultileptonAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*
 
     // check if can be tagged by jet flavor
     if (flavor!= 15){
-        float jetPTMax = - 1.0;
+        float jetPtMax = - 1.0;
         for (unsigned i = 0; i < vetoedJets.size(); ++i) {
 
 
             TLorentzVector jetP4; 
             jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
-            if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPTMax) {
+            if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
+                // cout<<"flavor Jet: "<< jetPtMax<<','<< jetP4.Pt()<< endl;
                 if(useHadronFlavor) {
                     flavor = vetoedJets[i]->hadronFlavor;
                 } else {
                     flavor = abs(vetoedJets[i]->partonFlavor);
                 }
-                jetPTMax = jetP4.Pt();
+                jetPtMax = jetP4.Pt();
             }
         }
     }
@@ -2403,33 +2407,34 @@ int MultileptonAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*
 }
 
 
-pair<float, float> MultileptonAnalyzer::GetTauVetoedJetPT(TLorentzVector p4, vector<TJet*> vetoedJets)
+pair<float, float> MultileptonAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
 {
 
-    float jetPT = -1;
-    float jetPTUnc = -1;
+    float jetPt = -1;
+    float jetPtUnc = -1;
     
 
     // check if can be tagged by jet flavor
 
-    float jetPTMax = - 1.0;
+    float jetPtMax = - 1.0;
     for (unsigned i = 0; i < vetoedJets.size(); ++i) {
 
         TLorentzVector jetP4; 
         jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
 
-        if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPTMax) {
+        if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
+            // cout<<"Energy Jet: "<<jetPtMax<<','<< jetP4.Pt() << endl;
 
             // save 
-            jetPT       = float(jetP4.Pt());
-            jetPTUnc    = jetPT * float(particleSelector->JetUncertainty(vetoedJets[i]));
-            jetPTUnc    = abs(jetPTUnc);
+            jetPt       = jetP4.Pt();
+            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoedJets[i]));
+            jetPtUnc    = abs(jetPtUnc);
 
-            jetPTMax = jetP4.Pt();
+            jetPtMax = jetP4.Pt();
         }    
     }
     
-    return make_pair(jetPT,jetPTUnc);
+    return make_pair(jetPt,jetPtUnc);
 }
 
 

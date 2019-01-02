@@ -624,7 +624,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
 
-
         if (
                 muonP4.Pt() > 10.
                 && fabs(muonP4.Eta()) < 2.4

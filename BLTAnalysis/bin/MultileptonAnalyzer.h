@@ -66,6 +66,8 @@ public:
     TFile *outFile;
     std::map<string, TTree*> outTrees;
     std::map<string, TH1D*> eventCounts;
+    std::map<string, TH2D*> pdfCounts;
+    TH2D *pdfCountsInit;
     TH1D *hGenCat;
 
     // Lumi mask

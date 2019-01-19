@@ -102,8 +102,14 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
+
+    // counts W decay modes for acceptance calculation
     outHistName = params->get_output_treename("GenCategory");
     hGenCat = new TH1D(outHistName.c_str(), "WW decay modes",30,0.5,30.5);
+
+    // record PDF variations to generated number of events based on MC replicas
+    outHistName = params->get_output_treename("var_PDF");
+    pdfCountsInit = new TH2D(outHistName.c_str(),"pdf variations (initial)", 101, -0.5, 100.5, 4, -0.5, 3.5);
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
@@ -243,8 +249,13 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         outTrees[channel] = tree;
 
         // event counter
-        string outHistName = params->get_output_treename("TotalEvents_" + channel);
+         outHistName = params->get_output_treename("TotalEvents_" + channel);
         eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
+
+        // saving pdf variations
+        outHistName = params->get_output_treename("var_PDF_" + channel);
+        pdfCounts[channel] = new TH2D(outHistName.c_str(),"pdf variations", 101, -0.5, 100.5, 4, -0.5, 3.5);
+
     }
 
     // initialize jet counters
@@ -291,6 +302,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
     vector<TGenParticle*> genParticles;
     vector<int> genMotherId;
+    vector<float> pdfVariations;
 
     unsigned wCount = 0;
     unsigned tauCount = 0;
@@ -300,38 +312,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     float topSF = 1.;
     topPtWeight = 1.;
     topPtVar = 0.;
+    nPartons = 0;
     if (!isData) {
-
-        // Set data period for 2016 MC scale factors
-        if (rng->Rndm() < 0.468) {
-            weights->SetDataPeriod("2016BtoF");    
-        } else {
-            weights->SetDataPeriod("2016GH");
-        }
-
-        // save gen weight for amc@nlo Drell-Yan sample
-        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
-        if (genWeight < 0) {
-            hTotalEvents->Fill(10);
-        }
-
-        // get weights for assessing PDF and QCD scale systematics
-        pdfWeight = 0.;
-        alphaS    = 1.;
-        qcdWeights.clear();
-        if (fLHEWeightArr != 0) {
-            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
-                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
-                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
-                if (id >= 1001 && id <= 1009) {
-                    qcdWeights.push_back(lheWeight);
-                } else if (id >= 2001 && id <= 2100) {      
-                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
-                } else if (id == 2101 || id == 2102) {
-                    alphaS = lheWeight;
-                }
-            }
-        }
 
         // loop over gen particle collection:
         //   * parton counting for combining inclusive and jet-binned Drell-Yan samples
@@ -424,6 +406,42 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
         nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
+
+        // Set data period for 2016 MC scale factors
+        if (rng->Rndm() < 0.468) {
+            weights->SetDataPeriod("2016BtoF");    
+        } else {
+            weights->SetDataPeriod("2016GH");
+        }
+
+        // save gen weight for amc@nlo Drell-Yan sample
+        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
+        if (genWeight < 0) {
+            hTotalEvents->Fill(10);
+        }
+
+        // get weights for assessing PDF and QCD scale systematics
+        pdfWeight = 0.;
+        alphaS    = 1.;
+        qcdWeights.clear();
+        if (fLHEWeightArr != 0) {
+            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
+                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
+                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
+                //cout << id << " " << lheWeight << endl;
+                if (id >= 1001 && id <= 1009) {
+                    qcdWeights.push_back(lheWeight);
+                } else if (id >= 2001 && id <= 2100) {      
+                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
+                    pdfVariations.push_back(lheWeight);
+                    ///cout << lheWeight << endl;
+                    pdfCountsInit->Fill(id - 2000, nPartons, lheWeight);
+                } else if (id == 2101 || id == 2102) {
+                    alphaS = lheWeight;
+                }
+            }
+        }
+
 
         // categorize events
         genCategory = 0;
@@ -613,17 +631,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         muon->pt = muonSF*muon->pt; 
         muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
 
-        // Remove muons with very small deltaR
-        float minDeltaR = 1e6;
-        for (unsigned j=0; j < muons.size(); ++j) {
-            TLorentzVector tmpMuonP4;
-            tmpMuonP4.SetPtEtaPhiM(muons[j]->pt, muons[j]->eta, muons[j]->phi, 0.1051);
-            float dr = muonP4.DeltaR(tmpMuonP4);
-            if (dr < minDeltaR) {
-                minDeltaR = dr;
-            }
-        }
-
         if (
                 muonP4.Pt() > 10.
                 && fabs(muonP4.Eta()) < 2.4
@@ -664,7 +671,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     /* ELECTRONS */
     vector<TElectron*> electrons, fail_electrons;
     vector<TLorentzVector> veto_electrons;
-    //float eScale = 1.;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -1896,11 +1902,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } 
     }
 
-    if (!isData && genParticles.size() == 2) {
-        genOneId = genParticles[0]->pdgId;
-        genOneP4.SetPtEtaPhiM(genParticles[0]->pt, genParticles[0]->eta, genParticles[0]->phi, genParticles[0]->mass); 
-        genTwoId = genParticles[1]->pdgId;
-        genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
+    if (!isData) {
+        if (genParticles.size() >= 1) {
+            genOneId = genParticles[0]->pdgId;
+            genOneP4.SetPtEtaPhiM(genParticles[0]->pt, genParticles[0]->eta, genParticles[0]->phi, genParticles[0]->mass); 
+        } else if (genParticles.size() >= 2) {
+            genTwoId = genParticles[1]->pdgId;
+            genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
+        }
+        for (unsigned i = 0; i < pdfVariations.size(); ++i) {
+            pdfCounts[channel]->Fill(i+1, nPartons, pdfVariations[i]);
+        }
+
     } else {
         genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
         genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 

@@ -109,7 +109,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // record PDF variations to generated number of events based on MC replicas
     outHistName = params->get_output_treename("var_PDF");
-    pdfCountsInit = new TH2D(outHistName.c_str(),"pdf variations (initial)", 101, -0.5, 100.5, 4, -0.5, 3.5);
+    pdfCountsInit = new TH1D(outHistName.c_str(), "pdf variations (initial)", 100, 0.5, 100.5);
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
@@ -255,7 +255,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         // saving pdf variations
         outHistName = params->get_output_treename("var_PDF_" + channel);
         pdfCounts[channel] = new TH2D(outHistName.c_str(),"pdf variations", 101, -0.5, 100.5, 4, -0.5, 3.5);
-
     }
 
     // initialize jet counters
@@ -434,8 +433,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 } else if (id >= 2001 && id <= 2100) {      
                     pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
                     pdfVariations.push_back(lheWeight);
+
                     ///cout << lheWeight << endl;
-                    pdfCountsInit->Fill(id - 2000, nPartons, lheWeight);
+                    pdfCountsInit->Fill(id - 2000, lheWeight);
                 } else if (id == 2101 || id == 2102) {
                     alphaS = lheWeight;
                 }
@@ -1910,10 +1910,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             genTwoId = genParticles[1]->pdgId;
             genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
         }
-        for (unsigned i = 0; i < pdfVariations.size(); ++i) {
-            pdfCounts[channel]->Fill(i+1, nPartons, pdfVariations[i]);
-        }
 
+        // save PDF MC replica variation by jet multiplicity
+        if (fLHEWeightArr != 0) {
+            for (unsigned i = 0; i < pdfVariations.size(); ++i) {
+                if (nJets <= 3) {
+                    pdfCounts[channel]->Fill(i+1, nJets, pdfVariations[i]);
+                } else {
+                    pdfCounts[channel]->Fill(i+1, 3, pdfVariations[i]);
+                }
+            }
+        }
     } else {
         genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
         genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 

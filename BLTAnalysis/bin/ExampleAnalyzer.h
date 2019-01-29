@@ -101,6 +101,7 @@ public:
 
     // generator level data
     UInt_t nPartons;
+    Float_t genWeight;
 
     // weights and uncertainties
     Float_t eventWeight;

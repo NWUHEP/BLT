@@ -103,6 +103,7 @@ void ExampleAnalyzer::Begin(TTree *tree)
 
         // gen level objects
         tree->Branch("nPartons", &nPartons);
+        tree->Branch("genWeight",&genWeight);
         
         // weights and their uncertainties
         tree->Branch("eventWeight", &eventWeight);
@@ -227,7 +228,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
         }
 
         // save gen weight for amc@nlo Drell-Yan sample
-        Float_t genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
+        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
         if (genWeight < 0) {
             hTotalEvents->Fill(10);
         }
@@ -398,7 +399,8 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
                 electron->pt > 10
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
+                && (GetElectronIsolation(electron, fInfo->rhoJet)/electron->pt) < 0.1
            ) {
                 electrons.push_back(electron);
                 veto_electrons.push_back(electronP4);

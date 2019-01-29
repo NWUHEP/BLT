@@ -33,7 +33,7 @@ eval `scram runtime -sh`
 
 cmsenv
 scramv1 b -j8 #ProjectRename
-cd BLT/BLTAnalysis/test
+cd BLT/BLTAnalysis/scripts
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
 echo $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT

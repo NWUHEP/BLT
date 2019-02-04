@@ -66,7 +66,7 @@ public:
     TFile *outFile;
     std::map<string, TTree*> outTrees;
     std::map<string, TH1D*> eventCounts;
-    std::map<string, TH2D*> pdfCounts;
+    std::map<string, TH2D*> pdfCountsJets, pdfCountsPartons;
     TH1D *pdfCountsInit;
     TH1D *hGenCat;
 
@@ -151,6 +151,7 @@ public:
     vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
     pair<int, int> GetGenId(vector<baconhep::TGenParticle*>, vector<int>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
+    void FillPDFHist(vector<float>, string);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float, float);
 

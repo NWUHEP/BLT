@@ -109,7 +109,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // record PDF variations to generated number of events based on MC replicas
     outHistName = params->get_output_treename("var_PDF");
-    pdfCountsInit = new TH1D(outHistName.c_str(), "pdf variations (initial)", 100, 0.5, 100.5);
+    pdfCountsInit = new TH1D(outHistName.c_str(), "pdf variations (initial)", 102, -0.5, 101.5);
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
@@ -252,9 +252,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
          outHistName = params->get_output_treename("TotalEvents_" + channel);
         eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
 
-        // saving pdf variations
-        outHistName = params->get_output_treename("var_PDF_" + channel);
-        pdfCounts[channel] = new TH2D(outHistName.c_str(),"pdf variations", 101, -0.5, 100.5, 4, -0.5, 3.5);
+        // saving pdf+alpha_s variations
+        outHistName = params->get_output_treename("var_PDF_jets_" + channel);
+        pdfCountsJets[channel]    = new TH2D(outHistName.c_str(),"pdf variations", 102, -0.5, 101.5, 4, -0.5, 3.5);
+        outHistName = params->get_output_treename("var_PDF_partons_" + channel);
+        pdfCountsPartons[channel] = new TH2D(outHistName.c_str(),"pdf variations", 102, -0.5, 101.5, 4, -0.5, 3.5);
     }
 
     // initialize jet counters
@@ -430,6 +432,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 //cout << id << " " << lheWeight << endl;
                 if (id >= 1001 && id <= 1009) {
                     qcdWeights.push_back(lheWeight);
+                    if (id == 1001) {
+                        pdfCountsInit->Fill(0., lheWeight);
+                    }
                 } else if (id >= 2001 && id <= 2100) {      
                     pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
                     pdfVariations.push_back(lheWeight);
@@ -438,6 +443,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     pdfCountsInit->Fill(id - 2000, lheWeight);
                 } else if (id == 2101 || id == 2102) {
                     alphaS = lheWeight;
+                    pdfVariations.push_back(lheWeight);
+                    if (id == 2101) {
+                        pdfCountsInit->Fill(101, lheWeight);
+                    }
                 }
             }
         }
@@ -1006,6 +1015,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
+
         if (nJetsCut < 2) //|| nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
@@ -1110,6 +1124,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (dielectronP4.M() < 12.)
             return kTRUE;
         eventCounts[channel]->Fill(3);
+
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
 
         if (nJetsCut < 2) //|| nBJetsCut < 1)
             return kTRUE;
@@ -1237,6 +1256,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
+
         if (nJetsCut < 2)// || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(4);
@@ -1339,6 +1363,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
+
         //if (nJetsCut < 2 || nBJetsCut < 1)
         //    return kTRUE;
         //eventCounts[channel]->Fill(4);
@@ -1434,6 +1463,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
+
         //if (nJetsCut < 2 || nBJetsCut < 1)
         //    return kTRUE;
         //eventCounts[channel]->Fill(4);
@@ -1519,6 +1553,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (electrons[0]->pt < 30. || !electronTriggered)
             return kTRUE;
         eventCounts[channel]->Fill(2);
+
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
 
         if (nJetsCut < 4 || nBJetsCut < 1)
             return kTRUE;
@@ -1615,6 +1654,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (muonIso/muonP4.Pt() > 0.15 )
             return kTRUE;
         eventCounts[channel]->Fill(3);
+
+        // save PDF MC replica variation by jet multiplicity (do this before jet selection)
+        if (!isData && fLHEWeightArr != 0) {
+            FillPDFHist(pdfVariations, channel);
+        }
 
         if (nJetsCut < 4 || nBJetsCut < 1)
             return kTRUE;
@@ -1911,16 +1955,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
         }
 
-        // save PDF MC replica variation by jet multiplicity
-        if (fLHEWeightArr != 0) {
-            for (unsigned i = 0; i < pdfVariations.size(); ++i) {
-                if (nJets <= 3) {
-                    pdfCounts[channel]->Fill(i+1, nJets, pdfVariations[i]);
-                } else {
-                    pdfCounts[channel]->Fill(i+1, 3, pdfVariations[i]);
-                }
-            }
-        }
     } else {
         genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
         genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
@@ -2282,4 +2316,23 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     }
     jet->pt = jetPt;
 
+}
+
+void MultileptonAnalyzer::FillPDFHist(vector<float> pdfVariations, string channel)
+{
+    // N.B. nPartons and nJets are both defined at global scope
+    if (nJets <= 3) {
+        pdfCountsJets[channel]->Fill(0., nJets, qcdWeights[0]);
+    } else {
+        pdfCountsJets[channel]->Fill(0., 3, qcdWeights[0]);
+    }
+
+    for (unsigned i = 0; i < pdfVariations.size(); ++i) {
+        if (nJets <= 3) {
+            pdfCountsJets[channel]->Fill(i+1, nJets, pdfVariations[i]);
+        } else {
+            pdfCountsJets[channel]->Fill(i+1, 3, pdfVariations[i]);
+        }
+        pdfCountsPartons[channel]->Fill(i+1, nPartons, pdfVariations[i]);
+    }
 }

@@ -25,24 +25,29 @@ ExampleAnalyzer::~ExampleAnalyzer()
 
 void ExampleAnalyzer::Begin(TTree *tree)
 
-{
+{   cout<< "begin"<<endl;
     rng = new TRandom3();
 
+
     // Parse command line option
+    cout<< "Parse command line option"<<endl;
     std::string tmp_option = GetOption();
     std::vector<std::string> options;
     std::regex re_whitespace("(\\s+)");  // split by white space
     std::copy(std::sregex_token_iterator(tmp_option.begin(), tmp_option.end(), re_whitespace, -1), std::sregex_token_iterator(), std::back_inserter(options));
 
     // Set the parameters
+    cout<< "Set the parameters"<<endl;
     params.reset(new Parameters());
     params->setup(options);
 
     // Set the cuts
+    cout<< "Set the cuts"<<endl;
     cuts.reset(new Cuts());
     particleSelector.reset(new ParticleSelector(*params, *cuts));
 
     // Trigger bits mapping file
+    cout<< "Trigger bits mapping file"<<endl;
     const std::string cmssw_base = getenv("CMSSW_BASE");
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
@@ -61,19 +66,24 @@ void ExampleAnalyzer::Begin(TTree *tree)
     }
 
     // Weight utility class
+    cout<< "Weight utility class"<<endl;
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
     string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+    //string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
     lumiMask.AddJSONFile(jsonFileName);
 
     // muon momentum corrections
+    cout<< "muon momentum corrections"<<endl;
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
     // electron scale corrections
+    cout<< "electron scale corrections"<<endl;
     electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data");
 
     // Prepare the output tree
+    cout<< "Prepare the output tree"<<endl;
     string outFileName = params->get_output_filename("output");
 
     outFile = new TFile(outFileName.c_str(),"RECREATE");
@@ -83,7 +93,7 @@ void ExampleAnalyzer::Begin(TTree *tree)
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
-                                        "etau", "mutau"
+                                        "etau", "mutau",
                                         };
 
     for (unsigned i = 0; i < channelNames.size(); ++i) {
@@ -103,7 +113,7 @@ void ExampleAnalyzer::Begin(TTree *tree)
 
         // gen level objects
         tree->Branch("nPartons", &nPartons);
-        tree->Branch("genWeight",&genWeight);
+        tree->Branch("genWeight", &genWeight);
         
         // weights and their uncertainties
         tree->Branch("eventWeight", &eventWeight);
@@ -143,8 +153,9 @@ void ExampleAnalyzer::Begin(TTree *tree)
         string outHistName = params->get_output_treename("TotalEvents_" + channel);
         eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
     }
-
+    cout<< "Done with initialization"<<endl;
     ReportPostBegin();
+
 }
 
 Bool_t ExampleAnalyzer::Process(Long64_t entry)
@@ -233,6 +244,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             hTotalEvents->Fill(10);
         }
 
+
         // pileup reweighting
         nPU          = fInfo->nPUmean;
         puWeight     = weights->GetPUWeight(fInfo->nPUmean); 
@@ -312,6 +324,9 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
 
 
     /* -------- Vertices ---------*/
+
+    //cout<<fInfo->hasGoodPV<<endl;
+
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
         TVector3 pv;
@@ -323,7 +338,6 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
     hTotalEvents->Fill(4);
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
-
 
 
     
@@ -463,7 +477,6 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             }
 
         }
-
 
         if( 
                 tau->pt > 20  
@@ -625,22 +638,27 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             effCont1 = weights->GetMuonRecoEff(muonOneP4);
             effCont2 = weights->GetMuonRecoEff(muonTwoP4);
 
+
             pair<float, float> effs, errs;
             effs = effCont1.GetEff();
             errs = effCont1.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
+
             effs = effCont2.GetEff();
             errs = effCont2.GetErr();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
 
             // check if lepton could pass the trigger threshold and is matched
             // to a trigger object.  When both muons pass the trigger, use the
             // efficiency for detecting either
+            
 
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
@@ -662,10 +680,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            // update the event weight
             eventWeight *= triggerWeight;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (electrons.size() == 2 && muons.size() == 0 && taus.size() == 0) { // e+e selection
 
@@ -735,6 +750,8 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
             // correct for trigger.
 
             // check if lepton could pass the trigger threshold and is matched
@@ -761,10 +778,8 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            // update event weight
             eventWeight *= triggerWeight;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
         }
     } else if (electrons.size() == 1 && muons.size() == 1 && taus.size() == 0) { // e+mu selection
         channel = "emu";
@@ -830,6 +845,8 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
 
             // correct for trigger.
 
@@ -857,10 +874,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            // update event weight
             eventWeight *= triggerWeight;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (electrons.size() == 1 && muons.size() == 0 && taus.size() == 1) { // e+tau selection
 
@@ -931,6 +945,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
             leptonTwoRecoVar    = 0.05;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
             if (triggered) {
@@ -942,10 +957,9 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            // update event weight
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
             eventWeight *= triggerWeight;
+            
+            
 
         }
     } else if (electrons.size() == 0 && muons.size() == 1 && taus.size() == 1) { // mu+tau selection
@@ -1016,6 +1030,7 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 0.95;
             leptonTwoRecoVar    = 0.05;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
             if (triggered) {
@@ -1027,10 +1042,8 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            // update event weight
             eventWeight *= triggerWeight;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+            
 
         }
     } else {
@@ -1198,7 +1211,7 @@ int ExampleAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*> ge
             TLorentzVector jetP4; 
             jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
             if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
-                // cout<<"flavor Jet: "<< jetPtMax<<','<< jetP4.Pt()<< endl;
+                // cout<<"flavor Jet: "<< jetPtMax<<","<< jetP4.Pt()<< endl;
                 if(useHadronFlavor) {
                     flavor = vetoedJets[i]->hadronFlavor;
                 } else {
@@ -1229,7 +1242,7 @@ pair<float, float> ExampleAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<
         jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
 
         if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
-            // cout<<"Energy Jet: "<<jetPtMax<<','<< jetP4.Pt() << endl;
+            // cout<<"Energy Jet: "<<jetPtMax<<","<< jetP4.Pt() << endl;
 
             // save 
             jetPt       = jetP4.Pt();

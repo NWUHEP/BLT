@@ -413,7 +413,6 @@ Bool_t ExampleAnalyzer::Process(Long64_t entry)
                 electron->pt > 10
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
-                //&& particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
                 && (GetElectronIsolation(electron, fInfo->rhoJet)/electron->pt) < 0.1
            ) {
                 electrons.push_back(electron);

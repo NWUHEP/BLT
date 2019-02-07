@@ -10,7 +10,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = []#'single_mu', 'single_el']
-mc_samples   = ['zjets', 'ttbar']#, 'diboson', 't', 'wjets']#, 'qcd']
+mc_samples   = ['zjets']#, 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
 
 data_dict = {}
 mc_dict = {}
@@ -230,7 +230,7 @@ mc_dict['zjets'] = [
        ),
     cfg(data_name = 'DYJetsToLL_M-10to50_alt',
         path     = '{0}/Summer16_DYJetsToLL_M-10to50_amcatnlo'.format(path),
-        nJobs    = 10,
+        nJobs    = 20,
         suffix   = 'zjets_m-10to50_alt'
        ),
     ]

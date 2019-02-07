@@ -67,7 +67,8 @@ public:
     std::map<string, TTree*> outTrees;
     std::map<string, TH1D*> eventCounts;
     std::map<string, TH2D*> pdfCountsJets, pdfCountsPartons;
-    TH1D *pdfCountsInit;
+    std::map<string, TH2D*> qcdCountsJets, qcdCountsPartons;
+    TH1D *pdfCountsInit, *qcdCountsInit;
     TH1D *hGenCat;
 
     // Lumi mask

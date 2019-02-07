@@ -71,7 +71,7 @@ class BatchMaster():
         elif self._location == 'lpc':
             batch_tmp.write('Requirements          = OpSys == "LINUX"&& (Arch != "DUMMY" )\n')
             batch_tmp.write('request_disk          = 2000000\n')
-            batch_tmp.write('request_memory        = 2048\n')
+            batch_tmp.write('request_memory        = 4096\n')
         batch_tmp.write('\n')
 
         for i, source in enumerate(sources):

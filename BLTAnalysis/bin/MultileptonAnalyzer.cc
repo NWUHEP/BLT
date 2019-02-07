@@ -109,7 +109,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     // record PDF variations to generated number of events based on MC replicas
     outHistName = params->get_output_treename("var_PDF");
-    pdfCountsInit = new TH1D(outHistName.c_str(), "pdf variations (initial)", 102, -0.5, 101.5);
+    pdfCountsInit = new TH1D(outHistName.c_str(), "pdf variations (initial)", 101, 0.5, 101.5);
+    outHistName = params->get_output_treename("var_QCD");
+    qcdCountsInit = new TH1D(outHistName.c_str(), "qcd variations (initial)", 9, 0.5, 9.5);
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
@@ -249,14 +251,19 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         outTrees[channel] = tree;
 
         // event counter
-         outHistName = params->get_output_treename("TotalEvents_" + channel);
+        outHistName = params->get_output_treename("TotalEvents_" + channel);
         eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
 
-        // saving pdf+alpha_s variations
+        // saving pdf variations
         outHistName = params->get_output_treename("var_PDF_jets_" + channel);
-        pdfCountsJets[channel]    = new TH2D(outHistName.c_str(),"pdf variations", 102, -0.5, 101.5, 4, -0.5, 3.5);
+        pdfCountsJets[channel]    = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
         outHistName = params->get_output_treename("var_PDF_partons_" + channel);
-        pdfCountsPartons[channel] = new TH2D(outHistName.c_str(),"pdf variations", 102, -0.5, 101.5, 4, -0.5, 3.5);
+        pdfCountsPartons[channel] = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
+
+        outHistName = params->get_output_treename("var_QCD_jets_" + channel);
+        qcdCountsJets[channel]    = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
+        outHistName = params->get_output_treename("var_QCD_partons_" + channel);
+        qcdCountsPartons[channel] = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
     }
 
     // initialize jet counters
@@ -432,21 +439,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 //cout << id << " " << lheWeight << endl;
                 if (id >= 1001 && id <= 1009) {
                     qcdWeights.push_back(lheWeight);
-                    if (id == 1001) {
-                        pdfCountsInit->Fill(0., lheWeight);
-                    }
+                    qcdCountsInit->Fill(id - 1000, lheWeight);
                 } else if (id >= 2001 && id <= 2100) {      
                     pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
                     pdfVariations.push_back(lheWeight);
-
-                    ///cout << lheWeight << endl;
                     pdfCountsInit->Fill(id - 2000, lheWeight);
                 } else if (id == 2101 || id == 2102) {
                     alphaS = lheWeight;
                     pdfVariations.push_back(lheWeight);
-                    if (id == 2101) {
-                        pdfCountsInit->Fill(101, lheWeight);
-                    }
+                    pdfCountsInit->Fill(101, lheWeight);
                 }
             }
         }
@@ -2321,10 +2322,13 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
 void MultileptonAnalyzer::FillPDFHist(vector<float> pdfVariations, string channel)
 {
     // N.B. nPartons and nJets are both defined at global scope
-    if (nJets <= 3) {
-        pdfCountsJets[channel]->Fill(0., nJets, qcdWeights[0]);
-    } else {
-        pdfCountsJets[channel]->Fill(0., 3, qcdWeights[0]);
+    for (unsigned i = 0; i < qcdWeights.size(); ++i) {
+        if (nJets <= 3) {
+            qcdCountsJets[channel]->Fill(i, nJets, qcdWeights[i]);
+        } else {
+            qcdCountsJets[channel]->Fill(i, 3, qcdWeights[i]);
+        }
+        qcdCountsPartons[channel]->Fill(i+1, nPartons, qcdWeights[i]);
     }
 
     for (unsigned i = 0; i < pdfVariations.size(); ++i) {

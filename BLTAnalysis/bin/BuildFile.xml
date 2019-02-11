@@ -3,6 +3,7 @@
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
 <bin file="ExampleAnalyzer.cc" name="ExampleAnalyzer"></bin>
+<bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
 
 
 

@@ -56,6 +56,11 @@ bool sort_by_higher_pt(const T* lhs, const T* rhs) {
     return lhs->pt > rhs->pt;
 }
 
+template<class T>
+bool sort_by_btag(const T* lhs, const T* rhs) {
+    return lhs->bmva > rhs->bmva;
+}
+
 // Basic classes
 namespace baconhep {
     class TMET : public TObject

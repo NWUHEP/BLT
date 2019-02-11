@@ -42,7 +42,8 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-ExampleAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#ExampleAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 

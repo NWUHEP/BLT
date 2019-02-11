@@ -6,13 +6,13 @@ BLT is a framework for analyzing bacon ntuples originally developed by @jiafulow
 Setup
 =====
 
-The master version has been tested to run with CMSSW_7_4_14 with ROOT6.  This will work cmslpc using scientific linux 6.
+The  has been tested to run with CMSSW_8_0_20 with ROOT6.  This will work cmslpc using scientific linux 6.
 
 ### Build and source environment
 
 ```
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-export SCRAM_ARCH=slc6_amd64_gcc491
+export SCRAM_ARCH=slc6_amd64_gcc530
 cmsrel CMSSW_8_0_20
 cd CMSSW_8_0_20/src
 cmsenv
@@ -23,7 +23,7 @@ cmsenv
 These forks are sync'ed to Kevin's repositories on 2015/11/17
 
 ```
-git clone git@github.com:NWUHEP/BaconProd.git
+git clone git@github.com:NWUHEP/BaconProd.git # this is not needed for running BLT
 git clone git@github.com:NWUHEP/BaconAna.git
 ```
 

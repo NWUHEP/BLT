@@ -538,7 +538,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
     float btagSF   = 1.;
     float mistagSF = 1.;
     float mcEff  = 1.;
-    if (tagName == "CSVM") { // not up-to-date
+    if (tagName == "CSVM") { 
         bTag = jet->csv;
         if (bTag > 0.8484) 
             isBTagged = true;

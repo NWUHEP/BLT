@@ -69,6 +69,8 @@ public:
     std::map<string, TH2D*> pdfCountsJets, pdfCountsPartons;
     std::map<string, TH2D*> qcdCountsJets, qcdCountsPartons;
     TH1D *pdfCountsInit, *qcdCountsInit;
+    TH2D *pdfCountsJetsInit, *pdfCountsPartonsInit;
+    TH2D *qcdCountsJetsInit, *qcdCountsPartonsInit;
     TH1D *hGenCat;
 
     // Lumi mask

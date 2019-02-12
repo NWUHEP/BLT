@@ -113,6 +113,17 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outHistName = params->get_output_treename("var_QCD");
     qcdCountsInit = new TH1D(outHistName.c_str(), "qcd variations (initial)", 9, 0.5, 9.5);
 
+    // saving pdf variations
+    outHistName = params->get_output_treename("var_PDF_jets_init");
+    pdfCountsJetsInit    = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
+    outHistName = params->get_output_treename("var_PDF_partons_init");
+    pdfCountsPartonsInit = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
+
+    outHistName = params->get_output_treename("var_QCD_jets_init");
+    qcdCountsJetsInit    = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
+    outHistName = params->get_output_treename("var_QCD_partons_init");
+    qcdCountsPartonsInit = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
+
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
                                         "e4j", "mu4j", "tau4j",
@@ -549,6 +560,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // keep track of total number of generated events with weights
         hTotalEvents->Fill(9, topPtWeight);
+
+        // record theory uncertainties before cuts in differenct parton bins
+        for (unsigned i = 0; i < qcdWeights.size(); ++i) {
+            qcdCountsPartonsInit->Fill(i+1, nPartons, qcdWeights[i]);
+        }
+
+        for (unsigned i = 0; i < pdfVariations.size(); ++i) {
+            pdfCountsPartonsInit->Fill(i+1, nPartons, pdfVariations[i]);
+        }   
 
     } else {
         nPU = 0;

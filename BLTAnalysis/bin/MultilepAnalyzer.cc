@@ -164,6 +164,22 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("nJets", &nJets);
         tree->Branch("nBJets", &nBJets);
 
+        // jet systematics
+        tree->Branch("nJetsJESUp",      &nJetsJESUp);
+        tree->Branch("nJetsJESDown",    &nJetsJESDown);
+        tree->Branch("nJetsJERUp",      &nJetsJERUp);
+        tree->Branch("nJetsJERDown",    &nJetsJERDown);
+        tree->Branch("nBJetsJESUp",     &nBJetsJESUp);
+        tree->Branch("nBJetsJESDown",   &nBJetsJESDown);
+        tree->Branch("nBJetsJERUp",     &nBJetsJERUp);
+        tree->Branch("nBJetsJERDown",   &nBJetsJERDown);
+        tree->Branch("nBJetsBTagUp",    &nBJetsBTagUp);
+        tree->Branch("nBJetsBTagDown",  &nBJetsBTagDown);
+        tree->Branch("nBJetsMistagUp",  &nBJetsMistagUp);
+        tree->Branch("nBJetsMistagDown",&nBJetsMistagDown);
+
+
+
         outTrees[channel] = tree;
 
         // event counter
@@ -792,18 +808,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.10566);
         dimuonP4 = muonOneP4 + muonTwoP4;
 
-        if (dimuonP4.M() > 80 || dimuonP4.M() < 102)
-            return kTRUE;
-        eventCounts[channel]->Fill(5);
-
-        float muonOneIso = GetMuonIsolation(muons[0]);
-        float muonTwoIso = GetMuonIsolation(muons[1]);
-
         leptonOneP4     = muonOneP4;
-        leptonOneIso    = muonOneIso;
+        leptonOneIso    = GetMuonIsolation(muons[0]);
         leptonOneFlavor = muons[0]->q*13;
         leptonTwoP4     = muonTwoP4;
-        leptonTwoIso    = muonTwoIso;
+        leptonTwoIso    = GetMuonIsolation(muons[1]);
         leptonTwoFlavor = muons[1]->q*13;
 
         // test if selected lepton fire the trigger.
@@ -814,7 +823,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) return kTRUE;
+        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -896,11 +905,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6);
         dielectronP4 = electronOneP4 + electronTwoP4;
 
-        if (dielectronP4.M() > 80 || dielectronP4.M() < 102)
-            return kTRUE;
-        eventCounts[channel]->Fill(5);
-
-
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*electrons[0]->q;
@@ -917,7 +921,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) return kTRUE;
+        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -1023,7 +1027,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) return kTRUE;
+        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -1127,7 +1131,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1212,7 +1216,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
 
@@ -1281,7 +1285,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1346,7 +1350,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1411,7 +1415,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
 
@@ -1477,7 +1481,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) return kTRUE;
+        if (!triggered) triggerLeptonStatus = 0;
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger

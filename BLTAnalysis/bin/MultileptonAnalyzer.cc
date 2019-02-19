@@ -267,12 +267,12 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
         // saving pdf variations
         outHistName = params->get_output_treename("var_PDF_jets_" + channel);
-        pdfCountsJets[channel]    = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
+        pdfCountsJets[channel]    = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 5, -0.5, 4.5);
         outHistName = params->get_output_treename("var_PDF_partons_" + channel);
         pdfCountsPartons[channel] = new TH2D(outHistName.c_str(),"pdf variations", 101, 0.5, 101.5, 4, -0.5, 3.5);
 
         outHistName = params->get_output_treename("var_QCD_jets_" + channel);
-        qcdCountsJets[channel]    = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
+        qcdCountsJets[channel]    = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 5, -0.5, 4.5);
         outHistName = params->get_output_treename("var_QCD_partons_" + channel);
         qcdCountsPartons[channel] = new TH2D(outHistName.c_str(),"qcd variations", 9, 0.5, 9.5, 4, -0.5, 3.5);
     }
@@ -545,8 +545,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // Account for the top pt weights
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
-            topPtWeight *= sqrt(topSF);
-            topPtVar    += pow(0.01*topPtWeight, 2);
+            topPtWeight = sqrt(topSF);
+            topPtVar    = topPtWeight; // the official prescription is to use no topPt weight as the down variation and twice the weight as the up variation
         }
 
         // pileup reweighting
@@ -1155,6 +1155,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
+
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*electrons[0]->q;
@@ -1583,6 +1584,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (nJetsCut < 4 || nBJetsCut < 1)
             return kTRUE;
         eventCounts[channel]->Fill(3);
+
 
         leptonOneP4     = electronP4;
         leptonOneIso    = electronIso;
@@ -2343,19 +2345,19 @@ void MultileptonAnalyzer::FillPDFHist(vector<float> pdfVariations, string channe
 {
     // N.B. nPartons and nJets are both defined at global scope
     for (unsigned i = 0; i < qcdWeights.size(); ++i) {
-        if (nJets <= 3) {
-            qcdCountsJets[channel]->Fill(i, nJets, qcdWeights[i]);
+        if (nJets <= 4) {
+            qcdCountsJets[channel]->Fill(i+1, nJets, qcdWeights[i]);
         } else {
-            qcdCountsJets[channel]->Fill(i, 3, qcdWeights[i]);
+            qcdCountsJets[channel]->Fill(i+1, 4, qcdWeights[i]);
         }
         qcdCountsPartons[channel]->Fill(i+1, nPartons, qcdWeights[i]);
     }
 
     for (unsigned i = 0; i < pdfVariations.size(); ++i) {
-        if (nJets <= 3) {
+        if (nJets <= 4) {
             pdfCountsJets[channel]->Fill(i+1, nJets, pdfVariations[i]);
         } else {
-            pdfCountsJets[channel]->Fill(i+1, 3, pdfVariations[i]);
+            pdfCountsJets[channel]->Fill(i+1, 4, pdfVariations[i]);
         }
         pdfCountsPartons[channel]->Fill(i+1, nPartons, pdfVariations[i]);
     }

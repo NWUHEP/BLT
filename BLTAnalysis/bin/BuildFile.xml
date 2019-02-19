@@ -2,5 +2,5 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
-<bin file="FakeSelector.cc" name="FakeSelector"></bin>
-<bin file="DileptonSelector.cc" name="DileptonSelector"></bin>
+<!--bin file="FakeSelector.cc" name="FakeSelector"></bin-->
+<!--bin file="DileptonSelector.cc" name="DileptonSelector"></bin-->

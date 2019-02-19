@@ -1066,27 +1066,33 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoGenId  = pdgId.first;
             leptonTwoMother = pdgId.second;
 
-            // reconstruction weights
+            // ID and ISO weights
             EfficiencyContainer effCont;
             pair<float, float> effs, errs;
 
-            effCont = weights->GetMuonRecoEff(muonOneP4);
+            effCont = weights->GetMuonIDEff(muonOneP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetMuonIDEff(muonTwoP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoIDWeight = effs.first/effs.second;
+            leptonTwoIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetMuonISOEff(muonOneP4);
             effs = effCont.GetEff();
             errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-            effCont = weights->GetMuonRecoEff(muonTwoP4);
+            effCont = weights->GetMuonISOEff(muonTwoP4);
             effs = effCont.GetEff();
             errs = effCont.GetErr();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-            // (add id/iso factorization)
-            leptonOneIDWeight = 1.;
-            leptonOneIDVar    = 0.;
-            leptonTwoIDWeight = 1.;
-            leptonTwoIDVar    = 0.;
 
             // trigger weights with trigger matching:
             //
@@ -1312,7 +1318,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             EfficiencyContainer effCont;
             pair<float, float> effs, errs;
 
-            effCont = weights->GetMuonRecoEff(muonP4);
+            effCont = weights->GetMuonISOEff(muonP4);
             effs = effCont.GetEff();
             errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
@@ -1325,8 +1331,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
             // id weights
-            leptonOneIDWeight = 1.;
-            leptonOneIDVar    = 0.;
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
             effCont = weights->GetElectronIDEff(electronP4);
             effs = effCont.GetEff();
@@ -1526,17 +1535,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             EfficiencyContainer effCont;
             pair<float, float> effs, errs;
 
-            effCont = weights->GetMuonRecoEff(muonP4);
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetMuonISOEff(muonP4);
             effs = effCont.GetEff();
             errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
             leptonTwoRecoWeight = 1.;
             leptonTwoRecoVar    = 0.;
-
-            // id/iso weights (todo: factorized the muon scale factors)
-            leptonOneIDWeight = 1.;
-            leptonOneIDVar    = 0.;
             leptonTwoIDWeight = 0.95;
             leptonTwoIDVar    = 0.05;
 
@@ -1627,7 +1639,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 0.;
+            leptonTwoRecoWeight = 1.;
             leptonTwoRecoVar    = 0.;
 
             // id/iso weights
@@ -1636,7 +1648,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             errs = effCont.GetErr();
             leptonOneIDWeight = effs.first/effs.second;
             leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoIDWeight = 0.;
+            leptonTwoIDWeight = 1.;
             leptonTwoIDVar    = 0.;
 
             // trigger weights
@@ -1724,19 +1736,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             EfficiencyContainer effCont;
             pair<float, float> effs, errs;
 
-            effCont = weights->GetMuonRecoEff(muonP4);
+            effCont = weights->GetMuonISOEff(muonP4);
             effs = effCont.GetEff();
             errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 0.;
+            leptonTwoRecoWeight = 1.;
             leptonTwoRecoVar    = 0.;
 
             // id/iso weights 
-            leptonOneRecoWeight = 1.;
-            leptonOneRecoVar    = 0.;
-            leptonTwoRecoWeight = 0.;
-            leptonTwoRecoVar    = 0.;
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 1.;
+            leptonTwoIDVar    = 0.;
 
             // trigger weights
             bool triggered = false;

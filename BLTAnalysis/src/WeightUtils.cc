@@ -12,9 +12,13 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
     // PU weights
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    //TFile* puFile = new TFile(fileName.c_str(), "OPEN");
+    //_puReweight = (TGraph*)puFile->Get("pileup_sf");
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/PU_histo_13TeV_GoldenJSON_69200nb.root";
     TFile* puFile = new TFile(fileName.c_str(), "OPEN");
-    _puReweight = (TGraph*)puFile->Get("pileup_sf");
+    _puReweight = (TH1D*)puFile->Get("mcwei_run000001");
 
     // muon trigger efficiencies 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_BCDEF.root";
@@ -166,7 +170,8 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D"); 
     _sf_doubleg_leg1 = (TH2F *)f_elTrigSF_leg1->Get("EGamma_SF2D");
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_NoRefit.root";
     TFile* f_elTrigSF_leg2 = new TFile(fileName.c_str(), "OPEN");
     _eff_doubleg_leg2_DATA = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffData2D");
     _eff_doubleg_leg2_MC   = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffMC2D");
@@ -228,7 +233,10 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
-    _eleSF_RECO_2D = (TH2F *)f_eleRecoSF->Get("EGamma_SF2D");
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/eleReco_HZZ_Moriond17_SFs.root";
+    TFile* f_eleRecoHZZSF = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_RECO_2D = (TH2F *)f_eleRecoHZZSF->Get("EGamma_SF2D");
 
     // electron id efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
@@ -240,7 +248,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_ID[4] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_4");
 
     // hzz electron id efficiencies
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/egamma_eff_hzz_ID_2016.root";
+    /*fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/egamma_eff_hzz_ID_2016.root";
     TFile* f_hzz_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
     _hzz_eleSF_ID[0] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_0");
     _hzz_eleSF_ID[1] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_1");
@@ -254,8 +262,10 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _hzz_eleSF_ID[9] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_9");
     _hzz_eleSF_ID[10] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_10");
     _hzz_eleSF_ID[11] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_11");
-    _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");
+    _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");*/
 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_HZZ_Moriond17.root";
+    TFile* f_hzz_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
     _hzz_eleSF_ID_2D = (TH2F *)f_hzz_eleIdSF->Get("EGamma_SF2D");
 
     // photon mva id (90%) efficiencies
@@ -291,7 +301,8 @@ void WeightUtils::SetSelection(string selection)
 
 float WeightUtils::GetPUWeight(float nPU)
 {
-    return _puReweight->Eval(nPU); 
+    //return _puReweight->Eval(nPU); 
+    return _puReweight->GetBinContent(_puReweight->FindBin(nPU)); 
 }
 
 std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
@@ -546,8 +557,8 @@ float WeightUtils::GetElectronRecoIdEff(TLorentzVector& electron) const
 
 float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const 
 {
-    //float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
-    float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
+    float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
+    //float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
     /*float binningPt[] = {7., 15., 20., 30., 40., 50., 60., 70., 80., 100., 120., 140., 160., 200.}; 
     int ptBin = 0;
     for (int i = 0; i < 13; ++i) {
@@ -559,7 +570,10 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
 
     float weight = 1;
     weight *= _eleSF_RECO_2D->GetBinContent(_eleSF_RECO_2D->FindBin(electron.scEta, 50.));
-    weight *= _hzz_eleSF_ID_2D->GetBinContent(_hzz_eleSF_ID_2D->FindBin(electron.scEta, tmpElePt));
+    //std::cout << "reco weight = " << weight << std::endl;
+    weight *= _hzz_eleSF_ID_2D->GetBinContent(_hzz_eleSF_ID_2D->FindBin(fabs(electron.scEta), tmpElePt));
+    //std::cout << "id weight = " <<_hzz_eleSF_ID_2D->GetBinContent(_hzz_eleSF_ID_2D->FindBin(fabs(electron.scEta), tmpElePt)) << std::endl;
+    //std::cout << "total weight = " << weight << std::endl;
     //weight *= _eleSF_RECO->Eval(electron.scEta);
     //weight *= _hzz_eleSF_ID[ptBin]->Eval(electron.scEta);
     
@@ -576,18 +590,21 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
             break;
         }
     }*/
-
-    float weight = 1;
+    float tmpPhotonPt = (photon.pt < 150.) ? photon.pt : 149.;
+    float weight = 1.;
     //if (photon.calibPt < 150.) {
     //    weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
     //}
-    weight *= _mva_gammaSF->GetBinContent(_mva_gammaSF->FindBin(photon.scEta, photon.pt));
+    weight *= _mva_gammaSF->GetBinContent(_mva_gammaSF->FindBin(photon.scEta, tmpPhotonPt));
 
     // electron veto scale factor
     if (fabs(photon.scEta) <= 1.49)
         weight *= 0.9938;
     else if (fabs(photon.scEta) > 1.49)
         weight *= 0.9875;
+
+    if (weight == 0)
+        weight = 1.;
     
     return weight;
 }

@@ -71,7 +71,8 @@ class WeightUtils: public TObject {
         // rng
         TRandom3 *rng;
 
-        TGraph  *_puReweight;
+        //TGraph  *_puReweight;
+        TH1D  *_puReweight;
         TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
         TGraphAsymmErrors *_muSF_ID_DATA_BCDEF[4], *_muSF_ID_MC_BCDEF[4]; 
         TGraphAsymmErrors *_muSF_ISO_DATA_BCDEF[4], *_muSF_ISO_MC_BCDEF[4]; 

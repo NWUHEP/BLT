@@ -120,9 +120,10 @@ public:
     float pdfWeight, alphaS;
 
     // physics object Lorentz vectors
-    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4;
+    TLorentzVector leptonOneP4, leptonTwoP4;
 
     // Additional lepton data
+    Float_t leptonOnePtCorr, leptonTwoPtCorr;
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneGenId, leptonTwoGenId; 
     Int_t leptonOneMother, leptonTwoMother; 

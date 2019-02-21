@@ -1221,8 +1221,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             FillPDFHist(pdfVariations, channel);
         }
 
-        if (nJetsCut < 2)// || nBJetsCut < 1)
-            return kTRUE;
+        //if (nJetsCut < 2 || nBJetsCut < 1)
+        //    return kTRUE;
         eventCounts[channel]->Fill(4);
 
         leptonOneP4     = muonP4;

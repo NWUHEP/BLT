@@ -69,7 +69,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
     string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
-    //string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
+    // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
     lumiMask.AddJSONFile(jsonFileName);
 
     // muon momentum corrections
@@ -119,11 +119,19 @@ void MultilepAnalyzer::Begin(TTree *tree)
         
         // weights and their uncertainties
         tree->Branch("eventWeight", &eventWeight);
-        tree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
-        tree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
         tree->Branch("topPtWeight", &topPtWeight);
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
+
+        tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
+        tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
+        tree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
+        tree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+        
+        tree->Branch("leptonOneIDVar", &leptonOneIDVar);
+        tree->Branch("leptonTwoIDVar", &leptonTwoIDVar);
+        tree->Branch("leptonOneRecoVar", &leptonOneRecoVar);
+        tree->Branch("leptonTwoRecoVar", &leptonTwoRecoVar);
 
 
         // leptons
@@ -236,7 +244,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     // Generator objects //
     ///////////////////////
 
-    vector<TGenParticle*> genTausHad;
+    vector<TGenParticle*> genTausHad, genElectrons, genMuons;
 
     if (!isData) {
 
@@ -278,7 +286,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         bitset<6> wDecay;
         bitset<4> tauDecay;
 
-        //   1.d) save gen level tau and leptonic taus
+        //   1.d) save gen level tau and leptonic taus, and e.mu
         vector<TGenParticle*> genTaus, genTausLep;
         
         
@@ -322,7 +330,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             }
 
 
-            // 2.d) This saves gen level tau and leptonic taus
+            // 2.d) This saves gen level tau, leptonic taus, electrons and muons
             if ( particle->parent != -2 ) {
                 if ( abs(particle->pdgId) == 16) {
                     TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
@@ -335,11 +343,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                     TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
                     if (abs(mother->pdgId) == 15) {
                         genTausLep.push_back(mother);
+                        if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
+                        if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
+                    } else if (abs(mother->pdgId) == 23 || abs(mother->pdgId) == 24) {
+                        if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
+                        if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
                     }
                 }
             }
         }
         
+        // cout << genElectrons.size() << genMuons.size() << genTaus.size() << endl ;
         // 3. finish loop over gen particles. now conclude gen level infomation
 
         // 3.a) counting partons: save to nPartons
@@ -489,8 +503,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     /* -------- Vertices ---------*/
 
-    //cout<<fInfo->hasGoodPV<<endl;
-
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
         TVector3 pv;
@@ -626,31 +638,56 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             }
         }
 
-        // apply tau energy scale correction (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
+       
+        // check apply correction for tau_h->tau_h and e->tau_h
         if (!isData) {
+            bool genOverlap = false;
 
-            // check if can be tagged as hadronic tau
-            bool genTauHadOverlap = false;
-            for (unsigned i = 0; i < genTausHad.size(); ++i) {
-                TLorentzVector genP4;
-                genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
-                if (tauP4.DeltaR(genP4) < 0.3) {
-                    genTauHadOverlap = true;
-                    break;
+            // 1. MC events with tau_h -> tau_h
+            if (genOverlap == false){
+                // 1.a) check overlap with hadronic tau
+                bool genTauHadOverlap = false;
+                for (unsigned i = 0; i < genTausHad.size(); ++i) {
+                    TLorentzVector genP4;
+                    genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
+                    if (tauP4.DeltaR(genP4) < 0.3) {
+                        genTauHadOverlap = true;
+                        genOverlap = true;
+                        break;
+                    }
+                }
+                // 1.b) apply correction for tau_h -> tau_h 
+                // (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
+                if (genTauHadOverlap) {
+                    if (tau->decaymode == 0) {
+                        tau->pt *= 0.995;
+                    } else if (tau->decaymode == 1) {
+                        tau->pt *= 1.01;
+                    } else if (tau->decaymode == 10) {
+                        tau->pt *= 1.006;
+                    }
                 }
             }
 
-            // apply the tau energy scale correction only for true tau ID
-            if (genTauHadOverlap) {
-                if (tau->decaymode == 0) {
-                    tau->pt *= 0.995;
-                } else if (tau->decaymode == 1) {
-                    tau->pt *= 1.01;
-                } else if (tau->decaymode == 10) {
-                    tau->pt *= 1.006;
-                }
-            }
-
+            
+            // // 2. MC events with electron -> tau_h
+            // if (genOverlap == false){
+            //     // 2.a) check overlap with  electron
+            //     bool genElectronOverlap = false;
+            //     for (unsigned i = 0; i < genElectrons.size(); ++i) {
+            //         TLorentzVector genP4;
+            //         genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
+            //         if (tauP4.DeltaR(genP4) < 0.3) {
+            //             genElectronOverlap = true;
+            //             genOverlap = true;
+            //             break;
+            //         }
+            //     }
+            //     // 2.b) apply correction for electron -> tau_h
+            //     if (genElectronOverlap) {
+            //         tau->pt *= 1.1;
+            //     }
+            // }
         }
 
         if( 
@@ -831,24 +868,38 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // correct for reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetMuonRecoEff(muonOneP4);
-            effCont2 = weights->GetMuonRecoEff(muonTwoP4);
-
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetMuonIDEff(muonOneP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetMuonIDEff(muonTwoP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoIDWeight = effs.first/effs.second;
+            leptonTwoIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetMuonISOEff(muonOneP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-
-            effs = effCont2.GetEff();
-            errs = effCont2.GetErr();
+            effCont = weights->GetMuonISOEff(muonTwoP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            
+
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
@@ -857,7 +908,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // to a trigger object.  When both muons pass the trigger, use the
             // efficiency for detecting either
             
-
+            EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
                 effCont2      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
@@ -930,20 +981,35 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // correct for reconstruction weights
-
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetElectronRecoEff(electronOneP4);
-            effCont2 = weights->GetElectronRecoEff(electronTwoP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetElectronIDEff(electronOneP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetElectronIDEff(electronTwoP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoIDWeight = effs.first/effs.second;
+            leptonTwoIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetElectronRecoEff(electronOneP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-            effs = effCont2.GetEff();
-            errs = effCont2.GetErr();
+            effCont = weights->GetElectronRecoEff(electronTwoP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
@@ -954,7 +1020,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // check if lepton could pass the trigger threshold and is matched
             // to a trigger object.  When both muons pass the trigger, use the
             // efficiency for detecting either
-
+            EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
@@ -1036,31 +1102,46 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetMuonRecoEff(muonP4);
-            effCont2 = weights->GetElectronRecoEff(electronP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            effCont = weights->GetElectronIDEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoIDWeight = effs.first/effs.second;
+            leptonTwoIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetMuonISOEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-            effs = effCont2.GetEff();
-            errs = effCont2.GetErr();
+            effCont = weights->GetElectronRecoEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonTwoRecoWeight = effs.first/effs.second;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
-
 
             // correct for trigger.
 
             // check if lepton could pass the trigger threshold and is matched
             // to a trigger object.  When both muons pass the trigger, use the
             // efficiency for detecting either
-
+            EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
@@ -1137,23 +1218,35 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
 
-            // reconstruction weights
-            EfficiencyContainer effCont1;
-            effCont1 = weights->GetElectronRecoEff(electronP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetElectronIDEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 0.92;
+            leptonTwoIDVar    = 0.05;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetElectronRecoEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 0.92;
-            leptonTwoRecoVar    = 0.05;
+            leptonTwoRecoWeight = 1.0;
+            leptonTwoRecoVar    = 0.0;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
                 effs = effCont1.GetEff();
@@ -1222,23 +1315,35 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
 
-            // reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetMuonRecoEff(muonP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 0.92;
+            leptonTwoIDVar    = 0.05;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetMuonISOEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 0.92;
-            leptonTwoRecoVar    = 0.05;
+            leptonTwoRecoWeight = 1.0;
+            leptonTwoRecoVar    = 0.0;
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effs = effCont1.GetEff();
@@ -1291,20 +1396,32 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // reconstruction weights
-            EfficiencyContainer effCont1;
-            effCont1 = weights->GetElectronRecoEff(electronP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetElectronIDEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 1.0;
+            leptonTwoIDVar    = 0.0;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetElectronRecoEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 1.0;
             leptonTwoRecoVar    = 0.0;
-            eventWeight *= leptonOneRecoWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
                 effs = effCont1.GetEff();
@@ -1356,21 +1473,33 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetMuonRecoEff(muonP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 1.0;
+            leptonTwoIDVar    = 0.0;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetMuonISOEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 1.0;
             leptonTwoRecoVar    = 0.0;
-            
-            eventWeight *= leptonOneRecoWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effs = effCont1.GetEff();
@@ -1422,20 +1551,33 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // reconstruction weights
-            EfficiencyContainer effCont1, effCont2;
-            effCont1 = weights->GetMuonRecoEff(muonP4);
-
+           // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 1.0;
+            leptonTwoIDVar    = 0.0;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetMuonISOEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 1.0;
             leptonTwoRecoVar    = 0.0;
-            eventWeight *= leptonOneRecoWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effs = effCont1.GetEff();
@@ -1487,21 +1629,32 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            // reconstruction weights
-            EfficiencyContainer effCont1;
-            effCont1 = weights->GetElectronRecoEff(electronP4);
-
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
             pair<float, float> effs, errs;
-            effs = effCont1.GetEff();
-            errs = effCont1.GetErr();
+
+            // id weight
+            effCont = weights->GetElectronIDEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            leptonTwoIDWeight = 1.0;
+            leptonTwoIDVar    = 0.0;
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetElectronRecoEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
             leptonOneRecoWeight = effs.first/effs.second;
             leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             leptonTwoRecoWeight = 1.0;
             leptonTwoRecoVar    = 0.0;
-            
-            eventWeight *= leptonOneRecoWeight;
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
+            EfficiencyContainer effCont1;
             if (triggered) {
                 effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
                 effs = effCont1.GetEff();
@@ -1601,22 +1754,52 @@ float MultilepAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, cons
 
 
 
-int MultilepAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*> genTausHad, vector<TJet*> vetoedJets, bool useHadronFlavor )
+int MultilepAnalyzer::GetTauGenFlavor(  TLorentzVector p4, 
+                                        vector<TGenParticle*> genTausHad, 
+                                        vector<TGenParticle*> genElectrons, 
+                                        vector<TGenParticle*> genMuons,
+                                        vector<TJet*> vetoedJets, 
+                                        bool useHadronFlavor )
 {
     int flavor = 26;
     
-    
     // check if can be tagged as hadronic tau
-    for (unsigned i = 0; i < genTausHad.size(); ++i) {
-        TLorentzVector genP4;
-        genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
-        if (genP4.DeltaR(p4) < 0.3) {
-            flavor = 15;
+    if (flavor==26){
+        for (unsigned i = 0; i < genTausHad.size(); ++i) {
+            TLorentzVector genP4;
+            genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
+            if (genP4.DeltaR(p4) < 0.3) {
+                flavor = 15;
+            }
         }
     }
 
+    
+    // check if can be tagged as electron
+    if (flavor==26){
+        for (unsigned i = 0; i < genElectrons.size(); ++i) {
+            TLorentzVector genP4;
+            genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
+            if (genP4.DeltaR(p4) < 0.3) {
+                flavor = 11;
+            }
+        }
+    }
+
+    // check if can be tagged as muon
+    if (flavor==26){
+        for (unsigned i = 0; i < genMuons.size(); ++i) {
+            TLorentzVector genP4;
+            genP4.SetPtEtaPhiM(genMuons[i]->pt, genMuons[i]->eta, genMuons[i]->phi, genMuons[i]->mass); 
+            if (genP4.DeltaR(p4) < 0.3) {
+                flavor = 13;
+            }
+        }
+    }
+
+
     // check if can be tagged by jet flavor
-    if (flavor!= 15){
+    if (flavor==26){
         float jetPtMax = - 1.0;
         for (unsigned i = 0; i < vetoedJets.size(); ++i) {
 
@@ -1624,7 +1807,6 @@ int MultilepAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*> g
             TLorentzVector jetP4; 
             jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
             if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
-                // cout<<"flavor Jet: "<< jetPtMax<<","<< jetP4.Pt()<< endl;
                 if(useHadronFlavor) {
                     flavor = vetoedJets[i]->hadronFlavor;
                 } else {
@@ -1634,6 +1816,9 @@ int MultilepAnalyzer::GetTauGenFlavor(TLorentzVector p4, vector<TGenParticle*> g
             }
         }
     }
+
+
+
     return flavor;
 }
 

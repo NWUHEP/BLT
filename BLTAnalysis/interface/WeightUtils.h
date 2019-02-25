@@ -53,8 +53,11 @@ class WeightUtils: public TObject {
 
         float   GetPUWeight(float);
         EfficiencyContainer GetTriggerEffWeight(string, TLorentzVector&) const;
-        EfficiencyContainer GetMuonRecoEff(TLorentzVector&) const; 
+        EfficiencyContainer GetMuonIDEff(TLorentzVector&) const; 
+        EfficiencyContainer GetMuonISOEff(TLorentzVector&) const; 
+        EfficiencyContainer GetElectronIDEff(TLorentzVector&) const;
         EfficiencyContainer GetElectronRecoEff(TLorentzVector&) const;
+        
 
         ClassDef(WeightUtils, 0);
 
@@ -77,8 +80,11 @@ class WeightUtils: public TObject {
         TGraphAsymmErrors *_muSF_ID_DATA_GH[4], *_muSF_ID_MC_GH[4]; 
         TGraphAsymmErrors *_muSF_ISO_DATA_GH[4], *_muSF_ISO_MC_GH[4]; 
 
-        // electron RECO/ID scale factors (what about ISO?)
+        // electron RECO/ID scale factors (id includes isolation)
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5];
+
+        // electron trigger efficiencies (the bins for 2.1 < |eta| < 2.4 are copies of the 1.6 to 2.1 bins 
+        TH2D *_elSF_Trigger_BCDEF, *_elSF_Trigger_GH;
 
         // electron trigger efficiencies (the bins for 2.1 < |eta| < 2.4 are copies of the 1.6 to 2.1 bins 
         float _elePtBins[8] = {30, 32, 35, 40, 50, 60, 120, 9999};

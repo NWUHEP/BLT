@@ -132,8 +132,8 @@ private:
 
 
     // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
 
     // modified multiplicities for jet related uncertainties
     unsigned nJetsCut, nBJetsCut;
@@ -144,7 +144,7 @@ private:
     // helper functions
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>, vector<baconhep::TJet*>, bool );
+    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
     pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);

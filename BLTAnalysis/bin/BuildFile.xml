@@ -1,11 +1,12 @@
 <use name="BLT/BLTAnalysis"/>
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
-<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
-<bin file="ExampleAnalyzer.cc" name="ExampleAnalyzer"></bin>
+
 <bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
 
 
 
 <!-- <bin file="FakeSelector.cc" name="FakeSelector"></bin>
+<bin file="ExampleAnalyzer.cc" name="ExampleAnalyzer"></bin>
+<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
 <bin file="TauSelector.cc" name="TauSelector"></bin> -->

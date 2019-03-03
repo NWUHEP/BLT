@@ -335,6 +335,7 @@ EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) co
 
 EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) const
 {
+    cout << "getting electron id sf" << endl;
     float binningPt[] = {10., 20., 35., 50., 90., 9999.};
     int ptBin = 0;
     for (int i = 0; i < 5; ++i) {
@@ -347,6 +348,8 @@ EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) cons
     int etaBin = GetBinNumber<TGraphErrors*>(_eleSF_ID[ptBin], electron.Eta());
     float sf   = _eleSF_ID[ptBin]->Eval(electron.Eta());
     float err  = _eleSF_ID[ptBin]->GetErrorY(etaBin);
+
+    cout << ptBin << ", " << etaBin << ", " << electron.Eta() << ", " << sf << ", " << err << endl;
     
     EfficiencyContainer effCont(sf, 1., err, 0.);
     return effCont;

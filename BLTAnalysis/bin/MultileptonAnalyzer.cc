@@ -939,6 +939,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
 
+    cout << electrons.size() << endl;
+
     string channel = "";
     if (muons.size() == 2 && electrons.size() == 0 && taus.size() == 0) { // mu+mu selection
         channel = "mumu";

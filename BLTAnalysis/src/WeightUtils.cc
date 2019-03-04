@@ -5,15 +5,14 @@ template <class Graph>
 int GetBinNumber(Graph graph, float x0)
 {
     Double_t x,y;
-    float xmin = 1e9;
     for (int i = 0; i < graph->GetN(); i++) {
         graph->GetPoint(i, x, y);
         float diff = fabs(x - x0);
-        if (diff > xmin) {
-            return i - 1;
-        } else {
-            xmin = diff;
-        }
+        float ex = graph->GetErrorX(i);
+        //cout << i << ", " << x << ", " << y << ", " << ex << ", " << diff << endl;
+        if (diff < ex) {
+            return i;
+        }     
     }
     return graph->GetN() - 1; 
 }
@@ -143,6 +142,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
+    _eleSF_RECO->Sort();
     
     // (these are for the legacy rereco and will look bad with the 12a ntuples (Feb17 rereco)
     //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_low_RecoSF_Legacy2016.root";
@@ -164,6 +164,13 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_ID[2] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_2");
     _eleSF_ID[3] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_3");
     _eleSF_ID[4] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_4");
+
+    // sort the graph points for easier access
+    _eleSF_ID[0]->Sort();
+    _eleSF_ID[1]->Sort();
+    _eleSF_ID[2]->Sort();
+    _eleSF_ID[3]->Sort();
+    _eleSF_ID[4]->Sort();
 
 }
 
@@ -335,7 +342,6 @@ EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) co
 
 EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) const
 {
-    cout << "getting electron id sf" << endl;
     float binningPt[] = {10., 20., 35., 50., 90., 9999.};
     int ptBin = 0;
     for (int i = 0; i < 5; ++i) {
@@ -349,7 +355,7 @@ EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) cons
     float sf   = _eleSF_ID[ptBin]->Eval(electron.Eta());
     float err  = _eleSF_ID[ptBin]->GetErrorY(etaBin);
 
-    cout << ptBin << ", " << etaBin << ", " << electron.Eta() << ", " << sf << ", " << err << endl;
+    //cout << electron.Eta() << ", " << etaBin << ", " << sf << ", " << err << endl;
     
     EfficiencyContainer effCont(sf, 1., err, 0.);
     return effCont;

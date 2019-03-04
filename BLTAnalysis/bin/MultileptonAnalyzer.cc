@@ -704,6 +704,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     /* ELECTRONS */
     vector<TElectron*> electrons, fail_electrons;
     vector<TLorentzVector> veto_electrons;
+    map<int, float> electronScaleCorr;
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
@@ -711,12 +712,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (isData) {
             scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
             electron->pt    *= sdata.scale;
-            electron->ptErr  = sdata.scale;
+            electron->pfPt   = sdata.scale; // since it's not used anywhere else...
         } else {
             float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
             float eScale = rng->Gaus(1, sFactor);
-            electron->pt    *= eScale;
-            electron->ptErr  = eScale;
+            electron->pt    *= eScale; 
+            electron->pfPt   = eScale; // since it's not used anywhere else...
         }
 
         TLorentzVector electronP4;
@@ -939,8 +940,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
 
-    cout << electrons.size() << endl;
-
     string channel = "";
     if (muons.size() == 2 && electrons.size() == 0 && taus.size() == 0) { // mu+mu selection
         channel = "mumu";
@@ -1096,14 +1095,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonOnePtCorr = electrons[0]->ptErr;
+        leptonOnePtCorr = electrons[0]->pfPt;
         leptonOneFlavor = 11*electrons[0]->q;
         leptonOneDZ     = electrons[0]->dz;
         leptonOneD0     = electrons[0]->d0;
 
         leptonTwoP4     = electronTwoP4;
         leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
-        leptonTwoPtCorr = electrons[1]->ptErr;
+        leptonTwoPtCorr = electrons[1]->pfPt;
         leptonTwoFlavor = 11*electrons[1]->q;
         leptonTwoDZ     = electrons[1]->dz;
         leptonTwoD0     = electrons[1]->d0;
@@ -1236,7 +1235,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         leptonTwoP4     = electronP4;
         leptonTwoIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonTwoPtCorr = electrons[0]->ptErr;
+        leptonTwoPtCorr = electrons[0]->pfPt;
         leptonTwoFlavor = 11*electrons[0]->q;
         leptonTwoDZ     = electrons[0]->dz;
         leptonTwoD0     = electrons[0]->d0;
@@ -1341,7 +1340,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonOnePtCorr = electrons[0]->ptErr;
+        leptonOnePtCorr = electrons[0]->pfPt;
         leptonOneFlavor = 11*electrons[0]->q;
         leptonOneDZ     = electrons[0]->dz;
         leptonOneD0     = electrons[0]->d0;
@@ -1540,7 +1539,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         leptonOneP4     = electronP4;
         leptonOneIso    = electronIso;
-        leptonOnePtCorr = electrons[0]->ptErr;
+        leptonOnePtCorr = electrons[0]->pfPt;
         leptonOneFlavor = electrons[0]->q*13;
         leptonOneDZ     = electrons[0]->dz;
         leptonOneD0     = electrons[0]->d0;

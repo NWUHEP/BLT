@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef MultilepAnalyzer_HH
-#define MultilepAnalyzer_HH
+#ifndef MULTILEPTONANALYZER_HH
+#define MULTILEPTONANALYZER_HH
 
 
 // Analysis tools
@@ -53,10 +53,10 @@
 #include <regex>
 
 
-class MultilepAnalyzer: public BLTSelector {
+class MultileptonAnalyzer: public BLTSelector {
 public:
-    MultilepAnalyzer();
-    ~MultilepAnalyzer();
+    MultileptonAnalyzer();
+    ~MultileptonAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -90,66 +90,72 @@ public:
 
     std::vector<string> triggerNames;
 
-
-    ////////////////////////////////
     // Branches in the output file
     // event data
-    UInt_t runNumber, lumiSection, nPV, triggerLeptonStatus, mcEra;
+    UInt_t runNumber, lumiSection, nPV, nPartons,triggerLeptonStatus;
     ULong64_t evtNumber;
+    Bool_t triggerStatus;
     Float_t nPU;
-
-    // generator level data
-    UInt_t nPartons;
-    Float_t genWeight;
-    UInt_t genCategory;
-
-    // weights and uncertainties
-    Float_t eventWeight;
-
-    // lepton variable
-    TLorentzVector leptonOneP4, leptonTwoP4;
-    Float_t leptonOneIso, leptonTwoIso;
-    Int_t leptonOneFlavor, leptonTwoFlavor;
-
-    // tau variable
-    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
-    Float_t tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
-
-    // ht
-    Float_t htSum, ht, htPhi;
-
-    // met
-    Float_t met, metPhi;
-
-    // object counters
-    UInt_t nMuons, nElectrons, nTaus, nJets, nBJets;
-    UInt_t nFailMuons, nFailElectrons;
-
-    ////////////////////////////////
-
-
-private:
-
-
-    // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+    TVector3 rPV;
+    UInt_t nJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
 
     // modified multiplicities for jet related uncertainties
-    unsigned nJetsCut, nBJetsCut;
-    unsigned nJetsJESUp,  nJetsJESDown,  nJetsJERUp,  nJetsJERDown;
-    unsigned nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
+    unsigned nJetsCut,nJetsCut2, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown;
+    unsigned nBJetsCut, nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
     unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
+    // weights and uncertainties
+    Float_t eventWeight, triggerWeight, puWeight, topPtWeight, genWeight;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight, leptonThreeRecoWeight, leptonFourRecoWeight;
+    Float_t triggerVar, puVar, topPtVar, leptonOneRecoVar, leptonTwoRecoVar;
+
+    vector<float> qcdWeights;
+    float pdfWeight, alphaS;
+
+    // physics object Lorentz vectors
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4, leptonFourP4, tauP4;
+
+    // Additional lepton data
+    Float_t leptonOneIso, leptonTwoIso, leptonThreeIso, leptonFourIso;
+    Int_t leptonOneMother, leptonTwoMother, leptonThreeMother, leptonFourMother; 
+    Int_t leptonOneFlavor, leptonTwoFlavor, leptonThreeFlavor, leptonFourFlavor;
+    Float_t leptonOneD0, leptonTwoD0, leptonThreeD0, leptonFourD0;
+    Float_t leptonOneDZ, leptonTwoDZ, leptonThreeDZ, leptonFourDZ;
+
+    // tau variables
+    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
+    Float_t tauMVA, tauPuppiChHadIso, tauPuppiGammaIso, tauPuppiNeuHadIso, tauVetoedJetPt, tauVetoedJetPtUnc;
+
+    // dimuon vertex data
+    TVector3 dileptonVertexOne, dileptonVertexTwo, dileptonVertexErrOne, dileptonVertexErrTwo;
+    Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
+    Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
+
+    // jet data
+    TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
+    Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
+    Int_t jetOneFlavor, jetTwoFlavor, jetThreeFlavor, jetFourFlavor;
+    Float_t met, metPhi, ht, htPhi, htSum;
+
+    // generator level data
+    Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
+    TLorentzVector genOneP4, genTwoP4;
+
     // helper functions
+    float MetKluge(float);
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
-    pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
+    vector<unsigned> PairDileptonToZ(vector<TLorentzVector>);
+    int GetGenMotherId(vector<baconhep::TGenParticle*>, TLorentzVector);
+    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>, vector<baconhep::TJet*>, bool );
+    pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
+    vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float , float);
+
+    //ClassDef(MultileptonAnalyzer,0);
 };
 
-#endif  // MultilepAnalyzer_HH
+#endif  // MULTILEPTONANALYZER_HH

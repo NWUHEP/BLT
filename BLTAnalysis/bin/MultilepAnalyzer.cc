@@ -111,6 +111,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("nPV", &nPV);
         tree->Branch("nPU", &nPU);
         tree->Branch("triggerLeptonStatus",&triggerLeptonStatus);
+        tree->Branch("mcEra",&mcEra);
 
         // gen level objects
         tree->Branch("nPartons", &nPartons);
@@ -228,7 +229,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     }
     hTotalEvents->Fill(2);
 
-
+    // Set data period for 2016 MC scale factors
+    mcEra = -1;
+    if (!isData) {
+        if (rng->Rndm() < 0.548) {  //0.468) {
+            weights->SetDataPeriod("2016BtoF"); 
+            mcEra = 0;
+        } else {
+            weights->SetDataPeriod("2016GH");
+            mcEra = 1;
+        }
+    }
 
     /////////////////////
     // Fill event info //
@@ -239,7 +250,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     lumiSection   = fInfo->lumiSec;
     nPV           = fPVArr->GetEntries();
     
-
+    
     ///////////////////////
     // Generator objects //
     ///////////////////////
@@ -248,12 +259,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     if (!isData) {
 
-        // Set data period for 2016 MC scale factors
-        if (rng->Rndm() < 0.468) {
-            weights->SetDataPeriod("2016BtoF");    
-        } else {
-            weights->SetDataPeriod("2016GH");
-        }
 
         // save gen weight for amc@nlo Drell-Yan sample
         genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;

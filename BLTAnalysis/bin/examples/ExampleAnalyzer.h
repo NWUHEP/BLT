@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef MultilepAnalyzer_HH
-#define MultilepAnalyzer_HH
+#ifndef ExampleAnalyzer_HH
+#define ExampleAnalyzer_HH
 
 
 // Analysis tools
@@ -53,10 +53,10 @@
 #include <regex>
 
 
-class MultilepAnalyzer: public BLTSelector {
+class ExampleAnalyzer: public BLTSelector {
 public:
-    MultilepAnalyzer();
-    ~MultilepAnalyzer();
+    ExampleAnalyzer();
+    ~ExampleAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -94,14 +94,14 @@ public:
     ////////////////////////////////
     // Branches in the output file
     // event data
-    UInt_t runNumber, lumiSection, nPV, triggerLeptonStatus, mcEra;
+    UInt_t runNumber, lumiSection, nPV, triggerLeptonStatus;
     ULong64_t evtNumber;
+    Bool_t triggerStatus;
     Float_t nPU;
 
     // generator level data
     UInt_t nPartons;
     Float_t genWeight;
-    UInt_t genCategory;
 
     // weights and uncertainties
     Float_t eventWeight;
@@ -115,41 +115,31 @@ public:
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
     Float_t tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
 
-    // ht
-    Float_t htSum, ht, htPhi;
-
     // met
     Float_t met, metPhi;
 
     // object counters
-    UInt_t nMuons, nElectrons, nTaus, nJets, nBJets;
-    UInt_t nFailMuons, nFailElectrons;
+    UInt_t  nMuons, nElectrons, nTaus, nJets, nBJets;
 
     ////////////////////////////////
 
 
 private:
 
-
     // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
-
-    // modified multiplicities for jet related uncertainties
-    unsigned nJetsCut, nBJetsCut;
-    unsigned nJetsJESUp,  nJetsJESDown,  nJetsJERUp,  nJetsJERDown;
-    unsigned nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
-    unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
+    Float_t triggerWeight, puWeight;
+    Float_t triggerVar, puVar;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t leptonOneRecoVar, leptonTwoRecoVar;
 
     // helper functions
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
-    pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
-    void ResetJetCounters();
-    void JetCounting(TJet* jet, float , float);
+    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>, vector<baconhep::TJet*>, bool );
+    pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
+
 };
 
-#endif  // MultilepAnalyzer_HH
+#endif  // ExampleAnalyzer_HH

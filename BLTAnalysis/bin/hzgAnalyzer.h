@@ -107,6 +107,7 @@ public:
     Float_t leptonTwoPt, leptonTwoEta, leptonTwoPhi;
 
     Float_t leptonOnePtKin, leptonTwoPtKin;
+    Float_t leptonOnePtKinJames, leptonTwoPtKinJames;
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso;
@@ -115,6 +116,8 @@ public:
     Float_t leptonOneD0, leptonTwoD0;
     Float_t leptonOneDZ, leptonTwoDZ;
     Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
+
+    Bool_t leptonOneECALDriven, leptonTwoECALDriven;
     
     // tau data
     Int_t tauDecayMode;
@@ -154,6 +157,7 @@ public:
     Float_t dileptonPt, dileptonEta, dileptonPhi, dileptonM;
     Float_t dileptonDEta, dileptonDPhi, dileptonDR;
     Float_t dileptonMKin;
+    Float_t dileptonMKinJames;
     
     // dilepton vertex data
     //Float_t dileptonVertexOneX, dileptonVertexOneY, dileptonVertexOneZ;
@@ -181,12 +185,15 @@ public:
     // three body
     Float_t llgPt, llgEta, llgPhi, llgM, llgPtOverM;
     Float_t llgMKin;
+    Float_t llgMKinJames;
     Float_t l1PhotonDEta, l1PhotonDPhi, l1PhotonDR;
     Float_t l2PhotonDEta, l2PhotonDPhi, l2PhotonDR;
     Float_t lPhotonDRMax, lPhotonDRMin;
     Float_t dileptonPhotonDEta, dileptonPhotonDPhi, dileptonPhotonDR;
     Float_t ptt;
     Float_t zgBigTheta, zgLittleTheta, zgPhi;
+    Float_t zgLittleThetaMY;
+    Float_t zgBigThetaJames, zgLittleThetaJames, zgPhiJames;
     Float_t genBigTheta, genLittleTheta, genPhi;
 
     // other

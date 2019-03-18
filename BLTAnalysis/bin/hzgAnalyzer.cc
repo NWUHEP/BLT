@@ -7,6 +7,7 @@
 #include <TF2.h>
 #include <RooRealVar.h>
 #include <RooWorkspace.h>
+#include "KinZfitter/KinZfitter/interface/KinZfitter.h"
 
 // prints a message and exits gracefully
 #define FATAL(msg) do { fprintf(stderr, "FATAL: %s\n", msg); gSystem->Exit(1); } while (0)
@@ -131,25 +132,27 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonOneEta", &leptonOneEta);
     outTree->Branch("leptonOnePhi", &leptonOnePhi);
     outTree->Branch("leptonOnePtKin", &leptonOnePtKin);
-    //outTree->Branch("leptonOneP4KinFit", &leptonOneP4KinFit);
+    outTree->Branch("leptonOnePtKinJames", &leptonOnePtKinJames);
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
     outTree->Branch("leptonOneMother", &leptonOneMother);
     outTree->Branch("leptonOneD0", &leptonOneD0);
     outTree->Branch("leptonOneDZ", &leptonOneDZ);
     outTree->Branch("leptonOneRecoWeight", &leptonOneRecoWeight);
+    outTree->Branch("leptonOneECALDriven", &leptonOneECALDriven);
 
     outTree->Branch("leptonTwoPt", &leptonTwoPt);
     outTree->Branch("leptonTwoEta", &leptonTwoEta);
     outTree->Branch("leptonTwoPhi", &leptonTwoPhi);
     outTree->Branch("leptonTwoPtKin", &leptonTwoPtKin);
-    //outTree->Branch("leptonTwoP4KinFit", &leptonTwoP4KinFit);
+    outTree->Branch("leptonTwoPtKinJames", &leptonTwoPtKinJames);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     outTree->Branch("leptonTwoMother", &leptonTwoMother);
     outTree->Branch("leptonTwoD0", &leptonTwoD0);
     outTree->Branch("leptonTwoDZ", &leptonTwoDZ);
     outTree->Branch("leptonTwoRecoWeight", &leptonTwoRecoWeight);
+    outTree->Branch("leptonTwoECALDriven", &leptonTwoECALDriven);
  
     outTree->Branch("tauDecayMode", &tauDecayMode);
     outTree->Branch("tauMVA", &tauMVA);
@@ -178,7 +181,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetTwoTag", &jetTwoTag);
 
     // gen level objects 
-
     outTree->Branch("genLeptonOnePt", &genLeptonOnePt);
     outTree->Branch("genLeptonOneEta", &genLeptonOneEta);
     outTree->Branch("genLeptonOnePhi", &genLeptonOnePhi);
@@ -213,6 +215,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("dileptonDPhi", &dileptonDPhi);
     outTree->Branch("dileptonDR", &dileptonDR);
     outTree->Branch("dileptonMKin", &dileptonMKin);
+    outTree->Branch("dileptonMKinJames", &dileptonMKinJames);
 
     // dilepton vertices
     //outTree->Branch("dileptonVertexOne", &dileptonVertexOne);
@@ -260,6 +263,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("llgM", &llgM);
     outTree->Branch("llgPtOverM", &llgPtOverM);
     outTree->Branch("llgMKin", &llgMKin);
+    outTree->Branch("llgMKinJames", &llgMKinJames);
     outTree->Branch("l1PhotonDEta", &l1PhotonDEta);
     outTree->Branch("l1PhotonDPhi", &l1PhotonDPhi);
     outTree->Branch("l1PhotonDR", &l1PhotonDR);
@@ -274,7 +278,11 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("ptt", &ptt);
     outTree->Branch("zgBigTheta", &zgBigTheta);
     outTree->Branch("zgLittleTheta", &zgLittleTheta);
+    outTree->Branch("zgLittleThetaMY", &zgLittleThetaMY);
     outTree->Branch("zgPhi", &zgPhi);
+    outTree->Branch("zgBigThetaJames", &zgBigThetaJames);
+    outTree->Branch("zgLittleThetaJames", &zgLittleThetaJames);
+    outTree->Branch("zgPhiJames", &zgPhiJames);
     outTree->Branch("genBigTheta", &genBigTheta);
     outTree->Branch("genLittleTheta", &genLittleTheta);
     outTree->Branch("genPhi", &genPhi);
@@ -294,7 +302,6 @@ void hzgAnalyzer::Begin(TTree *tree)
 
 Bool_t hzgAnalyzer::Process(Long64_t entry)
 {
-
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
@@ -319,11 +326,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             << std::endl;
    
     //bool sync_print = false;
-    bool sync_print_precut = true;
+    bool sync_print_precut = false;
 
     if (sync_print_precut) {          
         //ULong64_t myEventNumber = 4368674045;
-        if (!(
+        
+        //for checking object kinematics
+        /*if (!(
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 405) || 
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 419) || 
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 413) ||
@@ -344,6 +353,33 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 458) ||
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 457) ||
                 (fInfo->runNum == 1 && fInfo->lumiSec == 3 && fInfo->evtNum == 460) 
+                )
+            ) return kTRUE;*/
+       
+        // for checking non-overlapping events
+        if (!(
+                // muon channel
+                (fInfo->runNum == 1 && fInfo->lumiSec == 40     && fInfo->evtNum == 7817)   || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 65     && fInfo->evtNum == 12829)  || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 75     && fInfo->evtNum == 14933)  ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 57     && fInfo->evtNum == 11340)  ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1550   && fInfo->evtNum == 309928) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1569   && fInfo->evtNum == 313636) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1569   && fInfo->evtNum == 313680) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1570   && fInfo->evtNum == 313826) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 428    && fInfo->evtNum == 85455)  ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 421    && fInfo->evtNum == 84164)  ||
+                //electron channel
+                (fInfo->runNum == 1 && fInfo->lumiSec == 63 && fInfo->evtNum == 12497) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 79 && fInfo->evtNum == 15658) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 775 && fInfo->evtNum == 154801) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1098 && fInfo->evtNum == 219407) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1549 && fInfo->evtNum == 309788) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1543 && fInfo->evtNum == 308557) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1555 && fInfo->evtNum == 310804) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 379 && fInfo->evtNum == 75615) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 380 && fInfo->evtNum == 75912) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 408 && fInfo->evtNum == 81429) 
                 )
             ) return kTRUE;
 
@@ -440,12 +476,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     ///////////////////
 
     /* Vertices */
-    //TVertex* thePV;
+    TVertex* thePV;
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
         TVector3 pv;
-        //thePV = (TVertex *)fPVArr->At(0);
         copy_xyz((TVertex*) fPVArr->At(0), pv);
+        thePV = (TVertex *)fPVArr->At(0);
         xPV = pv.X();
         yPV = pv.Y();
         zPV = pv.Z();
@@ -457,10 +493,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     particleSelector->SetNPV(fInfo->nPU + 1);
     particleSelector->SetRho(fInfo->rhoJet);
 
-    /*if (sync_print_precut) {
+    if (sync_print_precut) {
         cout << "pvx, pvy, pvz, ndof" << endl;
         cout << thePV->x << ", " << thePV->y << ", " << thePV->z << ", " << thePV->ndof << endl;
-    }*/
+    }
 
     /* MUONS */
     vector<TMuon*> muons;
@@ -600,7 +636,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         electronP4.SetPtEtaPhiM(electron->calibPt, electron->eta, electron->phi, ELE_MASS);
         
         if (sync_print_precut) {
-           cout << "pt , eta, sc_eta, phi, d0, dz, sip3d, iso, mva, pass_mva" << endl;
+           cout << "electron pt, calibpt, eta, sc_eta, phi, d0, dz, sip3d, iso, mva, pass_mva" << endl;
            //cout << electronP4.Pt() << "," << electronP4.Eta() << "," << 
            cout << electron->pt << "," << electron->calibPt << "," <<  electron->eta << ", " << 
                    electron->scEta << ", " << electron->phi << "," << electron->d0 << "," << 
@@ -993,8 +1029,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(8); 
 
-        /*if (sync_print_precut) 
-            cout << "passed the L1EMTF cut" << endl;*/
+        if (sync_print_precut) 
+            cout << "passed the L1EMTF cut" << endl;
 
         bool hasValidPhoton = false;
         unsigned int photonIndex = 0;
@@ -1009,12 +1045,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             tempLLG = dileptonP4 + tempPhoton;
             float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
             float this_dr2 = leptonTwoP4.DeltaR(tempPhoton);
-            /*if (sync_print_precut) {
+            if (sync_print_precut) {
                 cout << "photon pt, et/m, z_mass, h_mass, dr1, dr2" << endl;
                 cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " 
-                     << tempDilepton.M() << ", " << tempLLG.M() << ", " 
+                     << dileptonP4.M() << ", " << tempLLG.M() << ", " 
                      << this_dr1 << ", " << this_dr2 << endl;
-            }*/
+            }
 
             if (
                 tempPhoton.Pt() > 15.0 &&
@@ -1034,8 +1070,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(9);
 
-        /*if (sync_print_precut)
-            cout << "passed the photon selection" << endl;*/
+        if (sync_print_precut)
+            cout << "passed the photon selection" << endl;
 
         TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
@@ -1266,9 +1302,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         else 
             photonOneR9 = photons[photonIndex]->r9;
 
-        /*if (sync_print_precut) {
+        if (sync_print_precut) {
             cout << "event is still alive" << endl;
-        }*/
+        }
+        
+        // KINEMATIC FIT JAMES METHOD
 
         float muonOneMean, muonOneSigma, muonOneAlphaL, muonOneAlphaR, muonOnePowerL, muonOnePowerR;
         float muonTwoMean, muonTwoSigma, muonTwoAlphaL, muonTwoAlphaR, muonTwoPowerL, muonTwoPowerR;
@@ -1290,12 +1328,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         mva_input_floats["muPFIsoR04_PU"] = muons[muonOneIndex]->puIso;
         EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonOneMean, muonOneSigma, 
                                  muonOneAlphaL, muonOnePowerL, muonOneAlphaR, muonOnePowerR);
-        /*leptonOneMean = muonOneMean;
-        leptonOneSigma = muonOneSigma;
-        leptonOneAlphaL = muonOneAlphaL;
-        leptonOneAlphaR = muonOneAlphaR;
-        leptonOnePowerL = muonOnePowerL;
-        leptonOnePowerR = muonOnePowerR;*/
+
+        //leptonOneMean = muonOneMean;
+        //leptonOneSigma = muonOneSigma;
+        //leptonOneAlphaL = muonOneAlphaL;
+        //leptonOneAlphaR = muonOneAlphaR;
+        //leptonOnePowerL = muonOnePowerL;
+        //leptonOnePowerR = muonOnePowerR;
         
         // BDT eval for muon two
         mva_input_floats["muEnergy"] = leptonTwoP4.E();
@@ -1312,12 +1351,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         EvalMuonEnergyResolution(mva_input_floats, mva_input_ints, muonTwoMean, muonTwoSigma, 
                                  muonTwoAlphaL, muonTwoPowerL, muonTwoAlphaR, muonTwoPowerR);
         
-        /*leptonTwoMean = muonTwoMean;
-        leptonTwoSigma = muonTwoSigma;
-        leptonTwoAlphaL = muonTwoAlphaL;
-        leptonTwoAlphaR = muonTwoAlphaR;
-        leptonTwoPowerL = muonTwoPowerL;
-        leptonTwoPowerR = muonTwoPowerR;*/
+        //leptonTwoMean = muonTwoMean;
+        //leptonTwoSigma = muonTwoSigma;
+        //leptonTwoAlphaL = muonTwoAlphaL;
+        //leptonTwoAlphaR = muonTwoAlphaR;
+        //leptonTwoPowerL = muonTwoPowerL;
+        //leptonTwoPowerR = muonTwoPowerR;
             
         // Kinematic Fit
         TVector3 v1, v2;
@@ -1352,13 +1391,38 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
         //leptonOneProbPostfit = postfitProb1;
         //leptonTwoProbPostfit = postfitProb2;
-        double muonOnePtKinFit = e1/cosh(muons[muonOneIndex]->eta);
-        double muonTwoPtKinFit = e2/cosh(muons[muonTwoIndex]->eta);
-        TLorentzVector muonOneP4KinFit, muonTwoP4KinFit;
-        muonOneP4KinFit.SetPtEtaPhiM(muonOnePtKinFit, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi, MUON_MASS);
-        muonTwoP4KinFit.SetPtEtaPhiM(muonTwoPtKinFit, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi, MUON_MASS);
-        //leptonOneP4KinFit = muonOneP4KinFit;
-        //leptonTwoP4KinFit = muonTwoP4KinFit;
+        double muonOnePtKinFitJames = e1/cosh(muons[muonOneIndex]->eta);
+        double muonTwoPtKinFitJames = e2/cosh(muons[muonTwoIndex]->eta);
+        TLorentzVector muonOneP4KinFitJames, muonTwoP4KinFitJames;
+        muonOneP4KinFitJames.SetPtEtaPhiM(muonOnePtKinFitJames, muons[muonOneIndex]->eta, muons[muonOneIndex]->phi, MUON_MASS);
+        muonTwoP4KinFitJames.SetPtEtaPhiM(muonTwoPtKinFitJames, muons[muonTwoIndex]->eta, muons[muonTwoIndex]->phi, MUON_MASS);
+        leptonOnePtKinJames = muonOneP4KinFitJames.Pt();
+        leptonTwoPtKinJames = muonTwoP4KinFitJames.Pt(); 
+
+        // KINEMATIC FIT MING-YAN METHOD
+
+        KinZfitter* kinZfitter = new KinZfitter(isData);
+        std::vector<TObject *> selectedLeptons;
+        selectedLeptons.push_back(muons[muonOneIndex]);
+        selectedLeptons.push_back(muons[muonTwoIndex]);
+        std::map<unsigned int, TLorentzVector> selectedFsrMap;
+        kinZfitter->Setup(selectedLeptons, selectedFsrMap);
+        kinZfitter->KinRefitZ();
+        std::vector<TLorentzVector> refitP4s;
+        refitP4s = kinZfitter->GetRefitP4s();
+        delete kinZfitter;
+
+        /*cout << "before kinematic fit" << endl;
+        cout << "lepton 1 pt, eta, phi: " << muons[muonOneIndex]->pt << ", " << muons[muonOneIndex]->eta << ", " << muons[muonOneIndex]->phi << endl;
+        cout << "lepton 2 pt, eta, phi: " << muons[muonTwoIndex]->pt << ", " << muons[muonTwoIndex]->eta << ", " << muons[muonTwoIndex]->phi << endl;
+
+        cout << "after kinematic fit" << endl;
+        cout << "lepton 1 pt, eta, phi " << refitP4s[0].Pt() << ", " << refitP4s[0].Eta() << ", " << refitP4s[0].Phi() << endl;
+        cout << "lepton 2 pt, eta, phi " << refitP4s[1].Pt() << ", " << refitP4s[1].Eta() << ", " << refitP4s[1].Phi() << endl;*/
+
+        TLorentzVector muonOneP4KinFit = refitP4s[0];
+        TLorentzVector muonTwoP4KinFit = refitP4s[1];
+
         leptonOnePtKin = muonOneP4KinFit.Pt();
         leptonTwoPtKin = muonTwoP4KinFit.Pt();
 
@@ -1367,6 +1431,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonPhi = dileptonP4.Phi();
         dileptonM = dileptonP4.M();
         dileptonMKin = (muonOneP4KinFit + muonTwoP4KinFit).M();
+        dileptonMKinJames = (muonOneP4KinFitJames + muonTwoP4KinFitJames).M();
         dileptonDEta = fabs(leptonOneP4.Eta() - leptonTwoP4.Eta());
         dileptonDPhi = fabs(leptonOneP4.DeltaPhi(leptonTwoP4));
         dileptonDR = leptonOneP4.DeltaR(leptonTwoP4);
@@ -1377,6 +1442,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         llgM = llgP4.M();
         llgPtOverM = llgP4.Pt()/llgP4.M();
         llgMKin = (muonOneP4KinFit + muonTwoP4KinFit + photonOneP4).M();
+        llgMKinJames = (muonOneP4KinFitJames + muonTwoP4KinFitJames + photonOneP4).M();
         
         l1PhotonDEta = fabs(leptonOneP4.Eta() - photonOneP4.Eta());
         l1PhotonDPhi = fabs(leptonOneP4.DeltaPhi(photonOneP4));
@@ -1399,7 +1465,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonPhotonDR = dileptonP4.DeltaR(photonOneP4);
         ptt = 2*fabs(dileptonP4.Px()*photonOneP4.Py() - photonOneP4.Px()*dileptonP4.Py())/llgP4.Pt();
 
-        /*// calculate angles
+        /*std::cout << "kinematics before Brian angles" << std::endl;
+        leptonOneP4.Print();
+        leptonTwoP4.Print();
+        dileptonP4.Print();
+        llgP4.Print();*/
+        // calculate angles like Brian
         TVector3 Xframe = llgP4.BoostVector();
         TVector3 Z1frame = dileptonP4.BoostVector();
 
@@ -1433,19 +1504,19 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TVector3 Z1frame_from_Xframe_newcoords = vecz_in_Xframe_newcoords.BoostVector();
 
         // define the positive and negative leptons
-        TLorentzVector l_minus, l_plus; 
+        TLorentzVector l_minus_james, l_plus_james; 
         if (leptonOneFlavor > 0) {
-            l_minus = leptonOneP4;
-            l_plus = leptonTwoP4;
+            l_minus_james = leptonOneP4;
+            l_plus_james = leptonTwoP4;
         }
         else {
-            l_minus = leptonTwoP4;
-            l_plus = leptonOneP4;
+            l_minus_james = leptonTwoP4;
+            l_plus_james = leptonOneP4;
         }
        
         // little theta, phi in Z1 frame; first boost to CM, then redefine coords
-        TLorentzVector veclm_in_Z1frame = l_minus;
-        TLorentzVector veclp_in_Z1frame = l_plus;
+        TLorentzVector veclm_in_Z1frame = l_minus_james;
+        TLorentzVector veclp_in_Z1frame = l_plus_james;
         veclm_in_Z1frame.Boost(-1*Xframe);
         veclm_in_Z1frame.Transform(rotation);
         veclp_in_Z1frame.Boost(-1*Xframe);
@@ -1456,11 +1527,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
 
         // now get angles
-        zgPhi = veclm_in_Z1frame.Phi();
-        zgLittleTheta = veclm_in_Z1frame.CosTheta();
+        zgPhiJames = veclm_in_Z1frame.Phi();
+        zgLittleThetaJames = veclm_in_Z1frame.CosTheta();
 
-        if (zgPhi < 0) 
-            zgPhi += 2*M_PI;
+        if (zgPhiJames < 0) 
+            zgPhiJames += 2*M_PI;
 
         // Big Theta in X frame
         TLorentzVector veczg_in_Xframe = llgP4;
@@ -1468,7 +1539,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         TLorentzVector veczg_in_Xframe_newcoords = llgP4;
         veczg_in_Xframe_newcoords.Transform(rotation);
-        zgBigTheta = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();*/
+        zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+
+        /////////////////////////////
+        //std::cout << "kinematics after Brian angles" << std::endl;
+        //leptonOneP4.Print();
+        //leptonTwoP4.Print();
+        //dileptonP4.Print();
+        //llgP4.Print();
 
         // calculate angles like Ming-Yan
         TLorentzVector l_minus, l_plus; 
@@ -1487,17 +1565,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         l_minus.Boost(dileptonP4.BoostVector());
         zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
         zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
+       
+        // the way MY does it (I think wrong)
+        TLorentzVector lep0 = leptonOneP4;
+        lep0.Boost(llgFrame);
+        lep0.Boost(dileptonP4.BoostVector());
+        zgLittleThetaMY = cos(dileptonP4.Angle(lep0.Vect()));
         
         TVector3 ppAxis(0, 0, 1);
         TVector3 zAxis = dileptonP4.Vect().Unit();
         TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
         TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
 
-        TRotation rotation;
-        rotation = rotation.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+        TRotation rot;
+        rot = rot.RotateAxes(xAxis, yAxis, zAxis).Inverse();
 
-        dileptonP4.Transform(rotation);
-        l_minus.Transform(rotation);
+        dileptonP4.Transform(rot);
+        l_minus.Transform(rot);
         zgPhi = l_minus.Phi();
             
         if (!isData) {
@@ -1506,13 +1590,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             muonIDWeightTwo = weights->GetHZZMuonIDEff(*muons[muonTwoIndex]);
             eventWeight *= muonIDWeightOne;
             eventWeight *= muonIDWeightTwo;
-            //eventWeight *= weights->GetMuonISOEff(leptonOneP4);
-            //eventWeight *= weights->GetMuonISOEff(leptonTwoP4);
-
-            /*pair<float, float> eff11 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonOneIndex]);
-            pair<float, float> eff12 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonTwoIndex]);
-            pair<float, float> eff21 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg2", *muons[muonOneIndex]);
-            pair<float, float> eff22 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg2", *muons[muonTwoIndex]);*/
 
             float sf11 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonOneIndex]);
             float sf12 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg1", *muons[muonTwoIndex]);
@@ -1520,25 +1597,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             float sf22 = weights->GetDoubleMuonTriggerEffWeight("HLT_DoubleMuon_leg2", *muons[muonTwoIndex]);
             
             if (leptonTwoPt < 20.) {
-                //muonTrigWeightOne = eff11.first/eff11.second;
-                //muonTrigWeightTwo = eff22.first/eff22.second;
                 muonTrigWeightOne = sf11;
                 muonTrigWeightTwo = sf22;
             }
             else {
-                //float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
-                //float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
                 float prod1 = sf11*sf22;
                 float prod2 = sf21*sf12;
                 if (prod1 > prod2) {
-                    //muonTrigWeightOne = eff11.first/eff11.second;
-                    //muonTrigWeightTwo = eff22.first/eff22.second;
                     muonTrigWeightOne = sf11;
                     muonTrigWeightTwo = sf22;
                 }
                 else {
-                    //muonTrigWeightOne = eff21.first/eff21.second;
-                    //muonTrigWeightTwo = eff12.first/eff12.second;
                     muonTrigWeightOne = sf21;
                     muonTrigWeightTwo = sf12;
                 }
@@ -1546,11 +1615,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             triggerWeight = muonTrigWeightOne*muonTrigWeightTwo;
             eventWeight *= triggerWeight;
-            
-            //float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
-            //float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
-            //triggerWeight = eff_data/eff_mc;
-            //eventWeight *= triggerWeight; 
            
             photonIDWeight = weights->GetPhotonMVAIdEff(*photons[photonIndex]); 
             eventWeight *= photonIDWeight;
@@ -1564,9 +1628,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }
 
-        /*if (sync_print_precut) {
+        if (sync_print_precut) {
             cout << "event still alive after event weights" << endl;
-        }*/
+        }
 
     } // end mumug selection
     
@@ -1624,13 +1688,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (electrons.size() < 2) 
             return kTRUE;
         hTotalEvents->Fill(5);
-        /*if (sync_print_precut)
-            cout << "at least two electrons present" << endl;*/
+        if (sync_print_precut)
+            cout << "at least two electrons present" << endl;
         if (photons.size() < 1)
             return kTRUE;
         hTotalEvents->Fill(6);
-        //if (sync_print_precut)
-        //cout << "at least one photon present" << endl;
+        if (sync_print_precut)
+            cout << "at least one photon present" << endl;
       
         TLorentzVector leptonOneP4, leptonTwoP4;
         unsigned int electronOneIndex = 0;
@@ -1643,7 +1707,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 tempElectronOne.SetPtEtaPhiM(electrons[i]->calibPt, electrons[i]->eta, electrons[i]->phi, ELE_MASS);
                 tempElectronTwo.SetPtEtaPhiM(electrons[j]->calibPt, electrons[j]->eta, electrons[j]->phi, ELE_MASS);
                 float thisMass = (tempElectronOne + tempElectronTwo).M();
-                /*if (sync_print_precut) {
+                if (sync_print_precut) {
                     cout << "Z pair loop for i = " << i << ", j = " << j << endl;
                     cout << "current value of zMassDiff = " << zMassDiff << endl;
                     cout << "lepton i pt, eta, phi: " << tempElectronOne.Pt() << ", " << tempElectronOne.Eta() << ", " 
@@ -1652,7 +1716,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                          << tempElectronTwo.Phi() << endl;
                     cout << "candidate Z mass = " << thisMass << endl;
                     cout << "lepton i, j q: " << electrons[i]->q << ", " << electrons[j]->q << endl;
-                } */
+                } 
                 //if (
                 //        //electrons[i]->q != electrons[j]->q
                 //        /*&&*/ electrons[i]->calibPt > 25.0 
@@ -1705,24 +1769,20 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         for (unsigned int i = 0; i < photons.size(); ++i) {
             TLorentzVector tempPhoton;
-            //TLorentzVector tempDilepton;
             TLorentzVector tempLLG;
             tempPhoton.SetPtEtaPhiM(photons[i]->calibPt, photons[i]->eta, photons[i]->phi, 0.);
-            //tempDilepton = leptonOneP4 + leptonTwoP4;
-            //tempLLG = leptonOneP4 + leptonTwoP4 + tempPhoton;
             tempLLG = dileptonP4 + tempPhoton;
             float this_dr1 = leptonOneP4.DeltaR(tempPhoton);
             float this_dr2 = leptonTwoP4.DeltaR(tempPhoton);
-            /*if (sync_print_precut) {
+            if (sync_print_precut) {
                 cout << "photon pt, et/m, z_mass, h_mass, dr1, dr2" << endl;
                 cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " 
-                     << tempDilepton.M() << ", " << tempLLG.M() << ", " 
+                     << dileptonP4.M() << ", " << tempLLG.M() << ", " 
                      << this_dr1 << ", " << this_dr2 << endl;
-            }*/
+            }
             if (
                 tempPhoton.Pt() > 15.0 &&
                 tempPhoton.Et()/tempLLG.M() > (15.0/110.0) &&
-                //tempDilepton.M() + tempLLG.M() > 185.0 &&
                 dileptonP4.M() + tempLLG.M() > 185.0 &&
                 tempLLG.M() > 100. && tempLLG.M() < 180. &&
                 this_dr1 > 0.4 && this_dr2 > 0.4
@@ -1731,22 +1791,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 photonIndex = i;
                 break;
             }
-            /*else {
+            else {
                 if (sync_print_precut) {
                     cout << "photon variables in the loop" << endl;
                     cout << "pt, et/m_llg, mass_sum, llg_mass, dr1, dr2" << endl;
                     cout << tempPhoton.Pt() << ", " << tempPhoton.Et()/tempLLG.M() << ", " << 
-                            tempDilepton.M() + tempLLG.M() << ", " << tempLLG.M() << ", " << 
+                            dileptonP4.M() + tempLLG.M() << ", " << tempLLG.M() << ", " << 
                             this_dr1 << ", " << this_dr2 << endl;
                 }
-            }*/
+            }
         }
 
         if (!hasValidPhoton)
             return kTRUE; 
         hTotalEvents->Fill(8);
-        /*if (sync_print_precut)
-            cout << "valid photon" << endl;*/
+        if (sync_print_precut)
+            cout << "valid photon" << endl;
 
         TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
@@ -1803,7 +1863,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         unsigned int jetTwoIndex = 0;
         unsigned int purityLevel = 0;
         TLorentzVector jetOneP4, jetTwoP4;
-        //TLorentzVector llg = leptonOneP4 + leptonTwoP4 + photonOneP4;
         if (!isLeptonTag) {
             //if (sync_print_precut) 
              //   cout << "event is not lepton tagged; checking dijet tag" << endl;
@@ -1957,6 +2016,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonOneFlavor = electrons[electronOneIndex]->q*11;
         leptonOneDZ     = electrons[electronOneIndex]->dz;
         leptonOneD0     = electrons[electronOneIndex]->d0;
+        leptonOneECALDriven = (electrons[electronOneIndex]->typeBits & baconhep::kEcalDriven);
             
         leptonTwoPt     = leptonTwoP4.Pt();
         leptonTwoEta     = leptonTwoP4.Eta();
@@ -1965,6 +2025,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoFlavor = electrons[electronTwoIndex]->q*11;
         leptonTwoDZ     = electrons[electronTwoIndex]->dz;
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
+        leptonTwoECALDriven = (electrons[electronTwoIndex]->typeBits & baconhep::kEcalDriven);
 
         photonOnePt  = photonOneP4.Pt();
         photonOneEta  = photonOneP4.Eta();
@@ -2004,14 +2065,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         EvalElectronEnergyResolution(mva_inputs, electronOneMean, electronOneSigma, 
                                      electronOneAlphaL, electronOnePowerL, electronOneAlphaR, electronOnePowerR);
         
-        /*leptonOneMean = electronOneMean;
-        leptonOneSigma = electronOneSigma;
-        leptonOneAlphaL = electronOneAlphaL;
-        leptonOneAlphaR = electronOneAlphaR;
-        leptonOnePowerL = electronOnePowerL;
-        leptonOnePowerR = electronOnePowerR; */
+        //leptonOneMean = electronOneMean;
+        //leptonOneSigma = electronOneSigma;
+        //leptonOneAlphaL = electronOneAlphaL;
+        //leptonOneAlphaR = electronOneAlphaR;
+        //leptonOnePowerL = electronOnePowerL;
+        //leptonOnePowerR = electronOnePowerR; 
 
-         // BDT eval for electron two
+        // BDT eval for electron two
         mva_inputs["elEnergy"] = leptonTwoP4.E();
         mva_inputs["elScEta"] = electrons[electronTwoIndex]->scEta;
         mva_inputs["elScPhi"] = electrons[electronTwoIndex]->scPhi;
@@ -2029,14 +2090,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         EvalElectronEnergyResolution(mva_inputs, electronTwoMean, electronTwoSigma, 
                                      electronTwoAlphaL, electronTwoPowerL, electronTwoAlphaR, electronTwoPowerR);
         
-        /*leptonTwoMean = electronTwoMean;
-        leptonTwoSigma = electronTwoSigma;
-        leptonTwoAlphaL = electronTwoAlphaL;
-        leptonTwoAlphaR = electronTwoAlphaR;
-        leptonTwoPowerL = electronTwoPowerL;
-        leptonTwoPowerR = electronTwoPowerR;*/
+        //leptonTwoMean = electronTwoMean;
+        //leptonTwoSigma = electronTwoSigma;
+        //leptonTwoAlphaL = electronTwoAlphaL;
+        //leptonTwoAlphaR = electronTwoAlphaR;
+        //leptonTwoPowerL = electronTwoPowerL;
+        //leptonTwoPowerR = electronTwoPowerR;
 
-         // Kinematic Fit
+        // Kinematic Fit James
         TVector3 v1, v2;
         v1.SetPtEtaPhi(electrons[electronOneIndex]->calibPt, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi);
         v2.SetPtEtaPhi(electrons[electronTwoIndex]->calibPt, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi);
@@ -2069,13 +2130,38 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //double postfitProb2 = GetDoubleSidedCB(e2/p[3], p[10], p[11], p[12], p[13], p[14], p[15]);
         //leptonOneProbPostfit = postfitProb1;
         //leptonTwoProbPostfit = postfitProb2;
-        double electronOnePtKinFit = e1/cosh(electrons[electronOneIndex]->eta);
-        double electronTwoPtKinFit = e2/cosh(electrons[electronTwoIndex]->eta);
-        TLorentzVector electronOneP4KinFit, electronTwoP4KinFit;
-        electronOneP4KinFit.SetPtEtaPhiM(electronOnePtKinFit, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi, ELE_MASS);
-        electronTwoP4KinFit.SetPtEtaPhiM(electronTwoPtKinFit, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi, ELE_MASS);
-        //leptonOneP4KinFit = electronOneP4KinFit;
-        //leptonTwoP4KinFit = electronTwoP4KinFit; 
+        double electronOnePtKinFitJames = e1/cosh(electrons[electronOneIndex]->eta);
+        double electronTwoPtKinFitJames = e2/cosh(electrons[electronTwoIndex]->eta);
+        TLorentzVector electronOneP4KinFitJames, electronTwoP4KinFitJames;
+        electronOneP4KinFitJames.SetPtEtaPhiM(electronOnePtKinFitJames, electrons[electronOneIndex]->eta, electrons[electronOneIndex]->phi, ELE_MASS);
+        electronTwoP4KinFitJames.SetPtEtaPhiM(electronTwoPtKinFitJames, electrons[electronTwoIndex]->eta, electrons[electronTwoIndex]->phi, ELE_MASS);
+        leptonOnePtKinJames = electronOneP4KinFitJames.Pt();
+        leptonTwoPtKinJames = electronTwoP4KinFitJames.Pt();
+        
+        // KINEMATIC FIT MING-YAN METHOD
+
+        KinZfitter* kinZfitter = new KinZfitter(isData);
+        std::vector<TObject *> selectedLeptons;
+        selectedLeptons.push_back(electrons[electronOneIndex]);
+        selectedLeptons.push_back(electrons[electronTwoIndex]);
+        std::map<unsigned int, TLorentzVector> selectedFsrMap;
+        kinZfitter->Setup(selectedLeptons, selectedFsrMap);
+        kinZfitter->KinRefitZ();
+        std::vector<TLorentzVector> refitP4s;
+        refitP4s = kinZfitter->GetRefitP4s();
+        delete kinZfitter;
+
+        /*cout << "before kinematic fit" << endl;
+        cout << "lepton 1 pt, eta, phi: " << electrons[electronOneIndex]->pt << ", " << electrons[electronOneIndex]->eta << ", " << electrons[electronOneIndex]->phi << endl;
+        cout << "lepton 2 pt, eta, phi: " << electrons[electronTwoIndex]->pt << ", " << electrons[electronTwoIndex]->eta << ", " << electrons[electronTwoIndex]->phi << endl;
+
+        cout << "after kinematic fit" << endl;
+        cout << "lepton 1 pt, eta, phi " << refitP4s[0].Pt() << ", " << refitP4s[0].Eta() << ", " << refitP4s[0].Phi() << endl;
+        cout << "lepton 2 pt, eta, phi " << refitP4s[1].Pt() << ", " << refitP4s[1].Eta() << ", " << refitP4s[1].Phi() << endl;*/
+    
+        TLorentzVector electronOneP4KinFit = refitP4s[0];
+        TLorentzVector electronTwoP4KinFit = refitP4s[1];
+        
         leptonOnePtKin = electronOneP4KinFit.Pt();
         leptonTwoPtKin = electronTwoP4KinFit.Pt();
 
@@ -2084,6 +2170,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonPhi = dileptonP4.Phi();
         dileptonM = dileptonP4.M();
         dileptonMKin = (electronOneP4KinFit + electronTwoP4KinFit).M();
+        dileptonMKinJames = (electronOneP4KinFitJames + electronTwoP4KinFitJames).M();
         dileptonDEta = fabs(leptonOneP4.Eta() - leptonTwoP4.Eta());
         dileptonDPhi = fabs(leptonOneP4.DeltaPhi(leptonTwoP4));
         dileptonDR = leptonOneP4.DeltaR(leptonTwoP4);
@@ -2094,6 +2181,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         llgM = llgP4.M();
         llgPtOverM = llgP4.Pt()/llgP4.M();
         llgMKin = (electronOneP4KinFit + electronTwoP4KinFit + photonOneP4).M();
+        llgMKinJames = (electronOneP4KinFitJames + electronTwoP4KinFitJames + photonOneP4).M();
         
         l1PhotonDEta = fabs(leptonOneP4.Eta() - photonOneP4.Eta());
         l1PhotonDPhi = fabs(leptonOneP4.DeltaPhi(photonOneP4));
@@ -2116,7 +2204,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonPhotonDR = dileptonP4.DeltaR(photonOneP4);
         ptt = 2*fabs(dileptonP4.Px()*photonOneP4.Py() - photonOneP4.Px()*dileptonP4.Py())/llgP4.Pt();
         
-        /*// calculate angles
+        /*std::cout << "kinematics before Brian angles" << std::endl;
+        leptonOneP4.Print();
+        leptonTwoP4.Print();
+        dileptonP4.Print();
+        llgP4.Print();*/
+        // calculate angles like Brian
         TVector3 Xframe = llgP4.BoostVector();
         TVector3 Z1frame = dileptonP4.BoostVector();
 
@@ -2150,19 +2243,19 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TVector3 Z1frame_from_Xframe_newcoords = vecz_in_Xframe_newcoords.BoostVector();
 
         // define the positive and negative leptons
-        TLorentzVector l_minus, l_plus; 
+        TLorentzVector l_minus_james, l_plus_james; 
         if (leptonOneFlavor > 0) {
-            l_minus = leptonOneP4;
-            l_plus = leptonTwoP4;
+            l_minus_james = leptonOneP4;
+            l_plus_james = leptonTwoP4;
         }
         else {
-            l_minus = leptonTwoP4;
-            l_plus = leptonOneP4;
+            l_minus_james = leptonTwoP4;
+            l_plus_james = leptonOneP4;
         }
        
         // little theta, phi in Z1 frame; first boost to CM, then redefine coords
-        TLorentzVector veclm_in_Z1frame = l_minus;
-        TLorentzVector veclp_in_Z1frame = l_plus;
+        TLorentzVector veclm_in_Z1frame = l_minus_james;
+        TLorentzVector veclp_in_Z1frame = l_plus_james;
         veclm_in_Z1frame.Boost(-1*Xframe);
         veclm_in_Z1frame.Transform(rotation);
         veclp_in_Z1frame.Boost(-1*Xframe);
@@ -2173,11 +2266,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
 
         // now get angles
-        zgPhi = veclm_in_Z1frame.Phi();
-        zgLittleTheta = veclm_in_Z1frame.CosTheta();
+        zgPhiJames = veclm_in_Z1frame.Phi();
+        zgLittleThetaJames = veclm_in_Z1frame.CosTheta();
 
-        if (zgPhi < 0) 
-            zgPhi += 2*M_PI;
+        if (zgPhiJames < 0) 
+            zgPhiJames += 2*M_PI;
 
         // Big Theta in X frame
         TLorentzVector veczg_in_Xframe = llgP4;
@@ -2185,7 +2278,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         TLorentzVector veczg_in_Xframe_newcoords = llgP4;
         veczg_in_Xframe_newcoords.Transform(rotation);
-        zgBigTheta = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();*/
+        zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+
+        /////////////////////////////
+        //std::cout << "kinematics after Brian angles" << std::endl;
+        //leptonOneP4.Print();
+        //leptonTwoP4.Print();
+        //dileptonP4.Print();
+        //llgP4.Print();
     
         // calculate angles like Ming-Yan
         TLorentzVector l_minus, l_plus; 
@@ -2205,16 +2305,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
         zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
         
+        // the way MY does it (I think wrong)
+        TLorentzVector lep0 = leptonOneP4;
+        lep0.Boost(llgFrame);
+        lep0.Boost(dileptonP4.BoostVector());
+        zgLittleThetaMY = cos(dileptonP4.Angle(lep0.Vect()));
+        
         TVector3 ppAxis(0, 0, 1);
         TVector3 zAxis = dileptonP4.Vect().Unit();
         TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
         TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
 
-        TRotation rotation;
-        rotation = rotation.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+        TRotation rot;
+        rot = rot.RotateAxes(xAxis, yAxis, zAxis).Inverse();
 
-        dileptonP4.Transform(rotation);
-        l_minus.Transform(rotation);
+        dileptonP4.Transform(rot);
+        l_minus.Transform(rot);
         zgPhi = l_minus.Phi();
             
         if (!isData) {
@@ -2223,37 +2329,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             elIDWeightTwo = weights->GetHZZElectronRecoIdEff(*electrons[electronTwoIndex]); 
             eventWeight *= elIDWeightOne;
             eventWeight *= elIDWeightTwo;
-
-            //pair<float, float> eff11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
-            //pair<float, float> eff12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
-            //pair<float, float> eff21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
-            //pair<float, float> eff22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
             
             float sf11 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronOneIndex]);
-            //float sf12 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[electronTwoIndex]);
-            //float sf21 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronOneIndex]);
             float sf22 = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[electronTwoIndex]);
 
-            //float prod1 = (eff11.first/eff11.second)*(eff22.first/eff22.second);
-            //float prod2 = (eff21.first/eff21.second)*(eff12.first/eff12.second);
-            //float prod1 = sf11*sf22;
-            //float prod2 = sf21*sf12;
-            //if (prod1 > prod2) {
-                elTrigWeightOne = sf11;
-                elTrigWeightTwo = sf22;
-            //}
-            //else {
-            //    elTrigWeightOne = sf21;
-            //    elTrigWeightTwo = sf12;
-            //}
+            elTrigWeightOne = sf11;
+            elTrigWeightTwo = sf22;
 
             triggerWeight = elTrigWeightOne*elTrigWeightTwo;
             eventWeight *= triggerWeight;
-
-            //float eff_data = eff11.first*eff22.first + eff12.first*eff21.first - eff11.first*eff12.first;
-            //float eff_mc = eff11.second*eff22.second + eff12.second*eff21.second - eff11.second*eff12.second;
-            //riggerWeight = eff_data/eff_mc;
-            //eventWeight *= triggerWeight;
            
             photonIDWeight = weights->GetPhotonMVAIdEff(*photons[photonIndex]); 
             eventWeight *= photonIDWeight;
@@ -2521,9 +2605,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     outTree->Fill();
     this->passedEvents++;
 
-    /*if (sync_print_precut) {
+    if (sync_print_precut) {
         cout << "event should have been filled" << endl;
-        }*/
+        }
     return kTRUE;
 }
 
@@ -2622,9 +2706,9 @@ void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_flo
     static RooAbsReal* mvaSigma;
     static RooAbsReal* mvaAlphaL;
     static RooAbsReal* mvaAlphaR;
-     // one-time MVA initialization: get trainings
+
+    // one-time MVA initialization: get trainings
     if (!mvaMean) {
-        // current working directory
         TDirectory* wd = gDirectory;
         
         const std::string cmssw_base = getenv("CMSSW_BASE");
@@ -2638,7 +2722,8 @@ void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_flo
         else gDirectory = 0;
          RooWorkspace* ws = dynamic_cast<RooWorkspace*>(f.Get("ws_mva_muons"));
         if (!ws) FATAL("TFile::Get() failed");
-         invar[0] = ws->var("var01");
+        // current working directory
+        invar[0] = ws->var("var01");
         invar[1] = ws->var("var02");
         invar[2] = ws->var("var03");
         invar[3] = ws->var("var04");
@@ -2650,7 +2735,7 @@ void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_flo
         invar[9] = ws->var("var10");
         invar[10] = ws->var("var11");
         invar[11] = ws->var("var12");
-         mvaMean = ws->function("limMean");
+        mvaMean = ws->function("limMean");
         mvaSigma = ws->function("limSigma");
         mvaAlphaL = ws->function("limAlphaL");
         mvaAlphaR = ws->function("limAlphaR");
@@ -2681,13 +2766,14 @@ void hzgAnalyzer::EvalMuonEnergyResolution(std::map<string, float> mva_input_flo
     *invar[9] = muPFIsoR04_NH;
     *invar[10] = muPFIsoR04_Pho;
     *invar[11] = muPFIsoR04_PU;
-     mean = mvaMean->getVal();
+    mean = mvaMean->getVal();
     sigma = mvaSigma->getVal();
     alphaL = mvaAlphaL->getVal();
     alphaR = mvaAlphaR->getVal();
      // NOTE: negative = infinite; powers were fixed at the training level
     powerL = -1;
     powerR = -1;
+    //f.Close();
  }
  void hzgAnalyzer::EvalElectronEnergyResolution(std::map<string, float> mva_inputs, float &mean, float &sigma, 
                                                     float &alphaL, float &powerL, float &alphaR, float &powerR) 

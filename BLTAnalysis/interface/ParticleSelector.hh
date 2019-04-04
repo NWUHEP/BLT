@@ -29,6 +29,9 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "JetMETCorrections/Modules/interface/JetResolution.h"
 
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"
+
 using namespace std;
 
 class ParticleSelector {
@@ -60,10 +63,12 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
-    bool BTagModifier(const baconhep::TJet* jet, string, int, int, float) const;
+    bool BTagModifier(const baconhep::TJet* jet, string, string, float) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
-    double JetUncertainty(const baconhep::TJet* jet) const;
+    double JetUncertainty(const baconhep::TJet* jet, string) const;
     pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
+    vector<string> GetJECSourceNames() { return this->_jecNames;}
+    vector<string> GetBTagSourceNames() { return this->_btagNames;}
 
 private:
     Parameters _parameters;
@@ -76,9 +81,34 @@ private:
 
     // For offline jet corrections
     FactorizedJetCorrector* _jetCorrector;
-    JetCorrectionUncertainty* _jecUncertainty;
+    map<string, JetCorrectionUncertainty*> _jecUncertaintyMap;
     JME::JetResolution jetResolution;
     JME::JetResolutionScaleFactor jetResolutionSF;
+
+    // jec uncertainty names
+    vector<string> _jecNames {
+                              "AbsoluteScale", "AbsoluteStat",
+                              "Fragmentation", "AbsoluteMPFBias", //"CorrelationGroupIntercalibration", 
+                              "PileUpDataMC", "PileUpPtBB", "PileUpPtEC1", "PileUpPtRef",
+                              "RelativeBal", "RelativeJEREC1",
+                              "RelativePtBB","RelativePtEC1",
+                              "RelativeStatFSR", "RelativeStatEC",
+                              "SinglePionECAL", "SinglePionHCAL",
+                              "TimePtEta", "FlavorQCD",
+                              "Total"
+                             };
+
+    // For getting b tag scale factors and their uncertainties
+    BTagCalibration *btagCalibrator, *mistagCalibrator;
+    BTagCalibrationReader *btagReader, *mistagReader;
+    vector<string> _btagNames = {
+                                 "bfragmentation", "btempcorr", "cb",
+                                 "cfragmentation", "dmux", "gluonsplitting",
+                                 "jes", "jetaway", "ksl", "l2c", 
+                                 "ltothers", "mudr",
+                                 "mupt", "sampledependence", "pileup",
+                                 "ptrel", "statistic",
+                                };
 };
 
 #endif  // PARTICLESELECTOR_HH

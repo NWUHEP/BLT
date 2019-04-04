@@ -1848,7 +1848,7 @@ pair<float, float> MultilepAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector
 
             // save 
             jetPt       = jetP4.Pt();
-            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoedJets[i]));
+            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoedJets[i], "Total"));
             jetPtUnc    = abs(jetPtUnc);
 
             jetPtMax = jetP4.Pt();
@@ -1936,28 +1936,28 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 
         // nominal
         ++nJets;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) ++nBJets;
+        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) ++nBJets;
 
         // b tag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 1, 0, rNumber)) ++nBJetsBTagUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", "up", rNumber)) ++nBJetsBTagUp;
              
         // b tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", -1, 0, rNumber))  ++nBJetsBTagDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", "down", rNumber))  ++nBJetsBTagDown;
 
         // misttag up
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 1, rNumber)) ++nBJetsMistagUp;
+        if (particleSelector->BTagModifier(jet, "MVAT", "upMistag", rNumber)) ++nBJetsMistagUp;
         
         // mistag down
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, -1, rNumber)) ++nBJetsMistagDown;
+        if (particleSelector->BTagModifier(jet, "MVAT", "downMistag", rNumber)) ++nBJetsMistagDown;
     }
 
     // JES up
     double jec = particleSelector->JetCorrector(jet, "NONE");
-    float jecUnc = particleSelector->JetUncertainty(jet);
+    float jecUnc = particleSelector->JetUncertainty(jet,"Total");
     jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
     if (jet->pt > 30) {
         ++nJetsJESUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
             ++nBJetsJESUp;
         } 
     }
@@ -1966,7 +1966,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
     if (jet->pt > 30) {
         ++nJetsJESDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
             ++nBJetsJESDown;
         } 
     }
@@ -1977,7 +1977,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT","central", rNumber)) { 
             ++nBJetsJERUp;
         }     
     }
@@ -1988,10 +1988,9 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt     = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rNumber)) { 
+        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
             ++nBJetsJERDown;
         } 
     }
     jet->pt = jetPt;
-
 }

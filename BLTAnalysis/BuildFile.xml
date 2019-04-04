@@ -2,6 +2,8 @@
 <use name="BaconAna/Utils"/>
 <use name="CondFormats/JetMETObjects"/>
 <use name="JetMETCorrections/Modules"/>
+<use name="CondTools/BTau"/>
+<use name="JetMETCorrections/Modules"/>
 <use name="root"/>
 <use name="rootcore"/>
 <use name="rootrflx"/>

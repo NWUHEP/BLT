@@ -130,13 +130,13 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_MC").c_str());
 
     // electron trigger efficiencies (BCDEF and GH)
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016BCDEF_v1.root";
-    TFile* elTriggerFile_BCDEF = new TFile(fileName.c_str(), "OPEN");
-    _elSF_Trigger_BCDEF = (TH2D*)elTriggerFile_BCDEF->Get("Ele27_WPTight_Gsf");
+    // fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016BCDEF_v1.root";
+    // TFile* elTriggerFile_BCDEF = new TFile(fileName.c_str(), "OPEN");
+    // _elSF_Trigger_BCDEF = (TH2D*)elTriggerFile_BCDEF->Get("Ele27_WPTight_Gsf");
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016GH_v1.root";
-    TFile* elTriggerFile_GH = new TFile(fileName.c_str(), "OPEN");
-    _elSF_Trigger_GH = (TH2D*)elTriggerFile_GH->Get("Ele27_WPTight_Gsf");
+    // fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016GH_v1.root";
+    // TFile* elTriggerFile_GH = new TFile(fileName.c_str(), "OPEN");
+    // _elSF_Trigger_GH = (TH2D*)elTriggerFile_GH->Get("Ele27_WPTight_Gsf");
 
     // electron reco efficiencies 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";

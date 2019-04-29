@@ -71,6 +71,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
     string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
     // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
     lumiMask.AddJSONFile(jsonFileName);
+    
 
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
@@ -484,6 +485,22 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     // Select objects//
     ///////////////////
 
+    /* -------- Vertices ---------*/
+
+    if (fInfo->hasGoodPV) {
+        assert(fPVArr->GetEntries() != 0);
+        TVector3 pv;
+        copy_xyz((TVertex*) fPVArr->At(0), pv);
+        particleSelector->SetPV(pv);
+    } else {
+        return kTRUE;
+    }
+    hTotalEvents->Fill(3);
+    particleSelector->SetNPV(fInfo->nPU + 1);
+    particleSelector->SetRho(fInfo->rhoJet);
+
+
+
     /* -------- Trigger --------- */
     bool passTrigger = false;
     vector<string> passTriggerNames;
@@ -503,25 +520,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     if (!passTrigger)
         return kTRUE;
-    hTotalEvents->Fill(3);
-
-
-    /* -------- Vertices ---------*/
-
-    if (fInfo->hasGoodPV) {
-        assert(fPVArr->GetEntries() != 0);
-        TVector3 pv;
-        copy_xyz((TVertex*) fPVArr->At(0), pv);
-        particleSelector->SetPV(pv);
-    } else {
-        return kTRUE;
-    }
     hTotalEvents->Fill(4);
-    particleSelector->SetNPV(fInfo->nPU + 1);
-    particleSelector->SetRho(fInfo->rhoJet);
 
 
-    
+
+
     /* -------- MUONS ---------*/
     vector<TMuon*> muons, fail_muons;
     vector<TLorentzVector> veto_muons;
@@ -571,6 +574,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     nMuons = muons.size();
     nFailMuons = fail_muons.size();
 
+    // fill hist if muonTriggered and leading muon is good.
+    if (muonTriggered && nMuons>0){
+        if (muons[0]->pt>25){
+            hTotalEvents->Fill(5);
+        }
+    }
+    
+
 
 
 
@@ -614,6 +625,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     nElectrons = electrons.size();
     nFailElectrons = fail_electrons.size();
+
+    // fill hist if muonTriggered and leading muon is good.
+    if (electronTriggered && nElectrons>0){
+        if (electrons[0]->pt>30){
+            hTotalEvents->Fill(6);
+        }
+    }
+
 
 
     
@@ -729,7 +748,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         assert(jet);
 
         // apply JEC offline and get scale uncertainties
-        double jec = particleSelector->JetCorrector(jet, "NONE");
+        double jec = particleSelector->JetCorrector(jet, "DummyName");
         jet->pt = jet->ptRaw*jec;
 
 
@@ -1951,9 +1970,11 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
         if (particleSelector->BTagModifier(jet, "MVAT", "downMistag", rNumber)) ++nBJetsMistagDown;
     }
 
-    // JES up
-    double jec = particleSelector->JetCorrector(jet, "NONE");
+    // jet energy corrections
+    double jec = particleSelector->JetCorrector(jet, "DummyName");
     float jecUnc = particleSelector->JetUncertainty(jet,"Total");
+    
+    // JES up
     jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
     if (jet->pt > 30) {
         ++nJetsJESUp;
@@ -1971,9 +1992,11 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
         } 
     }
 
-    // JER up
+    // Jet resolution corrections
     pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 1);
     float jerc = 1 + resRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+
+    // JER up
     jet->pt = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERUp;

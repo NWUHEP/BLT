@@ -63,6 +63,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         // jec uncertainties
         //JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
         //_jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
+        JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
+        _jecUncertaintyMap["Total"] = new JetCorrectionUncertainty(*jecUnc);
 
     } else { // MC 
         // jet energy corrections

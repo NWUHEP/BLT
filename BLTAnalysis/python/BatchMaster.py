@@ -21,9 +21,10 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, config_list, stage_dir, selection, period, executable='execBatch.sh', location='lpc'):
+    def __init__(self, config_list, stage_dir, output_dir, selection, period, executable='execBatch.sh', location='lpc'):
         self._current     = os.path.abspath('.')
         self._stage_dir   = stage_dir
+        self._output_dir  = output_dir
         self._config_list = config_list
         self._selection   = selection
         self._period      = period
@@ -52,6 +53,12 @@ class BatchMaster():
         2. Write batch configuration file
         '''
 
+        if self._location == 'lpc':
+            output_dir = 'root://cmseos.fnal.gov/' + self._output_dir
+            print output_dir
+        else:
+            output_dir = self._output_dir
+
         ## Writing the batch config file
         batch_tmp = open('.batch_tmp_{0}'.format(cfg._data_name,), 'w')
         batch_tmp.write('Universe              = vanilla\n')
@@ -70,16 +77,18 @@ class BatchMaster():
         for i, source in enumerate(sources):
 
             ## make file with list of inputs ntuples for the analyzer
-            input = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._data_name, str(i+1)), 'w')
+            input_file = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._data_name, str(i+1)), 'w')
             path = cfg._path
             if self._location == 'lpc':
                 path = 'root://cmseos.fnal.gov/' + cfg._path[10:]
 
             for file in source:
-                input.write(path+'/'+file+'\n')
-            input.close()
+                input_file.write(path+'/'+file+'\n')
+            input_file.close()
 
-            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period))
+            ### set output directory
+
+            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir))
             batch_tmp.write('Executable            = {0}\n'.format(self._executable))
             batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._data_name, i+1))
             batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._data_name, i+1))
@@ -100,6 +109,10 @@ class BatchMaster():
         print 'Setting up stage directory...'
         self._stage_dir  = '{0}/{1}_{2}_{3}'.format(self._stage_dir, self._selection, self._period, get_current_time())
         make_directory(self._stage_dir, clear=False)
+
+        print 'Setting up output directory...'
+        self._output_dir  = '{0}/{1}_{2}_{3}'.format(self._output_dir, self._selection, self._period, get_current_time())
+        make_directory('/eos/uscms/' + self._output_dir, clear=False)
 
         print 'Creating tarball of current workspace in {0}'.format(self._stage_dir)
         #os.system('tar czf {0}/source.tar.gz -C $CMSSW_BASE/src . 2> /dev/null'.format(self._stage_dir))

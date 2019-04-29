@@ -30,46 +30,47 @@ data_dict['single_mu'] = [
             nJobs     = 30,
             suffix    = 'muon_2016B'
            ),
-        cfg(data_name = 'muon_2016B_v2',
-            path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016B'
-           ),
-        cfg(data_name = 'muon_2016C',
-            path      = '{0}/SingleMuon_Run2016C-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016C'
-           ),
-        cfg(data_name = 'muon_2016D',
-            path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016D'
-           ),
-        cfg(data_name = 'muon_2016E',
-            path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016E'
-           ),
-        cfg(data_name = 'muon_2016F',
-            path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016F'
-           ),
-        cfg(data_name = 'muon_2016G',
-            path      = '{0}/SingleMuon_Run2016G-03Feb2017-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016G'
-           ),
-        cfg(data_name = 'muon_2016H_v2',
-            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
-        cfg(data_name = 'muon_2016H_v3',
-            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
-            nJobs     = 30,
-            suffix    = 'muon_2016H'
-           ),
+       cfg(data_name = 'muon_2016B_v2',
+           path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016B'
+          ),
+       cfg(data_name = 'muon_2016C',
+           path      = '{0}/SingleMuon_Run2016C-03Feb2017-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016C'
+          ),
+       cfg(data_name = 'muon_2016D',
+           path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016D'
+          ),
+       cfg(data_name = 'muon_2016E',
+           path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016E'
+          ),
+       cfg(data_name = 'muon_2016F',
+           path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016F'
+          ),
+       cfg(data_name = 'muon_2016G',
+           path      = '{0}/SingleMuon_Run2016G-03Feb2017-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016G'
+          ),
+       cfg(data_name = 'muon_2016H_v2',
+           path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016H'
+          ),
+       cfg(data_name = 'muon_2016H_v3',
+           path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
+           nJobs     = 30,
+           suffix    = 'muon_2016H'
+          ),
+
         ]
 
 data_dict['single_el'] = [
@@ -308,6 +309,7 @@ batch_list += sum([data_dict[n] for n in data_samples], [])
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
+                       output_dir  = '/store/user/zchen/batchout',
                        selection   = selection,
                        period      = period,
                        executable  = executable,

@@ -9,6 +9,7 @@ COUNT=$2
 SUFFIX=$3
 SELECTION=$4
 PERIOD=$5
+OUTDIR=$6
 
 ### Transfer files, prepare directory ###
 TOPDIR=$PWD
@@ -19,10 +20,22 @@ export CMSSW_VERSION=CMSSW_8_0_20
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 # temporary fix
+echo '----- ls TOPDIR -----'
+ls
+
+echo '----- untar source.tar.gz -----'
 tar -xzf source.tar.gz
-mv $CMSSW_VERSION tmp
+
+echo '----- rename source as tmp_source -----'
+mv $CMSSW_VERSION tmp_source
+
+echo '----- ls tmp_source/src -----'
+ls tmp_source/src
+
+echo '----- scram project -----'
 scram project CMSSW $CMSSW_VERSION
-cp -r tmp/src/* $CMSSW_VERSION/src
+#cmsrel CMSSW_8_0_20
+cp -r tmp_source/src/* $CMSSW_VERSION/src
 cd $CMSSW_VERSION/src
 eval `scram runtime -sh`
 
@@ -32,7 +45,7 @@ eval `scram runtime -sh`
 #scramv1 b ProjectRename
 
 cmsenv
-scramv1 b -j8 #ProjectRename
+scram b -j8
 cd BLT/BLTAnalysis/scripts
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
@@ -42,10 +55,18 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-#ExampleAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-#MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#DileptonSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
+FILE=output_${DATANAME}_${COUNT}.root
+xrdcp -f ${FILE} ${OUTDIR}/${FILE} 2>&1
+XRDEXIT=$?
+if [[ $XRDEXIT -ne 0 ]]; then
+  rm *.root
+  echo "exit code $XRDEXIT, failure in xrdcp"
+  exit $XRDEXIT
+fi
+rm ${FILE}
+

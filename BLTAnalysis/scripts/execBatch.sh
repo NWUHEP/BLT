@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 echo "Job submitted on host `hostname` on `date`"
@@ -10,6 +9,7 @@ COUNT=$2
 SUFFIX=$3
 SELECTION=$4
 PERIOD=$5
+OUTDIR=$6
 
 ### Transfer files, prepare directory ###
 TOPDIR=$PWD
@@ -49,22 +49,18 @@ MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
+# cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
 
 
 
-
-
-
-
-# ### Copy output and cleanup ###
-# FILE=output_${DATANAME}_${COUNT}.root
-# xrdcp -f ${FILE} ${OUTDIR}/${FILE} 2>&1
-# XRDEXIT=$?
-# if [[ $XRDEXIT -ne 0 ]]; then
-#   rm *.root
-#   echo "exit code $XRDEXIT, failure in xrdcp"
-#   exit $XRDEXIT
-# fi
-# rm ${FILE}
+### Copy output and cleanup ###
+FILE=output_${DATANAME}_${COUNT}.root
+xrdcp -f ${FILE} ${OUTDIR}/${FILE} 2>&1
+XRDEXIT=$?
+if [[ $XRDEXIT -ne 0 ]]; then
+  rm *.root
+  echo "exit code $XRDEXIT, failure in xrdcp"
+  exit $XRDEXIT
+fi
+rm ${FILE}
 

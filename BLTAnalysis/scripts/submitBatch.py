@@ -16,6 +16,9 @@ period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+# data_samples = ['single_el']
+# mc_samples   = []
+
 
 
 ''' 
@@ -309,7 +312,7 @@ batch_list += sum([data_dict[n] for n in data_samples], [])
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
-                       #output_dir  = '/store/user/zchen/batchout',
+                       output_dir  = '/store/user/zchen/batchout',
                        selection   = selection,
                        period      = period,
                        executable  = executable,

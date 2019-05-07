@@ -21,11 +21,12 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 # temporary fix
 tar -xzf source.tar.gz
-mv $CMSSW_VERSION tmp
+mv $CMSSW_VERSION tmp_src
 scram project CMSSW $CMSSW_VERSION
-cp -r tmp/src/* $CMSSW_VERSION/src
+cp -r tmp_src/src/* $CMSSW_VERSION/src
 cd $CMSSW_VERSION/src
 eval `scram runtime -sh`
+###
 
 # this used to work, now it don't
 #tar -xzf source.tar.gz

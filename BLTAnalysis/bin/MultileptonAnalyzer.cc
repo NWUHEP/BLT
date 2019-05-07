@@ -429,7 +429,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
 
         // Set data period for 2016 MC scale factors
-        if (rng->Rndm() < 0.468) {
+        if (rng->Rndm() > 0.452) {
             weights->SetDataPeriod("2016BtoF");    
         } else {
             weights->SetDataPeriod("2016GH");

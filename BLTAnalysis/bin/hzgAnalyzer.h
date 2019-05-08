@@ -192,7 +192,7 @@ public:
     Float_t dileptonPhotonDEta, dileptonPhotonDPhi, dileptonPhotonDR;
     Float_t ptt;
     Float_t zgBigTheta, zgLittleTheta, zgPhi;
-    Float_t zgLittleThetaMY;
+    Float_t zgBigThetaMY, zgLittleThetaMY, zgPhiMY;
     Float_t zgBigThetaJames, zgLittleThetaJames, zgPhiJames;
     Float_t genBigTheta, genLittleTheta, genPhi;
 

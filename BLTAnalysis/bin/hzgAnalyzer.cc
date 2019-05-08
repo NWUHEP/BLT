@@ -62,6 +62,8 @@ void hzgAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
+        //triggerNames.push_back("HLT_IsoMu24_v*"); // JUST TO TEST FOR ZIHENG
+        //triggerNames.push_back("HLT_IsoTkMu24_v*"); // JUST TO TEST FOR ZIHENG
     }
     else if (params->selection == "ee" || params->selection == "elelg") {
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
@@ -278,8 +280,10 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("ptt", &ptt);
     outTree->Branch("zgBigTheta", &zgBigTheta);
     outTree->Branch("zgLittleTheta", &zgLittleTheta);
-    outTree->Branch("zgLittleThetaMY", &zgLittleThetaMY);
     outTree->Branch("zgPhi", &zgPhi);
+    outTree->Branch("zgBigThetaMY", &zgBigThetaMY);
+    outTree->Branch("zgLittleThetaMY", &zgLittleThetaMY);
+    outTree->Branch("zgPhiMY", &zgPhiMY);
     outTree->Branch("zgBigThetaJames", &zgBigThetaJames);
     outTree->Branch("zgLittleThetaJames", &zgLittleThetaJames);
     outTree->Branch("zgPhiJames", &zgPhiJames);
@@ -326,7 +330,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             << std::endl;
    
     //bool sync_print = false;
-    bool sync_print_precut = false;
+    bool sync_print_precut = true;
 
     if (sync_print_precut) {          
         //ULong64_t myEventNumber = 4368674045;
@@ -357,7 +361,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             ) return kTRUE;*/
        
         // for checking non-overlapping events
-        if (!(
+        /*if (!(
                 // muon channel
                 (fInfo->runNum == 1 && fInfo->lumiSec == 40     && fInfo->evtNum == 7817)   || 
                 (fInfo->runNum == 1 && fInfo->lumiSec == 65     && fInfo->evtNum == 12829)  || 
@@ -381,7 +385,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 (fInfo->runNum == 1 && fInfo->lumiSec == 380 && fInfo->evtNum == 75912) ||
                 (fInfo->runNum == 1 && fInfo->lumiSec == 408 && fInfo->evtNum == 81429) 
                 )
-            ) return kTRUE;
+            ) return kTRUE;*/
 
         cout << "run, lumi, event" << endl;
         cout << fInfo->runNum << ", " << fInfo->lumiSec << ", " << fInfo->evtNum << endl;
@@ -864,7 +868,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     nTaus      = taus.size();
     nPhotons   = photons.size();
 
-    /*if (params->selection == "mumu") {
+    if (params->selection == "mumu") {
         
         if (muons.size() < 2)
             return kTRUE;
@@ -873,7 +877,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TLorentzVector muonOneP4, muonTwoP4;
         muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, MUON_MASS);
         muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, MUON_MASS);
-        if (muonOneP4.Pt() < 20.0) 
+        //if (muonOneP4.Pt() < 20.0) 
+        if (muonOneP4.Pt() < 25.0) 
             return kTRUE;
         //cout << "passed pt1 cut" << endl;
         hTotalEvents->Fill(6);
@@ -891,30 +896,32 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //cout << "passed Z window cut" << endl;
         hTotalEvents->Fill(9);
 
-        leptonOneP4     = muonOneP4;
-        leptonOneIso    = GetMuonIsolation(muons[0]);
-        leptonOneFlavor = muons[0]->q*13;
-        leptonOneDZ     = muons[0]->dz;
-        leptonOneD0     = muons[0]->d0;
-            
-        leptonTwoP4     = muonTwoP4;
-        leptonTwoIso    = GetMuonIsolation(muons[1]);
-        leptonTwoFlavor = muons[1]->q*13;
-        leptonTwoDZ     = muons[1]->dz;
-        leptonTwoD0     = muons[1]->d0;
+        return kTRUE; // save disk space (just need yields)
 
-        if (!isData) {
+        //leptonOneP4     = muonOneP4;
+        //leptonOneIso    = GetMuonIsolation(muons[0]);
+        //leptonOneFlavor = muons[0]->q*13;
+        //leptonOneDZ     = muons[0]->dz;
+        //leptonOneD0     = muons[0]->d0;
+            
+        //leptonTwoP4     = muonTwoP4;
+        //leptonTwoIso    = GetMuonIsolation(muons[1]);
+        //leptonTwoFlavor = muons[1]->q*13;
+        //leptonTwoDZ     = muons[1]->dz;
+        //leptonTwoD0     = muons[1]->d0;
+
+        /*if (!isData) {
             eventWeight *= weights->GetHZZMuonIDEff(*muons[0]); 
             eventWeight *= weights->GetHZZMuonIDEff(*muons[1]);
-        }
+        }*/
 
 
-        int isGlobalOne = (muons[0]->typeBits & baconhep::kGlobal) > 0;
-        int isGlobalTwo = (muons[1]->typeBits & baconhep::kGlobal) > 0;
-        int isTrackerOne = (muons[0]->typeBits & baconhep::kTracker) > 0;
-        int isTrackerTwo = (muons[1]->typeBits & baconhep::kTracker) > 0;
+        //int isGlobalOne = (muons[0]->typeBits & baconhep::kGlobal) > 0;
+        //int isGlobalTwo = (muons[1]->typeBits & baconhep::kGlobal) > 0;
+        //int isTrackerOne = (muons[0]->typeBits & baconhep::kTracker) > 0;
+        //int isTrackerTwo = (muons[1]->typeBits & baconhep::kTracker) > 0;
 
-        if (sync_print)
+        /*if (sync_print)
             cout << runNumber << "," << lumiSection << "," << evtNumber << ","  << 
                     thePV->x << ", " << thePV->y << ", " << thePV->z << ", " << 
                     muonOneP4.Pt() << "," << muonOneP4.Eta() << "," << 
@@ -932,8 +939,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                     muons[1]->dz << "," << muons[1]->sip3d << "," << 
                     muons[1]->nPixHits << "," << muons[1]->nTkLayers << "," << 
                     muons[1]->pt << "," << muons[1]->ptErr << "," << 
-                    GetMuonIsolation(muons[1]) << endl;
-    }*/
+                    GetMuonIsolation(muons[1]) << endl;*/
+    }
 
     //else if (params->selection == "mumug") {
     if (params->selection == "mumug") {
@@ -1525,13 +1532,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // then boost to Z1
         veclm_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
         veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
-
+        
         // now get angles
+        //cout << "veclm_in_Z1frame.Phi() = " << veclm_in_Z1frame.Phi() << endl;
         zgPhiJames = veclm_in_Z1frame.Phi();
         zgLittleThetaJames = veclm_in_Z1frame.CosTheta();
 
-        if (zgPhiJames < 0) 
-            zgPhiJames += 2*M_PI;
+        //if (zgPhiJames < 0) 
+        //    zgPhiJames += 2*M_PI;
 
         // Big Theta in X frame
         TLorentzVector veczg_in_Xframe = llgP4;
@@ -1539,7 +1547,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         TLorentzVector veczg_in_Xframe_newcoords = llgP4;
         veczg_in_Xframe_newcoords.Transform(rotation);
-        zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+        //zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+        zgBigThetaJames = (veczg_in_Xframe_newcoords.Vect()).CosTheta();
+
+        /*cout << "rotation matrix Brian" << endl;
+        cout << rotation.XX() << " " << rotation.XY() << " " << rotation.XZ() << endl;
+        cout << rotation.YX() << " " << rotation.YY() << " " << rotation.YZ() << endl;
+        cout << rotation.ZX() << " " << rotation.ZY() << " " << rotation.ZZ() << endl;*/
 
         /////////////////////////////
         //std::cout << "kinematics after Brian angles" << std::endl;
@@ -1548,31 +1562,27 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //dileptonP4.Print();
         //llgP4.Print();
 
-        // calculate angles like Ming-Yan
+        // calculate angles like Ming-Yan but with l_minus and l_plus
         TLorentzVector l_minus, l_plus; 
+
         if (leptonOneFlavor > 0) {
-            l_minus = leptonOneP4;
-            l_plus = leptonTwoP4;
+            l_minus.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+            l_plus.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
         }
         else {
-            l_minus = leptonTwoP4;
-            l_plus = leptonOneP4;
+            l_minus.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+            l_plus.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
         }
         
         TVector3 llgFrame = -1*llgP4.BoostVector();
         dileptonP4.Boost(llgFrame);
         l_minus.Boost(llgFrame);
-        l_minus.Boost(dileptonP4.BoostVector());
+        l_minus.Boost(-dileptonP4.BoostVector());
         zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
         zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
        
-        // the way MY does it (I think wrong)
-        TLorentzVector lep0 = leptonOneP4;
-        lep0.Boost(llgFrame);
-        lep0.Boost(dileptonP4.BoostVector());
-        zgLittleThetaMY = cos(dileptonP4.Angle(lep0.Vect()));
-        
         TVector3 ppAxis(0, 0, 1);
+        //TVector3 ppAxis = veckq_in_Xframe.Vect().Unit();
         TVector3 zAxis = dileptonP4.Vect().Unit();
         TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
         TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
@@ -1583,6 +1593,39 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonP4.Transform(rot);
         l_minus.Transform(rot);
         zgPhi = l_minus.Phi();
+        
+        /*cout << "rotation matrix Ming-Yan flavor" << endl;
+        cout << rot.XX() << " " << rot.XY() << " " << rot.XZ() << endl;
+        cout << rot.YX() << " " << rot.YY() << " " << rot.YZ() << endl;
+        cout << rot.ZX() << " " << rot.ZY() << " " << rot.ZZ() << endl;*/
+        
+        // the way MY does it (I think wrong)
+        TLorentzVector lep1, lep2;
+        lep1.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+        lep2.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+        dileptonP4 = lep1 + lep2;
+        
+        llgFrame = -1*llgP4.BoostVector();
+        dileptonP4.Boost(llgFrame);
+        lep1.Boost(llgFrame);
+        lep1.Boost(-dileptonP4.BoostVector());
+        zgLittleThetaMY = cos(dileptonP4.Angle(lep1.Vect()));
+        zgBigThetaMY = cos(dileptonP4.Angle(llgP4.Vect()));
+        
+        zAxis = dileptonP4.Vect().Unit();
+        yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
+        xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
+
+        TRotation rot_my;
+        rot_my = rot_my.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+
+        dileptonP4.Transform(rot_my);
+        lep1.Transform(rot_my);
+        zgPhiMY = lep1.Phi(); 
+
+        /*cout << "values for cos big theta: James = " << zgBigThetaJames << ",  Ming-Yan + flavor = " << zgBigTheta << ", Ming-Yan + leading = " << zgBigThetaMY << endl; 
+        cout << "values for cos little theta: James = " << zgLittleThetaJames << ",  Ming-Yan + flavor = " << zgLittleTheta << ", Ming-Yan + leading = " << zgLittleThetaMY << endl; 
+        cout << "values for phi: James = " << zgPhiJames << ",  Ming-Yan + flavor = " << zgPhi << ", Ming-Yan + leading = " << zgPhiMY << endl; */
             
         if (!isData) {
 
@@ -1634,7 +1677,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     } // end mumug selection
     
-    /*else if (params->selection == "ee") {
+    else if (params->selection == "ee") {
         if (electrons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -1655,19 +1698,21 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(9);   
         
-        leptonOneP4     = electronOneP4;
-        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
-        leptonOneFlavor = electrons[0]->q*11;
-        leptonOneDZ     = electrons[0]->dz;
-        leptonOneD0     = electrons[0]->d0;
-            
-        leptonTwoP4     = electronTwoP4;
-        leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
-        leptonTwoFlavor = electrons[1]->q*11;
-        leptonTwoDZ     = electrons[1]->dz;
-        leptonTwoD0     = electrons[1]->d0;
+        return kTRUE; // save disk space (just need yields)
+        
+        //leptonOneP4     = electronOneP4;
+        //leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        //leptonOneFlavor = electrons[0]->q*11;
+        //leptonOneDZ     = electrons[0]->dz;
+        //leptonOneD0     = electrons[0]->d0;
+        //    
+        //leptonTwoP4     = electronTwoP4;
+        //leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
+        //leptonTwoFlavor = electrons[1]->q*11;
+        //leptonTwoDZ     = electrons[1]->dz;
+        //leptonTwoD0     = electrons[1]->d0;
            
-        if (!isData) {
+        /*if (!isData) {
 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[0]); 
             eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[1]); 
@@ -1681,8 +1726,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             triggerWeight = eff_data/eff_mc;
             eventWeight *= triggerWeight;
 
-        }
-    } */
+        }*/
+    } 
     
     else if (params->selection == "elelg") {
         if (electrons.size() < 2) 
@@ -2264,13 +2309,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // then boost to Z1
         veclm_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
         veclp_in_Z1frame.Boost(-1*Z1frame_from_Xframe_newcoords);
-
+        
         // now get angles
+        //cout << "veclm_in_Z1frame.Phi() = " << veclm_in_Z1frame.Phi() << endl;
         zgPhiJames = veclm_in_Z1frame.Phi();
         zgLittleThetaJames = veclm_in_Z1frame.CosTheta();
 
-        if (zgPhiJames < 0) 
-            zgPhiJames += 2*M_PI;
+        //if (zgPhiJames < 0) 
+        //    zgPhiJames += 2*M_PI;
 
         // Big Theta in X frame
         TLorentzVector veczg_in_Xframe = llgP4;
@@ -2278,7 +2324,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         TLorentzVector veczg_in_Xframe_newcoords = llgP4;
         veczg_in_Xframe_newcoords.Transform(rotation);
-        zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+        //zgBigThetaJames = (-1*veczg_in_Xframe_newcoords.Vect()).CosTheta();
+        zgBigThetaJames = (veczg_in_Xframe_newcoords.Vect()).CosTheta();
+
+        /*cout << "rotation matrix Brian" << endl;
+        cout << rotation.XX() << " " << rotation.XY() << " " << rotation.XZ() << endl;
+        cout << rotation.YX() << " " << rotation.YY() << " " << rotation.YZ() << endl;
+        cout << rotation.ZX() << " " << rotation.ZY() << " " << rotation.ZZ() << endl;*/
 
         /////////////////////////////
         //std::cout << "kinematics after Brian angles" << std::endl;
@@ -2286,32 +2338,28 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         //leptonTwoP4.Print();
         //dileptonP4.Print();
         //llgP4.Print();
-    
-        // calculate angles like Ming-Yan
+
+        // calculate angles like Ming-Yan but with l_minus and l_plus
         TLorentzVector l_minus, l_plus; 
+
         if (leptonOneFlavor > 0) {
-            l_minus = leptonOneP4;
-            l_plus = leptonTwoP4;
+            l_minus.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+            l_plus.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
         }
         else {
-            l_minus = leptonTwoP4;
-            l_plus = leptonOneP4;
+            l_minus.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+            l_plus.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
         }
         
         TVector3 llgFrame = -1*llgP4.BoostVector();
         dileptonP4.Boost(llgFrame);
         l_minus.Boost(llgFrame);
-        l_minus.Boost(dileptonP4.BoostVector());
+        l_minus.Boost(-dileptonP4.BoostVector());
         zgLittleTheta = cos(dileptonP4.Angle(l_minus.Vect()));
         zgBigTheta = cos(dileptonP4.Angle(llgP4.Vect()));
-        
-        // the way MY does it (I think wrong)
-        TLorentzVector lep0 = leptonOneP4;
-        lep0.Boost(llgFrame);
-        lep0.Boost(dileptonP4.BoostVector());
-        zgLittleThetaMY = cos(dileptonP4.Angle(lep0.Vect()));
-        
+       
         TVector3 ppAxis(0, 0, 1);
+        //TVector3 ppAxis = veckq_in_Xframe.Vect().Unit();
         TVector3 zAxis = dileptonP4.Vect().Unit();
         TVector3 yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
         TVector3 xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
@@ -2322,6 +2370,39 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         dileptonP4.Transform(rot);
         l_minus.Transform(rot);
         zgPhi = l_minus.Phi();
+        
+        /*cout << "rotation matrix Ming-Yan flavor" << endl;
+        cout << rot.XX() << " " << rot.XY() << " " << rot.XZ() << endl;
+        cout << rot.YX() << " " << rot.YY() << " " << rot.YZ() << endl;
+        cout << rot.ZX() << " " << rot.ZY() << " " << rot.ZZ() << endl;*/
+        
+        // the way MY does it (I think wrong)
+        TLorentzVector lep1, lep2;
+        lep1.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+        lep2.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+        dileptonP4 = lep1 + lep2;
+        
+        llgFrame = -1*llgP4.BoostVector();
+        dileptonP4.Boost(llgFrame);
+        lep1.Boost(llgFrame);
+        lep1.Boost(-dileptonP4.BoostVector());
+        zgLittleThetaMY = cos(dileptonP4.Angle(lep1.Vect()));
+        zgBigThetaMY = cos(dileptonP4.Angle(llgP4.Vect()));
+        
+        zAxis = dileptonP4.Vect().Unit();
+        yAxis = ppAxis.Cross(zAxis.Unit()).Unit();
+        xAxis = (yAxis.Unit().Cross(zAxis.Unit())).Unit();
+
+        TRotation rot_my;
+        rot_my = rot_my.RotateAxes(xAxis, yAxis, zAxis).Inverse();
+
+        dileptonP4.Transform(rot_my);
+        lep1.Transform(rot_my);
+        zgPhiMY = lep1.Phi(); 
+
+        /*cout << "values for cos big theta: James = " << zgBigThetaJames << ",  Ming-Yan + flavor = " << zgBigTheta << ", Ming-Yan + leading = " << zgBigThetaMY << endl; 
+        cout << "values for cos little theta: James = " << zgLittleThetaJames << ",  Ming-Yan + flavor = " << zgLittleTheta << ", Ming-Yan + leading = " << zgLittleThetaMY << endl; 
+        cout << "values for phi: James = " << zgPhiJames << ",  Ming-Yan + flavor = " << zgPhi << ", Ming-Yan + leading = " << zgPhiMY << endl; */
             
         if (!isData) {
 

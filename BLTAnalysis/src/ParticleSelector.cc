@@ -208,15 +208,15 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     if (idName == "loose") 
     {
         if (fabs(el->eta) < 0.8) {
-            if (el->mva > 0.837) 
+            if (el->mvaSpring16 > 0.837) 
                 elPass = true;
         }
         else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
-            if (el->mva > 0.715)
+            if (el->mvaSpring16 > 0.715)
                 elPass = true;
         }
         else {
-            if (el->mva > 0.357)
+            if (el->mvaSpring16 > 0.357)
                 elPass = true;
         }
     } 
@@ -224,15 +224,15 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     else if (idName == "tight") 
     {
         if (fabs(el->eta) < 0.8) {
-            if (el->mva > 0.941) 
+            if (el->mvaSpring16 > 0.941) 
                 elPass = true;
         }
         else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
-            if (el->mva > 0.899)
+            if (el->mvaSpring16 > 0.899)
                 elPass = true;
         }
         else {
-            if (el->mva > 0.758)
+            if (el->mvaSpring16 > 0.758)
                 elPass = true;
         }
     } 
@@ -241,24 +241,24 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     {
         if (el->pt > 5. && el->pt < 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaHZZ > -0.211)
+                if (el->mvaSpring16HZZ > -0.211)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaHZZ > -0.396)  
+                if (el->mvaSpring16HZZ > -0.396)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaHZZ > -0.215)  
+                if (el->mvaSpring16HZZ > -0.215)  
                    elPass = true;
             }
         } else if (el->pt > 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaHZZ > -0.870)
+                if (el->mvaSpring16HZZ > -0.870)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaHZZ > -0.838)  
+                if (el->mvaSpring16HZZ > -0.838)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaHZZ > -0.763)
+                if (el->mvaSpring16HZZ > -0.763)
                     elPass = true;
             }
         }
@@ -361,16 +361,16 @@ bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName)
 {
     bool phoPass = false;
     if (idName == "loose") {
-        if (ph->mva > 0.2) 
+        if (ph->mvaSpring16 > 0.2) 
             phoPass = true;
     }
     else if (idName == "tight") {
         if (fabs(ph->scEta) <= 1.479) { // barrel
-            if (ph->mva > 0.68)
+            if (ph->mvaSpring16 > 0.68)
                 phoPass = true;
         }
         else { //endcap
-            if (ph->mva > 0.60)
+            if (ph->mvaSpring16 > 0.60)
                 phoPass = true;
         }
     }

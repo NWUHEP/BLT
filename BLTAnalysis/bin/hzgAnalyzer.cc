@@ -58,16 +58,23 @@ void hzgAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "mumu" || params->selection == "mumug") {
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
-        triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
-        //triggerNames.push_back("HLT_IsoMu24_v*"); 
-        //triggerNames.push_back("HLT_IsoTkMu24_v*");
+        if (params->period == "2016") {
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
+            //triggerNames.push_back("HLT_IsoMu24_v*"); 
+            //triggerNames.push_back("HLT_IsoTkMu24_v*");
+        }
+        else if (params->period == "2017") {
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*");
+        }
     }
     else if (params->selection == "ee" || params->selection == "elelg") {
-        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+        if (params->period == "2016") {
+            triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
+        }
     }
     else if (params->selection == "tautaug") { // select one muon plus one hadronic tau (for now)
         triggerNames.push_back("HLT_IsoMu24_v*");
@@ -803,7 +810,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOnePt = photonOneP4.Pt();
         photonOneEta = photonOneP4.Eta();
         photonOnePhi = photonOneP4.Phi();
-        photonOneMVA = photons[0]->mva;
+        photonOneMVA = photons[0]->mvaSpring16;
         passElectronVeto = photons[0]->passElectronVeto;  
         if (!isData)
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[0]);
@@ -1218,7 +1225,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOnePt  = photonOneP4.Pt();
         photonOneEta  = photonOneP4.Eta();
         photonOnePhi  = photonOneP4.Phi();
-        photonOneMVA = photons[photonIndex]->mva;
+        photonOneMVA = photons[photonIndex]->mvaSpring16;
         photonOneERes = photons[photonIndex]->eRes;
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
 

@@ -92,27 +92,6 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     }
 }
 
-/*bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
-    bool muPass = false;
-    if (cutLevel.cutName == "tightMuID") {
-        if (this->_parameters.period == "2012") {
-            if (
-                    mu->muNchi2       < cutLevel.NormalizedChi2
-                    && mu->nValidHits > cutLevel.NumberOfValidMuonHits
-                    && mu->nMatchStn  > cutLevel.NumberOfMatchedStations
-                    && mu->nPixHits   > cutLevel.NumberOfValidPixelHits
-                    && mu->nTkLayers  > cutLevel.TrackLayersWithMeasurement
-                    && fabs(mu->d0)   < cutLevel.dxy
-                    && fabs(mu->dz)   < cutLevel.dz
-                    && test_bits(mu->typeBits, baconhep::kPFMuon) == cutLevel.IsPF
-                    && test_bits(mu->typeBits, baconhep::kGlobal) == cutLevel.IsGLB
-               ) muPass = true;
-
-        }     
-    }
-    return muPass;
-}*/
-
 bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, string idName) const
 {
     bool muPass = false;
@@ -223,17 +202,11 @@ bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts:
     return elPass;
 }
 
-bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts::elMVACuts& cutLevel) const {
+bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idName) const {
     bool elPass = false;
 
-    if (cutLevel.cutName == "hzgMVAID") {
-        if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
-            //if (el->mvaOld > cutLevel.mvaVal[0]) elPass = true;  //FIXME
-        } else if (el->pt > cutLevel.pt[1]) {
-            //if (el->mvaOld > cutLevel.mvaVal[1]) elPass = true;  //FIXME
-        }
-
-    } else if (cutLevel.cutName == "looseMVAElID") {
+    if (idName == "loose") 
+    {
         if (fabs(el->eta) < 0.8) {
             if (el->mva > 0.837) 
                 elPass = true;
@@ -246,13 +219,14 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
             if (el->mva > 0.357)
                 elPass = true;
         }
-
-    } else if (cutLevel.cutName == "tightMVAElID") {
+    } 
+    
+    else if (idName == "tight") 
+    {
         if (fabs(el->eta) < 0.8) {
             if (el->mva > 0.941) 
                 elPass = true;
         }
-
         else if (fabs(el->eta) >= 0.8 && fabs(el->eta) < 1.479) {
             if (el->mva > 0.899)
                 elPass = true;
@@ -261,81 +235,35 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
             if (el->mva > 0.758)
                 elPass = true;
         }
-
-    } else if (cutLevel.cutName == "hzzMVAID") {
-        if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
-            if (fabs(el->scEta) < cutLevel.eta[0]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[0])
+    } 
+    
+    else if (idName == "HZZ") 
+    {
+        if (el->pt > 5. && el->pt < 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (el->mvaHZZ > -0.211)
                     elPass = true;
-            } else if (fabs(el->scEta) < cutLevel.eta[1]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[1])  
+            } else if (fabs(el->scEta) < 1.479) {
+                if (el->mvaHZZ > -0.396)  
                     elPass = true;
-            } else if (fabs(el->scEta) < cutLevel.eta[2]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[2])  
+            } else if (fabs(el->scEta) < 2.5) {
+                if (el->mvaHZZ > -0.215)  
                    elPass = true;
             }
-        } else if (el->pt > cutLevel.pt[1]) {
-            if (fabs(el->scEta) < cutLevel.eta[0]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[3])
+        } else if (el->pt > 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (el->mvaHZZ > -0.870)
                     elPass = true;
-            } else if (fabs(el->scEta) < cutLevel.eta[1]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[4])  
+            } else if (fabs(el->scEta) < 1.479) {
+                if (el->mvaHZZ > -0.838)  
                     elPass = true;
-            } else if (fabs(el->scEta) < cutLevel.eta[2]) {
-                if (el->mvaHZZ > cutLevel.mvaVal[5])
+            } else if (fabs(el->scEta) < 2.5) {
+                if (el->mvaHZZ > -0.763)
                     elPass = true;
-            }
-        }
-
-    } else if (cutLevel.cutName == "hwwMVAID") {
-        if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
-            if (fabs(el->eta) < cutLevel.eta[0]) {
-                if (
-                        //(el->mvaHZZ                 > cutLevel.mvaVal[0])  //FIXME
-                        //&& (el->nMissingHits       == cutLevel.missHits[0])  //FIXME
-                        1
-                        && ((!el->isConv)          == cutLevel.conversionVeto[0])
-                   ) elPass = true;
-            } else if (fabs(el->eta) < cutLevel.eta[1]) {
-                if (
-                        //(el->mvaHZZ                 > cutLevel.mvaVal[1])  //FIXME
-                        //&& (el->nMissingHits       == cutLevel.missHits[1])  //FIXME
-                        1
-                        && ((!el->isConv)          == cutLevel.conversionVeto[1])
-                   ) elPass = true;
-            } else if (fabs(el->eta) < cutLevel.eta[2]) {
-                if (
-                        //(el->mvaHZZ                 > cutLevel.mvaVal[2])  //FIXME
-                        //&& (el->nMissingHits       == cutLevel.missHits[2])  //FIXME
-                        1
-                        && ((!el->isConv)          == cutLevel.conversionVeto[2])
-                   ) elPass = true;
-            }
-        } else if (el->pt > cutLevel.pt[1]) {
-            if (fabs(el->eta) < cutLevel.eta[0]) {
-                if (
-                        //(el->mvaHZZ                  > cutLevel.mvaVal[3])  //FIXME
-                        //&& (el->nMissingHits        == cutLevel.missHits[3])  //FIXME
-                        1
-                        && ((!el->isConv)           == cutLevel.conversionVeto[3])
-                   ) elPass = true;
-            } else if (fabs(el->eta) < cutLevel.eta[1]) {
-                if (
-                        //(el->mvaHZZ                  > cutLevel.mvaVal[4])  //FIXME
-                        //&& (el->nMissingHits        == cutLevel.missHits[4])  //FIXME
-                        1
-                        && ((!el->isConv)           == cutLevel.conversionVeto[4])
-                   ) elPass = true;
-            } else if (fabs(el->eta) < cutLevel.eta[2]) {
-                if (
-                        //(el->mvaHZZ                  > cutLevel.mvaVal[5])  //FIXME
-                        //&& (el->nMissingHits        == cutLevel.missHits[5])  //FIXME
-                        1
-                        && ((!el->isConv)           == cutLevel.conversionVeto[5])
-                   ) elPass = true;
             }
         }
     }
+
     return elPass;
 }
 

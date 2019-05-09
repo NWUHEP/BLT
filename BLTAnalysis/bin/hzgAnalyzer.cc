@@ -431,7 +431,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         // Apply rochester muon momentum corrections
         particleSelector->ApplyMuonMomentumCorrection(muon, isData);
-        
+   
+        // muons for analysis
         if (
                 muon->pt > 5. 
                 && fabs(muon->eta) < 2.4
@@ -452,8 +453,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
             veto_muons.push_back(muonP4);
         }
-    }
-    
+    } 
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
 
     /* ELECTRONS */
@@ -462,21 +462,20 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
-
-        TLorentzVector electronP4;
-        electronP4.SetPtEtaPhiM(electron->calibPt, electron->eta, electron->phi, ELE_MASS);
-        
+    
         if (
-                electron->calibPt > 7
+                electron->calibPt > 7.
                 && fabs(electron->scEta) < 2.5
-                && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
-                && particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
+                && particleSelector->PassElectronMVA(electron, "HZZ")
+                && particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electron->calibPt < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
                 && fabs(electron->sip3d) < 4.0 
            ) {
-            electrons.push_back(electron);
-            veto_electrons.push_back(electronP4);
+            electrons.push_back(electron); // electrons for analysis
+            TLorentzVector electronP4;
+            electronP4.SetPtEtaPhiM(electron->calibPt, electron->eta, electron->phi, ELE_MASS);
+            veto_electrons.push_back(electronP4); // electrons for jet veto
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -491,7 +490,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TLorentzVector tauP4; 
         tauP4.SetPtEtaPhiM(tau->pt, tau->eta, tau->phi, tau->m);
 
-        // Prevent overlap of muons and jets
+        // Prevent overlap of muons and electrons
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
             if (tauP4.DeltaR(mu) < 0.3) {

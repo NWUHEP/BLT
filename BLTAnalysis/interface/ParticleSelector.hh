@@ -44,7 +44,6 @@ public:
     void SetRho(float rhoFactor)            { _rhoFactor = rhoFactor; }
 
     // Muons
-    //bool PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const;
     bool PassMuonID(const baconhep::TMuon* mu, string) const;
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const;
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const;
@@ -53,7 +52,7 @@ public:
 
     // Electrons
     bool PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const;
-    bool PassElectronMVA(const baconhep::TElectron* el, const Cuts::elMVACuts& cutLevel) const;
+    bool PassElectronMVA(const baconhep::TElectron* el, string) const;
     bool PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel, float EAEl[7]) const;
     float GetElectronIsolation(const baconhep::TElectron* el, const float rho) const;
 

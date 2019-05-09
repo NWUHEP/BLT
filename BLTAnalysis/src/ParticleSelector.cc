@@ -672,3 +672,44 @@ pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* je
 
     return make_pair(jres, jsf);
 }
+
+float ParticleSelector::GetMuonIsolation(const baconhep::TMuon* mu) 
+{
+    //float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
+    float combIso = (mu->chHadIso03 + std::max(0.,(double)mu->neuHadIso03 + mu->gammaIso03 - 0.5*mu->puIso03));
+    return combIso;
+}
+
+float ParticleSelector::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
+{
+    int iEta = 0;
+    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
+    for (unsigned i = 0; i < 8; ++i) {
+        if (fabs(el->scEta) > etaBins[i] && fabs(el->scEta) < etaBins[i+1]) {
+            iEta = i;
+            break;
+        }
+    }
+
+    float combIso = el->chHadIso + std::max(0., (double)el->neuHadIso + el->gammaIso - rho*effArea[iEta]);
+
+    return combIso;
+}
+
+float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho)
+{
+    int iEta = 0;
+    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
+    for (unsigned i = 0; i < 8; ++i) {
+        if (fabs(pho->scEta) > etaBins[i] && fabs(pho->scEta) < etaBins[i+1]) {
+            iEta = i;
+            break;
+        }
+    }
+
+    float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
+
+    return combIso;
+}

@@ -185,10 +185,6 @@ public:
     Float_t llgJJDEta, llgJJDPhi, llgJJDR;
     Float_t zepp;
 
-    float GetMuonIsolation(const baconhep::TMuon*);
-    float GetElectronIsolation(const baconhep::TElectron*, float);
-    float GetPhotonIsolation(const baconhep::TPhoton*, float);
-
     //ClassDef(hzgAnalyzer,0);
 };
 

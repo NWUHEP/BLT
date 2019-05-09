@@ -459,7 +459,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                && fabs(muon->dz)   < 0.5
                && muon->nTkLayers  > 5 
                && muon->nValidHits > 0
-               //&& GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+               //&& particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.15
            ){
             muons.push_back(muon);
         } */
@@ -473,7 +473,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                    ((muon->typeBits & baconhep::kTracker) && muon->nMatchStn > 0)) &&
                    (muon->btt != 2)) // Global muon or (arbitrated) tracker muon
                 && fabs(muon->sip3d) < 4.0                 
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.35
+                && particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.35
 
                 ) {
                     // We now have h->ZZ->4l "loose" muons
@@ -511,7 +511,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 && fabs(muon->dz)   < 0.5
                 && muon->nTkLayers  > 5 
                 && muon->nValidHits > 0
-                && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+                && particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.15
            ) {
             veto_muons.push_back(muonP4);
         }
@@ -533,7 +533,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 electron->calibPt > 7
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronMVA(electron, cuts->hzzMVAID)
-                && GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
+                && particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electronP4.Pt() < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
                 && fabs(electron->sip3d) < 4.0 
@@ -759,7 +759,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonOnePt     = muonOneP4.Pt();
         leptonOneEta    = muonOneP4.Eta();
         leptonOnePhi    = muonOneP4.Phi();
-        leptonOneIso    = GetMuonIsolation(muons[0]);
+        leptonOneIso    = particleSelector->GetMuonIsolation(muons[0]);
         leptonOneFlavor = muons[0]->q*13;
         leptonOneDZ     = muons[0]->dz;
         leptonOneD0     = muons[0]->d0;
@@ -767,7 +767,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoPt     = muonTwoP4.Pt();
         leptonTwoEta    = muonTwoP4.Eta();
         leptonTwoPhi    = muonTwoP4.Phi();
-        leptonTwoIso    = GetMuonIsolation(muons[1]);
+        leptonTwoIso    = particleSelector->GetMuonIsolation(muons[1]);
         leptonTwoFlavor = muons[1]->q*13;
         leptonTwoDZ     = muons[1]->dz;
         leptonTwoD0     = muons[1]->d0;
@@ -809,7 +809,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonOnePt     = electronOneP4.Pt();
         leptonOneEta    = electronOneP4.Eta();
         leptonOnePhi    = electronOneP4.Phi();
-        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        leptonOneIso    = particleSelector->GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = electrons[0]->q*11;
         leptonOneDZ     = electrons[0]->dz;
         leptonOneD0     = electrons[0]->d0;
@@ -817,7 +817,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoPt     = electronTwoP4.Pt();
         leptonTwoEta    = electronTwoP4.Eta();
         leptonTwoPhi    = electronTwoP4.Phi();
-        leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
+        leptonTwoIso    = particleSelector->GetElectronIsolation(electrons[1], fInfo->rhoJet);
         leptonTwoFlavor = electrons[1]->q*11;
         leptonTwoDZ     = electrons[1]->dz;
         leptonTwoD0     = electrons[1]->d0;
@@ -1121,7 +1121,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonOnePt     = leptonOneP4.Pt();
         leptonOneEta     = leptonOneP4.Eta();
         leptonOnePhi     = leptonOneP4.Phi();
-        leptonOneIso    = GetMuonIsolation(muons[muonOneIndex]);
+        leptonOneIso    = particleSelector->GetMuonIsolation(muons[muonOneIndex]);
         leptonOneFlavor = muons[muonOneIndex]->q*13;
         leptonOneDZ     = muons[muonOneIndex]->dz;
         leptonOneD0     = muons[muonOneIndex]->d0;
@@ -1129,7 +1129,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoPt     = leptonTwoP4.Pt();
         leptonTwoEta     = leptonTwoP4.Eta();
         leptonTwoPhi     = leptonTwoP4.Phi();
-        leptonTwoIso    = GetMuonIsolation(muons[muonTwoIndex]);
+        leptonTwoIso    = particleSelector->GetMuonIsolation(muons[muonTwoIndex]);
         leptonTwoFlavor = muons[muonTwoIndex]->q*13;
         leptonTwoDZ     = muons[muonTwoIndex]->dz;
         leptonTwoD0     = muons[muonTwoIndex]->d0;
@@ -1667,7 +1667,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonOnePt     = leptonOneP4.Pt();
         leptonOneEta     = leptonOneP4.Eta();
         leptonOnePhi     = leptonOneP4.Phi();
-        leptonOneIso    = GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
+        leptonOneIso    = particleSelector->GetElectronIsolation(electrons[electronOneIndex], fInfo->rhoJet);
         leptonOneFlavor = electrons[electronOneIndex]->q*11;
         leptonOneDZ     = electrons[electronOneIndex]->dz;
         leptonOneD0     = electrons[electronOneIndex]->d0;
@@ -1676,7 +1676,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoPt     = leptonTwoP4.Pt();
         leptonTwoEta     = leptonTwoP4.Eta();
         leptonTwoPhi     = leptonTwoP4.Phi();
-        leptonTwoIso    = GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
+        leptonTwoIso    = particleSelector->GetElectronIsolation(electrons[electronTwoIndex], fInfo->rhoJet);
         leptonTwoFlavor = electrons[electronTwoIndex]->q*11;
         leptonTwoDZ     = electrons[electronTwoIndex]->dz;
         leptonTwoD0     = electrons[electronTwoIndex]->d0;
@@ -1993,7 +1993,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             leptonOnePt     = muonP4.Pt();
             leptonOneEta     = muonP4.Eta();
             leptonOnePhi     = muonP4.Phi();
-            leptonOneIso    = GetMuonIsolation(muons[0]);
+            leptonOneIso    = particleSelector->GetMuonIsolation(muons[0]);
             leptonOneFlavor = muons[0]->q*13;
             leptonOneDZ     = muons[0]->dz;
             leptonOneD0     = muons[0]->d0;
@@ -2018,7 +2018,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             leptonTwoPt     = muonP4.Pt();
             leptonTwoEta     = muonP4.Eta();
             leptonTwoPhi     = muonP4.Phi();
-            leptonTwoIso    = GetMuonIsolation(muons[0]);
+            leptonTwoIso    = particleSelector->GetMuonIsolation(muons[0]);
             leptonTwoFlavor = muons[0]->q*13;
             leptonTwoDZ     = muons[0]->dz;
             leptonTwoD0     = muons[0]->d0;
@@ -2213,45 +2213,4 @@ int main(int argc, char **argv)
     }
 
     return EXIT_SUCCESS;
-}
-
-float hzgAnalyzer::GetMuonIsolation(const baconhep::TMuon* mu)
-{
-    //float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
-    float combIso = (mu->chHadIso03 + std::max(0.,(double)mu->neuHadIso03 + mu->gammaIso03 - 0.5*mu->puIso03));
-    return combIso;
-}
-
-float hzgAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
-{
-    int iEta = 0;
-    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
-    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
-    for (unsigned i = 0; i < 8; ++i) {
-        if (fabs(el->scEta) > etaBins[i] && fabs(el->scEta) < etaBins[i+1]) {
-            iEta = i;
-            break;
-        }
-    }
-
-    float combIso = el->chHadIso + std::max(0., (double)el->neuHadIso + el->gammaIso - rho*effArea[iEta]);
-
-    return combIso;
-}
-
-float hzgAnalyzer::GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho)
-{
-    int iEta = 0;
-    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
-    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
-    for (unsigned i = 0; i < 8; ++i) {
-        if (fabs(pho->scEta) > etaBins[i] && fabs(pho->scEta) < etaBins[i+1]) {
-            iEta = i;
-            break;
-        }
-    }
-
-    float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
-
-    return combIso;
 }

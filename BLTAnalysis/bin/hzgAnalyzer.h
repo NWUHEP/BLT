@@ -146,25 +146,13 @@ public:
     Float_t genPhotonPt, genPhotonEta, genPhotonPhi;
     Int_t genLeptonOneId, genLeptonTwoId;
     Bool_t genPhotonFHPFS, genPhotonIPFS;
-    
-    //Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
-    //TLorentzVector genOneP4, genTwoP4;
-    //Bool_t fromHardProcessFinalState, isPromptFinalState, hasPhotonMatch;
     Bool_t vetoDY;
 
     // dilepton data
     Float_t dileptonPt, dileptonEta, dileptonPhi, dileptonM;
     Float_t dileptonDEta, dileptonDPhi, dileptonDR;
     Float_t dileptonMKin;
-    
-    // dilepton vertex data
-    //Float_t dileptonVertexOneX, dileptonVertexOneY, dileptonVertexOneZ;
-    //Float_t dileptonVertexTwoX, dileptonVertexTwoY, dileptonVertexTwoZ;
-    //Float_t dileptonVertexOneXErr, dileptonVertexOneYErr, dileptonVertexOneZErr;
-    //Float_t dileptonVertexTwoXErr, dileptonVertexTwoYErr, dileptonVertexTwoZErr;
-    //Float_t dileptonVertexChi2One, dileptonVertexDOFOne;
-    //Float_t dileptonVertexChi2Two, dileptonVertexDOFTwo;
-    
+     
     // dijet data
     Float_t dijetPt, dijetEta, dijetPhi, dijetM;
     Float_t dijetDEta, dijetDPhi, dijetDR;

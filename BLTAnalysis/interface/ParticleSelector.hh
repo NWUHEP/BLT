@@ -44,23 +44,24 @@ public:
     void SetRho(float rhoFactor)            { _rhoFactor = rhoFactor; }
 
     // Muons
-    bool PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const;
+    //bool PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const;
+    bool PassMuonID(const baconhep::TMuon* mu, string) const;
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const;
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const;
-    float GetMuonIsolation(const baconhep::TMuon* mu);
-    void ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData);
+    float GetMuonIsolation(const baconhep::TMuon* mu) const;
+    void ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData) const;
 
     // Electrons
     bool PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const;
     bool PassElectronMVA(const baconhep::TElectron* el, const Cuts::elMVACuts& cutLevel) const;
     bool PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel, float EAEl[7]) const;
-    float GetElectronIsolation(const baconhep::TElectron* el, const float rho);
+    float GetElectronIsolation(const baconhep::TElectron* el, const float rho) const;
 
     // Photons
     bool PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phIDCuts& cutLevel) const;
     bool PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const;
     bool PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::phIsoCuts& cutLevel, float EAPho[7][3]) const;
-    float GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho);
+    float GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho) const;
 
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;

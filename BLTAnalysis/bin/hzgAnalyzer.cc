@@ -432,75 +432,24 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // Apply rochester muon momentum corrections
         particleSelector->ApplyMuonMomentumCorrection(muon, isData);
         
-        TLorentzVector muonP4;
-        muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
-
-        if (   /*  
-               // tight muon ID and ISO
-               muonP4.Pt() > 5.
-               && fabs(muonP4.Eta()) < 2.4
-               && (muon->typeBits & baconhep::kPFMuon) 
-               && (muon->typeBits & baconhep::kGlobal) 
-               && muon->muNchi2    < 10.
-               && muon->nMatchStn  > 1
-               && muon->nPixHits   > 0
-               && fabs(muon->d0)   < 0.2
-               && fabs(muon->dz)   < 0.5
-               && muon->nTkLayers  > 5 
-               && muon->nValidHits > 0
-               //&& particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.15
-           ){
+        if (
+                muon->pt > 5. 
+                && fabs(muon->eta) < 2.4
+                && particleSelector->PassMuonID(muon, "HZZ")
+                && particleSelector->GetMuonIsolation(muon)/muon->pt < 0.35
+           ) {
             muons.push_back(muon);
-        } */
-
-                // h->ZZ->4l "tight" ID and pf_isorel < 0.35
-                muonP4.Pt() > 5.
-                && fabs(muonP4.Eta()) < 2.4
-                && fabs(muon->d0) < 0.5
-                && fabs(muon->dz) < 1.0
-                && (((muon->typeBits & baconhep::kGlobal) || 
-                   ((muon->typeBits & baconhep::kTracker) && muon->nMatchStn > 0)) &&
-                   (muon->btt != 2)) // Global muon or (arbitrated) tracker muon
-                && fabs(muon->sip3d) < 4.0                 
-                && particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.35
-
-                ) {
-                    // We now have h->ZZ->4l "loose" muons
-                    if (muonP4.Pt() < 200.0) {
-                        if (muon->pogIDBits & baconhep::kPOGLooseMuon)
-                            muons.push_back(muon);
-                    }
-                    else {
-                        // need to pass the tracker high-pt ID
-                        if (
-                                (muon->pogIDBits & baconhep::kPOGLooseMuon) ||
-                                (muon->nMatchStn > 1
-                                && (muon->ptErr/muon->pt) < 0.3 
-                                && fabs(muon->d0) < 0.2
-                                && fabs(muon->dz) < 0.5
-                                && muon->nPixHits > 0
-                                && muon->nTkLayers > 5)
-                           )
-                            muons.push_back(muon);
-                    }
-                }
+        }
                     
         // muons for jet veto
         if (
-                muonP4.Pt() > 10
-                // tight muon ID and ISO
-                && fabs(muonP4.Eta()) < 2.4
-                && (muon->typeBits & baconhep::kPFMuon) 
-                && (muon->typeBits & baconhep::kGlobal) 
-                && muon->muNchi2    < 10.
-                && muon->nMatchStn  > 1
-                && muon->nPixHits   > 0
-                && fabs(muon->d0)   < 0.2
-                && fabs(muon->dz)   < 0.5
-                && muon->nTkLayers  > 5 
-                && muon->nValidHits > 0
-                && particleSelector->GetMuonIsolation(muon)/muonP4.Pt() < 0.15
+                muon->pt > 10.
+                && fabs(muon->eta) < 2.4
+                && particleSelector->PassMuonID(muon, "tight")
+                && particleSelector->GetMuonIsolation(muon)/muon->pt < 0.15
            ) {
+            TLorentzVector muonP4;
+            muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
             veto_muons.push_back(muonP4);
         }
     }

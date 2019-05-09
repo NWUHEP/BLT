@@ -92,7 +92,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     }
 }
 
-bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
+/*bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCuts& cutLevel) const {
     bool muPass = false;
     if (cutLevel.cutName == "tightMuID") {
         if (this->_parameters.period == "2012") {
@@ -111,7 +111,61 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, const Cuts::muIDCut
         }     
     }
     return muPass;
+}*/
+
+bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, string idName) const
+{
+    bool muPass = false;
+
+    if (idName == "tight") {
+        if (
+               (mu->typeBits & baconhep::kPFMuon) 
+               && (mu->typeBits & baconhep::kGlobal) 
+               && mu->muNchi2    < 10.
+               && mu->nMatchStn  > 1
+               && mu->nPixHits   > 0
+               && fabs(mu->d0)   < 0.2
+               && fabs(mu->dz)   < 0.5
+               && mu->nTkLayers  > 5 
+               && mu->nValidHits > 0
+           ) {
+            muPass = true;
+        }
+    }
+
+    else if (idName == "HZZ") {
+        if (
+            fabs(mu->d0) < 0.5
+            && fabs(mu->dz) < 1.0
+            && (((mu->typeBits & baconhep::kGlobal) || 
+               ((mu->typeBits & baconhep::kTracker) && mu->nMatchStn > 0)) &&
+               (mu->btt != 2)) // Global muon or (arbitrated) tracker muon
+            && fabs(mu->sip3d) < 4.0                 
+           ) {
+                // We now have h->ZZ->4l "loose" muons
+                if (mu->pt < 200.0) {
+                    if (mu->pogIDBits & baconhep::kPOGLooseMuon)
+                        muPass = true;
+                }
+                else {
+                    // need to pass the tracker high-pt ID
+                    if (
+                            (mu->pogIDBits & baconhep::kPOGLooseMuon) ||
+                            (mu->nMatchStn > 1
+                            && (mu->ptErr/mu->pt) < 0.3 
+                            && fabs(mu->d0) < 0.2
+                            && fabs(mu->dz) < 0.5
+                            && mu->nPixHits > 0
+                            && mu->nTkLayers > 5)
+                       )
+                        muPass = true;
+                }
+        }
+    }
+
+    return muPass;
 }
+
 
 bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const {
     bool isoPass = false;
@@ -675,14 +729,14 @@ pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* je
     return make_pair(jres, jsf);
 }
 
-float ParticleSelector::GetMuonIsolation(const baconhep::TMuon* mu) 
+float ParticleSelector::GetMuonIsolation(const baconhep::TMuon* mu) const
 {
     //float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
     float combIso = (mu->chHadIso03 + std::max(0.,(double)mu->neuHadIso03 + mu->gammaIso03 - 0.5*mu->puIso03));
     return combIso;
 }
 
-float ParticleSelector::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
+float ParticleSelector::GetElectronIsolation(const baconhep::TElectron* el, const float rho) const
 {
     int iEta = 0;
     float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
@@ -699,7 +753,7 @@ float ParticleSelector::GetElectronIsolation(const baconhep::TElectron* el, cons
     return combIso;
 }
 
-float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho)
+float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho) const
 {
     int iEta = 0;
     float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
@@ -716,7 +770,7 @@ float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const f
     return combIso;
 }
 
-void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData)
+void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData) const
 {
     double muonSF = 1.;
     if (isData)

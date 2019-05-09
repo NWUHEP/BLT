@@ -4,7 +4,6 @@
 <use name="CondFormats/JetMETObjects"/>
 <use name="JetMETCorrections/Modules"/>
 <use name="EgammaAnalysis/ElectronTools"/>
-<use name="HiggsAnalysis/GBRLikelihood"/>
 <use name="root"/>
 <use name="rootcore"/>
 <use name="rootrflx"/>

@@ -82,8 +82,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
     lumiMask.AddJSONFile(jsonFileName);
 
-    // muon momentum corrections
-    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
     rng = new TRandom3();
 
     // Prepare the output tree
@@ -432,18 +430,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         // Apply rochester muon momentum corrections
+        particleSelector->ApplyMuonMomentumCorrection(muon, isData);
+        
         TLorentzVector muonP4;
-        copy_p4(muon, MUON_MASS, muonP4);
-        double muonSF = 1.;
-        if (isData) {
-            muonSF = muonCorr->kScaleDT(muon->q, muon->pt, muon->eta, muon->phi, 0, 0);
-        } else {
-            muonSF = muonCorr->kScaleAndSmearMC(muon->q, muon->pt, muon->eta, muon->phi,
-                    muon->nTkLayers, rng->Rndm(), rng->Rndm(), 
-                    0, 0);
-        }
-
-        muon->pt = muonSF*muon->pt; 
         muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, MUON_MASS);
 
         if (   /*  
@@ -954,6 +943,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     } // end tautaug selection
 
     else { // llg selection (combines mumug and elelg)
+        assert(params->selection == "mumug" || params->selection == "elelg");
 
         unsigned int nLeptons = 0;
         if (params->selection == "mumug") 

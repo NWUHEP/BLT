@@ -24,7 +24,9 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
     this->_parameters = parameters;
     this->_cuts = cuts;
 
-    _rng = new TRandom3(1337);
+    const std::string _cmssw_base = getenv("CMSSW_BASE");
+    _rng = new TRandom3();
+    muonCorr = new RoccoR(_cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
     // offline jet corrections on-the-fly
     vector<string> ds = split(parameters.datasetgroup, '_');
@@ -712,4 +714,14 @@ float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const f
     float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
 
     return combIso;
+}
+
+void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData)
+{
+    double muonSF = 1.;
+    if (isData)
+        muonSF = muonCorr->kScaleDT(mu->q, mu->pt, mu->eta, mu->phi, 0, 0);
+    else
+        muonSF = muonCorr->kScaleAndSmearMC(mu->q, mu->pt, mu->eta, mu->phi, mu->nTkLayers, _rng->Rndm(), _rng->Rndm(), 0, 0);
+    mu->pt = muonSF*mu->pt;
 }

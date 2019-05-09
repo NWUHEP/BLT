@@ -12,6 +12,7 @@
 #include "BLT/BLTAnalysis/interface/BLTHelper.hh"
 #include "BLT/BLTAnalysis/interface/Parameters.hh"
 #include "BLT/BLTAnalysis/interface/Cuts.hh"
+#include "BLT/BLTAnalysis/interface/RoccoR.h"
 
 #include <TClonesArray.h>
 #include <TLorentzVector.h>
@@ -47,6 +48,7 @@ public:
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const;
     bool PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const;
     float GetMuonIsolation(const baconhep::TMuon* mu);
+    void ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData);
 
     // Electrons
     bool PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const;
@@ -82,6 +84,9 @@ private:
     JetCorrectionUncertainty* _jecUncertainty;
     JME::JetResolution jetResolution;
     JME::JetResolutionScaleFactor jetResolutionSF;
+
+    // For offline Rochester muon corrections
+    RoccoR *muonCorr;
 };
 
 #endif  // PARTICLESELECTOR_HH

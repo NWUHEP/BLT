@@ -506,16 +506,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }
 
-        // apply tau energy scale correction (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
-        if (!isData) {
-            if (tau->decaymode == 0) {
-                tau->pt *= 0.995;
-            } else if (tau->decaymode == 1) {
-                tau->pt *= 1.01;
-            } else if (tau->decaymode == 10) {
-                tau->pt *= 1.006;
-            }
-        }
+        // apply tau energy scale correction 
+        if (!isData) 
+            particleSelector->ApplyTauEnergyScaleCorrection(tau);
 
         if ( 
                 tau->pt > 18
@@ -540,18 +533,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
         assert(photon);
         
-        TLorentzVector photonP4;
-        photonP4.SetPtEtaPhiM(photon->calibPt, photon->eta, photon->phi, 0.);
-
         if (
-                // ID conditions
                 photon->pt > 10
                 && fabs(photon->scEta) < 2.5 
                 && (fabs(photon->scEta) <= 1.4442 || fabs(photon->scEta) >= 1.566)
-                && particleSelector->PassPhotonMVA(photon, cuts->looseMVAPhID)
+                && particleSelector->PassPhotonMVA(photon, "loose")
                 && photon->passElectronVeto
             ) {
             photons.push_back(photon);
+            TLorentzVector photonP4;
+            photonP4.SetPtEtaPhiM(photon->calibPt, photon->eta, photon->phi, 0.);
             veto_photons.push_back(photonP4);
         }
     } 
@@ -565,9 +556,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
 
-    nJets    = 0;
-    nFwdJets = 0;
-    nBJets   = 0;
+    nJets           = 0;
+    nCentralJets    = 0;
+    nFwdJets        = 0;
+    nBJets          = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
@@ -642,8 +634,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
     }
 
-    //std::sort(jets.begin(), jets.end(), sort_by_btag);
     std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
+    //std::sort(jets.begin(), jets.end(), sort_by_btag);
 
     /* MET */
     met    = fInfo->pfMETC;

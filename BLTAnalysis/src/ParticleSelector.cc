@@ -357,13 +357,14 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
     return phoPass;
 }
 
-bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const {
+bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName) const 
+{
     bool phoPass = false;
-    if (cutLevel.cutName == "looseMVAPhID") {
+    if (idName == "loose") {
         if (ph->mva > 0.2) 
             phoPass = true;
     }
-    else if (cutLevel.cutName == "tightMVAPhID") {
+    else if (idName == "tight") {
         if (fabs(ph->scEta) <= 1.479) { // barrel
             if (ph->mva > 0.68)
                 phoPass = true;
@@ -707,3 +708,16 @@ void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isD
         muonSF = muonCorr->kScaleAndSmearMC(mu->q, mu->pt, mu->eta, mu->phi, mu->nTkLayers, _rng->Rndm(), _rng->Rndm(), 0, 0);
     mu->pt = muonSF*mu->pt;
 }
+
+void ParticleSelector::ApplyTauEnergyScaleCorrection(baconhep::TTau* tau) const
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale 
+{
+    if (tau->decaymode == 0) {
+        tau->pt *= 0.995;
+    } else if (tau->decaymode == 1) {
+        tau->pt *= 1.01;
+    } else if (tau->decaymode == 10) {
+        tau->pt *= 1.006;
+    }
+}
+

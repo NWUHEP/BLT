@@ -63,19 +63,29 @@ void hzgAnalyzer::Begin(TTree *tree)
             triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
             triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*");
             triggerNames.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
-            //triggerNames.push_back("HLT_IsoMu24_v*"); 
-            //triggerNames.push_back("HLT_IsoTkMu24_v*");
         }
         else if (params->period == "2017") {
             triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*");
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*");
+        }
+        else if (params->period == "2018") {
+            triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*");
         }
     }
+
     else if (params->selection == "ee" || params->selection == "elelg") {
-        triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
         if (params->period == "2016") {
+            triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
             triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
         }
+        else if (params->period == "2017") {
+            triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+        }
+        else if (params->period == "2018") {
+            triggerNames.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*");
+        }
     }
+
     else if (params->selection == "tautaug") { // select one muon plus one hadronic tau (for now)
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
@@ -86,7 +96,16 @@ void hzgAnalyzer::Begin(TTree *tree)
 
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
-    string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+    string jsonFileName;
+    if (params->period == "2016") {
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+    }
+    else if (params->period == "2017") {
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
+    }
+    else if (params->period == "2018") {
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt";
+    }
     lumiMask.AddJSONFile(jsonFileName);
 
     rng = new TRandom3();

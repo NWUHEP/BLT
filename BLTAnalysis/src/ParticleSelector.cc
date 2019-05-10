@@ -497,12 +497,14 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int mistagSyst, float rNumber) const
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, int btagSyst, int mistagSyst) const
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
     int   jetFlavor = jet->hadronFlavor;
     float bTag      = -1;
+
+    float rNumber = _rng->Uniform(1.);
 
     float binningPt[] = {30, 50, 70, 100, 140, 200, 300, 600};
     int ptBin = 0;

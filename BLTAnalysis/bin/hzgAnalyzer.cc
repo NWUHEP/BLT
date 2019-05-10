@@ -108,8 +108,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     }
     lumiMask.AddJSONFile(jsonFileName);
 
-    rng = new TRandom3();
-
     // Prepare the output tree
     string outFileName = params->get_output_filename("output");
     string outTreeName = params->get_output_treename("tree");
@@ -644,7 +642,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         ++nCentralJets;
                     }
                 } else {
-                    if (particleSelector->BTagModifier(jet, "MVAT", 0, 0, rng->Uniform(1.))) { 
+                    if (particleSelector->BTagModifier(jet, "MVAT", 0, 0)) { 
                         ++nBJets;
                     } else {
                         ++nCentralJets;

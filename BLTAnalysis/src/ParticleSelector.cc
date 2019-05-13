@@ -241,27 +241,54 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     
     else if (idName == "HZZ") 
     {
-        if (el->pt > 5. && el->pt < 10.) {
-            if (fabs(el->scEta) < 0.8) {
-                if (el->mvaSpring16HZZ > -0.211)
-                    elPass = true;
-            } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaSpring16HZZ > -0.396)  
-                    elPass = true;
-            } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaSpring16HZZ > -0.215)  
-                   elPass = true;
+        if (_parameters.period == "2016") {
+            if (el->pt > 5. && el->pt < 10.) {
+                if (fabs(el->scEta) < 0.8) {
+                    if (el->mvaSpring16HZZ > -0.211)
+                        elPass = true;
+                } else if (fabs(el->scEta) < 1.479) {
+                    if (el->mvaSpring16HZZ > -0.396)  
+                        elPass = true;
+                } else if (fabs(el->scEta) < 2.5) {
+                    if (el->mvaSpring16HZZ > -0.215)  
+                       elPass = true;
+                }
+            } else if (el->pt > 10.) {
+                if (fabs(el->scEta) < 0.8) {
+                    if (el->mvaSpring16HZZ > -0.870)
+                        elPass = true;
+                } else if (fabs(el->scEta) < 1.479) {
+                    if (el->mvaSpring16HZZ > -0.838)  
+                        elPass = true;
+                } else if (fabs(el->scEta) < 2.5) {
+                    if (el->mvaSpring16HZZ > -0.763)
+                        elPass = true;
+                }
             }
-        } else if (el->pt > 10.) {
-            if (fabs(el->scEta) < 0.8) {
-                if (el->mvaSpring16HZZ > -0.870)
-                    elPass = true;
-            } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaSpring16HZZ > -0.838)  
-                    elPass = true;
-            } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaSpring16HZZ > -0.763)
-                    elPass = true;
+        }
+        else if (_parameters.period == "2017") {
+            if (el->pt > 5. && el->pt < 10.) {
+                if (fabs(el->scEta) < 0.8) {
+                    if (el->mvaFall17V1Iso > -0.1)
+                        elPass = true;
+                } else if (fabs(el->scEta) < 1.479) {
+                    if (el->mvaFall17V1Iso > -0.28)  
+                        elPass = true;
+                } else if (fabs(el->scEta) < 2.5) {
+                    if (el->mvaFall17V1Iso > -0.05)  
+                       elPass = true;
+                }
+            } else if (el->pt > 10.) {
+                if (fabs(el->scEta) < 0.8) {
+                    if (el->mvaFall17V1Iso > -0.83)
+                        elPass = true;
+                } else if (fabs(el->scEta) < 1.479) {
+                    if (el->mvaFall17V1Iso > -0.77)  
+                        elPass = true;
+                } else if (fabs(el->scEta) < 2.5) {
+                    if (el->mvaFall17V1Iso > -0.69)
+                        elPass = true;
+                }
             }
         }
     }

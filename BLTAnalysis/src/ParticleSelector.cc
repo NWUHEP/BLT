@@ -26,7 +26,9 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
     const std::string _cmssw_base = getenv("CMSSW_BASE");
     _rng = new TRandom3();
-    muonCorr = new RoccoR(_cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
+
+    std::string rcPath = _cmssw_base + "/src/BLT/BLTAnalysis/data/roccor/roccor_" + parameters.period + ".txt";
+    muonCorr = new RoccoR(rcPath);
 
     // offline jet corrections on-the-fly
     vector<string> ds = split(parameters.datasetgroup, '_');
@@ -707,7 +709,7 @@ void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isD
     if (isData)
         muonSF = muonCorr->kScaleDT(mu->q, mu->pt, mu->eta, mu->phi, 0, 0);
     else
-        muonSF = muonCorr->kScaleAndSmearMC(mu->q, mu->pt, mu->eta, mu->phi, mu->nTkLayers, _rng->Rndm(), _rng->Rndm(), 0, 0);
+        muonSF = muonCorr->kSmearMC(mu->q, mu->pt, mu->eta, mu->phi, mu->nTkLayers, _rng->Rndm(), 0, 0);
     mu->pt = muonSF*mu->pt;
 }
 

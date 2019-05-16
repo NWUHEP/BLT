@@ -389,18 +389,49 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
 bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName) const 
 {
     bool phoPass = false;
-    if (idName == "loose") {
-        if (ph->mvaSpring16 > 0.2) 
-            phoPass = true;
-    }
-    else if (idName == "tight") {
-        if (fabs(ph->scEta) <= 1.479) { // barrel
-            if (ph->mvaSpring16 > 0.68)
+    if (_parameters.period == "2016") {
+        if (idName == "loose") {
+            if (ph->mvaSpring16 > 0.2) {
                 phoPass = true;
+            }
         }
-        else { //endcap
-            if (ph->mvaSpring16 > 0.60)
-                phoPass = true;
+        else if (idName == "tight") {
+            if (fabs(ph->scEta) <= 1.479) { // barrel
+                if (ph->mvaSpring16 > 0.68) {
+                    phoPass = true;
+                }
+            }
+            else { //endcap
+                if (ph->mvaSpring16 > 0.60) {
+                    phoPass = true;
+                }
+            }
+        }
+    }
+    else { // 2017 or 2018 
+        if (idName == "loose") {
+            if (fabs(ph->scEta) <= 1.479) { // barrel
+                if (ph->mvaFall17V2 > -0.02) {
+                    phoPass = true;
+                }
+            }
+            else { //endcap
+                if (ph->mvaFall17V2 > -0.26) {
+                    phoPass = true;
+                }
+            }
+        }
+        else if (idName == "tight") {
+            if (fabs(ph->scEta) <= 1.479) { // barrel
+                if (ph->mvaFall17V2 > 0.42) {
+                    phoPass = true;
+                }
+            }
+            else { //endcap
+                if (ph->mvaFall17V2 > 0.14) {
+                    phoPass = true;
+                }
+            }
         }
     }
     

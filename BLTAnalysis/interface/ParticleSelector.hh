@@ -66,7 +66,7 @@ public:
     void ApplyTauEnergyScaleCorrection(baconhep::TTau* tau) const;
 
     // Jets
-    bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
+    bool PassJetID(const baconhep::TJet* jet, string) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
     bool BTagModifier(const baconhep::TJet* jet, string, int, int) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;

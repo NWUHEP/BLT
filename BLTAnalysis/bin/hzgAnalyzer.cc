@@ -588,11 +588,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
 
-        //if (isData) { // fix for broken bacon JEC
-        //    double jec = particleSelector->JetCorrector(jet, "NONE");
-        //    jet->pt = jet->ptRaw*jec;
-        //}
-        
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
 
@@ -622,10 +617,18 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
         }*/
 
+        string jetIDName;
+        if (params->period == "2016") {
+            jetIDName == "loose";
+        }
+        else { // 2017 or 2018
+            jetIDName == "tight";
+        }
+
         if (
                 jet->pt > 30 
                 && fabs(jet->eta) < 4.7
-                && particleSelector->PassJetID(jet, cuts->looseJetID)
+                && particleSelector->PassJetID(jet, jetIDName)
                 //&& !muOverlap 
                 //&& !elOverlap
                 //&& !phoOverlap

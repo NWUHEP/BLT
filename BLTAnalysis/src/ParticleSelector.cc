@@ -548,28 +548,83 @@ bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::ph
     return isoPass;
 }
 
-
-bool ParticleSelector::PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const {
+bool ParticleSelector::PassJetID(const baconhep::TJet* jet, string idName) const {
     bool jetPass = false;
-    if (fabs(jet->eta) <= 2.7) {
-        if (
-                jet->neuHadFrac       < 0.99
-                && jet->neuEmFrac     < 0.99
-                && jet->nParticles    > 1
-           ) {
-            if (fabs(jet->eta) <= 2.4) {
-                if (jet->chHadFrac > 0 && jet->nCharged > 0 && jet->chEmFrac < 0.99) 
+    if (idName == "loose") {
+        if (fabs(jet->eta) <= 2.7) {
+            if (
+                    jet->neuHadFrac       < 0.99
+                    && jet->neuEmFrac     < 0.99
+                    && jet->nParticles    > 1
+               ) {
+                if (fabs(jet->eta) <= 2.4) {
+                    if (jet->chHadFrac > 0 && jet->nCharged > 0 && jet->chEmFrac < 0.99) 
+                        jetPass = true;
+                } else {
+                    jetPass = true;
+                }
+            }
+        } else if (fabs(jet->eta) <= 3.0) { 
+            if (jet->neuEmFrac > 0.01 && jet->neuHadFrac < 0.98 && jet->nNeutrals > 2) 
+                jetPass = true;
+        } else {
+            if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
+                jetPass = true;
+        }
+    }
+    else if (idName == "tight") {
+        if (_parameters.period == "2017") {
+            if (fabs(jet->eta) <= 2.7) {
+                if (
+                        jet->neuHadFrac       < 0.90
+                        && jet->neuEmFrac     < 0.90
+                        && jet->nParticles    > 1
+                   ) {
+                    if (fabs(jet->eta) <= 2.4) {
+                        if (jet->chHadFrac > 0 && jet->nCharged > 0) 
+                            jetPass = true;
+                    } else {
+                        jetPass = true;
+                    }
+                }
+            } else if (fabs(jet->eta) <= 3.0) { 
+                if (jet->neuEmFrac > 0.02 && jet->neuHadFrac < 0.99 && jet->nNeutrals > 2) 
                     jetPass = true;
             } else {
-                jetPass = true;
+                if (jet->neuEmFrac < 0.9 && jet->neuHadFrac > 0.02 && jet->nNeutrals > 10) 
+                    jetPass = true;
             }
         }
-    } else if (fabs(jet->eta) <= 3.0) { 
-        if (jet->neuEmFrac > 0.01 && jet->neuHadFrac < 0.98 && jet->nNeutrals > 2) 
-            jetPass = true;
-    } else {
-        if (jet->neuEmFrac < 0.9 && jet->nNeutrals > 10) 
-            jetPass = true;
+        else if (_parameters.period == "2018") {
+            if (fabs(jet->eta) <= 2.6) {
+                if (
+                        jet->neuHadFrac       < 0.90
+                        && jet->neuEmFrac     < 0.90
+                        && jet->nParticles    > 1
+                        && jet->chHadFrac     > 0
+                        && jet->nCharged      > 0
+                   ) {
+                    jetPass = true;
+                }
+            }
+            else if (fabs(jet->eta) <= 2.7) {
+                if (
+                        jet->neuHadFrac       < 0.90
+                        && jet->neuEmFrac     < 0.99
+                        && jet->nCharged      > 0
+                   ) {
+                    jetPass = true;
+                }
+            }
+            else if (fabs(jet->eta) <= 3.0) { 
+                if (jet->neuEmFrac > 0.02 && jet->neuHadFrac < 0.99 && jet->nNeutrals > 2) 
+                    jetPass = true;
+            }
+            else {
+                if (jet->neuEmFrac < 0.9 && jet->neuHadFrac > 0.2 && jet->nNeutrals > 10) 
+                    jetPass = true;
+            }
+        }
     }
 
     return jetPass;

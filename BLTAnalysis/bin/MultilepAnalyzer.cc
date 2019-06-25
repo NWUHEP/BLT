@@ -68,9 +68,9 @@ void MultilepAnalyzer::Begin(TTree *tree)
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
-    string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+    string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
     // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/LSforPath_HLT_Ele27_WPTight_Gsf_withLowestSeed_L1_SingleIsoEG26_OR_L1_SingleIsoEG28.json";
-    // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
+    // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
     lumiMask.AddJSONFile(jsonFileName);
     
 
@@ -125,6 +125,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("topPtWeight", &topPtWeight);
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
+        tree->Branch("topPtVar", &topPtVar);
 
         tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
         tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
@@ -293,6 +294,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         bitset<6> wDecay;
         bitset<4> tauDecay;
 
+
         //   1.d) save gen level tau and leptonic taus, and e.mu
         vector<TGenParticle*> genTaus, genTausLep;
         
@@ -300,6 +302,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // 2. loop over gen particles
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
+            
+            // // [test] print out gen particles
+            // if  (particle->parent != -2 ){
+            //     TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+            //     if (abs(mother->pdgId) != abs(particle->pdgId) )std::cout<< "(" << abs(mother->pdgId) << ")" << abs(particle->pdgId) << " "; 
+            // }
 
             // 2.a) parton counting: update partonCount
             if (
@@ -322,14 +330,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                     (flavor == 12 || flavor == 14 || flavor == 16)
                     && particle->parent != -2
                ) {
+                
                 TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                
                 if (abs(mother->pdgId) == 24) {
                     wDecay.set(3*wCount + (flavor - 12)/2);
                     ++wCount;
                 } 
 
                 if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent != -2) {
-                    TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent);
+                    TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent); // gmother should not from initial quark
                     if (gmother->parent == -2 || tauCount == 2) continue;
                     tauDecay.set(2*tauCount + (flavor - 12)/2);
                     ++tauCount;
@@ -843,7 +853,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     ///////////////////////////////
 
 
-    hTotalEvents->Fill(5);
+    hTotalEvents->Fill(7);
     string channel = "";
     if        (nElectrons == 0 && nMuons == 2 && nTaus == 0 ){ // mu+mu selection
         
@@ -885,7 +895,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
+        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -997,7 +1007,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
+        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -1118,7 +1128,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 0;
+        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
@@ -1202,9 +1212,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         TLorentzVector electronP4, tauP4;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
@@ -1237,7 +1247,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1299,9 +1309,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         TLorentzVector muonP4, tauP4;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
@@ -1334,7 +1344,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
 
@@ -1415,7 +1425,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1492,7 +1502,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1569,7 +1579,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
 
@@ -1648,7 +1658,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-        if (!triggered) triggerLeptonStatus = 0;
+        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
         // correct for MC, including reconstruction and trigger
@@ -1950,25 +1960,26 @@ void MultilepAnalyzer::ResetJetCounters()
 void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
+    std::string bTagMethod = "MVAT";
 
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {
 
         // nominal
         ++nJets;
-        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) ++nBJets;
+        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) ++nBJets;
 
         // b tag up
-        if (particleSelector->BTagModifier(jet, "MVAT", "up", rNumber)) ++nBJetsBTagUp;
+        if (particleSelector->BTagModifier(jet, bTagMethod, "up", rNumber)) ++nBJetsBTagUp;
              
         // b tag down
-        if (particleSelector->BTagModifier(jet, "MVAT", "down", rNumber))  ++nBJetsBTagDown;
+        if (particleSelector->BTagModifier(jet, bTagMethod, "down", rNumber))  ++nBJetsBTagDown;
 
         // misttag up
-        if (particleSelector->BTagModifier(jet, "MVAT", "upMistag", rNumber)) ++nBJetsMistagUp;
+        if (particleSelector->BTagModifier(jet, bTagMethod, "upMistag", rNumber)) ++nBJetsMistagUp;
         
         // mistag down
-        if (particleSelector->BTagModifier(jet, "MVAT", "downMistag", rNumber)) ++nBJetsMistagDown;
+        if (particleSelector->BTagModifier(jet, bTagMethod, "downMistag", rNumber)) ++nBJetsMistagDown;
     }
 
     // jet energy corrections
@@ -1979,7 +1990,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
     if (jet->pt > 30) {
         ++nJetsJESUp;
-        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
+        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
             ++nBJetsJESUp;
         } 
     }
@@ -1988,7 +1999,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
     if (jet->pt > 30) {
         ++nJetsJESDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
+        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
             ++nBJetsJESDown;
         } 
     }
@@ -2001,7 +2012,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERUp;
-        if (particleSelector->BTagModifier(jet, "MVAT","central", rNumber)) { 
+        if (particleSelector->BTagModifier(jet, bTagMethod,"central", rNumber)) { 
             ++nBJetsJERUp;
         }     
     }
@@ -2012,7 +2023,7 @@ void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
     jet->pt     = jet->ptRaw*jec*jerc;
     if (jet->pt > 30) {
         ++nJetsJERDown;
-        if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) { 
+        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
             ++nBJetsJERDown;
         } 
     }

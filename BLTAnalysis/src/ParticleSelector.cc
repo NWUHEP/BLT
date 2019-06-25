@@ -545,19 +545,34 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
         if (bTag > 0.8484) 
             isBTagged = true;
 
-        if (abs(jetFlavor) == 5) {
-            btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
 
-            float effs[] = {0.45627061, 0.49951863, 0.51055844, 0.50376574, 0.49186896, 0.45660833, 0.38828584};
-            mcEff = effs[ptBin];
+        if (abs(jetFlavor) == 5) {
+            if (systName=="up" || systName=="down"){
+                btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+                float effs[] = {0.45627061, 0.49951863, 0.51055844, 0.50376574, 0.49186896, 0.45660833, 0.38828584};
+                mcEff = effs[ptBin];           
+            } 
+          // else do nothing
+
         } else if (abs(jetFlavor) == 4) {
-            btagSF = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
-            float effs[] = {0.04953503, 0.04814725, 0.05118469, 0.05404756, 0.0643619 , 0.05808081, 0.07079646};
-            mcEff  = effs[ptBin];
+            if (systName=="up" || systName=="down"){
+                btagSF = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+                float effs[] = {0.04953503, 0.04814725, 0.05118469, 0.05404756, 0.0643619 , 0.05808081, 0.07079646};
+                mcEff  = effs[ptBin];
+            }
+          // else do nothing
+
         } else {
-            mistagSF = mistagReader->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
-            float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
-            mcEff  = effs[ptBin];
+            if (systName == "upMistag") {
+                btagSF = mistagReader->eval_auto_bounds("up", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+                float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
+                mcEff  = effs[ptBin];
+            } 
+            if (systName == "downMistag") {
+                btagSF = mistagReader->eval_auto_bounds("down", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+                float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
+                mcEff  = effs[ptBin];
+            }           
         }
 
     } else if (tagName == "MVAT") {

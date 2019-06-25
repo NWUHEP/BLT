@@ -1960,7 +1960,8 @@ void MultilepAnalyzer::ResetJetCounters()
 void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
-    std::string bTagMethod = "MVAT";
+    //std::string bTagMethod = "MVAT";
+    std::string bTagMethod = "CSVM";
 
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {

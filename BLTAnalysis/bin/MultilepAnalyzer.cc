@@ -115,6 +115,10 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("triggerLeptonStatus",&triggerLeptonStatus);
         tree->Branch("mcEra",&mcEra);
 
+        tree->Branch("genTauOneDaughters", &genTauOneDaughters);
+        tree->Branch("genTauTwoDaughters", &genTauTwoDaughters);
+
+
         // gen level objects
         tree->Branch("nPartons", &nPartons);
         tree->Branch("genWeight", &genWeight);
@@ -296,7 +300,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
 
         //   1.d) save gen level tau and leptonic taus, and e.mu
-        vector<TGenParticle*> genTaus, genTausLep;
+        vector<TGenParticle*> genTaus, genTausLep, genTausDaughters;
         
         
         // 2. loop over gen particles
@@ -304,16 +308,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
             
             // // [test] print out gen particles
-            // if  (particle->parent != -2 ){
+            // if  (particle->parent >=0 ){
             //     TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //     if (abs(mother->pdgId) != abs(particle->pdgId) )std::cout<< "(" << abs(mother->pdgId) << ")" << abs(particle->pdgId) << " "; 
+            //     if (abs(mother->pdgId) != abs(particle->pdgId) ) std::cout<< " (" << abs(mother->pdgId) << ")" << abs(particle->pdgId); 
             // }
+            
 
             // 2.a) parton counting: update partonCount
             if (
                     particle->status == 23 
                     && (abs(particle->pdgId) < 6 || particle->pdgId == 21) 
-                    && particle->parent != -2
+                    && particle->parent >=0
                ) {
                 ++partonCount;
             }
@@ -328,7 +333,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             unsigned flavor = abs(particle->pdgId);
             if (
                     (flavor == 12 || flavor == 14 || flavor == 16)
-                    && particle->parent != -2
+                    && particle->parent >=0
                ) {
                 
                 TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
@@ -338,7 +343,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                     ++wCount;
                 } 
 
-                if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent != -2) {
+                if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent >=0) {
                     TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent); // gmother should not from initial quark
                     if (gmother->parent == -2 || tauCount == 2) continue;
                     tauDecay.set(2*tauCount + (flavor - 12)/2);
@@ -348,16 +353,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
 
             // 2.d) This saves gen level tau, leptonic taus, electrons and muons
-            if ( particle->parent != -2 ) {
-                if ( abs(particle->pdgId) == 16) {
-                    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-                    if (abs(mother->pdgId) == 15) { 
-                        genTaus.push_back(mother); 
-                    }
+            if ( particle->parent >=0 ) {
+                TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
+
+                if ( abs(mother->pdgId) == 15) {
+                    if (abs(particle->pdgId) == 16) genTaus.push_back(mother); 
+                    if (abs(particle->pdgId) != 22 || abs(particle->pdgId) != 15) genTausDaughters.push_back(particle);
                 }
 
                 if ( abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 ) {
-                    TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
                     if (abs(mother->pdgId) == 15) {
                         genTausLep.push_back(mother);
                         if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
@@ -369,8 +373,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 }
             }
         }
-        
-        // cout << genElectrons.size() << genMuons.size() << genTaus.size() << endl ;
+        // cout << endl;
+        // cout << "nGenElectron=" << genElectrons.size() << ", nGenMuon= " << genMuons.size() << ", nGenTau= " << genTaus.size() << endl;
         // 3. finish loop over gen particles. now conclude gen level infomation
 
         // 3.a) counting partons: save to nPartons
@@ -483,6 +487,42 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (isHad) genTausHad.push_back(genTaus[i]);
         }
 
+        // 3.e) get code for tauDecayMode;
+        std::string genTau1Daughters("0000000");
+        std::string genTau2Daughters("0000000");
+        for (unsigned i = 0; i < genTaus.size(); ++i) {
+          for (unsigned j = 0; j < genTausDaughters.size(); ++j) {
+            TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(genTausDaughters[j]->parent);
+            if (genTaus[i]->pt == mother->pt && genTaus[i]->eta== mother->eta && genTaus[i]->phi==mother->phi){
+              int pdgid = abs(genTausDaughters[j]->pdgId);
+              int daughterDigitPos = -1;
+
+              if (pdgid == 11) { daughterDigitPos = 0; }
+              else if (pdgid == 13) {daughterDigitPos = 1;}
+              else if (pdgid ==111) {daughterDigitPos = 2;}
+              else if (pdgid ==211) {daughterDigitPos = 3;}
+              else if (pdgid ==311) {daughterDigitPos = 4;}
+              else if (pdgid ==321) {daughterDigitPos = 5;}
+              else if (pdgid >=100) {daughterDigitPos = 6;}
+
+              if (i == 0 && daughterDigitPos>=0) genTau1Daughters[daughterDigitPos] = char(int(genTau1Daughters[daughterDigitPos])+1);
+              if (i == 1 && daughterDigitPos>=0) genTau2Daughters[daughterDigitPos] = char(int(genTau2Daughters[daughterDigitPos])+1);
+            }
+
+          }
+        }
+
+        genTauOneDaughters = std::atoi(genTau1Daughters.c_str());
+        genTauTwoDaughters = std::atoi(genTau2Daughters.c_str());
+        if (genTaus.size()==2) {
+          if (genTaus[1]->pt>genTaus[0]->pt){
+            genTauTwoDaughters = std::atoi(genTau1Daughters.c_str());
+            genTauOneDaughters = std::atoi(genTau2Daughters.c_str());
+          }
+        }
+        
+        // cout << "tau Decay modes are [e,mu,pi0,pi+,k0,k+,h]: " <<genTau1Daughters << "," <<  genTau2Daughters << endl;
+        // cout << "------------" << endl;
     } else {
         genWeight = 1.0;
         nPU = 0;
@@ -703,7 +743,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                     }
                 }
             }
-
             
             // // 2. MC events with electron -> tau_h
             // if (genOverlap == false){
@@ -1960,8 +1999,8 @@ void MultilepAnalyzer::ResetJetCounters()
 void MultilepAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
-    //std::string bTagMethod = "MVAT";
-    std::string bTagMethod = "CSVM";
+    std::string bTagMethod = "MVAT";
+    //std::string bTagMethod = "CSVM";
 
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {

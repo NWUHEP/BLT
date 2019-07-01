@@ -102,6 +102,7 @@ public:
     UInt_t nPartons;
     Float_t genWeight;
     UInt_t genCategory;
+    UInt_t genTauOneDaughters, genTauTwoDaughters;
 
     // weights and uncertainties
     Float_t eventWeight;
@@ -150,6 +151,7 @@ private:
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
     void ResetJetCounters();
     void JetCounting(TJet* jet, float , float);
+
 };
 
 #endif  // MultilepAnalyzer_HH

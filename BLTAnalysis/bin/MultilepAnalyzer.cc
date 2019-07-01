@@ -345,9 +345,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
                 if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent >=0) {
                     TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent); // gmother should not from initial quark
-                    if (gmother->parent == -2 || tauCount == 2) continue;
-                    tauDecay.set(2*tauCount + (flavor - 12)/2);
-                    ++tauCount;
+                    
+                    bool isHard = gmother->status != 2 && gmother->parent != -2;
+                    if (isHard && tauCount<2){
+                        tauDecay.set(2*tauCount + (flavor - 12)/2);
+                        ++tauCount;
+                        // cout<<abs(gmother->pdgId)<<"-"<<abs(mother->pdgId)<<"-"<<abs(particle->pdgId)<<endl;
+                    }                      
+                      
                 } 
             }
 
@@ -356,9 +361,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if ( particle->parent >=0 ) {
                 TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
 
-                if ( abs(mother->pdgId) == 15) {
-                    if (abs(particle->pdgId) == 16) genTaus.push_back(mother); 
-                    if (abs(particle->pdgId) != 22 || abs(particle->pdgId) != 15) genTausDaughters.push_back(particle);
+                if (abs(particle->pdgId) != 22 && abs(particle->pdgId) != 15 && abs(mother->pdgId) == 15 && mother->parent >=0) {
+                    TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent);
+                    bool isHard = gmother->status != 2 && gmother->parent != -2;
+
+                    if (isHard && abs(particle->pdgId) == 16) genTaus.push_back(mother); 
+                    if (isHard && abs(particle->pdgId) != 16) genTausDaughters.push_back(particle);
                 }
 
                 if ( abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 ) {
@@ -371,6 +379,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                         if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
                     }
                 }
+                
+                
             }
         }
         // cout << endl;

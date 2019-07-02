@@ -203,8 +203,7 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
             //if (el->mvaOld > cutLevel.mvaVal[0]) elPass = true;  //FIXME
         } else if (el->pt > cutLevel.pt[1]) {
             //if (el->mvaOld > cutLevel.mvaVal[1]) elPass = true;  //FIXME
-        }
-
+        } 
     } else if (cutLevel.cutName == "hzzMVAID") {
         if (el->pt > cutLevel.pt[0] && el->pt < cutLevel.pt[1]) {
             if (fabs(el->eta) < cutLevel.eta[0]) {

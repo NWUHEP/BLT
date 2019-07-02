@@ -9,8 +9,8 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['zjets', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
+data_samples = []#'single_mu', 'single_el']
+mc_samples   = ['diboson']#'zjets', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
 
 data_dict = {}
 mc_dict = {}
@@ -432,36 +432,41 @@ mc_dict['t'] = [
 
 mc_dict['diboson'] = [
     # Diboson
-    cfg(data_name = 'WW',
+    cfg(data_name = 'qqWW',
         path     = '{0}/Summer16_WWTo2L2Nu_powheg'.format(path),
         nJobs    = 10,
-        suffix   = 'ww'
+        suffix   = 'ww_qq'
        ),
-    cfg(data_name = 'WZJetsTo2L2Q',
-        path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_2l2q'
-       ),
-    cfg(data_name = 'WZJetsTo3LNu',
-        path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'wz_3lnu'
-       ),
-    cfg(data_name = 'ZZJetsTo2L2Nu',
-        path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_2l2nu'
-       ),
-    cfg(data_name = 'ZZJetsTo2L2Q',
-        path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_2l2q'
-       ),
-    cfg(data_name = 'ZZJetsTo4L',
-        path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
-        nJobs    = 10,
-        suffix   = 'zz_4l'
-       ),
+    #cfg(data_name = 'ggWW',
+    #    path     = '/eos/uscms/store/user/tgunter/makingBacon/13TeV/COMPLETE/GluGluWWTo2L2Nu_summer',
+    #    nJobs    = 10,
+    #    suffix   = 'ww_gg'
+    #   ),
+    #cfg(data_name = 'WZJetsTo2L2Q',
+    #    path     = '{0}/Summer16_WZTo2L2Q_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'wz_2l2q'
+    #   ),
+    #cfg(data_name = 'WZJetsTo3LNu',
+    #    path     = '{0}/Summer16_WZTo3LNu_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'wz_3lnu'
+    #   ),
+    #cfg(data_name = 'ZZJetsTo2L2Nu',
+    #    path     = '{0}/Summer16_ZZTo2L2Nu_powheg'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_2l2nu'
+    #   ),
+    #cfg(data_name = 'ZZJetsTo2L2Q',
+    #    path     = '{0}/Summer16_ZZTo2L2Q_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_2l2q'
+    #   ),
+    #cfg(data_name = 'ZZJetsTo4L',
+    #    path     = '{0}/Summer16_ZZto4L_amcatnlo'.format(path),
+    #    nJobs    = 10,
+    #    suffix   = 'zz_4l'
+    #   ),
     ]
 
 batch_list = []

@@ -126,6 +126,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
+                                        "mu3j",
                                         "e4j", "mu4j", "tau4j",
                                         "mutau_fakes", "mu4j_fakes",
                                         "etau_fakes", "e4j_fakes"
@@ -153,6 +154,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
         tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
         tree->Branch("topPtWeight", &topPtWeight);
+        tree->Branch("zPtWeight", &zPtWeight);
+        tree->Branch("wwPtWeight", &wwPtWeight);
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
         tree->Branch("genWeight", &genWeight);
@@ -162,6 +165,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonOneIDVar", &leptonOneIDVar);
         tree->Branch("leptonTwoIDVar", &leptonTwoIDVar);
         tree->Branch("topPtVar", &topPtVar);
+        tree->Branch("zPtVar", &zPtVar);
+        tree->Branch("wwPtScaleUp", &wwPtScaleUp);
+        tree->Branch("wwPtScaleDown", &wwPtScaleDown);
+        tree->Branch("wwPtResumUp", &wwPtResumUp);
+        tree->Branch("wwPtResumDown", &wwPtResumDown);
         tree->Branch("puVar", &puVar);
         tree->Branch("triggerVar", &triggerVar);
 
@@ -209,15 +217,21 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoTag", &jetTwoTag);
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
-        if (channel == "mu4j" || channel == "mu4j_fakes" 
-                || channel == "e4j" || channel == "e4j_fakes"
-                || channel == "tau4j") {
+        if (
+            channel == "mu3j"
+            || channel == "mu4j" || channel == "mu4j_fakes" 
+            || channel == "e4j" || channel == "e4j_fakes"
+            || channel == "tau4j"
+           ) {
             tree->Branch("jetThreeP4", &jetThreeP4);
             tree->Branch("jetThreeTag", &jetThreeTag);
             tree->Branch("jetThreeFlavor", &jetThreeFlavor);
-            tree->Branch("jetFourP4", &jetFourP4);
-            tree->Branch("jetFourTag", &jetFourTag);
-            tree->Branch("jetFourFlavor", &jetFourFlavor);
+            
+            if (channel != "mu3j") {
+                tree->Branch("jetFourP4", &jetFourP4);
+                tree->Branch("jetFourTag", &jetFourTag);
+                tree->Branch("jetFourFlavor", &jetFourFlavor);
+            }
         }
 
         // gen level objects
@@ -330,10 +344,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     unsigned topCount = 0;
     bitset<6> wDecay;
     bitset<4> tauDecay;
+
     float topSF = 1.;
     topPtWeight = 1.;
-    topPtVar = 0.;
-    nPartons = 0;
+    topPtVar  = 0.;
+
+    float zPt = -1.;
+    TLorentzVector zP4(0., 0., 0., 0);
+    zPtWeight = 1.;
+    zPtVar    = 0.;
+
+    TLorentzVector wwP4(0., 0., 0., 0);
+    wwPtWeight = 1.;
+    wwPtScaleUp = wwPtScaleDown = 1.;
+    wwPtResumUp = wwPtResumDown = 1.;
+    nPartons  = 0;
     if (!isData) {
 
         // loop over gen particle collection:
@@ -346,11 +371,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             unsigned pid = abs(particle->pdgId);
 
 
-            //if (abs(particle->pdgId) == 6) {
-                //cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
-                //cout << "\t" << particle->pt << ", " << particle->eta;
-                //cout << endl;
-            //}
+            //cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
+            //cout << "\t" << particle->pt << ", " << particle->eta;
+            //cout << endl;
 
             // parton counting for jet-binned Drell-Yan samples
             if (
@@ -365,6 +388,31 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             if (pid == 6 && particle->status == 62) {
                 topSF *= exp(0.0615 - 0.0005*particle->pt);
                 ++topCount;
+            }
+
+            // identify Z boson
+            if (pid == 23 && particle->status == 62) {
+                zPt = particle->pt;
+            }
+
+            // Z not included in low mass DY sample :(
+            if ((pid == 11 || pid == 13 || pid == 15) && particle->status == 23 && particle->parent == 0) {
+                TLorentzVector ellP4(0., 0., 0., 0.);
+                ellP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
+                zP4 += ellP4;
+            }
+
+            // identify W boson
+            if (pid == 24 && particle->status == 62) {
+                if (particle->pdgId < 0) {
+                    TLorentzVector wP4(0., 0., 0., 0.);
+                    wP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
+                    wwP4 += wP4;
+                } else {
+                    TLorentzVector wP4(0., 0., 0., 0.);
+                    wP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
+                    wwP4 += wP4;
+                }
             }
 
             // Tag events based on neutrino flavors
@@ -382,7 +430,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
                 if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent != -2) {
                     TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent);
-                    if (gmother->parent == -2 || tauCount == 2) continue;
+                    if (gmother->parent == -2 || tauCount == 2) 
+                        continue;
                     tauDecay.set(2*tauCount + (flavor - 12)/2);
                     ++tauCount;
                 } 
@@ -545,10 +594,35 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             genCategory = 21;
         }
 
-        // Account for the top pt weights
+        // top pt weights
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
             topPtWeight = sqrt(topSF);
             topPtVar    = topPtWeight; // the official prescription is to use no topPt weight as the down variation and twice the weight as the up variation
+        }
+
+        // Z pt weights
+        if (params->datasetgroup.substr(0, 5) == "zjets" && (zPt > 0. || zP4.Pt() > 0.)) {
+            if (zP4.Pt() > 0) 
+                zPt = zP4.Pt();
+
+            if (zPt < 140) {
+                zPtWeight = (0.876979 + 4.11598e-3*zPt - 2.3552e-5*zPt*zPt);
+                zPtWeight *= 1.10211*(0.958512 - 0.131835*erf((zPt - 14.1972)/10.1525));
+            } else {
+                zPtWeight = 0.891188;
+            }
+            zPtVar    = 0.01*zPtWeight; 
+        }
+
+        // WW pt weights
+        if (params->datasetgroup.substr(0, 5) == "ww_qq") {
+            wwPtWeight = weights->GetWWPtWeight(wwP4.Pt(), wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown);
+            //cout << wwPtWeight 
+            //    << ", " << wwPtScaleUp  
+            //    << ", " << wwPtScaleDown  
+            //    << ", " << wwPtResumUp  
+            //    << ", " << wwPtResumDown  
+            //    << endl;
         }
 
         // pileup reweighting
@@ -558,7 +632,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         eventWeight *= puWeight;
 
         // top pt reweighting
-        eventWeight *= topPtWeight;
+        //eventWeight *= topPtWeight;
+
+        // Z pt reweighting
+        eventWeight *= zPtWeight;
+
+        // WW pt reweighting
+        eventWeight *= wwPtWeight;
 
         // keep track of total number of generated events with weights
         hTotalEvents->Fill(9, topPtWeight);
@@ -1176,6 +1256,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
 
+            //cout << triggered << ", " << triggerWeight << ", " << sqrt(triggerVar) << endl;
+
             // update event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
@@ -1615,7 +1697,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= leptonOneRecoWeight*leptonOneIDWeight;
         }
     }  else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
-        channel = "mu4j";
+
+        if (nJetsCut > 4 && nBJetsCut >= 1) {
+            channel = "mu4j";
+        } else if (nJetsCut == 3 && nBJetsCut >= 2) {
+            channel = "mu3j";
+        }
+
         eventCounts[channel]->Fill(1);
 
         // convert to TLorentzVectors
@@ -1903,7 +1991,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Fill jet info //
     ///////////////////
 
-    if (channel != " tau4j" && channel != "mu4j" && channel != "e4j" && channel != "mu4j_fakes" && channel != "e4j_fakes") { // jets are handled differently for the lepton + jet selection
+    if (channel != " tau4j" 
+        && channel != "mu3j" 
+        && channel != "mu4j" 
+        && channel != "e4j" 
+        && channel != "mu4j_fakes" 
+        && channel != "e4j_fakes"
+       ) { // jets are handled differently for the lepton + jet selection
         if (jets.size() > 0) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag    = jets[0]->csv;

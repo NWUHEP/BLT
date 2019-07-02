@@ -33,6 +33,15 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* puFile = new TFile(fileName.c_str(), "OPEN");
     _puReweight = (TGraph*)puFile->Get("pileup_sf");
 
+    // WW pt weights
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/wwpt.root";
+    TFile* wwFile     = new TFile(fileName.c_str(), "OPEN");
+    _wwPtWeight       = (TH1D*)wwFile->Get("wwpt");
+    _wwPtScaleErrUp   = (TH1D*)wwFile->Get("wwpt_scaleup");
+    _wwPtScaleErrDown = (TH1D*)wwFile->Get("wwpt_scaledown");
+    _wwPtResumErrUp   = (TH1D*)wwFile->Get("wwpt_resumup");
+    _wwPtResumErrDown = (TH1D*)wwFile->Get("wwpt_resumdown");
+
     // muon trigger sf (BCDEF) 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_RunBtoF.root";
     TFile* muTriggerFile_BCDEF = new TFile(fileName.c_str(), "OPEN");
@@ -194,6 +203,16 @@ float WeightUtils::GetPUWeight(float nPU)
     return _puReweight->Eval(nPU); 
 }
 
+float WeightUtils::GetWWPtWeight(float wwPt, float& wwPtScaleUp, float& wwPtScaleDown,  float& wwPtResumUp,float& wwPtResumDown)
+{
+    int ibin      = _wwPtWeight->FindBin(wwPt);
+    wwPtScaleUp   = _wwPtScaleErrUp->GetBinContent(ibin);
+    wwPtScaleDown = _wwPtScaleErrDown->GetBinContent(ibin);
+    wwPtResumUp   = _wwPtResumErrUp->GetBinContent(ibin);
+    wwPtResumDown = _wwPtResumErrDown->GetBinContent(ibin);
+    return _wwPtWeight->GetBinContent(ibin); 
+}
+
 EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
     float effData = 1;
@@ -227,34 +246,36 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
         }
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
         // figure this one out; it no work
-        //if (_dataPeriod == "2016BtoF") {
-        //    int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());
-        //    effData = _elSF_Trigger_BCDEF->GetBinContent(bin);
-        //    errData = _elSF_Trigger_BCDEF->GetBinError(bin);
-        //} else if (_dataPeriod == "2016GH") {
-        //    int bin = _elSF_Trigger_GH->FindBin(lepton.Pt(), lepton.Eta());
-        //    effData = _elSF_Trigger_GH->GetBinContent(bin);
-        //    errData = _elSF_Trigger_GH->GetBinError(bin);
-        //}
+        if (_dataPeriod == "2016BtoF") {
+            int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());
+            effData = _elSF_Trigger_BCDEF->GetBinContent(bin);
+            errData = _elSF_Trigger_BCDEF->GetBinError(bin);
+        } else if (_dataPeriod == "2016GH") {
+            int bin = _elSF_Trigger_GH->FindBin(lepton.Pt(), lepton.Eta());
+            effData = _elSF_Trigger_GH->GetBinContent(bin);
+            errData = _elSF_Trigger_GH->GetBinError(bin);
+        }
+        effMC   = 1.;
+        errMC   = 0.;
 
-        int etaBin = 0;
-        int ptBin = 0;
-        for (int i = 0; i < 13; ++i) {
-            if (lepton.Eta() > _eleEtaBins[i] && lepton.Eta() <= _eleEtaBins[i+1]) {
-                etaBin = i;
-                break;
-            }
-        }
-        for (int i = 0; i < 8; ++i) {
-            if (lepton.Pt() > _elePtBins[i] && lepton.Pt() <= _elePtBins[i+1]) {
-                ptBin = i;
-                break;
-            }
-        }
-        effData = _ele_trigEff_data[etaBin][ptBin];
-        effMC   = _ele_trigEff_mc[etaBin][ptBin];
-        errData = 0.005*_ele_trigEff_data[etaBin][ptBin];
-        errMC   = 0.005*_ele_trigEff_mc[etaBin][ptBin];
+        //int etaBin = 0;
+        //int ptBin = 0;
+        //for (int i = 0; i < 13; ++i) {
+        //    if (lepton.Eta() > _eleEtaBins[i] && lepton.Eta() <= _eleEtaBins[i+1]) {
+        //        etaBin = i;
+        //        break;
+        //    }
+        //}
+        //for (int i = 0; i < 8; ++i) {
+        //    if (lepton.Pt() > _elePtBins[i] && lepton.Pt() <= _elePtBins[i+1]) {
+        //        ptBin = i;
+        //        break;
+        //    }
+        //}
+        //effData = _ele_trigEff_data[etaBin][ptBin];
+        //effMC   = _ele_trigEff_mc[etaBin][ptBin];
+        //errData = 0.005*_ele_trigEff_data[etaBin][ptBin];
+        //errMC   = 0.005*_ele_trigEff_mc[etaBin][ptBin];
 
     }
 

@@ -619,10 +619,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         string jetIDName;
         if (params->period == "2016") {
-            jetIDName == "loose";
+            jetIDName = "loose";
         }
         else { // 2017 or 2018
-            jetIDName == "tight";
+            jetIDName = "tight";
         }
 
         if (
@@ -906,7 +906,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             float eff_mc = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4).second; 
             triggerWeight = eff_data/eff_mc;
             eventWeight *= triggerWeight;
-            cout << "eventWeight = " << eventWeight << endl;
             
         }
 
@@ -1461,7 +1460,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         cout << "values for cos little theta: James = " << zgLittleThetaJames << ",  Ming-Yan + flavor = " << zgLittleTheta << ", Ming-Yan + leading = " << zgLittleThetaMY << endl; 
         cout << "values for phi: James = " << zgPhiJames << ",  Ming-Yan + flavor = " << zgPhi << ", Ming-Yan + leading = " << zgPhiMY << endl; */
             
-        if (!isData) {
+        if (!isData && params->period != "2018") {
             if (params->selection == "mumug") {
                 muonIDWeightOne = weights->GetHZZMuonIDEff(*muons[leptonOneIndex]); 
                 muonIDWeightTwo = weights->GetHZZMuonIDEff(*muons[leptonTwoIndex]);

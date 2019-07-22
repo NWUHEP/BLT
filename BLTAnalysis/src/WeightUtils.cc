@@ -160,7 +160,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_Loose_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_Loose_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin0_&_PF_pass_MC").c_str());
    
     // hzz muon id efficiencies
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/hzz_muon_id_sf.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_id/hzz_muon_id_sf_" + _dataPeriod + ".root";
     TFile* f_hzz_muIdSF = new TFile(fileName.c_str(), "OPEN");
     _hzz_muIdSF = (TH2F*)f_hzz_muIdSF->Get("FINAL");
 
@@ -235,7 +235,8 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
     
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/eleReco_HZZ_Moriond17_SFs.root";
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/eleReco_HZZ_Moriond17_SFs.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleReco_HZZ_SFs_" + _dataPeriod + ".root";
     TFile* f_eleRecoHZZSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO_2D = (TH2F *)f_eleRecoHZZSF->Get("EGamma_SF2D");
 
@@ -265,7 +266,8 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _hzz_eleSF_ID[11] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_11");
     _hzz_eleSF_ID[12] = (TGraphErrors*)f_hzz_eleIdSF->Get("grSF1D_12");*/
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_HZZ_Moriond17.root";
+    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_HZZ_Moriond17.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_HZZ_" + _dataPeriod + ".root";
     TFile* f_hzz_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
     _hzz_eleSF_ID_2D = (TH2F *)f_hzz_eleIdSF->Get("EGamma_SF2D");
 

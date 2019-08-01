@@ -335,35 +335,31 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     }
 
     else if (idName == "looseFall17V2") {
-        std::cout << "hit the correct ID block" << std::endl;
-        std::cout << "electron pt, scEta: " << el->pt << ", " << el->scEta << std::endl;
-        std::cout << "mva score = " << el->mvaFall17V2Iso << std::endl;
         if (el->pt > 5. && el->pt < 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaFall17V2Iso > 0.700642584415)
+                if (el->mvaFall17V2Iso > 0.604775)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaFall17V2Iso > 0.739335420875)  
+                if (el->mvaFall17V2Iso > 0.628743)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaFall17V2Iso > 1.45390456109)  
+                if (el->mvaFall17V2Iso > 0.896462)  
                    elPass = true;
             }
         } else if (el->pt > 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaFall17V2Iso > -0.146270871164)
+                if (el->mvaFall17V2Iso > -0.145237)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaFall17V2Iso > -0.0315850882679)  
+                if (el->mvaFall17V2Iso > -0.0315746)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaFall17V2Iso > -0.0321841194737)
+                if (el->mvaFall17V2Iso > -0.032173)
                     elPass = true;
             }
         }
     }
 
-    std::cout << "elPass = " << elPass << std::endl;
     return elPass;
 }
 

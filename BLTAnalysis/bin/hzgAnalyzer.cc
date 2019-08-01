@@ -101,7 +101,7 @@ void hzgAnalyzer::Begin(TTree *tree)
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
     }
     else if (params->period == "2017") {
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt";
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt";
     }
     else if (params->period == "2018") {
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt";
@@ -340,6 +340,30 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             << " Lumi: " << fInfo->lumiSec 
             << " Event: " << fInfo->evtNum 
             << std::endl;   
+
+    bool sync = false;
+    if (sync) {
+        if (!(
+                (fInfo->runNum == 302635 && fInfo->lumiSec == 402 && fInfo->evtNum == 401773465) ||
+                (fInfo->runNum == 302494 && fInfo->lumiSec == 284 && fInfo->evtNum == 241151661) ||
+                (fInfo->runNum == 302525 && fInfo->lumiSec == 441 && fInfo->evtNum == 544093881) || 
+                (fInfo->runNum == 302328 && fInfo->lumiSec == 231 && fInfo->evtNum == 191034168) || 
+                (fInfo->runNum == 302392 && fInfo->lumiSec == 171 && fInfo->evtNum == 195907051) || 
+                (fInfo->runNum == 302277 && fInfo->lumiSec == 158 && fInfo->evtNum == 158403680) || 
+                (fInfo->runNum == 302635 && fInfo->lumiSec == 172 && fInfo->evtNum == 179825595) || 
+                (fInfo->runNum == 302393 && fInfo->lumiSec == 333 && fInfo->evtNum == 376194273) || 
+                (fInfo->runNum == 302494 && fInfo->lumiSec == 259 && fInfo->evtNum == 220439368) || 
+                (fInfo->runNum == 302654 && fInfo->lumiSec == 41  && fInfo->evtNum == 52472529) 
+            )) 
+        {
+            return kTRUE;
+        }
+    }
+
+    if (sync) {
+        std::cout << "run, lumi, evt = " << fInfo->runNum << ", " << fInfo->lumiSec << ", " << fInfo->evtNum << std::endl;
+    }
+
           
     ///////////////////////
     // Generator objects // 
@@ -486,15 +510,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     for (int i=0; i<fElectronArr->GetEntries(); i++) {
         TElectron* electron = (TElectron*) fElectronArr->At(i);
         assert(electron);
+
+        if (sync) {
+            std::cout << "electron calibPt, scEta, reliso, dz, d0" << std::endl;
+            std::cout << electron->calibPt << ", " << electron->scEta << ", "
+                      << particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electron->calibPt << ", " 
+                      << electron->d0 << ", " << electron->dz << std::endl;
+        }
     
         if (
                 electron->calibPt > 7.
                 && fabs(electron->scEta) < 2.5
-                && particleSelector->PassElectronMVA(electron, "HZZ")
-                && particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electron->calibPt < 0.35
+                && particleSelector->PassElectronMVA(electron, "looseFall17V2")
+                //&& particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electron->calibPt < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
-                && fabs(electron->sip3d) < 4.0 
+                //&& fabs(electron->sip3d) < 4.0 
            ) {
             electrons.push_back(electron); // electrons for analysis
             TLorentzVector electronP4;

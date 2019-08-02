@@ -17,10 +17,10 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
-# data_samples = ['single_el']
-# mc_samples   = []
+# data_samples = ['single_mu', 'single_el']
+# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+data_samples = []
+mc_samples   = ['ttbar']
 
 
 
@@ -243,9 +243,21 @@ mc_dict['wjets'] = [
 mc_dict['ttbar'] = [
     # top
     cfg(data_name = 'ttbar_inclusive',
+        #path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/190627_132039/0000',
         path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
+       ),
+    # fsr
+    cfg(data_name = 'ttbar_inclusive_fsrUp',
+        path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_fsrDown',
+        path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrDown'
        ),
     # # leptonic top
     # cfg(data_name = 'ttbar_2l2nu',

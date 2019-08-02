@@ -3,6 +3,7 @@
 <flags CXXFLAGS="-g -Wall"/>
 
 <bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
+<bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin>
 
 
 

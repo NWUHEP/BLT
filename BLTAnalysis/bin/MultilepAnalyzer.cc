@@ -147,7 +147,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonOneIso", &leptonOneIso);
         tree->Branch("leptonOneFlavor", &leptonOneFlavor);
 
-        if ( channel == "mumu" || channel =="ee" || channel == "emu" || channel == "mutau" || channel == "etau"){
+        if ( channel == "mumu" || channel =="ee" || channel == "emu" || channel == "mutau" || channel == "etau"|| channel == "mutau_fakes" || channel == "etau_fakes"){
             tree->Branch("leptonTwoP4" , &leptonTwoP4);
             tree->Branch("leptonTwoIso", &leptonTwoIso);
             tree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
@@ -693,8 +693,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             hTotalEvents->Fill(6);
         }
     }
-
-
 
     
     /* -------- TAUS ---------*/

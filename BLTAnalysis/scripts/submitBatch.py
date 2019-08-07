@@ -18,8 +18,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
-
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','hzg']
 
 
 ''' 
@@ -325,6 +324,39 @@ mc_dict['diboson'] = [
       ),
     ]
 
+path = '/eos/uscms/store/user/jbueghly/sync_mc'
+mc_dict['hzg'] = [
+    cfg(data_name = 'hzg_gluglu',
+        path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
+        nJobs     = 9,
+        suffix    = 'hzg_gluglu'
+        ),
+    cfg(data_name = 'hzg_vbf',
+        path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
+        nJobs     = 26,
+        suffix    = 'hzg_vbf'
+        ),
+    cfg(data_name = 'hzg_wplus',
+        path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
+        nJobs     = 61,
+        suffix    = 'hzg_wh'
+        ),
+    cfg(data_name = 'hzg_wminus',
+        path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
+        nJobs     = 59,
+        suffix    = 'hzg_wh'
+        ),
+    cfg(data_name = 'hzg_zh',
+        path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
+        nJobs     = 60,
+        suffix    = 'hzg_zh'
+        ),
+    cfg(data_name = 'hzg_tth',
+        path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
+        nJobs     = 40, 
+        suffix    = 'hzg_tth'
+        ),
+    ]
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 

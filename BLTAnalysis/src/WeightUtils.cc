@@ -172,6 +172,22 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_ID[3]->Sort();
     _eleSF_ID[4]->Sort();
 
+    // photon mva id (90%) efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_id/photon_mva_id_2016.root";
+    TFile* f_mva_gammaIdSF = new TFile(fileName.c_str(), "OPEN");
+    _mva_gammaSF_ID[0] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_0");
+    _mva_gammaSF_ID[1] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_1");
+    _mva_gammaSF_ID[2] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_2");
+    _mva_gammaSF_ID[3] = (TGraphErrors*)f_mva_gammaIdSF->Get("grSF1D_3");
+    _mva_gammaSF = (TH2F *)f_mva_gammaIdSF->Get("EGamma_SF2D");
+
+    // photon r9 reweighting
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9_reweighting_2016.root";
+    TFile* f_photon_r9 = new TFile(fileName.c_str(), "OPEN"); 
+    _photon_r9_barrel = (TGraph *)f_photon_r9->Get("transffull5x5R9EB");
+    _photon_r9_endcap = (TGraph *)f_photon_r9->Get("transffull5x5R9EE");
+
+
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -388,3 +404,45 @@ void EfficiencyContainer::SetData(float dataEff, float mcEff, float dataErr, flo
     _dataErr = dataErr;
     _mcErr   = mcErr;
 };
+
+float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
+{
+    /*float binningPt[] = {20., 35., 50., 90., 150.};
+    int ptBin = 0;
+    for (int i = 0; i < 4; ++i) {
+        if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
+            ptBin = i;
+            break;
+        }
+    }*/
+    float tmpPhotonPt = (photon.pt < 150.) ? photon.pt : 149.;
+    float weight = 1.;
+    //if (photon.calibPt < 150.) {
+    //    weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
+    //}
+    weight *= _mva_gammaSF->GetBinContent(_mva_gammaSF->FindBin(photon.scEta, tmpPhotonPt));
+
+    // electron veto scale factor
+    if (fabs(photon.scEta) <= 1.49)
+        weight *= 0.9938;
+    else if (fabs(photon.scEta) > 1.49)
+        weight *= 0.9875;
+
+    if (weight == 0)
+        weight = 1.;
+    
+    return weight;
+}
+
+float WeightUtils::GetCorrectedPhotonR9(TPhoton& photon) const 
+{
+    float r9 = photon.r9;
+    if (fabs(photon.scEta) < 1.444)
+        r9 = _photon_r9_barrel->Eval(photon.r9);
+    else if (fabs(photon.scEta) > 1.566)
+        r9 = _photon_r9_endcap->Eval(photon.r9);
+    else
+        std::cout << "bad value of photon scEta: returning original r9" << std::endl;
+    
+    return r9;
+}

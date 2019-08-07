@@ -396,8 +396,55 @@ bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phI
     return phoPass;
 }
 
-bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, const Cuts::phMVACuts& cutLevel) const {
+bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName) const 
+{
     bool phoPass = false;
+    if (_parameters.period == "2016") {
+        if (idName == "loose") {
+            if (ph->mva > 0.2) {
+                phoPass = true;
+            }
+        }
+        else if (idName == "tight") {
+            if (fabs(ph->scEta) <= 1.479) { // barrel
+                if (ph->mva > 0.68) {
+                    phoPass = true;
+                }
+            }
+            else { //endcap
+                if (ph->mva > 0.60) {
+                    phoPass = true;
+                }
+            }
+        }
+    }
+    // else { // 2017 or 2018 
+    //     if (idName == "loose") {
+    //         if (fabs(ph->scEta) <= 1.479) { // barrel
+    //             if (ph->mvaFall17V2 > -0.02) {
+    //                 phoPass = true;
+    //             }
+    //         }
+    //         else { //endcap
+    //             if (ph->mvaFall17V2 > -0.26) {
+    //                 phoPass = true;
+    //             }
+    //         }
+    //     }
+    //     else if (idName == "tight") {
+    //         if (fabs(ph->scEta) <= 1.479) { // barrel
+    //             if (ph->mvaFall17V2 > 0.42) {
+    //                 phoPass = true;
+    //             }
+    //         }
+    //         else { //endcap
+    //             if (ph->mvaFall17V2 > 0.14) {
+    //                 phoPass = true;
+    //             }
+    //         }
+    //     }
+    // }
+    
     return phoPass;
 }
 
@@ -689,4 +736,21 @@ pair<float, float> ParticleSelector::JetResolutionAndSF(const baconhep::TJet* je
     }
 
     return make_pair(jres, jsf);
+}
+
+float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho) const
+{
+    int iEta = 0;
+    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
+    for (unsigned i = 0; i < 8; ++i) {
+        if (fabs(pho->scEta) > etaBins[i] && fabs(pho->scEta) < etaBins[i+1]) {
+            iEta = i;
+            break;
+        }
+    }
+
+    float combIso = pho->chHadIso + std::max(0., (double)pho->neuHadIso + pho->gammaIso - rho*effArea[iEta]);
+
+    return combIso;
 }

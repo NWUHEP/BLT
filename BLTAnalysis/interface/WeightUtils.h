@@ -24,7 +24,11 @@
 #include "TLorentzVector.h"
 #include "TRandom3.h"
 
+// BaconAna class definitions
+#include "BaconAna/DataFormats/interface/TPhoton.hh"
+
 using namespace std;
+using namespace baconhep;
 
 class EfficiencyContainer: public TObject{
     public:
@@ -57,6 +61,9 @@ class WeightUtils: public TObject {
         EfficiencyContainer GetMuonISOEff(TLorentzVector&) const; 
         EfficiencyContainer GetElectronIDEff(TLorentzVector&) const;
         EfficiencyContainer GetElectronRecoEff(TLorentzVector&) const;
+
+        float   GetPhotonMVAIdEff(TPhoton&) const;
+        float   GetCorrectedPhotonR9(TPhoton&) const;
         
 
         ClassDef(WeightUtils, 0);
@@ -117,6 +124,10 @@ class WeightUtils: public TObject {
             {0.802, 0.848, 0.889, 0.914, 0.929, 0.944, 0.975},
             {0.802, 0.848, 0.889, 0.914, 0.929, 0.944, 0.975} // not real
         };
+
+        TGraphErrors *_mva_gammaSF_ID[5];
+        TH2F *_mva_gammaSF;
+        TGraph *_photon_r9_barrel, *_photon_r9_endcap;
 
 };
 

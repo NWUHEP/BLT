@@ -126,8 +126,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
                                         "etau", "mutau", 
-                                        "mu3j",
-                                        "e4j", "mu4j", "tau4j",
+                                        "e4j", "mu4j", //"tau4j",
                                         "mutau_fakes", "mu4j_fakes",
                                         "etau_fakes", "e4j_fakes"
                                         };
@@ -199,10 +198,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonTwoD0", &leptonTwoD0);
         tree->Branch("leptonTwoDZ", &leptonTwoDZ);
 
-        if (channel == "mutau" || channel == "etau" 
-                || channel == "mutau_fakes" || channel == "etau_fakes"
-                || channel == "tau4j"
-                ) {
+        if (
+            channel == "mutau" || channel == "etau" 
+            || channel == "mutau_fakes" || channel == "etau_fakes"
+            //|| channel == "tau4j"
+            ) {
             //tree->Branch("tauChHadMult",  &tauChHadMult);
             //tree->Branch("tauPhotonMult", &tauPhotonMult);
             tree->Branch("tauDecayMode",  &tauDecayMode);
@@ -218,20 +218,16 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
         if (
-            channel == "mu3j"
-            || channel == "mu4j" || channel == "mu4j_fakes" 
+            channel == "mu4j" || channel == "mu4j_fakes" 
             || channel == "e4j" || channel == "e4j_fakes"
-            || channel == "tau4j"
+            //|| channel == "tau4j"
            ) {
             tree->Branch("jetThreeP4", &jetThreeP4);
             tree->Branch("jetThreeTag", &jetThreeTag);
             tree->Branch("jetThreeFlavor", &jetThreeFlavor);
-            
-            if (channel != "mu3j") {
-                tree->Branch("jetFourP4", &jetFourP4);
-                tree->Branch("jetFourTag", &jetFourTag);
-                tree->Branch("jetFourFlavor", &jetFourFlavor);
-            }
+            tree->Branch("jetFourP4", &jetFourP4);
+            tree->Branch("jetFourTag", &jetFourTag);
+            tree->Branch("jetFourFlavor", &jetFourFlavor);
         }
 
         // gen level objects
@@ -980,7 +976,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                                     nBJetsMistagUp, nBJetsMistagDown,
                                     nBJetsCTagUp, nBJetsCTagDown
                                    };
-
         nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
         nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
         nBJetList.insert(nBJetList.end(), nBJetsBTagUp.begin(), nBJetsBTagUp.end());
@@ -1470,8 +1465,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonOneIDWeight = effs.first/effs.second;
             leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-            leptonTwoIDWeight = 0.95;
-            leptonTwoIDVar    = 0.05;
+            if (genCategory == 7 || genCategory == 12) {
+                leptonTwoIDWeight = 0.95;
+                leptonTwoIDVar    = 0.05;
+            } else {
+                leptonTwoIDWeight = 1.;
+                leptonTwoIDVar    = 0.0001;
+            }
 
             // trigger weights
             bool triggered = false;
@@ -1570,8 +1570,13 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             leptonTwoRecoWeight = 1.;
             leptonTwoRecoVar    = 0.;
-            leptonTwoIDWeight = 0.95;
-            leptonTwoIDVar    = 0.05;
+            if (genCategory == 8 || genCategory == 15) {
+                leptonTwoIDWeight = 0.95;
+                leptonTwoIDVar    = 0.05;
+            } else {
+                leptonTwoIDWeight = 1.;
+                leptonTwoIDVar    = 0.0001;
+            }
 
             // trigger weights
             bool triggered = false;
@@ -1614,10 +1619,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             FillPDFHist(pdfVariations, channel);
         }
 
-        if (nJetsCut < 4 || nBJetsCut < 1)
+        //if (!(nJetsCut >= 3 && nBJetsCut >= 2) && !(nJetsCut >= 4 && nBJetsCut >= 1)) 
+        if (nJetsCut < 4 || nBJetsCut < 1) 
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
+        //cout << nJetsCut << " " << nBJetsCut << endl;
 
         leptonOneP4     = electronP4;
         leptonOneIso    = electronIso;
@@ -1629,7 +1636,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, electronP4);
-        if (nJets >= 4) {
+        if (nJets >= 3) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag      = jets[0]->csv;
             jetOneFlavor   = jets[0]->hadronFlavor;
@@ -1639,6 +1646,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
             jetThreeTag    = jets[2]->csv;
             jetThreeFlavor = jets[2]->hadronFlavor;
+        } 
+        if (nJets >= 4) {
             jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
@@ -1697,13 +1706,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= leptonOneRecoWeight*leptonOneIDWeight;
         }
     }  else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
-
-        if (nJetsCut > 4 && nBJetsCut >= 1) {
-            channel = "mu4j";
-        } else if (nJetsCut == 3 && nBJetsCut >= 2) {
-            channel = "mu3j";
-        }
-
+        channel = "mu4j";
         eventCounts[channel]->Fill(1);
 
         // convert to TLorentzVectors
@@ -1723,7 +1726,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             FillPDFHist(pdfVariations, channel);
         }
 
-        if (nJetsCut < 4 || nBJetsCut < 1)
+        //if (!(nJetsCut >= 3 && nBJetsCut >= 2) && !(nJetsCut >= 4 && nBJetsCut >= 1))  // revisit this
+        if (nJetsCut < 4 || nBJetsCut < 1) 
             return kTRUE;
         eventCounts[channel]->Fill(4);
 
@@ -1737,8 +1741,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Collect the highest pt jets in the event
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, muonP4);
- 
-        if (nJets >= 4) {
+        
+        if (nJets >= 3) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag      = jets[0]->csv;
             jetOneFlavor   = jets[0]->hadronFlavor;
@@ -1748,6 +1752,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
             jetThreeTag    = jets[2]->csv;
             jetThreeFlavor = jets[2]->hadronFlavor;
+        } 
+        if (nJets >= 4) {
             jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
@@ -1857,7 +1863,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (isData && nJets >= 4 && nBJets >= 1) {
+        //} else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets >= 3 && nBJets >= 1))) {
+        } else if (isData && (nJets >= 4 && nBJets >= 1)) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
             nMuons = 1;
@@ -1879,18 +1886,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             // Collect the highest pt jets in the event
             std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
             //jets = KinematicTopTag(jets, metP2, muonP4);
-            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-            jetOneTag      = jets[0]->csv;
-            jetOneFlavor   = jets[0]->hadronFlavor;
-            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-            jetTwoTag      = jets[1]->csv;
-            jetTwoFlavor   = jets[1]->hadronFlavor;
-            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-            jetThreeTag    = jets[2]->csv;
-            jetThreeFlavor = jets[2]->hadronFlavor;
-            jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
-            jetFourTag     = jets[3]->csv;
-            jetFourFlavor  = jets[3]->hadronFlavor;
+            if (nJets == 3) {
+                jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+                jetOneTag      = jets[0]->csv;
+                jetOneFlavor   = jets[0]->hadronFlavor;
+                jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+                jetTwoTag      = jets[1]->csv;
+                jetTwoFlavor   = jets[1]->hadronFlavor;
+                jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+                jetThreeTag    = jets[2]->csv;
+                jetThreeFlavor = jets[2]->hadronFlavor;
+            } else if (nJets >= 4) {
+                jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
+                jetFourTag     = jets[3]->csv;
+                jetFourFlavor  = jets[3]->hadronFlavor;
+            }
         } else {
             return kTRUE;
         }
@@ -1946,7 +1956,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        } else if (isData && nJets >= 4 && nBJets >= 1) {
+        //} else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets >= 3 && nBJets >= 1))) {
+        } else if (isData && (nJets >= 4 && nBJets >= 1)) {
             channel = "e4j_fakes";
             eventCounts[channel]->Fill(1);
             nElectrons = 1;
@@ -1991,9 +2002,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // Fill jet info //
     ///////////////////
 
-    if (channel != " tau4j" 
-        && channel != "mu3j" 
-        && channel != "mu4j" 
+    if (//channel != "tau4j" 
+        channel != "mu4j" 
         && channel != "e4j" 
         && channel != "mu4j_fakes" 
         && channel != "e4j_fakes"
@@ -2247,15 +2257,15 @@ float MultileptonAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, Efficienc
 
 void MultileptonAnalyzer::ResetJetCounters()
 {
-    nJets = nBJets = nFwdJets = 0;
-    nJetsCut       = nBJetsCut        = 0;
-    nJetsJERUp     = nJetsJERDown     = 0;
+    nJets = nFwdJets = nJetsCut = 0;
+    nJetsJERUp = nJetsJERDown = 0;
+    std::fill(nJetsJESUp.begin(), nJetsJESUp.end(), 0);
+    std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
+
+    nBJets = nBJetsCut = nBJetsRaw = 0;
     nBJetsJERUp    = nBJetsJERDown    = 0;
     nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
-
-    std::fill(nJetsJESUp.begin(), nJetsJESUp.end(), 0);
-    std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
     std::fill(nBJetsJESUp.begin(), nBJetsJESUp.end(), 0);
     std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
     std::fill(nBJetsBTagUp.begin(), nBJetsBTagUp.end(), 0);

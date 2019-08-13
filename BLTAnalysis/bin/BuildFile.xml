@@ -4,7 +4,7 @@
 
 <bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
 <bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin>
-<bin file="ZGAnalyzer.cc" name="ZGAnalyzer"></bin>
+<bin file="ZTauTauAnalyzer.cc" name="ZTauTauAnalyzer"></bin>
 
 
 

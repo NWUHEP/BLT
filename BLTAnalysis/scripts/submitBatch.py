@@ -18,9 +18,10 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','hzg']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
-
+#mc_samples.append('ttbar_systematics')
+mc_samples.append('hzg')
 ''' 
     Set job configurations.  
 '''
@@ -243,24 +244,7 @@ mc_dict['ttbar'] = [
         path     = '{0}/Summer16_TT_powheg'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
-       ),
-    # top full gen
-    cfg(data_name = 'ttbar_inclusive_tauReweight',
-        path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/190627_132039/0000',
-        nJobs    = 50,
-        suffix   = 'ttbar_inclusive_tauReweight'
-       ),
-    # # fsr
-    # cfg(data_name = 'ttbar_inclusive_fsrUp',
-    #     path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_inclusive_fsrUp'
-    #    ),
-    # cfg(data_name = 'ttbar_inclusive_fsrDown',
-    #     path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_inclusive_fsrDown'
-    #    ),
+       ),    
     # # leptonic top
     # cfg(data_name = 'ttbar_2l2nu',
     #     path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
@@ -274,6 +258,60 @@ mc_dict['ttbar'] = [
     #     suffix   = 'ttbar_semilepton'
     #    )
     ]
+
+mc_dict['ttbar_systematics'] = [
+    # top full gen
+    cfg(data_name = 'ttbar_inclusive_tauReweight',
+        path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/190627_132039/0000',
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_tauReweight'
+       ),
+    # fsr
+    cfg(data_name = 'ttbar_inclusive_fsrUp',
+        path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_fsrDown',
+        path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_fsrDown'
+       ),
+    # isr
+    cfg(data_name = 'ttbar_inclusive_isrUp',
+        path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_ifsrUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_isrDown',
+        path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_isrDown'
+       ),
+    # underline event
+    cfg(data_name = 'ttbar_inclusive_ueUp',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_ueUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_ueDown',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_ueDown'
+       ),
+    # matrix element and parton shower matching
+    cfg(data_name = 'ttbar_inclusive_mepsUp',
+        path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_mepsUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_mepsDown',
+        path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_inclusive_mepsDown'
+       ),
+    ]
+
 
 
 mc_dict['t'] = [

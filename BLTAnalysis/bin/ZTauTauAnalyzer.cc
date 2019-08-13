@@ -1,7 +1,7 @@
-#include "ZGAnalyzer.h"
+#include "ZTauTauAnalyzer.h"
 #include <map>
 
-// ZGAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo/Summer16_DYJetsToLL_M-50_amcatnlo_bacon_00.root 100000 dy dy single_lepton 2016 1
+// ZTauTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo/Summer16_DYJetsToLL_M-50_amcatnlo_bacon_00.root 100000 dy dy single_lepton 2016 1
 
 //
 // See header file for class documentation
@@ -12,17 +12,17 @@ using namespace std;
 
 
 
-ZGAnalyzer::ZGAnalyzer() : BLTSelector()
+ZTauTauAnalyzer::ZTauTauAnalyzer() : BLTSelector()
 {
 
 }
 
-ZGAnalyzer::~ZGAnalyzer()
+ZTauTauAnalyzer::~ZTauTauAnalyzer()
 {
 
 }
 
-void ZGAnalyzer::Begin(TTree *tree)
+void ZTauTauAnalyzer::Begin(TTree *tree)
 {   
     cout<< "begin"<<endl;
     rng = new TRandom3();
@@ -55,6 +55,7 @@ void ZGAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
+        triggerNames.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*");
 
     } else if (params->selection == "single_muon") {
         triggerNames.push_back("HLT_IsoMu24_v*");
@@ -91,7 +92,7 @@ void ZGAnalyzer::Begin(TTree *tree)
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
 
-    vector<std::string> channelNames = {"etau","mutau"};
+    vector<std::string> channelNames = {"etau","mutau","emu"};
 
     for (unsigned i = 0; i < channelNames.size(); ++i) {
         string channel = channelNames[i];
@@ -115,12 +116,14 @@ void ZGAnalyzer::Begin(TTree *tree)
         tree->Branch("topPtWeight", &topPtWeight);
 
         // tau staff
-        tree->Branch("tauDecayMode",     &tauDecayMode);
-        tree->Branch("tauMVA",           &tauMVA); 
-        tree->Branch("tauGenFlavor",     &tauGenFlavor);
-        tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
-        tree->Branch("tauVetoedJetPt",   &tauVetoedJetPt);
-        tree->Branch("tauVetoedJetPtUnc",&tauVetoedJetPtUnc);
+        if (channel == "etau" || channel == "mutau"){
+          tree->Branch("tauDecayMode",     &tauDecayMode);
+          tree->Branch("tauMVA",           &tauMVA); 
+          tree->Branch("tauGenFlavor",     &tauGenFlavor);
+          tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
+          tree->Branch("tauVetoedJetPt",   &tauVetoedJetPt);
+          tree->Branch("tauVetoedJetPtUnc",&tauVetoedJetPtUnc);
+        }
 
         // vectors
         tree->Branch("leptonOneP4",     &leptonOneP4);
@@ -137,6 +140,8 @@ void ZGAnalyzer::Begin(TTree *tree)
         tree->Branch("nPhotons", &nPhotons);
         tree->Branch("nJets", &nJets);
         tree->Branch("nBJets", &nBJets);
+        tree->Branch("nGenTausHad", &nGenTausHad);
+        tree->Branch("nGenTausLep", &nGenTausLep);
         // ht,met
         tree->Branch("htSum", &htSum);
         tree->Branch("ht", &ht);
@@ -156,7 +161,7 @@ void ZGAnalyzer::Begin(TTree *tree)
 
 }
 
-Bool_t ZGAnalyzer::Process(Long64_t entry)
+Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 {
     /* beginning of event loop */
     GetEntry(entry, 1);  // load all branches
@@ -320,12 +325,15 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
             }
             if (isHad) genTausHad.push_back(genTaus[i]);
         }
+        nGenTausHad = genTausHad.size();
+        nGenTausLep = genTausLep.size();
     } else {
         genWeight = 1.0;
         nPU = 0;
         nPartons = 0;
         genCategory = 0;
-
+        nGenTausHad = 0;
+        nGenTausLep = 0;
     }
 
 
@@ -365,6 +373,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end();
     muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
+    bool emuTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*") != passTriggerNames.end();
 
     if (!passTrigger)
         return kTRUE;
@@ -424,8 +433,6 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
 
 
 
-
-    
     /* -------- ELECTRONS ---------*/
     vector<TElectron*> electrons,fail_electrons;
     vector<TLorentzVector> veto_electrons;
@@ -447,7 +454,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
 
         if (
-                electron->pt > 10
+                electron->pt > 15
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
 
@@ -528,23 +535,23 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
             }
             
             // 2. MC events with electron -> tau_h
-            if (genOverlap == false){
-                // 2.a) check overlap with  electron
-                bool genElectronOverlap = false;
-                for (unsigned i = 0; i < genElectrons.size(); ++i) {
-                    TLorentzVector genP4;
-                    genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
-                    if (tauP4.DeltaR(genP4) < 0.3) {
-                        genElectronOverlap = true;
-                        genOverlap = true;
-                        break;
-                    }
-                }
-                // 2.b) apply correction for electron -> tau_h
-                if (genElectronOverlap) {
-                    tau->pt *= 1.1;
-                }
-            }
+            //if (genOverlap == false){
+            //    // 2.a) check overlap with  electron
+            //    bool genElectronOverlap = false;
+            //    for (unsigned i = 0; i < genElectrons.size(); ++i) {
+            //        TLorentzVector genP4;
+            //        genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
+            //        if (tauP4.DeltaR(genP4) < 0.3) {
+            //            genElectronOverlap = true;
+            //            genOverlap = true;
+            //            break;
+            //        }
+            //    }
+            //    // 2.b) apply correction for electron -> tau_h
+            //    if (genElectronOverlap) {
+            //        tau->pt *= 1.1;
+            //    }
+            // }
 
         }
 
@@ -908,7 +915,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
             errs = effCont.GetErr();
             leptonOneIDWeight = effs.first/effs.second;
             leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoIDWeight = 0.92;
+            leptonTwoIDWeight = 0.95;
             leptonTwoIDVar    = 0.05;
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
@@ -939,6 +946,78 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
             }
             eventWeight *= triggerWeight;
         }
+    } else if (nElectrons == 1 && nMuons == 1  ) { // e+mu selection
+
+        channel = "emu";
+        eventCounts[channel]->Fill(1);
+
+        if (electrons[0]->pt < 18 || muons[0]->pt < 10)
+            return kTRUE;
+        eventCounts[channel]->Fill(2);
+
+        if (!emuTriggered)
+            return kTRUE;
+        eventCounts[channel]->Fill(3);
+
+        // if (nPhotons == 0)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
+
+
+        TLorentzVector electronP4, muonP4;
+        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
+
+        leptonOneP4     = electronP4;
+        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        leptonOneFlavor = 11*electrons[0]->q;
+        leptonTwoP4     = muonP4;
+        leptonTwoIso    = GetMuonIsolation(muons[0]);
+        leptonTwoFlavor = 13*muons[0]->q;
+
+        TLorentzVector photonOneP4;
+        photonP4 = photonOneP4;
+        photonMVA = 0;
+        if (nPhotons > 0) {
+            photonOneP4.SetPtEtaPhiM(photons[0]->pt, photons[0]->eta, photons[0]->phi, 0.);
+            photonP4 = photonOneP4;
+            photonMVA = photons[0]->mva;
+        }
+
+        // correct for MC, including reconstruction and trigger
+        if (!isData) {
+
+            // correct for id,reco weights
+            EfficiencyContainer effCont;
+            pair<float, float> effs, errs;
+
+            // id weight
+            effCont = weights->GetElectronIDEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneIDWeight = effs.first/effs.second;
+            leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            effCont = weights->GetMuonIDEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoIDWeight = effs.first/effs.second;
+            leptonTwoIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
+
+            // reconstruction weight
+            effCont = weights->GetElectronRecoEff(electronP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonOneRecoWeight = effs.first/effs.second;
+            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            effCont = weights->GetMuonISOEff(muonP4);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            leptonTwoRecoWeight = effs.first/effs.second;;
+            leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
+        }
     } else {
         return kTRUE;
     }
@@ -954,7 +1033,7 @@ Bool_t ZGAnalyzer::Process(Long64_t entry)
     return kTRUE;
 }
 
-void ZGAnalyzer::Terminate()
+void ZTauTauAnalyzer::Terminate()
 {
     outFile->Write();
     outFile->Close();
@@ -962,14 +1041,14 @@ void ZGAnalyzer::Terminate()
     ReportPostTerminate();
 }
 
-void ZGAnalyzer::ReportPostBegin()
+void ZTauTauAnalyzer::ReportPostBegin()
 {
     std::cout << "  ==== Begin Job =============================================" << std::endl;
     std::cout << *params << std::endl;
     std::cout << "  ============================================================" << std::endl;
 }
 
-void ZGAnalyzer::ReportPostTerminate()
+void ZTauTauAnalyzer::ReportPostTerminate()
 {
     std::cout << "  ==== Terminate Job =========================================" << std::endl;
     std::cout << "  output   : " << params->get_output_filename("demoFile") << std::endl;
@@ -984,7 +1063,7 @@ void ZGAnalyzer::ReportPostTerminate()
 
 int main(int argc, char **argv)
 {
-    std::unique_ptr<ZGAnalyzer> selector(new ZGAnalyzer());
+    std::unique_ptr<ZTauTauAnalyzer> selector(new ZTauTauAnalyzer());
 
     try {
         selector->MakeMeSandwich(argc, argv);  //<===the real main function is here
@@ -1000,13 +1079,13 @@ int main(int argc, char **argv)
 }
 
 
-float ZGAnalyzer::GetMuonIsolation(const baconhep::TMuon* mu)
+float ZTauTauAnalyzer::GetMuonIsolation(const baconhep::TMuon* mu)
 {
     float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
     return combIso;
 }
 
-float ZGAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
+float ZTauTauAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, const float rho)
 {
     int iEta = 0;
     float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
@@ -1027,7 +1106,7 @@ float ZGAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, const floa
 
 
 
-int ZGAnalyzer::GetTauGenFlavor(  TLorentzVector p4, 
+int ZTauTauAnalyzer::GetTauGenFlavor(  TLorentzVector p4, 
                                         vector<TGenParticle*> genTausHad, 
                                         vector<TGenParticle*> genElectrons, 
                                         vector<TGenParticle*> genMuons,
@@ -1096,7 +1175,7 @@ int ZGAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
 }
 
 
-pair<float, float> ZGAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
+pair<float, float> ZTauTauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
 {
 
     float jetPt = -1;
@@ -1129,7 +1208,7 @@ pair<float, float> ZGAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*
 
 
 
-float ZGAnalyzer::GetTriggerSF(EfficiencyContainer eff1, EfficiencyContainer eff2)
+float ZTauTauAnalyzer::GetTriggerSF(EfficiencyContainer eff1, EfficiencyContainer eff2)
 {
     pair<double, double> trigEff1, trigEff2;
     trigEff1 = eff1.GetEff();
@@ -1156,7 +1235,7 @@ float ZGAnalyzer::GetTriggerSF(EfficiencyContainer eff1, EfficiencyContainer eff
     return sf;
 }
 
-float ZGAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyContainer eff2)
+float ZTauTauAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyContainer eff2)
 {
     pair<double, double> trigEff1, trigEff2, trigErr1, trigErr2;
     trigEff1 = eff1.GetEff();
@@ -1183,7 +1262,7 @@ float ZGAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyContaine
     return sfVar;
 }
 
-void ZGAnalyzer::ResetJetCounters()
+void ZTauTauAnalyzer::ResetJetCounters()
 {
     nJets = nBJets = 0;
     nJetsCut       = nBJetsCut        = 0;
@@ -1195,7 +1274,7 @@ void ZGAnalyzer::ResetJetCounters()
     nBJetsMistagUp = nBJetsMistagDown = 0;
 }
 
-void ZGAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
+void ZTauTauAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
     std::string bTagMethod = "MVAT";

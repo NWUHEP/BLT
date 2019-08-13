@@ -43,12 +43,9 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-#ExampleAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-#ZGAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+ZTauTauAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #TauAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-#MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-#FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
 # cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

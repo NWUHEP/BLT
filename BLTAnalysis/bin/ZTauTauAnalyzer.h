@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef ZGAnalyzer_HH
-#define ZGAnalyzer_HH
+#ifndef ZTauTauAnalyzer_HH
+#define ZTauTauAnalyzer_HH
 
 
 // Analysis tools
@@ -53,10 +53,10 @@
 #include <regex>
 
 
-class ZGAnalyzer: public BLTSelector {
+class ZTauTauAnalyzer: public BLTSelector {
 public:
-    ZGAnalyzer();
-    ~ZGAnalyzer();
+    ZTauTauAnalyzer();
+    ~ZTauTauAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -122,7 +122,7 @@ public:
     Float_t met, metPhi;
 
     // object counters
-    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets;
+    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets, nGenTausHad, nGenTausLep;
     UInt_t nFailMuons, nFailElectrons;
 
     ////////////////////////////////
@@ -153,4 +153,4 @@ private:
 
 };
 
-#endif  // ZGAnalyzer_HH
+#endif  // ZTauTauAnalyzer_HH

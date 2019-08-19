@@ -55,7 +55,8 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
         triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
-        triggerNames.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*");
+        // triggerNames.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*");
+        // triggerNames.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*");
 
     } else if (params->selection == "single_muon") {
         triggerNames.push_back("HLT_IsoMu24_v*");
@@ -108,6 +109,7 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
         tree->Branch("nPV", &nPV);
         tree->Branch("nPU", &nPU);
         tree->Branch("mcEra",&mcEra);
+        tree->Branch("triggerLeptonStatus",&triggerLeptonStatus);
         
         // weights and their uncertainties
         tree->Branch("eventWeight", &eventWeight);
@@ -373,7 +375,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end();
     muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
-    bool emuTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*") != passTriggerNames.end();
+    
+    // bool emuTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*") != passTriggerNames.end();
+    // bool mueTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*") != passTriggerNames.end();
 
     if (!passTrigger)
         return kTRUE;
@@ -844,7 +848,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         channel = "mutau";
         eventCounts[channel]->Fill(1);
 
-        if (muons[0]->pt < 30 )
+        if (muons[0]->pt < 25 )
             return kTRUE;
         eventCounts[channel]->Fill(2);
 
@@ -951,17 +955,12 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         channel = "emu";
         eventCounts[channel]->Fill(1);
 
-        if (electrons[0]->pt < 18 || muons[0]->pt < 10)
+        bool passTriggerPt1 = (electronTriggered && electrons[0]->pt > 30 && muons[0]->pt > 10);
+        bool passTriggerPt2 = (muonTriggered && electrons[0]->pt > 15 && muons[0]->pt > 25);
+        
+        if (!passTriggerPt1 && !passTriggerPt2)
             return kTRUE;
         eventCounts[channel]->Fill(2);
-
-        if (!emuTriggered)
-            return kTRUE;
-        eventCounts[channel]->Fill(3);
-
-        // if (nPhotons == 0)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
 
 
         TLorentzVector electronP4, muonP4;
@@ -983,6 +982,21 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
             photonP4 = photonOneP4;
             photonMVA = photons[0]->mva;
         }
+
+
+        // test if selected lepton fire the trigger.
+        bitset<2> triggered;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
+                triggered.set(0);
+            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
+                triggered.set(1);
+        }
+        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
+        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1016,6 +1030,34 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
             leptonTwoRecoWeight = effs.first/effs.second;;
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
+            // correct for trigger.
+
+            // check if lepton could pass the trigger threshold and is matched
+            // to a trigger object.  When both muons pass the trigger, use the
+            // efficiency for detecting either
+            EfficiencyContainer effCont1, effCont2;
+            if (triggered.all()) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                triggerWeight = GetTriggerSF(effCont1, effCont2);
+                triggerVar    = GetTriggerSFError(effCont1, effCont2);
+            } else if (triggered.test(0)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else if (triggered.test(1)) {
+                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effs          = effCont1.GetEff();
+                errs          = effCont1.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            } else {
+                return kTRUE;
+            }
+            eventWeight *= triggerWeight;
 
         }
     } else {

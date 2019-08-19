@@ -17,11 +17,13 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+# data_samples = ['single_mu', 'single_el']
+# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+## mc_samples.append('ttbar_systematics')
+# mc_samples.append('hzg')
 
-#mc_samples.append('ttbar_systematics')
-mc_samples.append('hzg')
+data_samples = []
+mc_samples   = ['ttbar_systematics']
 ''' 
     Set job configurations.  
 '''
@@ -281,7 +283,7 @@ mc_dict['ttbar_systematics'] = [
     cfg(data_name = 'ttbar_inclusive_isrUp',
         path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
         nJobs    = 50,
-        suffix   = 'ttbar_inclusive_ifsrUp'
+        suffix   = 'ttbar_inclusive_isrUp'
        ),
     cfg(data_name = 'ttbar_inclusive_isrDown',
         path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),

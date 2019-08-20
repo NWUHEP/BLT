@@ -23,7 +23,7 @@ period     = '2016'
 # mc_samples.append('hzg')
 
 data_samples = []
-mc_samples   = ['ttbar_systematics']
+mc_samples   = ['ttbar','ttbar_systematics']
 ''' 
     Set job configurations.  
 '''

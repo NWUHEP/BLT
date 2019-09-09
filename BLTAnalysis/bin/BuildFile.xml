@@ -1,4 +1,6 @@
 <use name="BLT/BLTAnalysis"/>
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
-<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>
+<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer_Original"></bin>
+<bin file="MultileptonAnalyzerNew.cc" name="MultileptonAnalyzer"></bin>
+<bin file="MLAnalyzer.cc" name="MLAnalyzer"></bin>

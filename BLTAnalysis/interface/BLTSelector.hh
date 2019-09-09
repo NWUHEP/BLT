@@ -78,6 +78,7 @@ public :
     TClonesArray            *fTauArr;
     TClonesArray            *fPhotonArr;
     TClonesArray            *fPVArr;
+    TClonesArray            *fAK5;
     TClonesArray            *fAK4CHSArr;
     TClonesArray            *fAK8CHSArr;
     TClonesArray            *fAddAK8CHSArr;
@@ -97,6 +98,7 @@ public :
     TBranch                 *b_PhotonArr;
     TBranch                 *b_PVArr;
     TBranch                 *b_AK4CHSArr;
+    TBranch                 *b_AK5;
     TBranch                 *b_AK8CHSArr;
     TBranch                 *b_AddAK8CHSArr;
     TBranch                 *b_CA15CHSArr;
@@ -142,6 +144,7 @@ void BLTSelector::Init(TTree *tree)
     fPhotonArr               = 0;
     fPVArr                   = 0;
     fAK4CHSArr               = 0;
+    fAK5                     = 0;
     fAK8CHSArr               = 0;
     fAddAK8CHSArr            = 0;
     fCA15CHSArr              = 0;
@@ -160,6 +163,7 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
     fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
     fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);
+    fChain->SetBranchAddress("AK5"   , &fAK5,       &b_AK5);
     //fChain->SetBranchAddress("AK8CHS", &fAK8CHSArr, &b_AK8CHSArr);
     //fChain->SetBranchAddress("AddAK8CHS", &fAddAK8CHSArr, &b_AddAK8CHSArr);
     //fChain->SetBranchAddress("CA15CHS", &fCA15CHSArr, &b_CA15CHSArr);

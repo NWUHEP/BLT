@@ -9,30 +9,37 @@ COUNT=$2
 SUFFIX=$3
 SELECTION=$4
 PERIOD=$5
+OUTDIR=$6
 
 ### Transfer files, prepare directory ###
 TOPDIR=$PWD
 
 # lpc
-#export SCRAM_ARCH=slc6_amd64_gcc491
-#export CMSSW_VERSION=CMSSW_7_4_14
-#source /cvmfs/cms.cern.ch/cmsset_default.sh
+export SCRAM_ARCH=slc6_amd64_gcc530
+export CMSSW_VERSION=CMSSW_8_0_20
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-# nut3
-export SCRAM_ARCH=slc6_amd64_gcc491
-export CMSSW_VERSION=CMSSW_7_4_12
-source /software/tier3/osg/cmsset_default.sh 
-
-# Setup CMSSW environment
-#scram project CMSSW $CMSSW_VERSION
-#cd $CMSSW_VERSION/src
-#eval `scram runtime -sh`
-
-#cp $TOPDIR/source.tar.gz .
+# temporary fix
 tar -xzf source.tar.gz
-cd $CMSSW_VERSION/src/
-scramv1 b ProjectRename
+ls $CMSSW_VERSION/* -a -r
+ls $CMSSW_VERSION/src/ -a
+
+mv $CMSSW_VERSION tmp_src
+
+
+scram project CMSSW $CMSSW_VERSION
+
+cp -r tmp_src/src/* $CMSSW_VERSION/src
+cd $CMSSW_VERSION/src
+eval `scram runtime -sh`
+
+# this used to work, now it don't
+#tar -xzf source.tar.gz
+#cd $CMSSW_VERSION/src/
+#scramv1 b ProjectRename
+
 cmsenv
+scram b -j8
 cd BLT/BLTAnalysis/test
 cp $TOPDIR/input_${DATANAME}_${COUNT}.txt input.txt
 
@@ -40,9 +47,20 @@ echo $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 echo $PATH
 pwd
 cat input.txt
+
 ### Run the analyzer
-#DimuonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#MultileptonAnalyzer_Original input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 MultileptonAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#DileptonSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#FakeSelector input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
-cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}
+FILE=output_${DATANAME}_${COUNT}.root
+xrdcp -f ${FILE} ${OUTDIR}/${FILE} 2>&1
+XRDEXIT=$?
+if [[ $XRDEXIT -ne 0 ]]; then
+  rm *.root
+  echo "exit code $XRDEXIT, failure in xrdcp"
+  exit $XRDEXIT
+fi
+rm ${FILE}

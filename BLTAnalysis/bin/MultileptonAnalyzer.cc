@@ -143,14 +143,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
-
+    bool printAll = false; // print all accepted events
+    bool debugPrint = false; //print debug information
+    UInt_t runNumDebug = 1;
+    UInt_t lumiDebug = 1;//4;
+    UInt_t eventDebug = 28;//335;
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
             << " Run: " << fInfo->runNum 
             << " Lumi: " << fInfo->lumiSec 
             << " Event: " << fInfo->evtNum 
             << std::endl;
-
+    if(debugPrint) sync_print = false;
     if (sync_print) {
         if (
             (fInfo->runNum == 275311 && fInfo->evtNum == 560373421  )
@@ -167,6 +171,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     return kTRUE;
                 }
     }
+    
+    sync_print =  (debugPrint &&
+		   fInfo->runNum == runNumDebug &&
+		   fInfo->evtNum == eventDebug  &&
+		   fInfo->lumiSec == lumiDebug
+		   );
 
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
@@ -265,7 +275,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(muon);
 
         if (
-                muon->pt > 10 
+                muon->pt > 10. 
                 && fabs(muon->eta) < 2.4
                 // tight muon ID
                 //&& (muon->typeBits & baconhep::kPFMuon) 
@@ -332,10 +342,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // Fill containers
         if (muon->trkIso/muon->pt < 0.1) {
 
-            if (muonP4.Pt() > 20 && fabs(muonP4.Eta()) < 2.1) {
+            if (muonP4.Pt() > 20. && fabs(muonP4.Eta()) < 2.1) {
                 veto_muons.push_back(muonP4);
 
-                if (muonP4.Pt() > 25) {
+                if (muonP4.Pt() > 25.) {
                     muons.push_back(muonP4);
                     muons_iso.push_back(muon->trkIso);
                     muons_q.push_back(muon->q);
@@ -364,7 +374,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         assert(electron);
 
         if (
-                electron->pt > 20 
+                electron->pt > 20. 
                 && fabs(electron->eta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
                 && particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)
@@ -455,14 +465,14 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if (
-                jet->pt > 30 
+                jet->pt > 30. 
                 && fabs(jet->eta) < 4.7
                 && particleSelector->PassJetID(jet, cuts->looseJetID)
            ) {
 
             if (fabs(jet->eta) <= 2.4) { 
                 if (
-                        jet->pt > 30 
+                        jet->pt > 30. 
                         && jet->mva > -0.89
                         && !muOverlap 
                         //&& !elOverlap
@@ -528,9 +538,25 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
 
+
+    
+    if(printAll) {
+      
+      std::cout << "Before Selections event " << entry 
+		<< " Run: " << fInfo->runNum 
+		<< " Lumi: " << fInfo->lumiSec 
+		<< " Event: " << fInfo->evtNum 
+		<< std::endl;
+      std::cout << "nJets " << nJets << " nBJets " << nBJets
+		<< " nFwdJets " << nFwdJets << " nElec " << nElectrons
+		<< " nTmpMuons " << tmp_muons.size() << " MET " << met
+		<< std::endl;
+
+    }
+
     // Synchronization printout
     if (sync_print) {
-        if (nBJets >= 1 && nJets >= 1 && met < 40 && muons.size() >= 2) {
+      if ((nBJets >= 1 && nJets >= 1 && met < 40. && muons.size() >= 2)) {
 
             jetP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             bjetP4.SetPtEtaPhiM(bjets[0]->pt, bjets[0]->eta, bjets[0]->phi, bjets[0]->mass);
@@ -541,9 +567,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             cout << dimuon.Phi() << ", " << dijet.Phi() << ", " << fabs(dimuon.DeltaPhi(dijet)) << endl;
         }
         cout << "STOP!" << endl;
-        return kTRUE;
+        if(!debugPrint) return kTRUE;
 
-    } else if (params->selection == "mumu") {
+    }
+    if (params->selection == "mumu") {
         if (muons.size() < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
@@ -561,8 +588,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
 
         if (
-                !(muonOneP4.Pt() > 25 && fabs(muonOneP4.Eta()) < 2.1) 
-                || !(muonTwoP4.Pt() > 25 && fabs(muonTwoP4.Eta()) < 2.1)
+                !(muonOneP4.Pt() > 25. && fabs(muonOneP4.Eta()) < 2.1) 
+                || !(muonTwoP4.Pt() > 25. && fabs(muonTwoP4.Eta()) < 2.1)
            )
             return kTRUE;
         hTotalEvents->Fill(6);
@@ -576,6 +603,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (dimuon.M() < 12. || dimuon.M() > 110.)
             return kTRUE;
         hTotalEvents->Fill(7);
+
+	if (debugPrint &&
+            fInfo->runNum == runNumDebug &&
+	    fInfo->evtNum == eventDebug  &&
+	    fInfo->lumiSec == lumiDebug
+	    ) {  
+	  std::cout << "Debug event " << entry 
+		    << " Run: " << fInfo->runNum 
+		    << " Lumi: " << fInfo->lumiSec 
+		    << " Event: " << fInfo->evtNum 
+		    << std::endl;
+	  std::cout << "nJets " << nJets << " nBJets " << nBJets
+		    << " nFwdJets " << nFwdJets << " nElec " << nElectrons
+		    << " nTmpMuons " << tmp_muons.size() << " MET " << met
+		    << std::endl;
+	}
 
         if (nBJets == 0 || (nBJets + nJets < 2 && nFwdJets == 0)) 
             return kTRUE;
@@ -604,6 +647,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff2 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
             eventWeight *= 1 - (1 - trigEff1.first)*(1 - trigEff2.first);
         }
+	if (printAll) {  
+	  std::cout << "Accepted event " << entry 
+		    << " Run: " << fInfo->runNum 
+		    << " Lumi: " << fInfo->lumiSec 
+		    << " Event: " << fInfo->evtNum 
+		    << std::endl;
+	  std::cout << "nJets " << nJets << " nBJets " << nBJets
+		    << " nFwdJets " << nFwdJets << " nElec " << nElectrons
+		    << " nTmpMuons " << tmp_muons.size()
+		    << std::endl;
+	}
+	
 
 
     } else if (params->selection == "ee") {
@@ -664,7 +719,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             pair<float, float> trigEff = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muons[0]);
             eventWeight *= trigEff.first;
         }
-    } 
+    }
         
 
 

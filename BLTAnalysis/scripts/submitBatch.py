@@ -17,13 +17,16 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-# data_samples = ['single_mu', 'single_el']
-# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
-## mc_samples.append('ttbar_systematics')
-# mc_samples.append('hzg')
+data_samples = ['single_mu', 'single_el']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
-data_samples = []
-mc_samples   = ['ttbar','ttbar_systematics']
+selection  = 'single_electron'
+data_samples = ['single_el']
+
+# mc_samples.append('ttbar_systematics')
+# mc_samples.append('hzg')
+# data_samples = []
+# mc_samples   = ['ttbar','ttbar_systematics']
 ''' 
     Set job configurations.  
 '''

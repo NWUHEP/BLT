@@ -1,4 +1,6 @@
 <use name="BLT/BLTAnalysis"/>
+<use name="TauAnalysis/SVfitTF"/>
+<use name="TauAnalysis/ClassicSVfit"/>
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 

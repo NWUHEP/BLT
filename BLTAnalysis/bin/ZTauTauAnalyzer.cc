@@ -24,7 +24,7 @@ ZTauTauAnalyzer::~ZTauTauAnalyzer()
 
 void ZTauTauAnalyzer::Begin(TTree *tree)
 {   
-    cout<< "begin"<<endl;
+    cout << __func__ << endl;
     rng = new TRandom3();
 
 
@@ -76,11 +76,11 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     
 
     // muon momentum corrections
-    cout<< "muon momentum corrections"<<endl;
+    cout<< "Muon momentum corrections"<<endl;
     muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
 
     // electron scale corrections
-    cout<< "electron scale corrections"<<endl;
+    cout<< "Electron scale corrections"<<endl;
     electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data");
 
     // Prepare the output tree
@@ -150,7 +150,14 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
         tree->Branch("htPhi", &htPhi);
         tree->Branch("met", &met);
         tree->Branch("metPhi", &metPhi);
+        tree->Branch("covMet00", &covMet00);
+        tree->Branch("covMet01", &covMet01);
+        tree->Branch("covMet11", &covMet11);
 
+	//SVFit variables
+	tree->Branch("massSVFit", &massSVFit);
+	tree->Branch("massErrSVFit", &massErrSVFit);
+	tree->Branch("svFitStatus", &svFitStatus);
 
         outTrees[channel] = tree;
         // event counter
@@ -180,7 +187,16 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
             << std::endl;
     }
 
-
+    //Whether or not to filter out events where selected
+    //lepton didn't fire the trigger
+    bool requireSelectedTrigger = false;
+    //Include SVFit mass
+    bool doSVFit = true;
+    bool useMassConstraint = false;
+    bool useLogMTermNLL = true;
+    Int_t kLogMTauMu = 4;
+    Int_t kLogMTauE  = 4;
+    
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
 
@@ -491,7 +507,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         TLorentzVector tauP4; 
         tauP4.SetPtEtaPhiM(tau->pt, tau->eta, tau->phi, tau->m);
 
-        // Prevent overlap of muons and jets
+        // Prevent overlap of muons and taus
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
             if (tauP4.DeltaR(mu) < 0.3) {
@@ -587,7 +603,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         TLorentzVector photonP4;
         photonP4.SetPtEtaPhiM(photon->pt, photon->eta, photon->phi, 0.);
 
-        // Prevent overlap of muons and jets
+        // Prevent overlap of muons and photons
         bool muOverlap = false;
         for (const auto& mu: veto_muons) {
             if (photonP4.DeltaR(mu) < 0.3) {
@@ -606,7 +622,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         
         assert(photon);
         if (
-            photon->pt > 10
+            photon->pt > 10.
             && !muOverlap
             && !elOverlap
             && fabs(photon->scEta) < 2.5 
@@ -646,7 +662,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         if (!isData) { // apply jet energy resolution corrections to simulation
             pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 0);
             gRand = rng->Gaus(0, resPair.first);
-            jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            jerc = 1. + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1., 0.));
             jet->pt = jet->pt*jerc;
         }
 
@@ -733,7 +749,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     /* -------- MET ---------*/
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
-
+    covMet00 = fInfo->pfMETCCov00;
+    covMet01 = fInfo->pfMETCCov01;
+    covMet11 = fInfo->pfMETCCov11;
 
     ///////////////////////////////
     /* Apply analysis selections */
@@ -791,15 +809,17 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
 
         // test if selected lepton fire the trigger.
-        bool triggered = false;
+        bool triggered = !requireSelectedTrigger;
         for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
+	  if(triggered) break;
+	  if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
         }
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
+        eventCounts[channel]->Fill(4);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -839,11 +859,56 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            } else {
-                return kTRUE;
             }
             eventWeight *= triggerWeight;
         }
+	if(doSVFit) {
+	  double metX = met*cos(metPhi);
+	  double metY = met*sin(metPhi);
+	  TMatrixD covMET(2,2);
+	  covMET[0][0] = covMet00;
+	  covMET[0][1] = covMet01;
+	  covMET[1][0] = covMet01;
+	  covMET[1][1] = covMet11;
+	  std::vector<classic_svFit::MeasuredTauLepton> measuredTauLeptons;
+	  // tau -> electron decay (Pt, eta, phi, mass)
+	  measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToElecDecay, electronP4.Pt(), electronP4.Eta(), electronP4.Phi(), 0.51100e-3));
+	  // tau -> 1prong0pi0 hadronic decay (Pt, eta, phi, mass, prongs)
+	  // prongs: 0 if pi0, 1 if 1 prong, 10 if 3 prongs 0 pi0
+	  measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToHadDecay,  tauP4.Pt(), tauP4.Eta(), tauP4.Phi(),  tauP4.M(), tauDecayMode)); 
+
+	  int svFitVerbosity = 0;
+	  ClassicSVfit* svFitAlgo = new ClassicSVfit(svFitVerbosity);
+	  double massConstraint = 125.06;
+	  if(useLogMTermNLL) svFitAlgo->addLogM_fixed(true, kLogMTauMu);
+	  if(useMassConstraint) svFitAlgo->setDiTauMassConstraint(massConstraint);
+	  svFitAlgo->integrate(measuredTauLeptons, metX, metY, covMET);
+	  massSVFit    = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMass();
+	  massErrSVFit = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMassErr();
+	  svFitStatus = svFitAlgo->isValidSolution();
+	  // transverseMass = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMass();
+	  // transverseMassErr = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMassErr();
+	  delete svFitAlgo;
+
+	  ++trkhistos;
+	  TObject* o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPt_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramEta_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPhi_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramMass_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramTransverseMass_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	}
+	
+	eventCounts[channel]->Fill(5);
+
     } else if (nElectrons == 0 && nMuons == 1 && nTaus == 1 ) { // mu+tau selection
         channel = "mutau";
         eventCounts[channel]->Fill(1);
@@ -892,9 +957,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
 
         // test if selected lepton fire the trigger.
-        bool triggered = false;
+        bool triggered = !requireSelectedTrigger;
         for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
+	  if(triggered) break;
+	  if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
@@ -902,6 +968,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
 
+        eventCounts[channel]->Fill(4);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -950,6 +1017,52 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
             }
             eventWeight *= triggerWeight;
         }
+	if(doSVFit) {
+	  double metX = met*cos(metPhi);
+	  double metY = met*sin(metPhi);
+	  TMatrixD covMET(2,2);
+	  covMET[0][0] = covMet00;
+	  covMET[0][1] = covMet01;
+	  covMET[1][0] = covMet01;
+	  covMET[1][1] = covMet11;
+	  std::vector<classic_svFit::MeasuredTauLepton> measuredTauLeptons;
+	  // tau -> electron decay (Pt, eta, phi, mass)
+	  measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToMuDecay, muonP4.Pt(), muonP4.Eta(), muonP4.Phi(), 105.66e-3));
+	  // tau -> 1prong0pi0 hadronic decay (Pt, eta, phi, mass, prongs)
+	  // prongs: 0 if pi0, 1 if 1 prong, 10 if 3 prongs 0 pi0
+	  measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToHadDecay,  tauP4.Pt(), tauP4.Eta(), tauP4.Phi(),  tauP4.M(), tauDecayMode)); 
+
+	  int svFitVerbosity = 0;
+	  ClassicSVfit* svFitAlgo = new ClassicSVfit(svFitVerbosity);
+	  double massConstraint = 125.06;
+	  if(useLogMTermNLL) svFitAlgo->addLogM_fixed(true, kLogMTauE);
+	  if(useMassConstraint) svFitAlgo->setDiTauMassConstraint(massConstraint);
+	  svFitAlgo->integrate(measuredTauLeptons, metX, metY, covMET);
+	  massSVFit    = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMass();
+	  massErrSVFit = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMassErr();
+	  svFitStatus = svFitAlgo->isValidSolution();
+	  delete svFitAlgo;
+	  // transverseMass = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMass();
+	  // transverseMassErr = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMassErr();
+	  ++trkhistos;
+	  TObject* o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPt_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramEta_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPhi_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramMass_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	  ++trkhistos;
+	  o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramTransverseMass_SVfitQuantity_%i",trkhistos));
+	  if(o) delete o;
+	}
+
+	eventCounts[channel]->Fill(5);
+
     } else if (nElectrons == 1 && nMuons == 1  ) { // e+mu selection
 
         channel = "emu";
@@ -992,11 +1105,12 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
                 triggered.set(1);
         }
-        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
+        if (requireSelectedTrigger && !triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
 
+        eventCounts[channel]->Fill(3);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1054,12 +1168,14 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            } else {
+            } else if(!requireSelectedTrigger){
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
 
         }
+        eventCounts[channel]->Fill(4);
+
     } else {
         return kTRUE;
     }

@@ -33,6 +33,11 @@
 #include "BaconAna/Utils/interface/TTrigger.hh"
 #include "BaconAna/DataFormats/interface/TLHEWeight.hh"
 
+// SVFit headers
+#include "TauAnalysis/ClassicSVfit/interface/ClassicSVfit.h"
+#include "TauAnalysis/ClassicSVfit/interface/MeasuredTauLepton.h"
+#include "TauAnalysis/ClassicSVfit/interface/svFitHistogramAdapter.h"
+
 // ROOT headers
 #include <TLorentzVector.h>
 #include <TVector3.h>
@@ -120,17 +125,22 @@ public:
 
     // met
     Float_t met, metPhi;
-
+    Float_t covMet00, covMet01, covMet11;
+    
     // object counters
     UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets, nGenTausHad, nGenTausLep;
     UInt_t nFailMuons, nFailElectrons;
 
+    //SVFit variables
+    Float_t massSVFit, massErrSVFit;
+    Int_t svFitStatus;
     ////////////////////////////////
 
 
 private:
 
-
+    //deleting svfit histograms
+    Int_t trkhistos = 0;
     // weights and uncertainties
     Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
     Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;

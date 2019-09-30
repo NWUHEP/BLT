@@ -203,6 +203,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetTwoTag", &jetTwoTag);
 
     // gen level objects 
+    outTree->Branch("nGenPhotons", &nGenPhotons);
     outTree->Branch("genLeptonOnePt", &genLeptonOnePt);
     outTree->Branch("genLeptonOneEta", &genLeptonOneEta);
     outTree->Branch("genLeptonOnePhi", &genLeptonOnePhi);
@@ -217,6 +218,9 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("genPhotonFHPFS", &genPhotonFHPFS);
     outTree->Branch("genPhotonIPFS", &genPhotonIPFS);
     outTree->Branch("vetoDY", &vetoDY);
+    outTree->Branch("phoMotherId", &phoMotherId);
+    outTree->Branch("phoMotherFHPFS", &phoMotherFHPFS);
+    outTree->Branch("phoMotherIPFS", &phoMotherIPFS);
 
     // object counters
     outTree->Branch("nMuons", &nMuons);
@@ -308,6 +312,9 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("llgJJDPhi", &llgJJDPhi);
     outTree->Branch("llgJJDR", &llgJJDR);
     outTree->Branch("zepp", &zepp);
+    outTree->Branch("photonZepp", &photonZepp);
+    outTree->Branch("jetOneMatched", &jetOneMatched);
+    outTree->Branch("jetTwoMatched", &jetTwoMatched);
 
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
@@ -371,6 +378,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     vector<TGenParticle*> genLeptons;
     vector<TGenParticle*> genPhotons;
+    vector<TGenParticle*> genFSPartons;
     if (!isData) {
         unsigned count = 0;
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
@@ -395,16 +403,26 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             }
                 
             // saving photons     
-            if (fabs(particle->pdgId) == 22) 
+            if (fabs(particle->pdgId) == 22) {
                 genPhotons.push_back(particle);    
+            }
+            
+            if(     particle->isHardProcess 
+                    && (fabs(particle->pdgId) <= 6 || particle->pdgId == 21)
+               ) {
+                genFSPartons.push_back(particle);
+            }
 
             }
 
             nPartons = count; // This is saved for reweighting inclusive DY and combining it with parton binned DY
 
+
     } else {
         nPartons = 0;
     }
+
+    nGenPhotons = genPhotons.size();
 
     /* Apply lumi mask */
     if (isData) {
@@ -880,6 +898,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 thisGenPhotonP4.SetPtEtaPhiM(pho->pt, pho->eta, pho->phi, 0.);
                 if (thisGenPhotonP4.DeltaR(photonOneP4) < 0.1) {
                     vetoDY = true;
+
                     break;
                 }
             }
@@ -1075,9 +1094,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 thisGenPhotonP4.SetPtEtaPhiM(pho->pt, pho->eta, pho->phi, 0.);
                 if (thisGenPhotonP4.DeltaR(photonOneP4) < 0.1) {
                     vetoDY = true;
+                    //TGenParticle* phoMother = (TGenParticle*) fGenParticleArr->At(pho->parent);
+                    //phoMotherId = phoMother->pdgId;
+                    //phoMotherFHPFS = phoMother->fromHardProcessFinalState;
+                    //phoMotherIPFS = phoMother->isPromptFinalState;
                     break;
                 }
             }
+            //else {
+            //    TLorentzVector thisGenPhotonP4;
+            //    thisGenPhotonP4.SetPtEtaPhiM(pho->pt, pho->eta, pho->phi, 0.);
+            //    if (thisGenPhotonP4.DeltaR(photonOneP4) < 0.1) {
+            //        TGenParticle* phoMother = (TGenParticle*) fGenParticleArr->At(pho->parent);
+            //        phoMotherId = phoMother->pdgId;
+            //        phoMotherFHPFS = phoMother->fromHardProcessFinalState;
+            //        phoMotherIPFS = phoMother->isPromptFinalState;
+            //    }
+            //}
         }
             
         // checking for lepton tag
@@ -1113,6 +1146,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         unsigned int jetTwoIndex = 0;
         unsigned int purityLevel = 0;
         TLorentzVector jetOneP4, jetTwoP4;
+        jetOneMatched = false;
+        jetTwoMatched = false;  
         if (!isLeptonTag) {
             if (jets.size() > 1)  {
                 for (unsigned int i = 0; i < jets.size(); ++i) {
@@ -1245,6 +1280,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             llgJJDEta = fabs(llgP4.Eta() - dijet.Eta());
             llgJJDPhi = fabs(llgP4.DeltaPhi(dijet));
             llgJJDR = llgP4.DeltaR(dijet);
+            photonZepp = photonOneP4.Eta() - (jetOneP4.Eta() + jetTwoP4.Eta())/2.;
+
+            // jet truth information
+            if (!isData && genFSPartons.size() > 0) {
+                TLorentzVector genJetOne, genJetTwo;
+                genJetOne.SetPtEtaPhiM(jets[jetOneIndex]->genpt, jets[jetOneIndex]->geneta, jets[jetOneIndex]->genphi, jets[jetOneIndex]->genm);
+                genJetTwo.SetPtEtaPhiM(jets[jetTwoIndex]->genpt, jets[jetTwoIndex]->geneta, jets[jetTwoIndex]->genphi, jets[jetTwoIndex]->genm);
+                for (unsigned int i = 0; i < genFSPartons.size(); i++) {
+                    TLorentzVector tmpGenParton;
+                    tmpGenParton.SetPtEtaPhiM(genFSPartons[i]->pt, genFSPartons[i]->eta, genFSPartons[i]->phi, genFSPartons[i]->mass);
+                    if (tmpGenParton.DeltaR(genJetOne) < 0.1) jetOneMatched = true;
+                    if (tmpGenParton.DeltaR(genJetTwo) < 0.1) jetTwoMatched = true;
+                }
+            }
+                
+            
+
         }
      
         leptonOnePt     = leptonOneP4.Pt();
@@ -1611,6 +1663,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 genPhotonP4.SetPtEtaPhiM(genPhotons[i]->pt, genPhotons[i]->eta, genPhotons[i]->phi, genPhotons[i]->mass);
                 genPhotonFHPFS = genPhotons[i]->fromHardProcessFinalState;
                 genPhotonIPFS = genPhotons[i]->isPromptFinalState;
+                TGenParticle* phoMother = (TGenParticle*) fGenParticleArr->At(genPhotons[i]->parent);
+                phoMotherId = phoMother->pdgId;
+                phoMotherFHPFS = phoMother->fromHardProcessFinalState;
+                phoMotherIPFS = phoMother->isPromptFinalState;
                 min_phot_dr = this_dr;
             }
         }
@@ -1622,6 +1678,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         genPhotonPt = 0.;
         genPhotonEta = 0.;
         genPhotonPhi = 0.;
+        genPhotonFHPFS = 0;
+        genPhotonIPFS = 0;
+        phoMotherId = 0;
+        phoMotherFHPFS = 0;
+        phoMotherIPFS = 0;
     }
         
     // gen angles

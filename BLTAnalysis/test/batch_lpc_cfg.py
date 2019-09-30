@@ -2,18 +2,12 @@
 import BLT.BLTAnalysis.BatchMaster as bm
 import sys
 
-
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 selection = 'mumug'
-period     = '2016'
-#path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleMuon/'
-#path       = '/eos/uscms/store/user/jbueghly/sync_data/'
-path        = '/eos/uscms/store/group/lpcbacon/12d/'
-#path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/DoubleEG/'
-#path       = '/eos/uscms/store/user/jbueghly/jbueghly_data_multicrab/Charmonium/'
-#path       = '/eos/uscms/store/user/naodell/bacontuples/12_vertex/'
-#path       = '/eos/uscms/store/user/jbueghly/ref_double_mu/'
+periods = [2016]
+#path        = '/eos/uscms/store/group/lpcbacon/12d/'
+path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
 executable = 'execBatch.sh'
 
 ''' 
@@ -21,50 +15,94 @@ executable = 'execBatch.sh'
     number of jobs, arguments to pass to executable, output directory name)
 '''
 
-data_list = []
-data_list.extend([
+muon_data_16 = []
+muon_data_16.extend([
 
     # Double muon data
-    cfg(data_name = 'muon_2016B_v2',
-        path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
-        nJobs    = 51,
+
+    # RERECO
+    #cfg(data_name = 'muon_2016B_v2',
+    #    path     = '{0}/DoubleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016B'
+    #   ),
+    #cfg(data_name = 'muon_2016C_v1',
+    #    path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1'.format(path),
+    #    nJobs    = 67,
+    #    suffix   = 'muon_2016C'
+    #   ),
+    #cfg(data_name = 'muon_2016D_v1',
+    #    path     = '{0}/DoubleMuon_Run2016D-03Feb2017-v1'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016D'
+    #   ),
+    #cfg(data_name = 'muon_2016E_v1',
+    #    path     = '{0}/DoubleMuon_Run2016E-03Feb2017-v1'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016E'
+    #   ),
+    #cfg(data_name = 'muon_2016F_v1',
+    #    path     = '{0}/DoubleMuon_Run2016F-03Feb2017-v1'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016F'
+    #   ),
+    #cfg(data_name = 'muon_2016G_v1',
+    #    path     = '{0}/DoubleMuon_Run2016G-03Feb2017-v1'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016G'
+    #   ),
+    #cfg(data_name = 'muon_2016H_v2',
+    #    path     = '{0}/DoubleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2016H'
+    #   ),
+    #cfg(data_name = 'muon_2016H_v3',
+    #    path     = '{0}/DoubleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
+    #    nJobs    = 28,
+    #    suffix   = 'muon_2016H'
+    #   ),
+    #])
+
+    # LEGACY
+    cfg(data_name = 'muon_2016B',
+        path     = '{0}/DoubleMuon_Run2016B-17Jul2018_ver2-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016B'
        ),
-    cfg(data_name = 'muon_2016C_v1',
-        path     = '{0}/DoubleMuon_Run2016C-03Feb2017-v1'.format(path),
-        nJobs    = 67,
+    cfg(data_name = 'muon_2016C',
+        path     = '{0}/DoubleMuon_Run2016C-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016C'
        ),
-    cfg(data_name = 'muon_2016D_v1',
-        path     = '{0}/DoubleMuon_Run2016D-03Feb2017-v1'.format(path),
-        nJobs    = 51,
+    cfg(data_name = 'muon_2016D',
+        path     = '{0}/DoubleMuon_Run2016D-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016D'
        ),
-    cfg(data_name = 'muon_2016E_v1',
-        path     = '{0}/DoubleMuon_Run2016E-03Feb2017-v1'.format(path),
-        nJobs    = 51,
+    cfg(data_name = 'muon_2016E',
+        path     = '{0}/DoubleMuon_Run2016E-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016E'
        ),
-    cfg(data_name = 'muon_2016F_v1',
-        path     = '{0}/DoubleMuon_Run2016F-03Feb2017-v1'.format(path),
-        nJobs    = 51,
+    cfg(data_name = 'muon_2016F',
+        path     = '{0}/DoubleMuon_Run2016F-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016F'
        ),
-    cfg(data_name = 'muon_2016G_v1',
-        path     = '{0}/DoubleMuon_Run2016G-03Feb2017-v1'.format(path),
-        nJobs    = 51,
+    cfg(data_name = 'muon_2016G',
+        path     = '{0}/DoubleMuon_Run2016G-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016G'
        ),
-    cfg(data_name = 'muon_2016H_v2',
-        path     = '{0}/DoubleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
-        nJobs    = 51,
+    cfg(data_name = 'muon_2016H',
+        path     = '{0}/DoubleMuon_Run2016H-17Jul2018-v1'.format(path),
+        nJobs    = 50,
         suffix   = 'muon_2016H'
        ),
-    cfg(data_name = 'muon_2016H_v3',
-        path     = '{0}/DoubleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
-        nJobs    = 28,
-        suffix   = 'muon_2016H'
-       ),
+    ])
+
+electron_data_16 = []
+electron_data_16.extend([
 
     # Double electron data
     #cfg(data_name = 'electron_2016B_v2',
@@ -108,318 +146,481 @@ data_list.extend([
     #    suffix   = 'electron_2016H'
     #   ),
 
-    # Charmonium data
-    #cfg(data_name = 'muon_2016B_v2',
-    #    path     = '{0}/Charmonium_Run2016B-03Feb2017_ver2-v2'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016B'
-    #   ),
-    #cfg(data_name = 'muon_2016C_v1',
-    #    path     = '{0}/Charmonium_Run2016C-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016C'
-    #   ),
-    #cfg(data_name = 'muon_2016D_v1',
-    #    path     = '{0}/Charmonium_Run2016D-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016D'
-    #   ),
-    #cfg(data_name = 'muon_2016E_v1',
-    #    path     = '{0}/Charmonium_Run2016E-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016E'
-    #   ),
-    #cfg(data_name = 'muon_2016F_v1',
-    #    path     = '{0}/Charmonium_Run2016F-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016F'
-    #   ),
-    #cfg(data_name = 'muon_2016G_v1',
-    #    path     = '{0}/Charmonium_Run2016G-03Feb2017-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016G'
-    #   ),
-    #cfg(data_name = 'muon_2016H_v2',
-    #    path     = '{0}/Charmonium_Run2016H-03Feb2017_ver2-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016H'
-    #   ),
-    #cfg(data_name = 'muon_2016H_v3',
-    #    path     = '{0}/Charmonium_Run2016H-03Feb2017_ver3-v1'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'muon_2016H'
-    #   ),
+    # LEGACY
+    cfg(data_name = 'electron_2016B',
+        path     = '{0}/DoubleEG_Run2016B-17Jul2018_ver2-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016B'
+       ),
+    cfg(data_name = 'electron_2016C',
+        path     = '{0}/DoubleEG_Run2016C-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016C'
+       ),
+    cfg(data_name = 'electron_2016D',
+        path     = '{0}/DoubleEG_Run2016D-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016D'
+       ),
+    cfg(data_name = 'electron_2016E',
+        path     = '{0}/DoubleEG_Run2016E-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016E'
+       ),
+    cfg(data_name = 'electron_2016F',
+        path     = '{0}/DoubleEG_Run2016F-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016F'
+       ),
+    cfg(data_name = 'electron_2016G',
+        path     = '{0}/DoubleEG_Run2016G-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016G'
+       ),
+    cfg(data_name = 'electron_2016H',
+        path     = '{0}/DoubleEG_Run2016H-17Jul2018-v1'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2016H'
+       ),
     ])
+ 
+mc_16 = []
+mc_16.extend([
 
-mc_list = []
-#path       = '/eos/uscms/store/user/jbueghly/jbueghly_mc_multicrab'
-path       = '/eos/uscms/store/user/jbueghly/sync_mc'
-mc_list.extend([
-    #cfg(data_name = 'JpsiToMuMu',
-    #    path     = '{0}/JpsiToMuMu_JpsiPt8'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'JpsiToMuMu'
-    #   ),
-    #cfg(data_name = 'BtoJpsi',
-    #    path     = '{0}/BToJPsiKMu_JpsiMuMu'.format(path),
-    #    nJobs    = 20,
-    #    suffix   = 'BtoJpsi'
-    #   ),
-    # Drell-Yan
-    #cfg(data_name = 'DYJetsToLL_M-50',
-    #    path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'zjets_m-50'
-    #   ),
-    #cfg(data_name = 'DYJetsToLL_M-10to50',
-    #    path     = '{0}/DYJetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zjets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY1JetsToLL_M-50',
-    #    path     = '{0}/DY1JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY1JetsToLL_M-10to50',
-    #    path     = '{0}/DY1JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z1jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-50',
-    #    path     = '{0}/DY2JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY2JetsToLL_M-10to50',
-    #    path     = '{0}/DY2JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z2jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-50',
-    #    path     = '{0}/DY3JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY3JetsToLL_M-10to50',
-    #    path     = '{0}/DY3JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z3jets_m-10to50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-50',
-    #    path     = '{0}/DY4JetsToLL_M-50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-50'
-    #   ),
-    #cfg(data_name = 'DY4JetsToLL_M-10to50',
-    #    path     = '{0}/DY4JetsToLL_M-10to50_madgraph'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'z4jets_m-10to50'
-    #   ),
-
-    cfg(data_name = 'DYJetsToLL_M-50', 
-        path      = '{0}/DYJetsToLL_M-50_amcatnlo_all_gen_tmp'.format(path),
-        #path      = '{0}/DYJetsToLL_M-50_amcatnlo_met_test'.format(path),
-        nJobs     = 51,
-        suffix    = 'zjets_m-50_amc'
-        ),
-
-    cfg(data_name = 'ZGTo2LG', 
-        path      = '{0}/ZGTo2LG_amcatnlo_all_gen'.format(path),
-        nJobs     = 51,
-        suffix    = 'zg_llg'
-        ),
-
-    # top
-    #cfg(data_name = 'ttbar_leptonic',
-    #    path     = '{0}/TTTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'ttbar_lep'
-    #   ),
+    #cfg(data_name = 'DYJetsToLL_M-50', 
+    #    path      = '{0}/DYJetsToLL_M-50_amcatnlo_all_gen_tmp'.format(path),
+    #    nJobs     = 51,
+    #    suffix    = 'zjets_m-50_amc'
+    #    ),
+    #cfg(data_name = 'ZGTo2LG', 
+    #    path      = '{0}/ZGTo2LG_amcatnlo_all_gen'.format(path),
+    #    nJobs     = 51,
+    #    suffix    = 'zg_llg'
+    #    ),
     #cfg(data_name = 'ttbar_inclusive',
     #    path     = '{0}/TT_powheg'.format(path),
     #    nJobs    = 51,
     #    suffix   = 'ttbar_inclusive'
     #   ),
-#    cfg(data_name = 'ttbar_semileptonic',
-#        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'ttbar_semilep'
-#       ),
-#     cfg(data_name = 'ttbar_leptonic',
-#         path     = '{0}/TTJets_DiLept_madgraph/all'.format(path),
-#         nJobs    = 50,
-#         suffix   = 'ttbar_lep'
-#        ),
-#    cfg(data_name = 'T_s-channel',
-#        path     = '{0}/Summer16_ST_s-channel_4f_leptonDecays_amcatnlo'.format(path),
-#        nJobs    = 10,
-#        suffix   = 't_s'
-#       ),
-#    cfg(data_name = 'Tbar_s-channel',
-#        path     = '{0}/'.format(path),
-#        nJobs    = 10,
-#        suffix   = 'tbar_s'
-#       ),
-    #cfg(data_name = 'T_t-channel',
-    #    path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_t'
-    #   ),
-    #cfg(data_name = 'Tbar_t-channel',
-    #    path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_t'
-    #   ),
-    #cfg(data_name = 'T_tW-channel',
-    #    path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 't_tw'
-    #   ),
-    #cfg(data_name = 'Tbar_tW-channel',
-    #    path     = '{0}/Summer16_ST_tW_antitop_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'tbar_tw'
-    #   ),
-
-    # W + jets
-    #cfg(data_name = 'W1JetsToLNu',
-    #    path     = '{0}/W1JetsToLNu_madgraph'.format(path),
-    #    nJobs    = 51,
-    #    suffix   = 'w1jets'
-    #   ),
-    #cfg(data_name = 'W2JetsToLNu',
-    #    path     = '{0}/W2JetsToLNu_madgraph'.format(path),
-    #    nJobs    = 51,
-    #    suffix   = 'w2jets'
-    #   ),
-    #cfg(data_name = 'W3JetsToLNu',
-    #    path     = '{0}/W3JetsToLNu_madgraph_tmp'.format(path),
-    #    nJobs    = 51,
-    #    suffix   = 'w3jets'
-    #   ),
-    #cfg(data_name = 'W4JetsToLNu',
-    #    path     = '{0}/W4JetsToLNu_madgraph_tmp'.format(path),
-    #    nJobs    = 51,
-    #    suffix   = 'w4jets'
-    #   ),
-
-    # Diboson
-    #cfg(data_name = 'WW',
-    #    path     = '{0}/WWTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'ww'
-    #   ),
-    #cfg(data_name = 'WZJetsTo2L2Q',
-    #    path     = '{0}/WZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 51,
-    #    suffix   = 'wz_2l2q'
-    #   ),
-    #cfg(data_name = 'WZJetsTo3LNu',
-    #    path     = '{0}/WZTo3LNu_powheg'.format(path),
-    #    nJobs    = 27,
-    #    suffix   = 'wz_3lnu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Nu',
-    #    path     = '{0}/ZZTo2L2Nu_powheg'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2nu'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo2L2Q',
-    #    path     = '{0}/ZZTo2L2Q_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_2l2q'
-    #   ),
-    #cfg(data_name = 'ZZJetsTo4L',
-    #    path     = '{0}/ZZTo4L_amcatnlo'.format(path),
-    #    nJobs    = 10,
-    #    suffix   = 'zz_4l'
-    #   ),
-    #cfg(data_name = 'GluGluHToZZTo4L',
-    #    path     = '{0}/GluGlu_HToZZTo4L'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'gluglu_h_zz_4l'
-    #   ),
-    #cfg(data_name = 'VBFHToZZTo4L',
-    #    path     = '{0}/VBF_HToZZTo4L'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'vbf_h_zz_4l'
-    #   ),
-    #cfg(data_name = 'GluGluHToZZTo2L2Q',
-    #    path     = '{0}/GluGluHToZZTo2L2Q_powheg'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'gluglu_h_zz_2l2q'
-    #   ),
-    #cfg(data_name = 'VBFHToZZTo2L2X',
-    #    path     = '{0}/VBF_HToZZTo2L2X'.format(path),
-    #    nJobs    = 50,
-    #    suffix   = 'vbf_h_zz_2l2x'
-    #   ),
-    ])
-
-path       = '/eos/uscms/store/user/jbueghly/sync_mc'
-sig_list = []
-sig_list.extend([
-#    cfg(data_name = 'zjpsi_singlet',
-#        path      = '{0}/zjpsi_singlet'.format(path),
-#        nJobs     = 5,
-#        suffix    = 'zjpsi_singlet'
-#        ),
-    cfg(data_name = 'hzg_gluglu',
-        path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
-        nJobs     = 9,
-        suffix    = 'hzg_gluglu'
-        ),
-    cfg(data_name = 'hzg_vbf',
-        path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
-        nJobs     = 26,
-        suffix    = 'hzg_vbf'
-        ),
-    cfg(data_name = 'hzg_wplus',
-        path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
-        nJobs     = 61,
-        suffix    = 'hzg_wh'
-        ),
-    cfg(data_name = 'hzg_wminus',
-        path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
-        nJobs     = 59,
-        suffix    = 'hzg_wh'
-        ),
-    cfg(data_name = 'hzg_zh',
-        path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
-        nJobs     = 60,
-        suffix    = 'hzg_zh'
-        ),
-    cfg(data_name = 'hzg_tth',
-        path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
-        nJobs     = 40, 
-        suffix    = 'hzg_tth'
-        ),
-    #cfg(data_name = 'zg_llg',
-    #    path      = '{0}/ZGTo2LG_amcatnlo'.format(path),
-    #    nJobs     = 26,
-    #    suffix    = 'zg_llg'
+    #cfg(data_name = 'hzg_gluglu',
+    #    path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
+    #    nJobs     = 9,
+    #    suffix    = 'hzg_gluglu'
     #    ),
+    #cfg(data_name = 'hzg_vbf',
+    #    path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
+    #    nJobs     = 26,
+    #    suffix    = 'hzg_vbf'
+    #    ),
+    #cfg(data_name = 'hzg_wplus',
+    #    path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
+    #    nJobs     = 61,
+    #    suffix    = 'hzg_wplus'
+    #    ),
+    #cfg(data_name = 'hzg_wminus',
+    #    path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
+    #    nJobs     = 59,
+    #    suffix    = 'hzg_wminus'
+    #    ),
+    #cfg(data_name = 'hzg_zh',
+    #    path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
+    #    nJobs     = 60,
+    #    suffix    = 'hzg_zh'
+    #    ),
+    #cfg(data_name = 'hzg_tth',
+    #    path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
+    #    nJobs     = 40, 
+    #    suffix    = 'hzg_tth'
+    #    ),
+    #cfg(data_name = 'htautau_gluglu',
+    #    path      = '{0}/GluGluHToTauTau_M125_13TeV_powheg_RunIISummer16_v6-v3'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'htautau_gluglu'
+    #    ),
+    #cfg(data_name = 'htautau_vbf',
+    #    path      = '{0}/VBFHToTauTau_M125_13TeV_powheg_RunIISummer16_v6-v2'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'htautau_vbf'
+    #    ),
+
+    # LEGACY
+    cfg(data_name = 'DYJetsToLL_M-50_16', 
+        path      = '{0}/DYJetsToLL_M-50_amcatnlo_RunIISummer16MiniAODv3_tmp'.format(path),
+        nJobs     = 50,
+        suffix    = 'zjets_m-50_amc_16'
+        ),
+    cfg(data_name = 'ZGToLLG_16', 
+        path      = '{0}/ZGToLLG_01J_LoosePtlPtg_5f_13TeV-amcatnloFXFX_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50,
+        suffix    = 'zg_llg_16'
+        ),
+
+    cfg(data_name = 'hzg_gluglu_M125_16',
+        path      = '{0}/GluGluHToZG_M-125_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_gluglu_M125_16'
+        ),
+    cfg(data_name = 'hzg_vbf_M125_16',
+        path      = '{0}/VBFHToZG_M-125_13TeV_powheg_RunIISummer16MiniAODv3_v3_ext'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_vbf_M125_16'
+        ),
+    cfg(data_name = 'hzg_wplush_M125_16',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wplush_M125_16'
+        ),
+    cfg(data_name = 'hzg_wminush_M125_16',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wminush_M125_16'
+        ),
+    cfg(data_name = 'hzg_zh_M125_16',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_zh_M125_16'
+        ),
+    cfg(data_name = 'hzg_tth_M125_16',
+        path      = '{0}/ttHToZG_ZToLL_M125_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 50, 
+        suffix    = 'hzg_tth_M125_16'
+        ),
+    
+    cfg(data_name = 'hzg_gluglu_M120_16',
+        path      = '{0}/GluGluHToZG_M-120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 4,
+        suffix    = 'hzg_gluglu_M120_16'
+        ),
+    cfg(data_name = 'hzg_vbf_M120_16',
+        path      = '{0}/VBFHToZG_M-120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 3,
+        suffix    = 'hzg_vbf_M120_16'
+        ),
+    cfg(data_name = 'hzg_wplush_M120_16',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1,
+        suffix    = 'hzg_wplush_M120_16'
+        ),
+    cfg(data_name = 'hzg_wminush_M120_16',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1,
+        suffix    = 'hzg_wminush_M120_16'
+        ),
+    cfg(data_name = 'hzg_zh_M120_16',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 2,
+        suffix    = 'hzg_zh_M120_16'
+        ),
+    cfg(data_name = 'hzg_tth_M120_16',
+        path      = '{0}/ttHToZG_ZToLL_M120_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1, 
+        suffix    = 'hzg_tth_M120_16'
+        ),
+    
+    cfg(data_name = 'hzg_gluglu_M130_16',
+        path      = '{0}/GluGluHToZG_M-130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 5,
+        suffix    = 'hzg_gluglu_M130_16'
+        ),
+    cfg(data_name = 'hzg_vbf_M130_16',
+        path      = '{0}/VBFHToZG_M-130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 3,
+        suffix    = 'hzg_vbf_M130_16'
+        ),
+    cfg(data_name = 'hzg_wplush_M130_16',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 2,
+        suffix    = 'hzg_wplush_M130_16'
+        ),
+    cfg(data_name = 'hzg_wminush_M130_16',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1,
+        suffix    = 'hzg_wminush_M130_16'
+        ),
+    cfg(data_name = 'hzg_zh_M130_16',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1,
+        suffix    = 'hzg_zh_M130_16'
+        ),
+    cfg(data_name = 'hzg_tth_M130_16',
+        path      = '{0}/ttHToZG_ZToLL_M130_13TeV_powheg_RunIISummer16MiniAODv3'.format(path),
+        nJobs     = 1, 
+        suffix    = 'hzg_tth_M130_16'
+        ),
+
     ])
 
-batch_list = []
-batch_list += data_list
-batch_list += mc_list
-batch_list += sig_list
+batch_16_samples = []
+if selection == 'mumug':
+    batch_16_samples += muon_data_16
+elif selection == 'elelg':
+    batch_16_samples += electron_data_16
+batch_16_samples += mc_16
 
-#batch = bm.BatchMaster(configList = data_list, 
-#                      shortQueue = False,
-#                      stageDir   = 'batch',
-#                      executable = executable,
-#                      selection  = selection,
-#                      location   = 'lpc'
-#                     )
-batch = bm.BatchMaster(config_list = batch_list, 
+batch_16 = bm.BatchMaster(config_list = batch_16_samples, 
                        stage_dir   = 'batch',
                        selection   = selection,
-                       period      = period,
+                       period      = 2016,
                        executable  = executable,
                        location    = 'lpc'
                      )
-batch.submit_to_batch()
 
+#path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
+muon_data_17 = []
+muon_data_17.extend([
+
+    # double muon 2017
+    cfg(data_name = 'muon_2017B',
+        path     = '{0}/DoubleMuon_Run2017B-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'muon_2017B'
+       ),
+    cfg(data_name = 'muon_2017C',
+        path     = '{0}/DoubleMuon_Run2017C-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'muon_2017C'
+       ),
+    cfg(data_name = 'muon_2017D',
+        path     = '{0}/DoubleMuon_Run2017D-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'muon_2017D'
+       ),
+    cfg(data_name = 'muon_2017E',
+        path     = '{0}/DoubleMuon_Run2017E-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'muon_2017E'
+       ),
+    cfg(data_name = 'muon_2017F',
+        path     = '{0}/DoubleMuon_Run2017F-31Mar2018-v1/'.format(path),
+        nJobs    = 51,
+        suffix   = 'muon_2017F'
+       ),
+    ])
+
+electron_data_17 = []
+electron_data_17.extend([
+    
+    # DoubleEG 2017
+    cfg(data_name = 'electron_2017B',
+        path     = '{0}/DoubleEG_Run2017B-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2017B'
+       ),
+    cfg(data_name = 'electron_2017C',
+        path     = '{0}/DoubleEG_Run2017C-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2017C'
+       ),
+    cfg(data_name = 'electron_2017D',
+        path     = '{0}/DoubleEG_Run2017D-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2017D'
+       ),
+    cfg(data_name = 'electron_2017E',
+        path     = '{0}/DoubleEG_Run2017E-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2017E'
+       ),
+    cfg(data_name = 'electron_2017F',
+        path     = '{0}/DoubleEG_Run2017F-31Mar2018-v1/'.format(path),
+        nJobs    = 50,
+        suffix   = 'electron_2017F'
+       ),
+   ])
+
+mc_17 = []
+mc_17.extend([
+    cfg(data_name = 'DYJetsToLL_M-50_2017',
+        path      = '{0}/DYJetsToLL_M-50_amcatnlo_Fall17_v14_ext1-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'zjets_m-50_2017'
+        ),
+
+    cfg(data_name = 'hzg_gluglu_m-120_2017',
+        path      = '{0}/GluGluHToZG_ZToLL_M-120_13TeV_powheg_Fall17_v14_ext1-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_gluglu_m-120_2017'
+        ),
+    cfg(data_name = 'hzg_vbf_m-120_2017',
+        path      = '{0}/VBFHToZG_ZToLL_M-120_13TeV_powheg_Fall17_v14_ext1-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_vbf_m-120_2017'
+        ),
+    cfg(data_name = 'hzg_wplush_m-120_2017',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wplush_m-120_2017'
+        ),
+    cfg(data_name = 'hzg_wminush_m-120_2017',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wminush_m-120_2017'
+        ),
+    cfg(data_name = 'hzg_zh_m-120_2017',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_zh_m-120_2017'
+        ),
+    cfg(data_name = 'hzg_tth_m-120_2017',
+        path      = '{0}/ttHToZG_ZToLL_M120_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50, 
+        suffix    = 'hzg_tth_m-120_2017'
+        ),
+
+    cfg(data_name = 'hzg_gluglu_m-125_2017',
+        path      = '{0}/GluGluHToZG_ZToLL_M-125_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_gluglu_m-125_2017'
+        ),
+    cfg(data_name = 'hzg_vbf_m-125_2017',
+        path      = '{0}/VBFHToZG_ZToLL_M-125_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_vbf_m-125_2017'
+        ),
+    cfg(data_name = 'hzg_wplush_m-125_2017',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToAll_M125_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wplush_m-125_2017'
+        ),
+    cfg(data_name = 'hzg_wminush_m-125_2017',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToAll_M125_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wminush_m-125_2017'
+        ),
+    cfg(data_name = 'hzg_zh_m-125_2017',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToAll_M-125_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_zh_m-125_2017'
+        ),
+    cfg(data_name = 'hzg_tth_m-125_2017',
+        path      = '{0}/ttHToZG_ZToLL_M125_13TeV_powheg_pythia8_Fall17_v14-v1/'.format(path),
+        nJobs     = 50, 
+        suffix    = 'hzg_tth_m-125_2017'
+        ),
+    
+    cfg(data_name = 'hzg_gluglu_m-130_2017',
+        path      = '{0}/GluGluHToZG_ZToLL_M-130_13TeV_powheg_Fall17_v14_ext1-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_gluglu_m-130_2017'
+        ),
+    #cfg(data_name = 'hzg_vbf_m-130_2017',
+    #    path      = '{0}/VBFHToZG_ZToLL_M-130_13TeV_powheg_Fall17_v14-v1/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_vbf_m-130_2017'
+    #    ),
+    cfg(data_name = 'hzg_wplush_m-130_2017',
+        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wplush_m-130_2017'
+        ),
+    cfg(data_name = 'hzg_wminush_m-130_2017',
+        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_wminush_m-130_2017'
+        ),
+    cfg(data_name = 'hzg_zh_m-130_2017',
+        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_Fall17_v14-v1/'.format(path),
+        nJobs     = 50,
+        suffix    = 'hzg_zh_m-130_2017'
+        ),
+    #cfg(data_name = 'hzg_tth_m-130_2017',
+    #    path      = '{0}/ttHToZG_ZToLL_M130_13TeV_powheg_pythia8_Fall17_v14-v1/'.format(path),
+    #    nJobs     = 50, 
+    #    suffix    = 'hzg_tth_m-130_2017'
+    #    ),
+    ])
+
+
+batch_17_samples = []
+#if selection == 'mumug':
+#    batch_17_samples += muon_data_17
+#elif selection == 'elelg':
+#    batch_17_samples += electron_data_17
+batch_17_samples += mc_17
+
+batch_17 = bm.BatchMaster(config_list = batch_17_samples, 
+                       stage_dir   = 'batch',
+                       selection   = selection,
+                       period      = 2017,
+                       executable  = executable,
+                       location    = 'lpc'
+                     )
+
+muon_data_18 = []
+muon_data_18.extend([
+    
+    cfg(data_name = 'muon_2018A',
+        path      = '{0}/DoubleMuon_Run2018A-17Sep2018-v2'.format(path),
+        nJobs     = 50,
+        suffix    = 'muon_2018A'
+       ),
+    cfg(data_name = 'muon_2018B',
+        path      = '{0}/DoubleMuon_Run2018B-17Sep2018-v1'.format(path),
+        nJobs     = 50,
+        suffix    = 'muon_2018B'
+       ),
+    cfg(data_name = 'muon_2018C',
+        path      = '{0}/DoubleMuon_Run2018C-17Sep2018-v1'.format(path),
+        nJobs     = 50,
+        suffix    = 'muon_2018C'
+       ),
+    cfg(data_name = 'muon_2018D',
+        path      = '{0}/DoubleMuon_Run2018D-PromptReco-v2'.format(path),
+        nJobs     = 50,
+        suffix    = 'muon_2018D'
+       ),
+    ])
+
+#electron_data_18 = []
+#electron_data_18.extend([
+#
+#    cfg(data_name = 'electron_2018A', 
+#        path      = '{0}/'.format(path),
+#        nJobs     = 50,
+#        suffix    = 'electron_2018A'
+#        ),
+#    cfg(data_name = 'electron_2018B', 
+#        path      = '{0}/'.format(path),
+#        nJobs     = 50,
+#        suffix    = 'electron_2018B'
+#        ),
+#    cfg(data_name = 'electron_2018C', 
+#        path      = '{0}/'.format(path),
+#        nJobs     = 50,
+#        suffix    = 'electron_2018C'
+#        ),
+#    cfg(data_name = 'electron_2018D', 
+#        path      = '{0}/'.format(path),
+#        nJobs     = 50,
+#        suffix    = 'electron_2018D'
+#        ),
+#    ])
+
+#mc_18 = []
+#mc_18.extend([
+#
+#            ])
+
+batch_18_samples = []
+if selection == 'mumug':
+    batch_18_samples += muon_data_18
+#elif selection == 'elelg':
+    #batch_18_samples += electron_data_18
+#batch_18_samples += mc_18
+
+batch_18 = bm.BatchMaster(config_list = batch_18_samples, 
+                       stage_dir   = 'batch',
+                       selection   = selection,
+                       period      = 2018,
+                       executable  = executable,
+                       location    = 'lpc'
+                     )
+
+if 2016 in periods:
+    batch_16.submit_to_batch()
+
+if 2017 in periods:
+    batch_17.submit_to_batch()
+
+if 2018 in periods:
+    batch_18.submit_to_batch()

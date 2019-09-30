@@ -137,12 +137,16 @@ public:
     Float_t met, metPhi, metNC, metPhiNC, ht, htPhi, htSum;
 
     // generator level data
+
+    UInt_t nGenPhotons;
     Float_t genLeptonOnePt, genLeptonOneEta, genLeptonOnePhi;
     Float_t genLeptonTwoPt, genLeptonTwoEta, genLeptonTwoPhi;
     Float_t genPhotonPt, genPhotonEta, genPhotonPhi;
     Int_t genLeptonOneId, genLeptonTwoId;
     Bool_t genPhotonFHPFS, genPhotonIPFS;
     Bool_t vetoDY;
+    Int_t phoMotherId;
+    Bool_t phoMotherFHPFS, phoMotherIPFS; 
 
     // dilepton data
     Float_t dileptonPt, dileptonEta, dileptonPhi, dileptonM;
@@ -179,7 +183,8 @@ public:
 
     // other
     Float_t llgJJDEta, llgJJDPhi, llgJJDR;
-    Float_t zepp;
+    Float_t zepp, photonZepp;
+    Bool_t jetOneMatched, jetTwoMatched;
 
     //ClassDef(hzgAnalyzer,0);
 };

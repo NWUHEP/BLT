@@ -17,13 +17,15 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-# data_samples = ['single_mu', 'single_el']
-# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+data_samples = [ ] #'single_mu', 'single_el']
+mc_samples   = [ 'zjets' ] #'ttbar', 'wjets', 'zjets', 't', 'diboson']
 ## mc_samples.append('ttbar_systematics')
 # mc_samples.append('hzg')
+# mc_samples.append('htautau')
+# mc_samples.append('zetau')
 
-data_samples = []
-mc_samples   = ['ttbar','ttbar_systematics']
+# data_samples = []
+# mc_samples   = ['ttbar','ttbar_systematics']
 ''' 
     Set job configurations.  
 '''
@@ -397,12 +399,35 @@ mc_dict['hzg'] = [
         suffix    = 'hzg_tth'
         ),
     ]
+path = '/eos/uscms/store/group/lpcbacon/jbueghly'
+mc_dict['htautau'] = [
+    cfg(data_name = 'htautau_gluglu',
+        path      = '{0}/GluGluHToTauTau_M125_13TeV_powheg_RunIISummer16_v6-v3'.format(path),
+        nJobs     = 20,
+        suffix    = 'htautau_gluglu'
+        ),
+    # cfg(data_name = 'htautau_vbf',
+    #     path      = '{0}/VBFHToTauTau_M125_13TeV_powheg_RunIISummer16_v6-v2'.format(path),
+    #     nJobs     = 20,
+    #     suffix    = 'htautau_vbf'
+    #     ),
+    ]
+
+path = '/eos/uscms/store/user/mmackenz/private_mc/2016'
+mc_dict['zetau'] = [
+    cfg(data_name = 'zetau',
+        path      = '{0}/ZToETau_13TeV_Tauola_TuneCUETP8M1_RunII2016'.format(path),
+        nJobs     = 1,
+        suffix    = 'zetau'
+        ),
+    ]
+
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 
 batch = bm.BatchMaster(config_list = batch_list, 
                        stage_dir   = 'batch',
-                       output_dir  = '/store/user/zchen/batchout',
+                       output_dir  = '/store/user/mmackenz/batch_output',
                        selection   = selection,
                        period      = period,
                        executable  = executable,

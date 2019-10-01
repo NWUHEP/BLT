@@ -107,6 +107,7 @@ public:
     UInt_t nPartons;
     Float_t genWeight;
     UInt_t genCategory;
+    UInt_t nGenElectrons, nGenMuons, nGenTausHad, nGenTausLep;
 
     // weights and uncertainties
     Float_t eventWeight;
@@ -128,7 +129,7 @@ public:
     Float_t covMet00, covMet01, covMet11;
     
     // object counters
-    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets, nGenTausHad, nGenTausLep;
+    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets;
     UInt_t nFailMuons, nFailElectrons;
 
     //SVFit variables

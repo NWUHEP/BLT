@@ -144,6 +144,9 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
         tree->Branch("nBJets", &nBJets);
         tree->Branch("nGenTausHad", &nGenTausHad);
         tree->Branch("nGenTausLep", &nGenTausLep);
+        tree->Branch("nGenElectrons", &nGenElectrons);
+        tree->Branch("nGenMuons", &nGenMuons);
+
         // ht,met
         tree->Branch("htSum", &htSum);
         tree->Branch("ht", &ht);
@@ -345,6 +348,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
         }
         nGenTausHad = genTausHad.size();
         nGenTausLep = genTausLep.size();
+	nGenElectrons = genElectrons.size();
+	nGenMuons = genMuons.size();
     } else {
         genWeight = 1.0;
         nPU = 0;

@@ -7,6 +7,7 @@
 <bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
 <bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin>
 <bin file="ZTauTauAnalyzer.cc" name="ZTauTauAnalyzer"></bin>
+<bin file="GenTauTauAnalyzer.cc" name="GenTauTauAnalyzer"></bin>
 
 
 

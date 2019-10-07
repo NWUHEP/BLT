@@ -68,9 +68,15 @@ void MultilepAnalyzer::Begin(TTree *tree)
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
-    string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
-    // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/LSforPath_HLT_Ele27_WPTight_Gsf_withLowestSeed_L1_SingleIsoEG26_OR_L1_SingleIsoEG28.json";
-    // string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
+
+    string jsonFileName = "";
+    if (params->period == "2016") {
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
+    }
+    if (params->period == "2017"){
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
+    }
+    cout<< jsonFileName <<endl;
     lumiMask.AddJSONFile(jsonFileName);
     
 

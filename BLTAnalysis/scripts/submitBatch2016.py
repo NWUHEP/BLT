@@ -16,6 +16,7 @@ cfg        = bm.JobConfig
 executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
+analyzer   = 'MultilepAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
@@ -409,6 +410,7 @@ batch = bm.BatchMaster(config_list = batch_list,
                        selection   = selection,
                        period      = period,
                        executable  = executable,
-                       location    = 'lpc'
+                       location    = 'lpc',
+                       analyzer    = analyzer
                      )
 batch.submit_to_batch()

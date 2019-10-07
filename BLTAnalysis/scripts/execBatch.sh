@@ -10,6 +10,7 @@ SUFFIX=$3
 SELECTION=$4
 PERIOD=$5
 OUTDIR=$6
+ANALYZER=$7
 
 ### Transfer files, prepare directory ###
 TOPDIR=$PWD
@@ -43,10 +44,10 @@ pwd
 cat input.txt
 
 ### Run the analyzer
-#MultilepAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+$ANALYZER input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #ZTauTauAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #TauAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
-ZEEAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#ZEEAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 ### Copy output and cleanup ###
 # cp output_${DATANAME}_${COUNT}.root ${_CONDOR_SCRATCH_DIR}

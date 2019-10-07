@@ -21,13 +21,14 @@ class JobConfig():
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, config_list, stage_dir, output_dir, selection, period, executable='execBatch.sh', location='lpc'):
+    def __init__(self, config_list, stage_dir, output_dir, selection, period, analyzer, executable='execBatch.sh', location='lpc'):
         self._current     = os.path.abspath('.')
         self._stage_dir   = stage_dir
         self._output_dir  = output_dir
         self._config_list = config_list
         self._selection   = selection
         self._period      = period
+        self.analyzer     = analyzer
         self._executable  = executable
         self._location    = location
     
@@ -88,7 +89,7 @@ class BatchMaster():
 
             ### set output directory
 
-            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir))
+            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5} {6}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir, self.analyzer))
             batch_tmp.write('Executable            = {0}\n'.format(self._executable))
             batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._data_name, i+1))
             batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._data_name, i+1))

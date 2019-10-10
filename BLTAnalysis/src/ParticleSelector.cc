@@ -401,18 +401,18 @@ bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName)
     bool phoPass = false;
     if (_parameters.period == "2016") {
         if (idName == "loose") {
-            if (ph->mva > 0.2 || ph->mvaSpring16) {
+            if (ph->mva > 0.2 || ph->mvaSpring16 > 0.2) {
                 phoPass = true;
             }
         }
         else if (idName == "tight") {
             if (fabs(ph->scEta) <= 1.479) { // barrel
-                if (ph->mva > 0.68 || ph->mvaSpring16) {
+                if (ph->mva > 0.68 || ph->mvaSpring16 > 0.2) {
                     phoPass = true;
                 }
             }
             else { //endcap
-                if (ph->mva > 0.60 || ph->mvaSpring16) {
+                if (ph->mva > 0.60 || ph->mvaSpring16 > 0.2) {
                     phoPass = true;
                 }
             }

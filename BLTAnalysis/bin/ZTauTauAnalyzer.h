@@ -113,7 +113,7 @@ public:
     Float_t eventWeight;
 
     // lepton variable
-    TLorentzVector leptonOneP4, leptonTwoP4, photonP4;
+    TLorentzVector leptonOneP4, leptonTwoP4, photonP4;    
     Float_t leptonOneIso, leptonTwoIso, photonMVA;
     Int_t leptonOneFlavor, leptonTwoFlavor;
 
@@ -135,6 +135,7 @@ public:
     //SVFit variables
     Float_t massSVFit, massErrSVFit;
     Int_t svFitStatus;
+    TLorentzVector leptonOneSVP4, leptonTwoSVP4; //corrected lorentz vectors    
     ////////////////////////////////
 
 

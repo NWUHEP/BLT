@@ -84,9 +84,61 @@ data_dict['single_el'] = [
 
 
 
-mc_dict['zjets'] = [] # need reformate folder
+mc_dict['zjets'] = [
+    cfg(data_name = 'DY0JetsToLL',
+       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       nJobs    = 20,
+       suffix   = 'DY0JetsToLL'
+      ),
+    cfg(data_name = 'DY1JetsToLL',
+       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       nJobs    = 20,
+       suffix   = 'DY1JetsToLL'
+      ),
+    cfg(data_name = 'DY2JetsToLL',
+       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       nJobs    = 20,
+       suffix   = 'DY2JetsToLL'
+      ),
+] # need reformate folder
 
-mc_dict['wjets'] = [] # need jet binned
+mc_dict['wjets'] = [
+      cfg(data_name = 'WJetsToLNu_HT_100To200',
+        path     = '{0}/WJetsToLNu_HT_100To200_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_100To200'
+        ), 
+        
+      cfg(data_name = 'WJetsToLNu_HT_200To400',
+        path     = '{0}/WJetsToLNu_HT_200To400_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_200To400'
+        ), 
+      
+      cfg(data_name = 'WJetsToLNu_HT_400To600',
+        path     = '{0}/WJetsToLNu_HT_400To600_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_400To600'
+        ), 
+        
+      cfg(data_name = 'WJetsToLNu_HT_600To800',
+        path     = '{0}/WJetsToLNu_HT_600To800_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_600To800'
+        ), 
+      cfg(data_name = 'WJetsToLNu_HT_800To1200',
+        path     = '{0}/WJetsToLNu_HT_800To1200_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_800To1200'
+        ), 
+        
+      cfg(data_name = 'WJetsToLNu_HT_1200To2500',
+        path     = '{0}/WJetsToLNu_HT_1200To2500_TuneCP5_13TeV'.format(path),
+        nJobs    = 50,
+        suffix   = 'WJetsToLNu_HT_1200To2500'
+        ), 
+
+] # need jet binned
 
 mc_dict['diboson'] = [
       cfg(data_name = 'ww',

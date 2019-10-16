@@ -29,23 +29,40 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
     // offline jet corrections on-the-fly
     vector<string> ds = split(parameters.datasetgroup, '_');
-    string datasetname = ds[0];
+    std::string datasetname = ds[0];
     const std::string cmssw_base = getenv("CMSSW_BASE");
     if (datasetname == "muon" || datasetname == "electron") { // data 
         // jet energy corrections
-        string runPeriod   = ds[1];
-        cout << datasetname << " " << runPeriod << endl;
+        std::string runPeriod = ds[1];
+        std::string jecPath = "";
+        cout << "-- load jet energy correction, dataset=" << datasetname << " ,period=" << runPeriod << endl;
         if (runPeriod == "2016B" || runPeriod == "2016C" || runPeriod == "2016D") {
-            runPeriod = "BCD";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016BCDV4_DATA/Summer16_23Sep2016BCDV4_DATA";
         } else if (runPeriod == "2016E" || runPeriod == "2016F") {
-            runPeriod = "EF";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016EFV4_DATA/Summer16_23Sep2016EFV4_DATA";
         } else if (runPeriod == "2016G") {
-            runPeriod = "G";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016GV4_DATA/Summer16_23Sep2016GV4_DATA";
         } else if (runPeriod == "2016H") {
-            runPeriod = "H";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016HV4_DATA/Summer16_23Sep2016HV4_DATA";
+        } else if (runPeriod == "2017B") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017B_V32_DATA/Fall17_17Nov2017B_V32_DATA";
+        } else if (runPeriod == "2017C") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017C_V32_DATA/Fall17_17Nov2017C_V32_DATA";
+        } else if (runPeriod == "2017D"|| runPeriod == "2017E") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017DE_V32_DATA/Fall17_17Nov2017DE_V32_DATA";
+        } else if (runPeriod == "2017F") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017F_V32_DATA/Fall17_17Nov2017F_V32_DATA";
+        } else if (runPeriod == "2018A") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Autumn18_RunA_V8_DATA/Autumn18_RunA_V8_DATA";
+        } else if (runPeriod == "2018B") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Autumn18_RunB_V8_DATA/Autumn18_RunB_V8_DATA";
+        } else if (runPeriod == "2018C") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Autumn18_RunC_V8_DATA/Autumn18_RunC_V8_DATA";
+        } else if (runPeriod == "2018D") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Autumn18_RunD_V8_DATA/Autumn18_RunD_V8_DATA";
         }
 
-        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
+        
         std::cout << jecPath << std::endl;
         JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
         JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
@@ -68,7 +85,18 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
     } else { // MC 
         // jet energy corrections
-        std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
+        std::string period = parameters.period; // 2016,17,18
+
+        std::string jecPath = "";
+        if (period=="2016") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
+        } else if (period=="2017") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017_V32_MC/Fall17_17Nov2017_V32_MC";
+        } else if (period=="2018") {
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Autumn18_V8_MC/Autumn18_V8_MC";
+        }
+            
+
         std::cout << jecPath << std::endl;
         JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(jecPath + "_L2L3Residual_AK4PFchs.txt"); 
         JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(jecPath + "_L3Absolute_AK4PFchs.txt");
@@ -90,8 +118,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
 
         // jet energy resolution
-        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");
-        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
+        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
+        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
 
         // b tag scale factor and uncertainty payload files
         vector<string> btagUncSources {
@@ -110,13 +138,13 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
                                        "down_ptrel", "down_statistic"
                                       };
 
-        btagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
+        btagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/btag/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
         btagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", btagUncSources);
         btagReader->load(*btagCalibrator, BTagEntry::FLAV_B, "mujets");    
         btagReader->load(*btagCalibrator, BTagEntry::FLAV_C, "mujets");    
 
         // mistag scale factor and uncertainty payload files
-        mistagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Moriond17_B_H.csv");
+        mistagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/btag/CSVv2_Moriond17_B_H.csv");
         mistagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
         mistagReader->load(*mistagCalibrator, BTagEntry::FLAV_UDSG, "incl");    
     }

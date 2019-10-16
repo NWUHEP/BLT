@@ -65,28 +65,28 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
     // Weight utility class
     cout<< "Weight utility class"<<endl;
+    cout<< "-- period " << params->period << ", selection " << params->selection <<endl;
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
-
     string jsonFileName = "";
     if (params->period == "2016") {
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
     }
     if (params->period == "2017"){
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
     }
-    cout<< jsonFileName <<endl;
+    cout<< "-- use lumi mask: " << jsonFileName <<endl;
     lumiMask.AddJSONFile(jsonFileName);
     
 
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
+    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3");
 
     // electron scale corrections
     cout<< "electron scale corrections"<<endl;
-    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data");
+    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data/electron_es");
 
     // Prepare the output tree
     cout<< "Prepare the output tree"<<endl;
@@ -862,6 +862,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 && !tauOverlap
             ) {
             if (isData){
+                // std::cout<<jet->pt<<std::endl;
                 // for data pass pt threshold
                 if (jet->pt > 30){
                     ++nJets;
@@ -882,6 +883,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     // sort jet by higher btag
     // std::sort(jets .begin(), jets .end(), sort_by_btag<TJet>);
+    
 
     // use the highest jet multiplicities given all systematic variations
     unsigned nJetList[] = {nJets, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown};
@@ -890,7 +892,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     // cut are maximum of counters which systematic variation
     nJetsCut  = *std::max_element(nJetList, nJetList+sizeof(nJetList)/sizeof(unsigned));
     nBJetsCut = *std::max_element(nBJetList, nBJetList+sizeof(nBJetList)/sizeof(unsigned));
-
+    // std::cout<<nJetsCut<<", "<<nBJetsCut<<std::endl;
     // save ht
     htSum = sumJetPt;
     ht    = hadronicP4.Pt();
@@ -899,7 +901,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     /* -------- MET ---------*/
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
-
+ 
 
     ///////////////////////////////
     /* Apply analysis selections */
@@ -948,11 +950,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
                 triggered.set(1);
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered.set(0); 
+
         if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
-
+        eventCounts[channel]->Fill(5);
+        
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1060,11 +1066,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
                 triggered.set(1);
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered.set(0); 
+
         if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
-
+        eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1181,11 +1190,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
                 triggered.set(1);
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered.set(0); 
+        
         if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
         if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
         if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
-
+        eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1300,9 +1312,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1397,9 +1412,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1493,9 +1511,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1590,9 +1611,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1671,9 +1695,13 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
+
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1748,9 +1776,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1825,9 +1856,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1904,9 +1938,12 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        if (params->period != "2016") triggered = true; 
+        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
-
+        eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 

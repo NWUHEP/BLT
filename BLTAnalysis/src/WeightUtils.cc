@@ -29,7 +29,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
     // PU weights
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup/pileup_sf_2016_full.root";
     TFile* puFile = new TFile(fileName.c_str(), "OPEN");
     _puReweight = (TGraph*)puFile->Get("pileup_sf");
 
@@ -130,16 +130,16 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_MC").c_str());
 
     // electron trigger efficiencies (BCDEF and GH)
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/TriggerSF_Run2016BCDEF_v1.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_trigger/TriggerSF_Run2016BCDEF_v1.root";
     TFile* elTriggerFile_BCDEF = new TFile(fileName.c_str(), "OPEN");
     _elSF_Trigger_BCDEF = (TH2D*)elTriggerFile_BCDEF->Get("Ele27_WPTight_Gsf");
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/TriggerSF_Run2016GH_v1.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_trigger/TriggerSF_Run2016GH_v1.root";
     TFile* elTriggerFile_GH = new TFile(fileName.c_str(), "OPEN");
     _elSF_Trigger_GH = (TH2D*)elTriggerFile_GH->Get("Ele27_WPTight_Gsf");
 
     // electron reco efficiencies 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_iso/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
     _eleSF_RECO->Sort();
@@ -157,7 +157,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     //_eleSF_RECO[4] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_3");
 
     // electron id efficiencies
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/egamma_eff_ID_2016.root";
     TFile* f_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_ID[0] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_0");
     _eleSF_ID[1] = (TGraphErrors*)f_eleIdSF->Get("grSF1D_1");
@@ -182,7 +182,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _mva_gammaSF = (TH2F *)f_mva_gammaIdSF->Get("EGamma_SF2D");
 
     // photon r9 reweighting
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9_reweighting_2016.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_iso/photon_r9_reweighting_2016.root";
     TFile* f_photon_r9 = new TFile(fileName.c_str(), "OPEN"); 
     _photon_r9_barrel = (TGraph *)f_photon_r9->Get("transffull5x5R9EB");
     _photon_r9_endcap = (TGraph *)f_photon_r9->Get("transffull5x5R9EE");

@@ -3,6 +3,7 @@ import BLT.BLTAnalysis.BatchMaster as bm
 
 import sys
 #MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/SingleMuonRun2017B_17Nov2017_v1/SingleMuonRun2017B_17Nov2017_v1_0.root 10000 muon_2017B muon_2017B single_lepton 2017 1
+#MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_0.root 10000 ttbar_2l2nu ttbar_2l2nu single_lepton 2017 1
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig

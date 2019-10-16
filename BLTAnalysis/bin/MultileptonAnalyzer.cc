@@ -172,6 +172,11 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("puVar", &puVar);
         tree->Branch("triggerVar", &triggerVar);
 
+        if (channel == "ee" || channel == "etau" || channel == "emu" || channel == "e4j") {
+            tree->Branch("eleTriggerVarTagSyst", &eleTriggerVarTagSyst);
+            tree->Branch("eleTriggerVarProbeSyst", &eleTriggerVarProbeSyst);
+        }
+
         // met and ht
         tree->Branch("met", &met);
         tree->Branch("metPhi", &metPhi);
@@ -197,6 +202,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonTwoGenId", &leptonTwoGenId);
         tree->Branch("leptonTwoD0", &leptonTwoD0);
         tree->Branch("leptonTwoDZ", &leptonTwoDZ);
+
 
         if (
             channel == "mutau" || channel == "etau" 
@@ -613,12 +619,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // WW pt weights
         if (params->datasetgroup.substr(0, 5) == "ww_qq") {
             wwPtWeight = weights->GetWWPtWeight(wwP4.Pt(), wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown);
-            //cout << wwPtWeight 
-            //    << ", " << wwPtScaleUp  
-            //    << ", " << wwPtScaleDown  
-            //    << ", " << wwPtResumUp  
-            //    << ", " << wwPtResumDown  
-            //    << endl;
         }
 
         // pileup reweighting
@@ -1235,18 +1235,27 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronOneP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
             } else if (triggered.test(0)) {
                 effCont       = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
                 effs          = effCont.GetEff();
                 errs          = effCont.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronOneP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
             } else if (triggered.test(1)) {
                 effCont       = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
                 effs          = effCont.GetEff();
                 errs          = effCont.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronTwoP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronTwoP4);
             } else {
                 return kTRUE;
             }
@@ -1370,6 +1379,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else if (triggered.test(0)) {
                 effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
                 effs          = effCont.GetEff();
@@ -1382,6 +1394,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 errs          = effCont.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else {
                 return kTRUE;
             }
@@ -1470,7 +1485,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 leptonTwoIDVar    = 0.05;
             } else {
                 leptonTwoIDWeight = 1.;
-                leptonTwoIDVar    = 0.0001;
+                leptonTwoIDVar    = 0.01;
             }
 
             // trigger weights
@@ -1488,6 +1503,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 errs = effCont.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else {
                 return kTRUE;
             }
@@ -1575,7 +1593,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 leptonTwoIDVar    = 0.05;
             } else {
                 leptonTwoIDWeight = 1.;
-                leptonTwoIDVar    = 0.0001;
+                leptonTwoIDVar    = 0.01;
             }
 
             // trigger weights
@@ -1697,6 +1715,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 errs = effCont.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else {
                 return kTRUE;
             }

@@ -139,13 +139,17 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _muSF_ISO_MC_GH[3] = (TGraphAsymmErrors*)f_muRecoSF_ISO_GH->Get((filePath + "pt_PLOT_abseta_bin3_&_Tight2012_pass_MC").c_str());
 
     // electron trigger efficiencies (BCDEF and GH)
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016BCDEF_v1.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/single_electron_sf_BCDEF.root";
     TFile* elTriggerFile_BCDEF = new TFile(fileName.c_str(), "OPEN");
-    _elSF_Trigger_BCDEF = (TH2D*)elTriggerFile_BCDEF->Get("Ele27_WPTight_Gsf");
+    _elSF_Trigger_BCDEF        = (TH2D*)elTriggerFile_BCDEF->Get("h2_sf_BCDEF");
+    _elSF_Trigger_BCDEF_tag    = (TH2D*)elTriggerFile_BCDEF->Get("h2_err_tag_BCDEF");
+    _elSF_Trigger_BCDEF_probe  = (TH2D*)elTriggerFile_BCDEF->Get("h2_err_prob_BCDEF");
 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/2017Feb-A-Popov_TriggerSF_Run2016GH_v1.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/single_electron_sf_GH.root";
     TFile* elTriggerFile_GH = new TFile(fileName.c_str(), "OPEN");
-    _elSF_Trigger_GH = (TH2D*)elTriggerFile_GH->Get("Ele27_WPTight_Gsf");
+    _elSF_Trigger_GH        = (TH2D*)elTriggerFile_GH->Get("h2_sf_GH");
+    _elSF_Trigger_GH_tag    = (TH2D*)elTriggerFile_GH->Get("h2_err_tag_GH");
+    _elSF_Trigger_GH_probe  = (TH2D*)elTriggerFile_GH->Get("h2_err_prob_GH");
 
     // electron reco efficiencies 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_reco_2016.root";
@@ -153,18 +157,6 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
     _eleSF_RECO->Sort();
     
-    // (these are for the legacy rereco and will look bad with the 12a ntuples (Feb17 rereco)
-    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_low_RecoSF_Legacy2016.root";
-    //TFile* f_eleRecoSF_1 = new TFile(fileName.c_str(), "OPEN"); 
-    //_eleSF_RECO[0] = (TGraphErrors*)f_eleRecoSF_1->Get("grSF1D_0");
-
-    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root";
-    //TFile* f_eleRecoSF_2 = new TFile(fileName.c_str(), "OPEN"); 
-    //_eleSF_RECO[1] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_0");
-    //_eleSF_RECO[2] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_1");
-    //_eleSF_RECO[3] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_2");
-    //_eleSF_RECO[4] = (TGraphErrors*)f_eleRecoSF_2->Get("grSF1D_3");
-
     // electron id efficiencies
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/egamma_eff_ID_2016.root";
     TFile* f_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
@@ -213,6 +205,30 @@ float WeightUtils::GetWWPtWeight(float wwPt, float& wwPtScaleUp, float& wwPtScal
     return _wwPtWeight->GetBinContent(ibin); 
 }
 
+float WeightUtils::GetEleTriggerSyst(string errType, TLorentzVector &lepton) const
+{
+    float err = 0.;
+    if (_dataPeriod == "2016BtoF") {
+        if (errType == "tag") {
+            int bin = _elSF_Trigger_BCDEF_tag->FindBin(lepton.Pt(), lepton.Eta());
+            err = _elSF_Trigger_BCDEF_tag->GetBinContent(bin);
+        } else if (errType == "probe") {
+            int bin = _elSF_Trigger_BCDEF_probe->FindBin(lepton.Pt(), lepton.Eta());
+            err = _elSF_Trigger_BCDEF_probe->GetBinContent(bin);
+        }
+    } else if (_dataPeriod == "2016GH") {
+        if (errType == "tag") {
+            int bin = _elSF_Trigger_GH_tag->FindBin(lepton.Pt(), lepton.Eta());
+            err = _elSF_Trigger_GH_tag->GetBinContent(bin);
+        } else if (errType == "probe") {
+            int bin = _elSF_Trigger_GH_probe->FindBin(lepton.Pt(), lepton.Eta());
+            err = _elSF_Trigger_GH_probe->GetBinContent(bin);
+        }
+    }
+
+    return err;
+}
+
 EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const
 {
     float effData = 1;
@@ -245,7 +261,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             errMC   = _muSF_IsoMu24_MC_GH[etaBin]->GetErrorY(ptBin);
         }
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
-        // figure this one out; it no work
+        // official numbers
         if (_dataPeriod == "2016BtoF") {
             int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());
             effData = _elSF_Trigger_BCDEF->GetBinContent(bin);
@@ -258,6 +274,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
         effMC   = 1.;
         errMC   = 0.;
 
+        // values from Kevin, et. al.
         //int etaBin = 0;
         //int ptBin = 0;
         //for (int i = 0; i < 13; ++i) {

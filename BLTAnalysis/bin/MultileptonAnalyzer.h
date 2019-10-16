@@ -115,6 +115,7 @@ public:
     Float_t triggerVar, puVar, topPtVar, zPtVar, wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown;
     Float_t leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
     Float_t leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
 
     vector<float> qcdWeights;
     float pdfWeight, alphaS;

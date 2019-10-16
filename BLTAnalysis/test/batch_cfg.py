@@ -10,7 +10,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['zjets', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
+mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
 
 data_dict = {}
 mc_dict = {}
@@ -235,24 +235,24 @@ mc_dict['zjets'] = [
        ),
     ]
 
-#path = '/eos/uscms/store/user/naodell/bacontuples'
-#mc_dict['zjets'] = [
-#    cfg(data_name = 'DY0JetsToLL_alt',
-#        path     = '{0}/Summer16_DYToLL_0J_amcatnlo'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'z0jets_alt'
-#       ),
-#    cfg(data_name = 'DY1JetsToLL_alt',
-#        path     = '{0}/Summer16_DYToLL_1J_amcatnlo'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'z1jets_alt'
-#       ),
-#    cfg(data_name = 'DY2JetsToLL_alt',
-#        path     = '{0}/Summer16_DYToLL_2J_amcatnlo'.format(path),
-#        nJobs    = 50,
-#        suffix   = 'z2jets_alt'
-#       ),
-#    ]
+path = '/eos/uscms/store/user/naodell/bacontuples'
+mc_dict['zjets_ext'] = [
+    cfg(data_name = 'DY0JetsToLL_alt',
+        path     = '{0}/Summer16_DYToLL_0J_amcatnlo'.format(path),
+        nJobs    = 50,
+        suffix   = 'z0jets_alt'
+       ),
+    cfg(data_name = 'DY1JetsToLL_alt',
+        path     = '{0}/Summer16_DYToLL_1J_amcatnlo'.format(path),
+        nJobs    = 50,
+        suffix   = 'z1jets_alt'
+       ),
+    cfg(data_name = 'DY2JetsToLL_alt',
+        path     = '{0}/Summer16_DYToLL_2J_amcatnlo'.format(path),
+        nJobs    = 50,
+        suffix   = 'z2jets_alt'
+       ),
+    ]
 
 path = '/eos/uscms/store/group/lpcbacon/12'
 mc_dict['wjets'] = [

@@ -135,6 +135,8 @@ private:
     // weights and uncertainties
     Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
     Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
+
 
     // modified multiplicities for jet related uncertainties
     unsigned nJetsCut, nBJetsCut;

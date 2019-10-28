@@ -251,18 +251,18 @@ mc_dict['ttbar'] = [
         nJobs    = 50,
         suffix   = 'ttbar_inclusive'
        ),    
-    # # leptonic top
-    # cfg(data_name = 'ttbar_2l2nu',
-    #     path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_2l2nu'
-    #    ),
-    # # semi leptonic top
-    # cfg(data_name = 'ttbar_semilepton',
-    #     path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-    #     nJobs    = 50,
-    #     suffix   = 'ttbar_semilepton'
-    #    )
+    # leptonic top
+    cfg(data_name = 'ttbar_2l2nu',
+        path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_2l2nu'
+       ),
+    # semi leptonic top
+    cfg(data_name = 'ttbar_semilepton',
+        path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
+        nJobs    = 50,
+        suffix   = 'ttbar_semilepton'
+       )
     ]
 
 mc_dict['ttbar_systematics'] = [

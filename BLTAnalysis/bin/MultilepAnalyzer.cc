@@ -136,6 +136,11 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("puWeight", &puWeight);
         tree->Branch("triggerWeight", &triggerWeight);
         tree->Branch("topPtVar", &topPtVar);
+        if (channel =="ee" || channel == "emu" || channel == "etau"|| channel == "etau_fakes" || channel == "e4j" || channel == "e4j_fakes") {
+          tree->Branch("eleTriggerVarTagSyst", &eleTriggerVarTagSyst);
+          tree->Branch("eleTriggerVarProbeSyst", &eleTriggerVarProbeSyst);
+        }
+
 
         tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
         tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
@@ -1123,18 +1128,28 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronOneP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
             } else if (triggered.test(0)) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronOneP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
+
             } else if (triggered.test(1)) {
                 effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronTwoP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronTwoP4);
             } else {
                 return kTRUE;
             }
@@ -1259,6 +1274,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
+                
             } else {
                 return kTRUE;
             }
@@ -1356,6 +1376,10 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
             } else {
                 return kTRUE;
             }
@@ -1555,6 +1579,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else {
                 return kTRUE;
             }
@@ -1737,6 +1764,10 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
             } else {
                 return kTRUE;
             }
@@ -1979,6 +2010,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
             } else {
                 return kTRUE;
             }

@@ -98,13 +98,20 @@ void hzgAnalyzer::Begin(TTree *tree)
     lumiMask = RunLumiRangeMap();
     string jsonFileName;
     if (params->period == "2016") {
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+        //if (params->selection == "mumug") { // special muon physics JSON
+        //    jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON_MuonPhys.txt";
+        //}
+        //else {
+        //    //jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+        //    jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt";
+        //}
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt";
     }
     else if (params->period == "2017") {
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt";
     }
     else if (params->period == "2018") {
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt";
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt";
     }
     lumiMask.AddJSONFile(jsonFileName);
 
@@ -140,6 +147,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("genWeight", &genWeight);
     outTree->Branch("eventWeight", &eventWeight);
     outTree->Branch("puWeight", &puWeight);
+    outTree->Branch("prefWeight", &prefWeight);
     outTree->Branch("triggerWeight", &triggerWeight);
     outTree->Branch("elIDWeightOne", &elIDWeightOne);
     outTree->Branch("elIDWeightTwo", &elIDWeightTwo);
@@ -313,6 +321,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("llgJJDR", &llgJJDR);
     outTree->Branch("zepp", &zepp);
     outTree->Branch("photonZepp", &photonZepp);
+    outTree->Branch("vbfPtBalance", &vbfPtBalance);
     outTree->Branch("jetOneMatched", &jetOneMatched);
     outTree->Branch("jetTwoMatched", &jetTwoMatched);
 
@@ -830,8 +839,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoD0     = electrons[1]->d0;
            
         if (!isData) {
-            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[0]); 
-            eventWeight *= weights->GetHZZElectronRecoIdEff(*electrons[1]); 
+            eventWeight *= weights->GetElectronMVARecoIdEff(*electrons[0]); 
+            eventWeight *= weights->GetElectronMVARecoIdEff(*electrons[1]); 
         }
 
     } // end ee selection
@@ -1281,6 +1290,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             llgJJDPhi = fabs(llgP4.DeltaPhi(dijet));
             llgJJDR = llgP4.DeltaR(dijet);
             photonZepp = photonOneP4.Eta() - (jetOneP4.Eta() + jetTwoP4.Eta())/2.;
+            vbfPtBalance = (photonOneP4.Px() + photonOneP4.Py() + dileptonP4.Px() + dileptonP4.Py() + jetOneP4.Px() + jetOneP4.Py() + jetTwoP4.Px() + jetTwoP4.Py()) / (photonOneP4.Pt() + dileptonP4.Pt() + jetOneP4.Pt() + jetTwoP4.Pt());
 
             // jet truth information
             if (!isData && genFSPartons.size() > 0) {
@@ -1543,7 +1553,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         cout << "values for cos little theta: James = " << zgLittleThetaJames << ",  Ming-Yan + flavor = " << zgLittleTheta << ", Ming-Yan + leading = " << zgLittleThetaMY << endl; 
         cout << "values for phi: James = " << zgPhiJames << ",  Ming-Yan + flavor = " << zgPhi << ", Ming-Yan + leading = " << zgPhiMY << endl; */
             
-        if (!isData && params->period != "2018") {
+        if (!isData) {
             if (params->selection == "mumug") {
                 muonIDWeightOne = weights->GetHZZMuonIDEff(*muons[leptonOneIndex]); 
                 muonIDWeightTwo = weights->GetHZZMuonIDEff(*muons[leptonTwoIndex]);
@@ -1575,8 +1585,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 triggerWeight = muonTrigWeightOne*muonTrigWeightTwo;
             }
             else if (params->selection == "elelg") {
-                elIDWeightOne = weights->GetHZZElectronRecoIdEff(*electrons[leptonOneIndex]); 
-                elIDWeightTwo = weights->GetHZZElectronRecoIdEff(*electrons[leptonTwoIndex]); 
+                elIDWeightOne = weights->GetElectronMVARecoIdEff(*electrons[leptonOneIndex]); 
+                elIDWeightTwo = weights->GetElectronMVARecoIdEff(*electrons[leptonTwoIndex]); 
                 eventWeight *= elIDWeightOne;
                 eventWeight *= elIDWeightTwo;
                 
@@ -1593,6 +1603,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
            
             photonIDWeight = weights->GetPhotonMVAIdEff(*photons[photonIndex]); 
             eventWeight *= photonIDWeight;
+
+            prefWeight = fInfo->prefweight;
+            eventWeight *= prefWeight;
+            //std::cout << "event, prefWeight " << evtNumber << ", " << prefWeight << std::endl;
         }
 
     } // end llg selection
@@ -1728,6 +1742,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
     outTree->Fill();
     this->passedEvents++;
+
+    //std::cout << "run, event, PU weight: " << runNumber << ", " << evtNumber << ", " << puWeight << std::endl;
+    //std::cout << "run, event, ID weight 1, ID weight 2: " << 
+    //              runNumber << ", " << evtNumber << ", " <<  elIDWeightOne << ", " << elIDWeightTwo << std::endl;
+    //std::cout << "run, event, photon ID weight" << runNumber << ", " << evtNumber << ", " <<  photonIDWeight << std::endl;
+    //std::cout << "run, event, trig weight 1, trig weight 2: " << 
+    //              runNumber << ", " << evtNumber << ", " <<  elTrigWeightOne << ", " << elTrigWeightTwo << std::endl;
+    //std::cout << "run, event, trig weight 1, trig weight 2: " << 
+    //              runNumber << ", " << evtNumber << ", " <<  muonTrigWeightOne << ", " << muonTrigWeightTwo << std::endl;
 
     return kTRUE;
 }

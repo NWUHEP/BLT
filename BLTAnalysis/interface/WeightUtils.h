@@ -56,6 +56,7 @@ class WeightUtils: public TObject {
         float   GetHZZMuonIDEff(TMuon&) const;
         float   GetElectronRecoIdEff(TLorentzVector&) const;
         float   GetHZZElectronRecoIdEff(TElectron&) const;
+        float   GetElectronMVARecoIdEff(TElectron&) const;
         float   GetPhotonMVAIdEff(TPhoton&) const;
         float   GetCorrectedPhotonR9(TPhoton&) const;
 
@@ -89,6 +90,7 @@ class WeightUtils: public TObject {
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5], *_hzz_eleSF_ID[13];
         TH2F *_eleSF_RECO_2D, *_hzz_eleSF_ID_2D;
+        TH2F *_eleSF_MVA_RECO_2D, *_eleSF_MVA_LOW_RECO_2D, *_eleSF_MVA_ID_2D;
 
         TGraphErrors *_mva_gammaSF_ID[5];
         TH2F *_mva_gammaSF;

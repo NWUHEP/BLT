@@ -92,6 +92,7 @@ public:
     // weights
     Int_t genWeight;
     Float_t eventWeight, triggerWeight, puWeight;
+    Float_t prefWeight;
     Float_t elIDWeightOne, elIDWeightTwo;
     Float_t elTrigWeightOne, elTrigWeightTwo;
     Float_t muonIDWeightOne, muonIDWeightTwo;
@@ -184,6 +185,7 @@ public:
     // other
     Float_t llgJJDEta, llgJJDPhi, llgJJDR;
     Float_t zepp, photonZepp;
+    Float_t vbfPtBalance;
     Bool_t jetOneMatched, jetTwoMatched;
 
     //ClassDef(hzgAnalyzer,0);

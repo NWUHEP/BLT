@@ -10,7 +10,7 @@ selection  = 'single_lepton'
 period     = '2016'
 
 ''' Whether or not to actually submit '''
-dryrun = True
+dryrun = False
 
 gen_samples  = [ 'zmutau' ]
 digi_samples = [ ]
@@ -42,7 +42,7 @@ gen_dict['zetau'] = [
 gen_dict['zmutau'] = [
     cfg(data_name = 'z_mutau',
         path      = '',
-        nJobs     = 100,
+        nJobs     = 1,
         suffix    = 'z_mutau',
         arguments = 'ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016.py'        
     ),

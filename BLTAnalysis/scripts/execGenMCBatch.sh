@@ -20,6 +20,15 @@ export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 tar -xzf source.tar.gz
 cd CMSSW_?_?_*/src
+cmsenv
+pwd
+cd ../../
+mv $CMSSW_VERSION tmp_source
+scram project CMSSW $CMSSW_VERSION
+cp -r tmp_source/src/* $CMSSW_VERSION/src
+cd $CMSSW_VERSION/src
+eval `scram runtime -sh`
+
 
 cmsenv
 scramv1 b -j8 #ProjectRename
@@ -33,6 +42,14 @@ pwd
 
 echo "Appending process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT} to $SCRIPT"
 echo "process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT}" >> ${SCRIPT}
+
+INPUT=$(cat input*.txt | head -n 1)
+echo "input: $INPUT"
+echo "Replacing in.root with ${INPUT}"
+sed 's/in.root/${INPUT}/' $SCRIPT
+
+echo "Printing the ${SCRIPT} script:"
+cat $SCRIPT
 
 ### Run the script
 cmsRun $ARGUMENTS

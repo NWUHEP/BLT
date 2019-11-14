@@ -12,10 +12,10 @@ period     = '2016'
 ''' Whether or not to actually submit '''
 dryrun = False
 
-gen_samples  = [ 'zmutau' ]
+gen_samples  = [ ]
 digi_samples = [ ]
 aod_samples  = [ ]
-mini_samples = [ ]
+mini_samples = [ 'zmutau' ]
 
 ''' 
     Set job configurations.  
@@ -74,7 +74,7 @@ gen_dict['hmutau'] = [
 
 digi_dict['zemu'] = [
     cfg(data_name = 'z_emu',
-        path      = '{0}/ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'z_emu',
         arguments = 'ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
@@ -83,7 +83,7 @@ digi_dict['zemu'] = [
 
 digi_dict['zetau'] = [
     cfg(data_name = 'z_etau',
-        path      = '{0}/ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'z_etau',
         arguments = 'ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
@@ -92,7 +92,7 @@ digi_dict['zetau'] = [
 
 digi_dict['zmutau'] = [
     cfg(data_name = 'z_mutau',
-        path      = '{0}/ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'z_mutau',
         arguments = 'ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
@@ -101,7 +101,7 @@ digi_dict['zmutau'] = [
 
 digi_dict['hemu'] = [
     cfg(data_name = 'h_emu',
-        path      = '{0}/HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'h_emu',
         arguments = 'HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
@@ -110,7 +110,7 @@ digi_dict['hemu'] = [
 
 digi_dict['hetau'] = [
     cfg(data_name = 'h_etau',
-        path      = '{0}/HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'h_etau',
         arguments = 'HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
@@ -119,13 +119,183 @@ digi_dict['hetau'] = [
 
 digi_dict['hmutau'] = [
     cfg(data_name = 'h_mutau',
-        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016'.format(path),
+        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
         nJobs     = 100,
         suffix    = 'h_mutau',
         arguments = 'HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
     ),
 ]
 
+aod_dict['zemu'] = [
+    cfg(data_name = 'z_emu',
+        path      = '{0}/ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_emu',
+        arguments = 'ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['zetau'] = [
+    cfg(data_name = 'z_etau',
+        path      = '{0}/ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_etau',
+        arguments = 'ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['zmutau'] = [
+    cfg(data_name = 'z_mutau',
+        path      = '{0}/ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_mutau',
+        arguments = 'ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hemu'] = [
+    cfg(data_name = 'h_emu',
+        path      = '{0}/HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_emu',
+        arguments = 'HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hetau'] = [
+    cfg(data_name = 'h_etau',
+        path      = '{0}/HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_etau',
+        arguments = 'HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hmutau'] = [
+    cfg(data_name = 'h_mutau',
+        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_mutau',
+        arguments = 'HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+digi_dict['hmutau'] = [
+    cfg(data_name = 'h_mutau',
+        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Gen'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_mutau',
+        arguments = 'HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_Digi.py'
+    ),
+]
+
+aod_dict['zemu'] = [
+    cfg(data_name = 'z_emu',
+        path      = '{0}/ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_emu',
+        arguments = 'ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['zetau'] = [
+    cfg(data_name = 'z_etau',
+        path      = '{0}/ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_etau',
+        arguments = 'ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['zmutau'] = [
+    cfg(data_name = 'z_mutau',
+        path      = '{0}/ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_mutau',
+        arguments = 'ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hemu'] = [
+    cfg(data_name = 'h_emu',
+        path      = '{0}/HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_emu',
+        arguments = 'HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hetau'] = [
+    cfg(data_name = 'h_etau',
+        path      = '{0}/HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_etau',
+        arguments = 'HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+aod_dict['hmutau'] = [
+    cfg(data_name = 'h_mutau',
+        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-Digi'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_mutau',
+        arguments = 'HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_AOD.py'
+    ),
+]
+
+mini_dict['zemu'] = [
+    cfg(data_name = 'z_emu',
+        path      = '{0}/ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_emu',
+        arguments = 'ZToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
+
+mini_dict['zetau'] = [
+    cfg(data_name = 'z_etau',
+        path      = '{0}/ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_etau',
+        arguments = 'ZToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
+
+mini_dict['zmutau'] = [
+    cfg(data_name = 'z_mutau',
+        path      = '{0}/ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'z_mutau',
+        arguments = 'ZToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
+
+mini_dict['hemu'] = [
+    cfg(data_name = 'h_emu',
+        path      = '{0}/HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_emu',
+        arguments = 'HToEMu_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
+
+mini_dict['hetau'] = [
+    cfg(data_name = 'h_etau',
+        path      = '{0}/HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_etau',
+        arguments = 'HToETau_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
+
+mini_dict['hmutau'] = [
+    cfg(data_name = 'h_mutau',
+        path      = '{0}/HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016-AOD'.format(path),
+        nJobs     = 100,
+        suffix    = 'h_mutau',
+        arguments = 'HToMuTau_13TeV_TuneCUETP8M1_Filter_RunII2016_MINIAOD.py'
+    ),
+]
 
 gen_list   = []
 gen_list  += sum([gen_dict[n]  for n in gen_samples ], []) 

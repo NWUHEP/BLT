@@ -43,10 +43,13 @@ pwd
 echo "Appending process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT} to $SCRIPT"
 echo "process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT}" >> ${SCRIPT}
 
-INPUT=$(cat input*.txt | head -n 1)
+INPUT=$(cat ../../input*.txt | head -n 1)
 echo "input: $INPUT"
 echo "Replacing in.root with ${INPUT}"
-sed 's/in.root/${INPUT}/' $SCRIPT
+echo "sed -i \"s/in.root/(${INPUT})/g\" $SCRIPT"
+INPUT2=$(echo $INPUT | sed -r 's/\//\\\//g')
+echo "input 2: $INPUT2"
+sed -i "s/in.root/${INPUT2}/g" $SCRIPT
 
 echo "Printing the ${SCRIPT} script:"
 cat $SCRIPT

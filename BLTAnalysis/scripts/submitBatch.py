@@ -17,12 +17,15 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = [ ] #'single_mu', 'single_el']
-mc_samples   = [ 'zjets' ] #'ttbar', 'wjets', 'zjets', 't', 'diboson']
+''' Whether or not to actually submit '''
+dryrun = True
+
+data_samples = [ ]#'single_mu', 'single_el']
+mc_samples   = [ ] #'ttbar', 'wjets',  't', 'diboson', 'zjets' ]
 ## mc_samples.append('ttbar_systematics')
 # mc_samples.append('hzg')
 # mc_samples.append('htautau')
-# mc_samples.append('zetau')
+mc_samples.append('zetau')
 
 # data_samples = []
 # mc_samples   = ['ttbar','ttbar_systematics']
@@ -431,6 +434,7 @@ batch = bm.BatchMaster(config_list = batch_list,
                        selection   = selection,
                        period      = period,
                        executable  = executable,
-                       location    = 'lpc'
+                       location    = 'lpc',
+                       dryrun      = dryrun
                      )
 batch.submit_to_batch()

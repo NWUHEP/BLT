@@ -13,15 +13,16 @@ def make_directory(filePath, clear = True):
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''
-    def __init__(self, data_name, path, suffix, nJobs=1):
+    def __init__(self, data_name, path, suffix, nJobs=1, arguments = ''):
         self._data_name  = data_name
         self._path      = path
         self._suffix    = suffix
         self._nJobs     = nJobs
+        self._arguments = arguments
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
-    def __init__(self, config_list, stage_dir, output_dir, selection, period, executable='execBatch.sh', location='lpc'):
+    def __init__(self, config_list, stage_dir, output_dir, selection, period, executable='execBatch.sh', location='lpc', dryrun = False):
         self._current     = os.path.abspath('.')
         self._stage_dir   = stage_dir
         self._output_dir  = output_dir
@@ -30,8 +31,12 @@ class BatchMaster():
         self._period      = period
         self._executable  = executable
         self._location    = location
+        self._dryrun      = dryrun
+        
     
     def split_jobs_by_dataset(self, directory, nJobs):
+        if len(directory) == 0:
+            return ['' for i in range(0, nJobs)]
         fileList = os.listdir(directory)
         nFiles = len(fileList)
         
@@ -87,8 +92,10 @@ class BatchMaster():
             input_file.close()
 
             ### set output directory
-
-            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir))
+            if cfg._arguments == '':
+                batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir))
+            else :
+                batch_tmp.write('Arguments             = {0} {1} {2}\n'.format(cfg._arguments,i+1,output_dir))
             batch_tmp.write('Executable            = {0}\n'.format(self._executable))
             batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._data_name, i+1))
             batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._data_name, i+1))
@@ -121,8 +128,9 @@ class BatchMaster():
             exit()
         else:
             cmssw_version = os.getenv('CMSSW_BASE').split('/')[-1]
-            os.system('tar czf {0}/source.tar.gz -X $CMSSW_BASE/tar_exclude.txt -C $CMSSW_BASE/.. {1}'.format(self._stage_dir, cmssw_version))
-
+            if not self._dryrun:
+                os.system('tar czf {0}/source.tar.gz -X $CMSSW_BASE/tar_exclude.txt -C $CMSSW_BASE/.. {1}'.format(self._stage_dir, cmssw_version))
+        
         subprocess.call('cp {0} {1}'.format(self._executable, self._stage_dir), shell=True)
         os.chdir(self._stage_dir)
         make_directory('reports', clear=False)
@@ -133,4 +141,5 @@ class BatchMaster():
                 print cfg._data_name
                 sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
                 self.make_batch_lpc(cfg, sourceFiles)
-                subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._data_name), shell=True)
+                if not self._dryrun:
+                    subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._data_name), shell=True)

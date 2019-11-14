@@ -130,10 +130,12 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     // vectors
     tree->Branch("leptonOneP4",     &leptonOneP4);
     tree->Branch("leptonTwoP4",     &leptonTwoP4);
-    tree->Branch("leptonOneFlavor",     &leptonOneFlavor);
-    tree->Branch("leptonTwoFlavor",     &leptonTwoFlavor);
+    tree->Branch("leptonOneFlavor", &leptonOneFlavor);
+    tree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
     tree->Branch("photonP4",        &photonP4);
 
+    tree->Branch("genLeptonOneP4",  &genLeptonOneP4); //closest true lepton p4
+    tree->Branch("genLeptonTwoP4",  &genLeptonTwoP4);
       
     // object counters
     tree->Branch("nMuons", &nMuons);
@@ -248,6 +250,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   ///////////////////////
 
   vector<TGenParticle*> genTausHad, genElectrons, genMuons;
+  vector<TGenParticle*> genTauNeutrinos;
 
   if (!isData) {
 
@@ -277,10 +280,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     topPtWeight = 1.;
     topPtVar = 0.;
 
-    //   1.d) save gen level tau and leptonic taus, and e.mu
+    //   1.d) save gen level tau and leptonic taus, and e,mu
     vector<TGenParticle*> genTaus, genTausLep;
-        
-        
     // 2. loop over gen particles
     for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
       TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
@@ -308,17 +309,14 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	  TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent);
 	  bool isHard = gmother->status != 2 && gmother->parent != -2;
 
-	  if (isHard && abs(particle->pdgId) == 16) genTaus.push_back(mother); 
+	  if (isHard && abs(particle->pdgId) == 16) { genTaus.push_back(mother); genTauNeutrinos.push_back(particle);}
 	}
 
 	if ( abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 ) {
+	  if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
+	  if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
 	  if (abs(mother->pdgId) == 15) {
 	    genTausLep.push_back(mother);
-	    if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
-	    if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
-	  } else if (abs(mother->pdgId) == 23 || abs(mother->pdgId) == 24) {
-	    if (abs(particle->pdgId) == 11) genElectrons.push_back(particle);
-	    if (abs(particle->pdgId) == 13) genMuons.push_back(particle);
 	  }
 	}
                 
@@ -903,7 +901,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
       }
       eventWeight *= triggerWeight;
-    }
+    } //end if(!isData)
+    
     if(doSVFit) {
       if(debug) 
 	cout << "DEBUG: SVFit work" << endl;
@@ -978,7 +977,36 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       o = gDirectory->Get(Form("svfitAlgorithm_histogramTau2Phi_SVfitQuantity_%i",trkhistos));
       if(o) delete o;
     }
-	
+
+    //Find Gen-level lorentz vectors
+    genLeptonOneP4.SetXYZT(0.,0.,0.,0.);
+    genLeptonTwoP4.SetXYZT(0.,0.,0.,0.);
+    if(!isData) {
+      TLorentzVector gen;
+      for(unsigned elec = 0; elec < genElectrons.size(); ++elec) {
+	gen.SetPtEtaPhiM(genElectrons[elec]->pt, genElectrons[elec]->eta, genElectrons[elec]->phi, genElectrons[elec]->mass);
+	if(leptonOneP4.DeltaR(gen) < 0.3
+	   && abs(gen.E()/leptonOneP4.E()-1.) < 0.3) //within 0.3 in delta R and 30% of energy
+	  genLeptonOneP4 = gen;
+      }
+      for(unsigned tau = 0; tau < genTausHad.size(); ++tau) {
+	gen.SetPtEtaPhiM(genTausHad[tau]->pt, genTausHad[tau]->eta, genTausHad[tau]->phi, genTausHad[tau]->mass);
+	TLorentzVector nulv; //need to subtract tau neutrino from tau lorentz vector
+	for(unsigned nu = 0; nu < genTauNeutrinos.size(); ++nu) {
+	  TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(genTauNeutrinos[nu]->parent);
+	  TLorentzVector mom;
+	  mom.SetPtEtaPhiM(mother->pt, mother->eta, mother->phi, mother->mass);
+	  if(gen.DeltaR(mom) < 0.1) {
+	    nulv.SetPtEtaPhiM(genTauNeutrinos[nu]->pt, genTauNeutrinos[nu]->eta, genTauNeutrinos[nu]->phi, genTauNeutrinos[nu]->mass);
+	    break;
+	  }
+	}
+	gen -= nulv;
+	if(leptonTwoP4.DeltaR(gen) < 0.3
+	   && abs(gen.E()/leptonTwoP4.E()-1.) < 0.3) //within 0.3 in delta R and 30% of energy
+	  genLeptonTwoP4 = gen;
+      }
+    }
     eventCounts[channel]->Fill(5);
 
   } else if (nElectrons == 0 && nMuons == 1 && nTaus == 1 ) { // mu+tau selection
@@ -1167,6 +1195,35 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       if(o) delete o;
     }
 
+    //Find Gen-level lorentz vectors
+    genLeptonOneP4.SetXYZT(0.,0.,0.,0.);
+    genLeptonTwoP4.SetXYZT(0.,0.,0.,0.);
+    if(!isData) {
+      TLorentzVector gen;
+      for(unsigned muon = 0; muon < genMuons.size(); ++muon) {
+	gen.SetPtEtaPhiM(genMuons[muon]->pt, genMuons[muon]->eta, genMuons[muon]->phi, genMuons[muon]->mass);
+	if(leptonOneP4.DeltaR(gen) < 0.3
+	   && abs(gen.E()/leptonOneP4.E()-1.) < 0.3) //within 0.3 in delta R and 30% of energy
+	  genLeptonOneP4 = gen;
+      }
+      for(unsigned tau = 0; tau < genTausHad.size(); ++tau) {
+	gen.SetPtEtaPhiM(genTausHad[tau]->pt, genTausHad[tau]->eta, genTausHad[tau]->phi, genTausHad[tau]->mass);
+	TLorentzVector nulv; //need to subtract tau neutrino from tau lorentz vector
+	for(unsigned nu = 0; nu < genTauNeutrinos.size(); ++nu) {
+	  TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(genTauNeutrinos[nu]->parent);
+	  TLorentzVector mom;
+	  mom.SetPtEtaPhiM(mother->pt, mother->eta, mother->phi, mother->mass);
+	  if(gen.DeltaR(mom) < 0.1) {
+	    nulv.SetPtEtaPhiM(genTauNeutrinos[nu]->pt, genTauNeutrinos[nu]->eta, genTauNeutrinos[nu]->phi, genTauNeutrinos[nu]->mass);
+	    break;
+	  }
+	}
+	gen -= nulv;
+	if(leptonTwoP4.DeltaR(gen) < 0.3
+	   && abs(gen.E()/leptonTwoP4.E()-1.) < 0.3) //within 0.3 in delta R and 30% of energy
+	  genLeptonTwoP4 = gen;
+      }
+    }
     eventCounts[channel]->Fill(5);
 
   } else if (nElectrons == 1 && nMuons == 1  ) { // e+mu selection

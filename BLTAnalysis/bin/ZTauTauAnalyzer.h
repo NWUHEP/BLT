@@ -114,6 +114,7 @@ public:
 
     // lepton variable
     TLorentzVector leptonOneP4, leptonTwoP4, photonP4;    
+    TLorentzVector genLeptonOneP4, genLeptonTwoP4;
     Float_t leptonOneIso, leptonTwoIso, photonMVA;
     Int_t leptonOneFlavor, leptonTwoFlavor;
 

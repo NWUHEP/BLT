@@ -31,7 +31,7 @@ eval `scram runtime -sh`
 
 
 cmsenv
-scramv1 b -j8 #ProjectRename
+scramv1 b -j4 #ProjectRename
 
 echo "topdir: $TOPDIR"
 echo "script+args: $ARGUMENTS"
@@ -40,8 +40,10 @@ echo "count: $COUNT"
 echo "outdir: $OUTDIR"
 pwd
 
-echo "Appending process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT} to $SCRIPT"
-echo "process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT}" >> ${SCRIPT}
+if [[ "$SCRIPT" != "private_mc_bacon.py" ]]; then
+    echo "Appending process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT} to $SCRIPT"
+    echo "process.RandomNumberGeneratorService.generator.initialSeed = ${COUNT}" >> ${SCRIPT}
+fi
 
 INPUT=$(cat ../../input*.txt | head -n 1)
 echo "input: $INPUT"

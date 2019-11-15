@@ -19,7 +19,7 @@ export SCRAM_ARCH=slc6_amd64_gcc530
 # # export CMSSW_VERSION=CMSSW_8_0_20
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 tar -xzf source.tar.gz
-cd CMSSW_?_?_*/src
+cd CMSSW_*_?_*/src
 cmsenv
 pwd
 cd ../../

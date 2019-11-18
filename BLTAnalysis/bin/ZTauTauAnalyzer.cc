@@ -116,6 +116,7 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("genWeight", &genWeight);
     tree->Branch("puWeight", &puWeight);
     tree->Branch("topPtWeight", &topPtWeight);
+    tree->Branch("genTauFlavorWeight", &genTauFlavorWeight);
 
     // tau staff
     if (channel == "etau" || channel == "mutau"){
@@ -863,9 +864,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     // correct for MC, including reconstruction and trigger
     if (!isData) {
-
-      tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-      tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+      auto taugenpair    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
+      auto taugenhadpair = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true ); // useHadronFlavor = true
+      tauGenFlavor    = taugenpair.first;
+      tauGenFlavorHad = taugenhadpair.first;
 
       // correct for id,reco weights
       EfficiencyContainer effCont;
@@ -891,6 +893,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       leptonTwoRecoVar    = 0.0;
       eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
+      //gen object weight
+      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
+      eventWeight *= genTauFlavorWeight;
+      
       // correct for trigger.
       EfficiencyContainer effCont1;
       if (triggered) {
@@ -1076,8 +1082,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     // correct for MC, including reconstruction and trigger
     if (!isData) {
 
-      tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-      tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+      auto taugenpair    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
+      auto taugenhadpair = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true ); // useHadronFlavor = true
+      tauGenFlavor    = taugenpair.first;
+      tauGenFlavorHad = taugenhadpair.first;
 
       // correct for id,reco weights
       EfficiencyContainer effCont;
@@ -1102,6 +1110,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       leptonTwoRecoWeight = 1.0;
       leptonTwoRecoVar    = 0.0;
       eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
+      eventWeight *= genTauFlavorWeight;
 
       if (nPhotons > 0) {
 	eventWeight *= weights->GetPhotonMVAIdEff(*photons[0]);
@@ -1427,74 +1437,104 @@ float ZTauTauAnalyzer::GetElectronIsolation(const baconhep::TElectron* el, const
 
 
 
-int ZTauTauAnalyzer::GetTauGenFlavor(  TLorentzVector p4, 
+pair<int,TLorentzVector> ZTauTauAnalyzer::GetTauGenFlavor(  TLorentzVector p4, 
 				       vector<TGenParticle*> genTausHad, 
 				       vector<TGenParticle*> genElectrons, 
 				       vector<TGenParticle*> genMuons,
 				       vector<TJet*> vetoedJets, 
 				       bool useHadronFlavor )
 {
-  int flavor = 26;
+  int flavor = 26; //return in case of no match
     
   // check if can be tagged as hadronic tau
-  if (flavor==26){
-    for (unsigned i = 0; i < genTausHad.size(); ++i) {
-      TLorentzVector genP4;
-      genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
-      if (genP4.DeltaR(p4) < 0.3) {
-	flavor = 15;
-      }
-    }
+  for (unsigned i = 0; i < genTausHad.size(); ++i) {
+    TLorentzVector genP4;
+    genP4.SetPtEtaPhiM(genTausHad[i]->pt, genTausHad[i]->eta, genTausHad[i]->phi, genTausHad[i]->mass); 
+    if (genP4.DeltaR(p4) < 0.3) 
+      return pair<int,TLorentzVector>(15, genP4);
   }
 
     
   // check if can be tagged as electron
-  if (flavor==26){
-    for (unsigned i = 0; i < genElectrons.size(); ++i) {
-      TLorentzVector genP4;
-      genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
-      if (genP4.DeltaR(p4) < 0.3) {
-	flavor = 11;
-      }
-    }
+  for (unsigned i = 0; i < genElectrons.size(); ++i) {
+    TLorentzVector genP4;
+    genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
+    if (genP4.DeltaR(p4) < 0.3) 
+      return pair<int,TLorentzVector>(11, genP4);
   }
 
+
   // check if can be tagged as muon
-  if (flavor==26){
-    for (unsigned i = 0; i < genMuons.size(); ++i) {
-      TLorentzVector genP4;
-      genP4.SetPtEtaPhiM(genMuons[i]->pt, genMuons[i]->eta, genMuons[i]->phi, genMuons[i]->mass); 
-      if (genP4.DeltaR(p4) < 0.3) {
-	flavor = 13;
-      }
-    }
+  for (unsigned i = 0; i < genMuons.size(); ++i) {
+    TLorentzVector genP4;
+    genP4.SetPtEtaPhiM(genMuons[i]->pt, genMuons[i]->eta, genMuons[i]->phi, genMuons[i]->mass); 
+    if (genP4.DeltaR(p4) < 0.3)
+      return pair<int,TLorentzVector>(13, genP4);
   }
 
 
   // check if can be tagged by jet flavor
-  if (flavor==26){
-    float jetPtMax = - 1.0;
-    for (unsigned i = 0; i < vetoedJets.size(); ++i) {
-
-
-      TLorentzVector jetP4; 
-      jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
-      if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
-	if(useHadronFlavor) {
-	  flavor = vetoedJets[i]->hadronFlavor;
-	} else {
-	  flavor = abs(vetoedJets[i]->partonFlavor);
-	}
-	jetPtMax = jetP4.Pt();
+  float jetPtMax = - 1.0;
+  TLorentzVector jetP4; 
+  for (unsigned i = 0; i < vetoedJets.size(); ++i) {
+    jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
+    if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
+      if(useHadronFlavor) {
+	flavor = vetoedJets[i]->hadronFlavor;
+      } else {
+	flavor = abs(vetoedJets[i]->partonFlavor);
       }
+      jetPtMax = jetP4.Pt();
     }
   }
-
-
-
-  return flavor;
+  
+  return pair<int,TLorentzVector>(flavor, jetP4);
 }
 
+double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta) {
+  if(abs(pdgid) == 15) return 1.;
+  
+  //b-jet
+  if(abs(pdgid) == 5) {
+    if(pt < 25.)
+      return 1.061694561;
+    if(pt < 30.)
+      return 1.177661174;
+    if(pt < 40.)
+      return 1.488901406;
+    if(pt < 50.)
+      return 0.972327128;
+    if(pt < 65.)
+      return 0.897842372;
+    return 0.857519502;
+  }
+  //electron
+  if(abs(pdgid) == 11) {
+    if(abs(eta) < 1.479) //barrel region
+      return 1.4;
+    return 1.9;
+  }
+
+  //muon
+  if(abs(pdgid) == 13) 
+      return 1.;
+
+  //jet
+  if(abs(pdgid) < 7) {
+    if(pt < 25.)
+      return 0.976550401;
+    if(pt < 30.)
+      return 0.880820553;
+    if(pt < 40.)
+      return 0.818182921;
+    if(pt < 50.)
+      return 0.789590788;
+    if(pt < 65.)
+      return 0.896520371;
+    return 0.672976190;    
+  }
+  return 1.;
+}
 
 pair<float, float> ZTauTauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
 {

@@ -111,7 +111,8 @@ public:
 
     // weights and uncertainties
     Float_t eventWeight;
-
+    Float_t genTauFlavorWeight;
+    
     // lepton variable
     TLorentzVector leptonOneP4, leptonTwoP4, photonP4;    
     TLorentzVector genLeptonOneP4, genLeptonTwoP4;
@@ -157,7 +158,8 @@ private:
     // helper functions
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
-    int GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
+    pair<int,TLorentzVector> GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
+    double FakeTauSF(int pdgid, double pt, double eta);
     pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);

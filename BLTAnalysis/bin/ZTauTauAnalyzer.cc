@@ -137,7 +137,12 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
 
     tree->Branch("genLeptonOneP4",  &genLeptonOneP4); //closest true lepton p4
     tree->Branch("genLeptonTwoP4",  &genLeptonTwoP4);
-      
+
+    tree->Branch("leptonOneD0",     &leptonOneD0);
+    tree->Branch("leptonTwoD0",     &leptonTwoD0);
+    tree->Branch("leptonOneIso",    &leptonOneIso);
+    tree->Branch("leptonTwoIso",    &leptonTwoIso);
+
     // object counters
     tree->Branch("nMuons", &nMuons);
     tree->Branch("nElectrons", &nElectrons);
@@ -154,8 +159,35 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("htSum", &htSum);
     tree->Branch("ht", &ht);
     tree->Branch("htPhi", &htPhi);
-    tree->Branch("met", &met);
-    tree->Branch("metPhi", &metPhi);
+    tree->Branch("pfMET"        , &pfMET        );
+    tree->Branch("pfMETphi"     , &pfMETphi     );
+    tree->Branch("pfMETCov00"   , &pfMETCov00   );
+    tree->Branch("pfMETCov01"   , &pfMETCov01   );
+    tree->Branch("pfMETCov11"   , &pfMETCov11   );
+    tree->Branch("pfMETC"       , &pfMETC       );
+    tree->Branch("pfMETCphi"    , &pfMETCphi    );
+    tree->Branch("pfMETCCov00"  , &pfMETCCov00  );
+    tree->Branch("pfMETCCov01"  , &pfMETCCov01  );
+    tree->Branch("pfMETCCov11"  , &pfMETCCov11  );
+    tree->Branch("puppMET"      , &puppMET      );
+    tree->Branch("puppMETphi"   , &puppMETphi   );
+    tree->Branch("puppMETCov00" , &puppMETCov00 );
+    tree->Branch("puppMETCov01" , &puppMETCov01 );
+    tree->Branch("puppMETCov11" , &puppMETCov11 );
+    tree->Branch("puppMETC"     , &puppMETC     );
+    tree->Branch("puppMETCphi"  , &puppMETCphi  );
+    tree->Branch("puppMETCCov00", &puppMETCCov00);
+    tree->Branch("puppMETCCov01", &puppMETCCov01);
+    tree->Branch("puppMETCCov11", &puppMETCCov11);
+    tree->Branch("alpacaMET"    , &alpacaMET    );
+    tree->Branch("alpacaMETphi" , &alpacaMETphi );
+    tree->Branch("pcpMET"       , &pcpMET       );
+    tree->Branch("pcpMETphi"    , &pcpMETphi    );
+    tree->Branch("trkMET"       , &trkMET       );
+    tree->Branch("trkMETphi"    , &trkMETphi    );
+    //Used in SVfit
+    tree->Branch("met"     , &met);
+    tree->Branch("metPhi"  , &metPhi);
     tree->Branch("covMet00", &covMet00);
     tree->Branch("covMet01", &covMet01);
     tree->Branch("covMet11", &covMet11);
@@ -184,6 +216,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   GetEntry(entry, 1);  // load all branches
   outFile->cd();
   eventWeight = 1.;
+  genTauFlavorWeight = 1.;
   this->totalEvents++;
   hTotalEvents->Fill(1);
   //for debugging a specific event
@@ -210,7 +243,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   bool useLogMTermNLL = true;
   Int_t kLogMTauMu = 4;
   Int_t kLogMTauE  = 4;
-    
+
+  //Whether or not to use fake tau scale factors
+  bool useFakeTauSF = false;
+  
   const bool isData = (fInfo->runNum != 1);
   particleSelector->SetRealData(isData);
 
@@ -779,8 +815,43 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   htPhi = hadronicP4.Phi();
 
   /* -------- MET ---------*/
-  met    = fInfo->pfMETC;
-  metPhi = fInfo->pfMETCphi;
+  //Particle Flow MET
+  pfMET         = fInfo->pfMET;
+  pfMETphi      = fInfo->pfMETphi;
+  pfMETCov00    = fInfo->pfMETCov00;
+  pfMETCov01    = fInfo->pfMETCov01;
+  pfMETCov11    = fInfo->pfMETCov11;
+  //Corrected Particle Flow MET
+  pfMETC        = fInfo->pfMETC;
+  pfMETCphi     = fInfo->pfMETCphi;
+  pfMETCCov00   = fInfo->pfMETCCov00;
+  pfMETCCov01   = fInfo->pfMETCCov01;
+  pfMETCCov11   = fInfo->pfMETCCov11;
+  //PUPPI MET
+  puppMET      = fInfo->puppET;
+  puppMETphi   = fInfo->puppETphi;
+  puppMETCov00 = fInfo->puppETCov00;
+  puppMETCov01 = fInfo->puppETCov01;
+  puppMETCov11 = fInfo->puppETCov11;
+  //Type 1 PUPPI MET
+  puppMETC      = fInfo->puppETC;
+  puppMETCphi   = fInfo->puppETCphi;
+  puppMETCCov00 = fInfo->puppETCCov00;
+  puppMETCCov01 = fInfo->puppETCCov01;
+  puppMETCCov11 = fInfo->puppETCCov11;
+  //Alapaca MET
+  alpacaMET     = fInfo->alpacaMET;
+  alpacaMETphi  = fInfo->alpacaMETphi;
+  //Alapaca+PUPPI MET
+  pcpMET        = fInfo->pcpMET;
+  pcpMETphi     = fInfo->pcpMETphi;
+  //Trk MET
+  trkMET        = fInfo->trkMET;
+  trkMETphi     = fInfo->trkMETphi;
+
+  //Choose a MET version for SVfit algorithm
+  met      = fInfo->pfMETC;
+  metPhi   = fInfo->pfMETCphi;
   covMet00 = fInfo->pfMETCCov00;
   covMet01 = fInfo->pfMETCCov01;
   covMet11 = fInfo->pfMETCCov11;
@@ -825,9 +896,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     leptonOneP4     = electronP4;
     leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+    leptonOneD0     = electrons[0]->d0;
     leptonOneFlavor = 11*electrons[0]->q;
     leptonTwoP4     = tauP4;
     leptonTwoIso    = 0.;
+    leptonTwoD0     = taus[0]->d0LeadChHad;
     leptonTwoFlavor = 15*taus[0]->q;
 
     TLorentzVector photonOneP4;
@@ -850,7 +923,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
 
     // test if selected lepton fire the trigger.
-    bool triggered = !requireSelectedTrigger;
+    bool triggered = (!requireSelectedTrigger)&&(electronTriggered);
     for (const auto& name: passTriggerNames) {
       if(triggered) break;
       if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
@@ -859,7 +932,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       }
     }
     if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-    if ( triggered) triggerLeptonStatus = 1;
+    if ( triggered) triggerLeptonStatus = 1 + 2*muonTriggered;
+    //status: 0 no trigger, 1 electron, 2 muon, 3 both
+
     eventCounts[channel]->Fill(4);
 
     // correct for MC, including reconstruction and trigger
@@ -895,7 +970,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
       //gen object weight
       genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
-      eventWeight *= genTauFlavorWeight;
+      if(useFakeTauSF) eventWeight *= genTauFlavorWeight;
       
       // correct for trigger.
       EfficiencyContainer effCont1;
@@ -1041,9 +1116,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     leptonOneP4     = muonP4;
     leptonOneIso    = GetMuonIsolation(muons[0]);
+    leptonOneD0     = muons[0]->d0;
     leptonOneFlavor = 13*muons[0]->q;
     leptonTwoP4     = tauP4;
     leptonTwoIso    = 0.;
+    leptonTwoD0     = taus[0]->d0LeadChHad;
     leptonTwoFlavor = 15*taus[0]->q;
 
     TLorentzVector photonOneP4;
@@ -1066,7 +1143,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
 
     // test if selected lepton fire the trigger.
-    bool triggered = !requireSelectedTrigger;
+    bool triggered = (!requireSelectedTrigger)&&(muonTriggered);
     for (const auto& name: passTriggerNames) {
       if(triggered) break;
       if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
@@ -1075,8 +1152,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       }
     }
     if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-    if ( triggered) triggerLeptonStatus = 1;
-
+    if ( triggered) triggerLeptonStatus = 2 + electronTriggered;
+    //status: 0 no trigger, 1 electron, 2 muon, 3 both
+    
     eventCounts[channel]->Fill(4);
 
     // correct for MC, including reconstruction and trigger
@@ -1111,7 +1189,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       leptonTwoRecoVar    = 0.0;
       eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
       genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
-      eventWeight *= genTauFlavorWeight;
+      if(useFakeTauSF) eventWeight *= genTauFlavorWeight;
 
       if (nPhotons > 0) {
 	eventWeight *= weights->GetPhotonMVAIdEff(*photons[0]);
@@ -1255,9 +1333,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     leptonOneP4     = electronP4;
     leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+    leptonOneD0     = electrons[0]->d0;
     leptonOneFlavor = 11*electrons[0]->q;
     leptonTwoP4     = muonP4;
     leptonTwoIso    = GetMuonIsolation(muons[0]);
+    leptonTwoD0     = muons[0]->d0;
     leptonTwoFlavor = 13*muons[0]->q;
 
     TLorentzVector photonOneP4;
@@ -1282,7 +1362,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
     if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
     if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
-
+    //if not requiring the lepton firing the trigger, store if both were fired
+    if(!requireSelectedTrigger)
+      triggerLeptonStatus = (passTriggerPt2) + 2*(passTriggerPt1);
+    //passTrigger1 = electron but triggered.set(0) == muon
+    
     eventCounts[channel]->Fill(3);
 
     // correct for MC, including reconstruction and trigger
@@ -1291,7 +1375,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       // correct for id,reco weights
       EfficiencyContainer effCont;
       pair<float, float> effs, errs;
-
+      massSVFit = 0;
+      massErrSVFit = 0.;
+      leptonOneSVP4.SetXYZT(0.,0.,0.,0.);
+      leptonTwoSVP4.SetXYZT(0.,0.,0.,0.);
+      svFitStatus = -10;
       // id weight
       effCont = weights->GetElectronIDEff(electronP4);
       effs = effCont.GetEff();
@@ -1324,24 +1412,24 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       // to a trigger object.  When both muons pass the trigger, use the
       // efficiency for detecting either
       EfficiencyContainer effCont1, effCont2;
-      if (triggered.all()) {
+      if (triggered.all() || (!requireSelectedTrigger && passTriggerPt1 && passTriggerPt2)) {
 	effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
 	effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
 	triggerWeight = GetTriggerSF(effCont1, effCont2);
 	triggerVar    = GetTriggerSFError(effCont1, effCont2);
-      } else if (triggered.test(0)) {
+      } else if (triggered.test(0) || (!requireSelectedTrigger && passTriggerPt2)) { //muon triggered
 	effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
 	effs          = effCont1.GetEff();
 	errs          = effCont1.GetErr();
 	triggerWeight = effs.first/effs.second;
 	triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-      } else if (triggered.test(1)) {
+      } else if (triggered.test(1) || (!requireSelectedTrigger && passTriggerPt1)) { //electron triggered
 	effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
 	effs          = effCont1.GetEff();
 	errs          = effCont1.GetErr();
 	triggerWeight = effs.first/effs.second;
 	triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-      } else if(!requireSelectedTrigger){
+      } else {
 	return kTRUE;
       }
       eventWeight *= triggerWeight;

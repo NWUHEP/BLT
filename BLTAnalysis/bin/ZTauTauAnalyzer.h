@@ -117,6 +117,7 @@ public:
     TLorentzVector leptonOneP4, leptonTwoP4, photonP4;    
     TLorentzVector genLeptonOneP4, genLeptonTwoP4;
     Float_t leptonOneIso, leptonTwoIso, photonMVA;
+    Float_t leptonOneD0, leptonTwoD0;
     Int_t leptonOneFlavor, leptonTwoFlavor;
 
     // tau variable
@@ -129,7 +130,19 @@ public:
     // met
     Float_t met, metPhi;
     Float_t covMet00, covMet01, covMet11;
-    
+    // Particle flow met
+    Float_t pfMET, pfMETphi, pfMETCov00, pfMETCov01, pfMETCov11;
+    Float_t pfMETC, pfMETCphi, pfMETCCov00, pfMETCCov01, pfMETCCov11;
+    //  PUPPI met
+    Float_t puppMET, puppMETphi, puppMETCov00, puppMETCov01, puppMETCov11;
+    Float_t puppMETC, puppMETCphi, puppMETCCov00, puppMETCCov01, puppMETCCov11;
+    // Alapaca met
+    Float_t alpacaMET, alpacaMETphi;
+    // Alapaca + PUPPI met
+    Float_t pcpMET, pcpMETphi;
+    // Trk met
+    Float_t trkMET, trkMETphi;
+
     // object counters
     UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets;
     UInt_t nFailMuons, nFailElectrons;

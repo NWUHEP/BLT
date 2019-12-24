@@ -645,11 +645,11 @@ float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
 
 float WeightUtils::GetCorrectedPhotonR9(TPhoton& photon) const 
 {
-    float r9 = photon.r9;
+    float r9 = photon.r9_full5x5;
     if (fabs(photon.scEta) < 1.444)
-        r9 = _photon_r9_barrel->Eval(photon.r9);
+        r9 = _photon_r9_barrel->Eval(photon.r9_full5x5);
     else if (fabs(photon.scEta) > 1.566)
-        r9 = _photon_r9_endcap->Eval(photon.r9);
+        r9 = _photon_r9_endcap->Eval(photon.r9_full5x5);
     else
         std::cout << "bad value of photon scEta: returning original r9" << std::endl;
     

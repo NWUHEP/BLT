@@ -46,12 +46,11 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
                 runPeriod = "BCD";
             } else if (runPeriod == "2016E" || runPeriod == "2016F") {
                 runPeriod = "EF";
-            } else if (runPeriod == "2016G") {
-                runPeriod = "G";
-            } else if (runPeriod == "2016H") {
-                runPeriod = "H";
+            } else if (runPeriod == "2016G" || runPeriod == "2016H") {
+                runPeriod = "GH";
             } 
-            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
+            //jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016" + runPeriod + "V4_DATA/Summer16_23Sep2016" + runPeriod + "V4_DATA";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_07Aug2017" + runPeriod + "_V11_DATA/Summer16_07Aug2017" + runPeriod + "_V11_DATA";
         }
 
         else if (parameters.period == "2017") {
@@ -102,7 +101,8 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         // jet energy corrections
         std::string jecPath;
         if (parameters.period == "2016") {
-            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
+            //jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
+            jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Summer16_07Aug2017_V11_MC/Summer16_07Aug2017_V11_MC";
         } 
         else if (parameters.period == "2017") {
             jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jec/Fall17_17Nov2017_V32_MC/Fall17_17Nov2017_V32_MC";
@@ -130,8 +130,10 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         _jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
 
         // jet energy resolution
-        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
-        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
+        //jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
+        //jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
+        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt");
+        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
     }
 }
 
@@ -808,6 +810,11 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     _jetCorrector->setJetPt(jet->ptRaw);
     _jetCorrector->setJetA(jet->area);
     _jetCorrector->setRho(_rhoFactor); 
+
+    std::vector<float> vv = _jetCorrector->getSubCorrections();
+    for (unsigned int i = 0; i < vv.size(); ++i) {
+        std::cout << "correction " << i << " = " << vv.at(i) << std::endl;
+    }
 
     double correction = _jetCorrector->getCorrection();
 

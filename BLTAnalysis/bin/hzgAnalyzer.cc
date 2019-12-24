@@ -37,6 +37,8 @@ hzgAnalyzer::~hzgAnalyzer()
 
 void hzgAnalyzer::Begin(TTree *tree)
 {
+    rng = new TRandom3();
+
     // Parse command line option
     std::string tmp_option = GetOption();
     std::vector<std::string> options;
@@ -360,16 +362,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     bool sync = false;
     if (sync) {
         if (!(
-                (fInfo->runNum == 302635 && fInfo->lumiSec == 402 && fInfo->evtNum == 401773465) ||
-                (fInfo->runNum == 302494 && fInfo->lumiSec == 284 && fInfo->evtNum == 241151661) ||
-                (fInfo->runNum == 302525 && fInfo->lumiSec == 441 && fInfo->evtNum == 544093881) || 
-                (fInfo->runNum == 302328 && fInfo->lumiSec == 231 && fInfo->evtNum == 191034168) || 
-                (fInfo->runNum == 302392 && fInfo->lumiSec == 171 && fInfo->evtNum == 195907051) || 
-                (fInfo->runNum == 302277 && fInfo->lumiSec == 158 && fInfo->evtNum == 158403680) || 
-                (fInfo->runNum == 302635 && fInfo->lumiSec == 172 && fInfo->evtNum == 179825595) || 
-                (fInfo->runNum == 302393 && fInfo->lumiSec == 333 && fInfo->evtNum == 376194273) || 
-                (fInfo->runNum == 302494 && fInfo->lumiSec == 259 && fInfo->evtNum == 220439368) || 
-                (fInfo->runNum == 302654 && fInfo->lumiSec == 41  && fInfo->evtNum == 52472529) 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 14) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 12) ||
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 36) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 86) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 107) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 120) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 119) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 161) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 166) || 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 169) 
             )) 
         {
             return kTRUE;
@@ -451,10 +453,41 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (triggered) {
             passTriggerNames.push_back(triggerNames[i]);
+
+            // remove overlap between electron and muon channels
+            if (params->selection == "elelg") {
+                if (params->period == "2016") {
+                    if (
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*" || 
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*" ||
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*" || 
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*"
+                        ) {
+                        passTrigger = false;
+                        break;
+                    }
+                }
+                else if (params->period == "2017") {
+                    if (
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*" || 
+                            triggerNames[i] == "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*"
+                        ) {
+                        passTrigger = false;
+                        break;
+                    }
+                }
+                else if (params->period == "2018") {
+                    if (triggerNames[i] == "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*" ) {
+                        passTrigger = false;
+                        break;
+                    }
+                }
+            }
+
         }
     }
 
-    if (!passTrigger)// && isData)
+    if (!passTrigger) // && isData)
         return kTRUE;
     hTotalEvents->Fill(3);
 
@@ -649,9 +682,23 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
 
-        // Prevent overlap of muons and jets
+        if (sync)
+            std::cout << "raw pt, corr pt, area, rho " << 
+                          jet->ptRaw << ", " << jet->pt << ", " << jet->area << ", " << fInfo->rhoJet << std::endl;
+
+        float gRand = 1.;
+        float jerc = 1.;
+        if (!isData) { // apply jet energy resolution corrections to simulation
+            pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 0);
+            gRand = rng->Gaus(0, resPair.first);
+            jerc = 1 + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
+            jet->pt = jet->pt*jerc;
+        }
+
         TLorentzVector jetP4; 
         jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+        
+        // Prevent overlap of other objects and jets
 
         /*bool muOverlap = false;
         for (const auto& mu: veto_muons) {
@@ -891,12 +938,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOnePt = photonOneP4.Pt();
         photonOneEta = photonOneP4.Eta();
         photonOnePhi = photonOneP4.Phi();
-        photonOneMVA = photons[0]->mvaSpring16;
+        photonOneMVA = photons[0]->mvaFall17V2;
         passElectronVeto = photons[0]->passElectronVeto;  
         if (!isData)
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[0]);
         else 
-            photonOneR9 = photons[0]->r9;
+            photonOneR9 = photons[0]->r9_full5x5;
 
         // DY photon overlap removal
         vetoDY = false;
@@ -1149,7 +1196,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
             
         // checking for dijet tag
-        isDijetTag = false;
+        /*isDijetTag = false;
         isTightDijetTag = false;
         unsigned int jetOneIndex = 0;
         unsigned int jetTwoIndex = 0;
@@ -1229,6 +1276,44 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                             purityLevel = 1;
                         }
                                 
+                    }
+                }
+            }
+        }*/
+        
+        // checking for dijet tag
+        isDijetTag = false;
+        isTightDijetTag = false;
+        unsigned int jetOneIndex = 0;
+        unsigned int jetTwoIndex = 0;
+        TLorentzVector jetOneP4, jetTwoP4;
+        jetOneMatched = false;
+        jetTwoMatched = false;  
+        if (!isLeptonTag) {
+            if (jets.size() > 1)  {
+                for (unsigned int i = 0; i < jets.size(); ++i) {
+                    for (unsigned int j = i+1; j < jets.size(); ++j) {
+                        TLorentzVector tempJetOne;
+                        TLorentzVector tempJetTwo;
+                        tempJetOne.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
+                        tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
+                        TLorentzVector tempDijet = tempJetOne + tempJetTwo;
+                        if  (   tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonOneP4) >= 0.4 
+                            &&  tempJetOne.DeltaR(leptonTwoP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
+                            &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
+                            ) {
+                            isDijetTag = true;
+                            jetOneIndex = i;
+                            jetTwoIndex = j;
+                            float zeppen = llgP4.Eta() - (tempJetOne.Eta() + tempJetTwo.Eta())/2.;
+                            if  (   fabs(tempJetOne.Eta() - tempJetTwo.Eta()) >= 3.5 
+                                &&  fabs(zeppen) <= 2.5 && tempDijet.M() >= 500.
+                                &&  fabs(tempDijet.DeltaPhi(llgP4)) >= 2.4
+                                ) {
+                                isTightDijetTag = true;
+                            }
+                            break;
+                        }  
                     }
                 }
             }
@@ -1340,14 +1425,28 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOnePt  = photonOneP4.Pt();
         photonOneEta  = photonOneP4.Eta();
         photonOnePhi  = photonOneP4.Phi();
-        photonOneMVA = photons[photonIndex]->mvaSpring16;
-        photonOneERes = photons[photonIndex]->eRes;
+        photonOneMVA = photons[photonIndex]->mvaFall17V2;
+        //photonOneERes = photons[photonIndex]->eRes;
+       // photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / photons[photonIndex]->pt;
+        TLorentzVector tmpPhotonP4ForRes;
+        tmpPhotonP4ForRes.SetPtEtaPhiM(photons[photonIndex]->pt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
+        photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / tmpPhotonP4ForRes.E();
+        if (sync) {
+            std::cout << "photon resolution = " << photonOneERes << std::endl;
+        }
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
-        if (!isData)
+        if (!isData) {
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
+            if (sync) {
+                std::cout << "event, uncorrected r9, corrected r9: " << 
+                             evtNumber << ", " <<   
+                             photons[photonIndex]->r9_full5x5 << ", " << 
+                             weights->GetCorrectedPhotonR9(*photons[photonIndex]) << std::endl;
+            }
+        }
         else 
-            photonOneR9 = photons[photonIndex]->r9;
+            photonOneR9 = photons[photonIndex]->r9_full5x5;
 
         // kinematic fit
         KinZfitter* kinZfitter = new KinZfitter(isData);

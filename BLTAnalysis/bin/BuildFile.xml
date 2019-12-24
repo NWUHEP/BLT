@@ -2,6 +2,7 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="hzgAnalyzer.cc" name="hzgAnalyzer"></bin>
+<bin file="hzgAnalyzerUCSBSync.cc" name="hzgAnalyzerUCSBSync"></bin>
 <!--<bin file="htautauGenAnalyzer.cc" name="htautauGenAnalyzer"></bin>-->
 <!--<bin file="MultileptonAnalyzer.cc" name="MultileptonAnalyzer"></bin>-->
 <!--<bin file="zjpsiAnalyzer.cc" name="zjpsiAnalyzer"></bin>-->

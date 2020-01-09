@@ -5,7 +5,7 @@ import sys
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 selection = 'mumug'
-periods = [2018]
+periods = [2017]
 #path        = '/eos/uscms/store/group/lpcbacon/12d/'
 path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
 executable = 'execBatch.sh'
@@ -370,8 +370,8 @@ batch_16 = bm.BatchMaster(config_list = batch_16_samples,
 #path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
 muon_data_17 = []
 muon_data_17.extend([
-
-    # double muon 2017
+#
+#    # double muon 2017
     cfg(data_name = 'muon_2017B',
         path     = '{0}/DoubleMuon_Run2017B-31Mar2018-v1/'.format(path),
         nJobs    = 50,
@@ -398,6 +398,36 @@ muon_data_17.extend([
         suffix   = 'muon_2017F'
        ),
     ])
+
+#muon_data_17.extend([
+
+    # double muon 2017
+    #cfg(data_name = 'muon_2017B',
+    #    path     = '/eos/uscms/store/user/lpcbacon/corderom/data_2017/DoubleMuon/2017_data_legacy_DoubleMuon_Run2017B-31Mar2018-v1/190923_203833/',
+    #    nJobs    = 50,
+    #    suffix   = 'muon_2017B'
+    #   ),
+    #cfg(data_name = 'muon_2017C',
+    #    path     = '{0}/DoubleMuon_Run2017C-31Mar2018-v1/'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'muon_2017C'
+    #   ),
+    #cfg(data_name = 'muon_2017D',
+    #    path     = '{0}/DoubleMuon_Run2017D-31Mar2018-v1/'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'muon_2017D'
+    #   ),
+    #cfg(data_name = 'muon_2017E',
+    #    path     = '{0}/DoubleMuon_Run2017E-31Mar2018-v1/'.format(path),
+    #    nJobs    = 50,
+    #    suffix   = 'muon_2017E'
+    #   ),
+    #cfg(data_name = 'muon_2017F',
+    #    path     = '{0}/DoubleMuon_Run2017F-31Mar2018-v1/'.format(path),
+    #    nJobs    = 51,
+    #    suffix   = 'muon_2017F'
+    #   ),
+    #])
 
 electron_data_17 = []
 electron_data_17.extend([

@@ -88,6 +88,7 @@ public:
     Float_t nPU;
     Float_t xPV, yPV, zPV;
     UInt_t nJets, nCentralJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    Float_t rho;
    
     // weights
     Int_t genWeight;
@@ -133,7 +134,11 @@ public:
 
     // jet data
     Float_t jetOnePt, jetOneEta, jetOnePhi, jetOneM;
+    Float_t jetOneL1Corr, jetOneL2Corr, jetOneL3Corr, jetOneL4Corr;
+    Float_t jetOneArea, jetOneRawPt;
     Float_t jetTwoPt, jetTwoEta, jetTwoPhi, jetTwoM;
+    Float_t jetTwoL1Corr, jetTwoL2Corr, jetTwoL3Corr, jetTwoL4Corr;
+    Float_t jetTwoArea, jetTwoRawPt;
     Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
     Float_t met, metPhi, metNC, metPhiNC, ht, htPhi, htSum;
 

@@ -70,6 +70,7 @@ public:
     bool PassJetPUID(const baconhep::TJet* jet) const;
     bool BTagModifier(const baconhep::TJet* jet, string, int, int) const;
     double JetCorrector(const baconhep::TJet* jet, string) const;
+    std::vector<float> GetJetSubcorrections(const baconhep::TJet* jet, string) const;
     double JetUncertainty(const baconhep::TJet* jet) const;
     pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
 

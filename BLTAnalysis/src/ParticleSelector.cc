@@ -132,8 +132,23 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         // jet energy resolution
         //jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
         //jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
-        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt");
-        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
+        
+        std::string jerPath;
+        if (parameters.period == "2016") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1";
+        }
+        else if (parameters.period == "2017") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Fall17_V3";
+        }
+        else if (parameters.period == "2018") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Autumn18_V7b";
+        }
+
+        std::cout << jerPath << std::endl;
+        jetResolution   = JME::JetResolution(jerPath + "_MC_PtResolution_AK4PFchs.txt");
+        jetResolutionSF = JME::JetResolutionScaleFactor(jerPath + "_MC_SF_AK4PFchs.txt");
+        //jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt");
+        //jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
     }
 }
 
@@ -811,15 +826,29 @@ double ParticleSelector::JetCorrector(const baconhep::TJet* jet, string tagName)
     _jetCorrector->setJetA(jet->area);
     _jetCorrector->setRho(_rhoFactor); 
 
-    std::vector<float> vv = _jetCorrector->getSubCorrections();
+    /*std::vector<float> vv = _jetCorrector->getSubCorrections();
     for (unsigned int i = 0; i < vv.size(); ++i) {
         std::cout << "correction " << i << " = " << vv.at(i) << std::endl;
-    }
+    }*/
 
     double correction = _jetCorrector->getCorrection();
 
     return correction;
 }
+
+std::vector<float> ParticleSelector::GetJetSubcorrections(const baconhep::TJet* jet, string tagName) const 
+{
+    _jetCorrector->setJetEta(jet->eta);
+    _jetCorrector->setJetPt(jet->ptRaw);
+    _jetCorrector->setJetA(jet->area);
+    _jetCorrector->setRho(_rhoFactor); 
+
+    return _jetCorrector->getSubCorrections();
+}
+
+    
+    
+
 
 double ParticleSelector::JetUncertainty(const baconhep::TJet* jet) const
 {

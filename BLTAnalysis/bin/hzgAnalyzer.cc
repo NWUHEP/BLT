@@ -136,6 +136,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("xPV", &xPV);
     outTree->Branch("yPV", &yPV);
     outTree->Branch("zPV", &zPV);
+    outTree->Branch("rho", &rho);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -207,10 +208,22 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("jetOneEta", &jetOneEta);
     outTree->Branch("jetOnePhi", &jetOnePhi);
     outTree->Branch("jetOneTag", &jetOneTag);
+    outTree->Branch("jetOneRawPt", &jetOneRawPt);
+    outTree->Branch("jetOneArea", &jetOneArea);
+    outTree->Branch("jetOneL1Corr", &jetOneL1Corr);
+    outTree->Branch("jetOneL2Corr", &jetOneL2Corr);
+    outTree->Branch("jetOneL3Corr", &jetOneL3Corr);
+    outTree->Branch("jetOneL4Corr", &jetOneL4Corr);
     outTree->Branch("jetTwoPt", &jetTwoPt);
     outTree->Branch("jetTwoEta", &jetTwoEta);
     outTree->Branch("jetTwoPhi", &jetTwoPhi);
     outTree->Branch("jetTwoTag", &jetTwoTag);
+    outTree->Branch("jetTwoRawPt", &jetTwoRawPt);
+    outTree->Branch("jetTwoArea", &jetTwoArea);
+    outTree->Branch("jetTwoL1Corr", &jetTwoL1Corr);
+    outTree->Branch("jetTwoL2Corr", &jetTwoL2Corr);
+    outTree->Branch("jetTwoL3Corr", &jetTwoL3Corr);
+    outTree->Branch("jetTwoL4Corr", &jetTwoL4Corr);
 
     // gen level objects 
     outTree->Branch("nGenPhotons", &nGenPhotons);
@@ -363,15 +376,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     if (sync) {
         if (!(
                 (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 14) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 12) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 36) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 86) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 107) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 120) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 119) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 161) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 166) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 169) 
+                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 809) 
             )) 
         {
             return kTRUE;
@@ -501,6 +506,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
     nPV           = fPVArr->GetEntries();
+    rho           = fInfo->rhoJet;
     if (!isData) {
         nPU = fInfo->nPUmean;
         puWeight = weights->GetPUWeight(nPU); // pileup reweighting
@@ -728,6 +734,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
         else { // 2017 or 2018
             jetIDName = "tight";
+        }
+
+        if (sync) {
+            std::cout << "jet passes id = " << particleSelector->PassJetID(jet, jetIDName) << std::endl;
         }
 
         if (
@@ -1298,6 +1308,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                         tempJetOne.SetPtEtaPhiM(jets[i]->pt, jets[i]->eta, jets[i]->phi, jets[i]->mass);
                         tempJetTwo.SetPtEtaPhiM(jets[j]->pt, jets[j]->eta, jets[j]->phi, jets[j]->mass);
                         TLorentzVector tempDijet = tempJetOne + tempJetTwo;
+                        if (sync) {
+                            std::cout << "jet one index = " << i << std::endl;
+                            std::cout << "j1L1DR, j1L2DR, j1GamDR: " << 
+                                tempJetOne.DeltaR(leptonOneP4) << ", " << 
+                                tempJetOne.DeltaR(leptonTwoP4) << ", " << 
+                                tempJetOne.DeltaR(photonOneP4) << std::endl;
+                            std::cout << "j2L1DR, j2L2DR, j2GamDR: " << 
+                                tempJetTwo.DeltaR(leptonOneP4) << ", " << 
+                                tempJetTwo.DeltaR(leptonTwoP4) << ", " << 
+                                tempJetTwo.DeltaR(photonOneP4) << std::endl;
+                        }
                         if  (   tempJetOne.DeltaR(leptonOneP4) >= 0.4 && tempJetTwo.DeltaR(leptonOneP4) >= 0.4 
                             &&  tempJetOne.DeltaR(leptonTwoP4) >= 0.4 && tempJetTwo.DeltaR(leptonTwoP4) >= 0.4 
                             &&  tempJetOne.DeltaR(photonOneP4) >= 0.4 && tempJetTwo.DeltaR(photonOneP4) >= 0.4
@@ -1313,8 +1334,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                                 isTightDijetTag = true;
                             }
                             break;
-                        }  
+                        }
                     }
+                    if (isDijetTag) break;
                 }
             }
         }
@@ -1326,11 +1348,27 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             jetOneEta = jetOneP4.Eta();
             jetOnePhi = jetOneP4.Phi();
             jetOneM   = jetOneP4.M();
+            jetOneRawPt = jets[jetOneIndex]->ptRaw;
+            jetOneArea = jets[jetOneIndex]->area;
+
+            std::vector<float> jetOneSubcorrections = particleSelector->GetJetSubcorrections(jets[jetOneIndex], "NONE");
+            jetOneL1Corr = jetOneSubcorrections.at(0);
+            jetOneL2Corr = jetOneSubcorrections.at(1);
+            jetOneL3Corr = jetOneSubcorrections.at(2);
+            jetOneL4Corr = jetOneSubcorrections.at(3);
             
             jetTwoPt = jetTwoP4.Pt();
             jetTwoEta = jetTwoP4.Eta();
             jetTwoPhi = jetTwoP4.Phi();
             jetTwoM   = jetTwoP4.M();
+            jetTwoRawPt = jets[jetTwoIndex]->ptRaw;
+            jetTwoArea = jets[jetTwoIndex]->area;
+            
+            std::vector<float> jetTwoSubcorrections = particleSelector->GetJetSubcorrections(jets[jetTwoIndex], "NONE");
+            jetTwoL1Corr = jetTwoSubcorrections.at(0);
+            jetTwoL2Corr = jetTwoSubcorrections.at(1);
+            jetTwoL3Corr = jetTwoSubcorrections.at(2);
+            jetTwoL4Corr = jetTwoSubcorrections.at(3);
 
             TLorentzVector dijet = jetOneP4 + jetTwoP4;
             dijetPt = dijet.Pt();

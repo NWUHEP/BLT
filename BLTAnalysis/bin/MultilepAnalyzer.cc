@@ -51,7 +51,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "single_lepton") {
-        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*"); // HLT_Ele27_WPTight_Gsf_v // HLT_Ele32_WPTight_Gsf_v
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
 
@@ -76,6 +76,11 @@ void MultilepAnalyzer::Begin(TTree *tree)
     if (params->period == "2017"){
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
     }
+    if (params->period == "2018"){
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt"; // 2018 mask
+    }
+
+    
     cout<< "-- use lumi mask: " << jsonFileName <<endl;
     lumiMask.AddJSONFile(jsonFileName);
     
@@ -140,7 +145,6 @@ void MultilepAnalyzer::Begin(TTree *tree)
           tree->Branch("eleTriggerVarTagSyst", &eleTriggerVarTagSyst);
           tree->Branch("eleTriggerVarProbeSyst", &eleTriggerVarProbeSyst);
         }
-
 
         tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
         tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
@@ -405,7 +409,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
             topPtWeight *= sqrt(topSF);
             topPtVar    += pow(0.01*topPtWeight, 2);
-            eventWeight *= topPtWeight;
+            // eventWeight *= topPtWeight;
         } 
         
         // 3.c) categorize events: save to genCategory
@@ -912,14 +916,13 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     /* Apply analysis selections */
     ///////////////////////////////
 
-
     hTotalEvents->Fill(7);
     string channel = "";
     if        (nElectrons == 0 && nMuons == 2 && nTaus == 0 ){ // mu+mu selection
-        
 
         channel = "mumu";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (muons[0]->pt < 25. || muons[1]->pt < 10.)
             return kTRUE;
@@ -949,19 +952,27 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bitset<2> triggered;
-        for (const auto& name: passTriggerNames) {
+        
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
             if (trigger->passObj(name, 1, muons[0]->hltMatchBits) && muonOneP4.Pt() > 25)
                 triggered.set(0);
             if (trigger->passObj(name, 1, muons[1]->hltMatchBits) && muonTwoP4.Pt() > 25)
                 triggered.set(1);
-        }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered.set(0); 
+          }
+          if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+          if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+          if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+        } 
 
-        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
-        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
-        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!muonTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (muonTriggered) { triggered.set(0); triggerLeptonStatus = 1; }  
+        }
+
+
         eventCounts[channel]->Fill(5);
         
         // correct for MC, including reconstruction and trigger
@@ -1031,10 +1042,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
         }
     } else if (nElectrons == 2 && nMuons == 0 && nTaus == 0) { // e+e selection
-
-
         channel = "ee";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
 
         if (electrons[0]->pt < 30 || electrons[1]->pt < 10 )
@@ -1065,19 +1075,26 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bitset<2> triggered;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits) && electronOneP4.Pt() > 30)
-                triggered.set(0);
-            if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
-                triggered.set(1);
-        }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered.set(0); 
 
-        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
-        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
-        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, electrons[0]->hltMatchBits) && electronOneP4.Pt() > 30)
+                  triggered.set(0);
+              if (trigger->passObj(name, 1, electrons[1]->hltMatchBits) && electronTwoP4.Pt() > 30)
+                  triggered.set(1);
+          }
+          if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+          if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+          if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+        }
+
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (electronTriggered) { triggered.set(0); triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
@@ -1159,6 +1176,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     } else if (nElectrons == 1 && nMuons == 1 && nTaus == 0) { // e+mu selection
         channel = "emu";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
 
         // trigger matching for thresholds
@@ -1198,20 +1216,28 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
 
         // test if selected lepton fire the trigger.
-        bitset<2> triggered;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
-                triggered.set(0);
-            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
-                triggered.set(1);
+        bitset<2> triggered;        
+
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, muons[0]->hltMatchBits))
+                  triggered.set(0);
+              if (trigger->passObj(name, 1, electrons[0]->hltMatchBits))
+                  triggered.set(1);
+          }
+          if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
+          if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
+          if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
         }
+
         // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered.set(0); 
-        
-        if (!triggered.test(0) && !triggered.test(1)) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
-        if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
-        if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
+        else {
+          if (!muonTriggered && !electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if ( muonTriggered && !electronTriggered) { triggered.set(0); triggerLeptonStatus = 1; } 
+          if (!muonTriggered &&  electronTriggered) { triggered.set(1); triggerLeptonStatus = 2; } 
+          if ( muonTriggered &&  electronTriggered) { triggered.set(0); triggered.set(1); triggerLeptonStatus = 3; } 
+        }
         eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
@@ -1285,9 +1311,10 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
         }
     } else if (nElectrons == 1 && nMuons == 0 && nTaus == 1) { // e+tau selection
-
+        
         channel = "etau";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (electrons[0]->pt < 30 )
             return kTRUE;
@@ -1326,17 +1353,24 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
-                triggered = true;
-                break;
-            }
+
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
+                  triggered = true;
+                  break;
+              }
+          }
+          if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered) triggerLeptonStatus = 1;
         }
+
         // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
-        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered) triggerLeptonStatus = 1;
+        else {
+          if (!electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (electronTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1392,6 +1426,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "mutau";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (muons[0]->pt < 25)
             return kTRUE;
@@ -1430,17 +1465,24 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
+
+        if (params->period == "2016") {
         for (const auto& name: passTriggerNames) {
             if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
         }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
+        }
+
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!muonTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (muonTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
@@ -1491,6 +1533,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "etau_fakes";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (fail_electrons[0]->pt < 30 )
             return kTRUE;
@@ -1529,17 +1572,22 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, fail_electrons[0]->hltMatchBits)) {
-                triggered = true;
-                break;
-            }
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, fail_electrons[0]->hltMatchBits)) {
+                  triggered = true;
+                  break;
+              }
+          }
+          if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered) triggerLeptonStatus = 1;
         }
+
         // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
-        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered) triggerLeptonStatus = 1;
+        else {
+          if (!electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (electronTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
         eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1595,6 +1643,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         channel = "mutau_fakes";
         eventCounts[channel]->Fill(1);
 
+
         if (fail_muons[0]->pt < 25)
             return kTRUE;
         eventCounts[channel]->Fill(2);
@@ -1632,17 +1681,24 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
+
+        if (params->period == "2016") {
         for (const auto& name: passTriggerNames) {
             if (trigger->passObj(name, 1, fail_muons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
         }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
+        }
+
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!muonTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (muonTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
 
         // correct for MC, including reconstruction and trigger
@@ -1693,6 +1749,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "e4j";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (electrons[0]->pt < 30 )
             return kTRUE;
@@ -1716,18 +1773,22 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
-                triggered = true;
-                break;
-            }
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, electrons[0]->hltMatchBits)) {
+                  triggered = true;
+                  break;
+              }
+          }
+          if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered) triggerLeptonStatus = 1;
         }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
 
-        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered) triggerLeptonStatus = 1;
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (electronTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
         eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1777,6 +1838,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "mu4j";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (muons[0]->pt < 25)
             return kTRUE;
@@ -1799,20 +1861,29 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
 
 
+
         // test if selected lepton fire the trigger.
         bool triggered = false;
+
+        if (params->period == "2016") {
         for (const auto& name: passTriggerNames) {
             if (trigger->passObj(name, 1, muons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
         }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
+        }
+
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!muonTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (muonTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
+
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
@@ -1859,6 +1930,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "mu4j_fakes";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (fail_muons[0]->pt < 25)
             return kTRUE;
@@ -1879,20 +1951,29 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneIso    = GetMuonIsolation(fail_muons[0]);
         leptonOneFlavor = 13*fail_muons[0]->q;
 
+
         // test if selected lepton fire the trigger.
         bool triggered = false;
+
+        if (params->period == "2016") {
         for (const auto& name: passTriggerNames) {
             if (trigger->passObj(name, 1, fail_muons[0]->hltMatchBits)) {
                 triggered = true;
                 break;
             }
         }
-        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
         if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
         if ( triggered) triggerLeptonStatus = 1;
+        }
+
+        // artificial set leading as true, because trigger test is not saved in 2017 and 2018
+        else {
+          if (!muonTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (muonTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
+
         eventCounts[channel]->Fill(5);
+
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
@@ -1940,6 +2021,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "e4j_fakes";
         eventCounts[channel]->Fill(1);
+        // coutchannel
 
         if (fail_electrons[0]->pt < 30 )
             return kTRUE;
@@ -1963,17 +2045,22 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
-        for (const auto& name: passTriggerNames) {
-            if (trigger->passObj(name, 1, fail_electrons[0]->hltMatchBits)) {
-                triggered = true;
-                break;
-            }
+        if (params->period == "2016") {
+          for (const auto& name: passTriggerNames) {
+              if (trigger->passObj(name, 1, fail_electrons[0]->hltMatchBits)) {
+                  triggered = true;
+                  break;
+              }
+          }
+          if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
+          if ( triggered) triggerLeptonStatus = 1;
         }
+
         // artificial set leading as true, because trigger test is not saved in 2017 and 2018
-        if (params->period != "2016") triggered = true; 
-        
-        if (!triggered) {triggerLeptonStatus = 0; return kTRUE;}
-        if ( triggered) triggerLeptonStatus = 1;
+        else {
+          if (!electronTriggered) { triggerLeptonStatus = 0; return kTRUE; }
+          if (electronTriggered) { triggered = true; triggerLeptonStatus = 1; } 
+        }
         eventCounts[channel]->Fill(5);
         // correct for MC, including reconstruction and trigger
         if (!isData) {

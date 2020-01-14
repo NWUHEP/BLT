@@ -5,7 +5,7 @@ import sys
 
 # to run interactively
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
-# MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 10000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+# MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 # ExampleAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_000.root 1000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 # MultilepAnalyzer /eos/uscms/store/user/zchen/Output_90.root 100 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 
@@ -21,12 +21,9 @@ analyzer   = 'MultilepAnalyzer'
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
-# selection  = 'single_electron'
-# data_samples = ['single_el']
-# mc_samples.append('ttbar_systematics')
-# mc_samples.append('hzg')
+
 # data_samples = []
-# mc_samples   = ['ttbar','ttbar_systematics']
+# mc_samples   = ['ttbar_systematics']
 
 ''' 
     Set job configurations.  
@@ -243,7 +240,6 @@ mc_dict['wjets'] = [
        ),
     ]
 
-
 mc_dict['ttbar'] = [
     # top
     cfg(data_name = 'ttbar_inclusive',
@@ -317,7 +313,6 @@ mc_dict['ttbar_systematics'] = [
         suffix   = 'ttbar_inclusive_mepsDown'
        ),
     ]
-
 
 
 mc_dict['t'] = [

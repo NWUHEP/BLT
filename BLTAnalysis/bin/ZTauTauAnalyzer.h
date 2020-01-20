@@ -143,6 +143,9 @@ public:
     // Trk met
     Float_t trkMET, trkMETphi;
 
+    // Correction to MET due to Pt adjustments of reconstructed objects
+    Float_t metCorr, metCorrPhi;
+    
     // object counters
     UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets;
     UInt_t nFailMuons, nFailElectrons;

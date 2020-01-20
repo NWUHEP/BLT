@@ -185,6 +185,10 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("pcpMETphi"    , &pcpMETphi    );
     tree->Branch("trkMET"       , &trkMET       );
     tree->Branch("trkMETphi"    , &trkMETphi    );
+    //correction to the met due to particle pt scalings
+    tree->Branch("metCorr"      , &metCorr      );
+    tree->Branch("metCorrPhi"   , &metCorrPhi   );
+
     //Used in SVfit
     tree->Branch("met"     , &met);
     tree->Branch("metPhi"  , &metPhi);
@@ -243,9 +247,14 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   bool useLogMTermNLL = true;
   Int_t kLogMTauMu = 4;
   Int_t kLogMTauE  = 4;
-
+  
   //Whether or not to use fake tau scale factors
-  bool useFakeTauSF = false;
+  bool useFakeTauSF = false; //currently using in the histogramming instead
+
+  //Reset MET correction variables
+  metCorr = 0.;
+  metCorrPhi = 0.;
+
   
   const bool isData = (fInfo->runNum != 1);
   particleSelector->SetRealData(isData);
@@ -476,10 +485,22 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 					  0, 0);
     }
     muon->pt = muonSF*muon->pt; 
-        
+   
     TLorentzVector muonP4;
     muonP4.SetPtEtaPhiM(muon->pt, muon->eta, muon->phi, 0.10566);
 
+    //Update MET with the updated muon Pt
+    TVector3 muonP3 = muonP4.Vect();
+    muonP3.SetZ(0.);
+    if(muonSF > 0.) { //skip if SF = 0
+      muonP3 = (1. - 1./muonSF)*muonP3; //muon pT - original pT = changed pT
+      TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
+      
+      metP3 = metP3 - muonP3; //add to met -1*change, to cancel it out
+      metCorr = metP3.Mag();
+      metCorrPhi = metP3.Phi();
+    }
+    
     if (
 	muonP4.Pt() > 10.
 	&& fabs(muonP4.Eta()) < 2.4
@@ -522,17 +543,30 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     assert(electron);
         
     // apply electron scale and smear
+    float electronSF = 1.;
     if (isData) {
       scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
-      electron->pt *= sdata.scale;
+      electronSF = sdata.scale;
     } else {
       float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
-      electron->pt *= rng->Gaus(1, sFactor);
+      electronSF *= rng->Gaus(1, sFactor);
     }
+    electron->pt *= electronSF;
 
     TLorentzVector electronP4;
     electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
 
+    //Update MET with the updated electron Pt
+    TVector3 electronP3 = electronP4.Vect();
+    electronP3.SetZ(0.);
+    if(electronSF > 0.) {
+      electronP3 = (1. - 1./electronSF)*electronP3;
+      TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
+      metP3 = metP3 - electronP3;
+      metCorr = metP3.Mag();
+      metCorrPhi = metP3.Phi();
+    }
+    
     if (
 	electron->pt > 15
 	&& fabs(electron->scEta) < 2.5
@@ -603,15 +637,29 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	    break;
 	  }
 	}
+	float tauSF = 1.;
 	// 1.b) apply correction for tau_h -> tau_h 
 	// (https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV#Tau_energy_scale)
 	if (genTauHadOverlap) {
 	  if (tau->decaymode == 0) {
-	    tau->pt *= 0.995;
+	    tauSF = 0.995;
 	  } else if (tau->decaymode == 1) {
-	    tau->pt *= 1.01;
+	    tauSF = 1.01;
 	  } else if (tau->decaymode == 10) {
-	    tau->pt *= 1.006;
+	    tauSF = 1.006;
+	  }
+	  tau->pt *= tauSF;
+	  tauP4.SetPtEtaPhiM(tau->pt, tau->eta, tau->phi, tau->m); //update the lorentz vector
+
+	  //Update MET with the updated tau Pt
+	  TVector3 tauP3 = tauP4.Vect();
+	  tauP3.SetZ(0.);
+	  if(tauSF > 0.) {
+	    tauP3 = (1. - 1./tauSF)*tauP3;
+	    TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
+	    metP3 = metP3 - tauP3;
+	    metCorr = metP3.Mag();
+	    metCorrPhi = metP3.Phi();
 	  }
 	}
       }
@@ -632,6 +680,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       //    // 2.b) apply correction for electron -> tau_h
       //    if (genElectronOverlap) {
       //        tau->pt *= 1.1;
+      //        FIXME: Add Met correction update due to Pt scaling
       //    }
       // }
 
@@ -722,7 +771,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     // apply JEC offline and get scale uncertainties
     double jec = particleSelector->JetCorrector(jet, "DummyName");
-    jet->pt = jet->ptRaw*jec;
+    float jetSF = 1.;
+    jetSF = jec;
+    jet->pt = jet->ptRaw*jetSF;
 
 
     float gRand = 1.;
@@ -733,7 +784,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       jerc = 1. + gRand*sqrt(std::max((double)resPair.second*resPair.second - 1., 0.));
       jet->pt = jet->pt*jerc;
     }
-
+    jetSF *= jec;
+    
     // Prevent overlap of muons and jets
     TLorentzVector jetP4; 
     jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
@@ -789,6 +841,16 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	// for MC apply corrections and variate systematics
 	JetCounting(jet,jerc, gRand);
       }
+      //Update MET with the updated jet Pt
+      // TVector3 jetP3 = jetP4.Vect();
+      // jetP3.SetZ(0.);
+      // if(jetSF > 0.) jetP3 = (1. - 1./jetSF)*jetP3;
+      // else           jetP3 = 0.*jetP3;
+      // TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
+      // metP3 = metP3 - jetP3;
+      // metCorr = metP3.Mag();
+      // metCorrPhi = metP3.Phi();
+
 
       if (jet->pt > 30) {
 	hadronicP4 += jetP4;
@@ -814,6 +876,13 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   ht    = hadronicP4.Pt();
   htPhi = hadronicP4.Phi();
 
+  if(metCorr == nanf("")) {
+    cout << "Run: " << runNumber << " Event:" << evtNumber << " Lumi: " << lumiSection
+	 << " Error! MET correction for pT scaling has value nanf, setting to zero\n";
+    metCorr = 0.;
+    metCorrPhi = 0.;
+  }
+  
   /* -------- MET ---------*/
   //Particle Flow MET
   pfMET         = fInfo->pfMET;
@@ -988,8 +1057,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       if(debug) 
 	cout << "DEBUG: SVFit work" << endl;
 
-      double metX = met*cos(metPhi);
-      double metY = met*sin(metPhi);
+      double metX = met*cos(metPhi) + metCorr*cos(metCorrPhi);
+      double metY = met*sin(metPhi) + metCorr*sin(metCorrPhi);
       TMatrixD covMET(2,2);
       covMET[0][0] = covMet00;
       covMET[0][1] = covMet01;
@@ -1211,8 +1280,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     if(doSVFit) {
       if(debug) 
 	cout << "DEBUG: SVFit work" << endl;
-      double metX = met*cos(metPhi);
-      double metY = met*sin(metPhi);
+      double metX = met*cos(metPhi) + metCorr*cos(metCorrPhi);
+      double metY = met*sin(metPhi) + metCorr*sin(metCorrPhi);
       TMatrixD covMET(2,2);
       covMET[0][0] = covMet00;
       covMET[0][1] = covMet01;
@@ -1314,7 +1383,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     }
     eventCounts[channel]->Fill(5);
 
-  } else if (nElectrons == 1 && nMuons == 1  ) { // e+mu selection
+  } else if (nElectrons == 1 && nMuons == 1 && nTaus == 0 ) { // e+mu selection
 
     channel = "emu";
     eventCounts[channel]->Fill(1);
@@ -1362,10 +1431,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     if ( triggered.test(0) && !triggered.test(1)) triggerLeptonStatus = 1;
     if (!triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 2;
     if ( triggered.test(0) &&  triggered.test(1)) triggerLeptonStatus = 3;
-    //if not requiring the lepton firing the trigger, store if both were fired
+    //if not requiring the lepton firing the trigger, store which were fired
     if(!requireSelectedTrigger)
-      triggerLeptonStatus = (passTriggerPt2) + 2*(passTriggerPt1);
-    //passTrigger1 = electron but triggered.set(0) == muon
+      //                      electron               muon
+      triggerLeptonStatus = (passTriggerPt1) + 2*(passTriggerPt2);
+    //status: 0 no trigger, 1 electron, 2 muon, 3 both
     
     eventCounts[channel]->Fill(3);
 
@@ -1436,6 +1506,80 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 
     }
     eventCounts[channel]->Fill(4);
+    if(doSVFit) {
+      if(debug) 
+	cout << "DEBUG: SVFit work" << endl;
+
+      double metX = met*cos(metPhi) + metCorr*cos(metCorrPhi);
+      double metY = met*sin(metPhi) + metCorr*sin(metCorrPhi);
+      TMatrixD covMET(2,2);
+      covMET[0][0] = covMet00;
+      covMET[0][1] = covMet01;
+      covMET[1][0] = covMet01;
+      covMET[1][1] = covMet11;
+      std::vector<classic_svFit::MeasuredTauLepton> measuredTauLeptons;
+      // tau -> electron decay (Pt, eta, phi, mass)
+      measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToElecDecay, electronP4.Pt(), electronP4.Eta(), electronP4.Phi(), 0.51100e-3));
+      // tau -> 1prong0pi0 hadronic decay (Pt, eta, phi, mass, prongs)
+      // prongs: 0 if pi0, 1 if 1 prong, 10 if 3 prongs 0 pi0
+      measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(classic_svFit::MeasuredTauLepton::kTauToMuDecay,  muonP4.Pt(), muonP4.Eta(), muonP4.Phi(),  muonP4.M(), 105.66)); 
+
+      int svFitVerbosity = 0;
+      ClassicSVfit* svFitAlgo = new ClassicSVfit(svFitVerbosity);
+      double massConstraint = 125.06;
+      if(useLogMTermNLL) svFitAlgo->addLogM_fixed(true, kLogMTauMu);
+      if(useMassConstraint) svFitAlgo->setDiTauMassConstraint(massConstraint);
+      classic_svFit::TauTauHistogramAdapter* histAdapt = new classic_svFit::TauTauHistogramAdapter();
+      svFitAlgo->setHistogramAdapter(histAdapt);
+      svFitAlgo->integrate(measuredTauLeptons, metX, metY, covMET);
+      massSVFit    = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMass();
+      massErrSVFit = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getMassErr();
+      if(debug) 
+	cout << "DEBUG: Getting SVFit vectors" << endl;
+      classic_svFit::LorentzVector tau1P4 = static_cast<classic_svFit::TauTauHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->GetFittedTau1LV();
+      classic_svFit::LorentzVector tau2P4 = static_cast<classic_svFit::TauTauHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->GetFittedTau2LV();
+      leptonOneSVP4.SetPtEtaPhiM(tau1P4.Pt(), tau1P4.Eta(), tau1P4.Phi(), tau1P4.M());
+      leptonTwoSVP4.SetPtEtaPhiM(tau2P4.Pt(), tau2P4.Eta(), tau2P4.Phi(), tau2P4.M());
+      // transverseMass = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMass();
+      // transverseMassErr = static_cast<DiTauSystemHistogramAdapter*>(svFitAlgo->getHistogramAdapter())->getTransverseMassErr();
+      svFitStatus = svFitAlgo->isValidSolution();
+      delete svFitAlgo;
+
+      trkhistos += 6; //from created histogram adapter object
+      TObject* o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPt_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramEta_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramPhi_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramMass_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("ClassicSVfitIntegrand_histogramTransverseMass_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      //tau momentum correction histograms
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau1Pt_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau1Eta_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau1Phi_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau2Pt_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau2Eta_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+      ++trkhistos;
+      o = gDirectory->Get(Form("svfitAlgorithm_histogramTau2Phi_SVfitQuantity_%i",trkhistos));
+      if(o) delete o;
+    }
 
   } else {
     return kTRUE;

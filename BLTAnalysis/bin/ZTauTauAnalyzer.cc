@@ -124,6 +124,8 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       tree->Branch("tauMVA",           &tauMVA); 
       tree->Branch("tauGenFlavor",     &tauGenFlavor);
       tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
+      tree->Branch("tauGenPt",         &tauGenPt);
+      tree->Branch("tauGenEta",        &tauGenEta);
       tree->Branch("tauVetoedJetPt",   &tauVetoedJetPt);
       tree->Branch("tauVetoedJetPtUnc",&tauVetoedJetPtUnc);
     }
@@ -149,6 +151,7 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("nTaus", &nTaus);
     tree->Branch("nPhotons", &nPhotons);
     tree->Branch("nJets", &nJets);
+    tree->Branch("nFwdJets", &nFwdJets);
     tree->Branch("nBJets", &nBJets);
     tree->Branch("nGenTausHad", &nGenTausHad);
     tree->Branch("nGenTausLep", &nGenTausLep);
@@ -209,6 +212,8 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
 
   }
+  tauGenPt = 0.; tauGenEta = 0.;
+  
   cout<< "Done with initialization"<<endl;
   ReportPostBegin();
 
@@ -250,7 +255,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   
   //Whether or not to use fake tau scale factors
   bool useFakeTauSF = false; //currently using in the histogramming instead
-
+  bool veryTightTauID = false; //just tight ID right now
+  
   //Reset MET correction variables
   metCorr = 0.;
   metCorrPhi = 0.;
@@ -823,40 +829,46 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     }
 
     // save good jets
-    if (
-	fabs(jet->eta) <= 2.4
-	&& particleSelector->PassJetID(jet, cuts->looseJetID)
-	&& !muOverlap 
-	&& !elOverlap
-	&& !tauOverlap
-	&& !photonOverlap
-	) {
-      if (isData){
-	// for data pass pt threshold
-	if (jet->pt > 30){
-	  ++nJets;
-	  if (jet->bmva > 0.9432) ++nBJets;
+    if (particleSelector->PassJetID(jet, cuts->looseJetID)) {
+      if(fabs(jet->eta) <= 2.4
+	 && !muOverlap 
+	 && !elOverlap
+	 && !tauOverlap
+	 && !photonOverlap
+	 ) {
+	if (isData){
+	  // for data pass pt threshold
+	  if (jet->pt > 30){
+	    ++nJets;
+	    if (jet->bmva > 0.9432) ++nBJets;
+	  }
+	} else {
+	  // for MC apply corrections and variate systematics
+	  JetCounting(jet,jerc, gRand);
 	}
-      } else {
-	// for MC apply corrections and variate systematics
-	JetCounting(jet,jerc, gRand);
-      }
-      //Update MET with the updated jet Pt
-      // TVector3 jetP3 = jetP4.Vect();
-      // jetP3.SetZ(0.);
-      // if(jetSF > 0.) jetP3 = (1. - 1./jetSF)*jetP3;
-      // else           jetP3 = 0.*jetP3;
-      // TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
-      // metP3 = metP3 - jetP3;
-      // metCorr = metP3.Mag();
-      // metCorrPhi = metP3.Phi();
+	//Update MET with the updated jet Pt
+	// TVector3 jetP3 = jetP4.Vect();
+	// jetP3.SetZ(0.);
+	// if(jetSF > 0.) jetP3 = (1. - 1./jetSF)*jetP3;
+	// else           jetP3 = 0.*jetP3;
+	// TVector3 metP3(metCorr*cos(metCorrPhi), metCorr*sin(metCorrPhi), 0.);
+	// metP3 = metP3 - jetP3;
+	// metCorr = metP3.Mag();
+	// metCorrPhi = metP3.Phi();
 
 
-      if (jet->pt > 30) {
+	if (jet->pt > 30) {
+	  hadronicP4 += jetP4;
+	  sumJetPt += jetP4.Pt();
+	}
+	//end central jets
+      } else if(jet->pt > 30. //forward jets
+		&& fabs(jet->eta) < 4.7
+		&& ((fabs(jet->eta) < 2.5 && jet->mva > -0.89) || (fabs(jet->eta) >  2.5))) {
+	nFwdJets++;
 	hadronicP4 += jetP4;
 	sumJetPt += jetP4.Pt();
       }
-
     }
   }
 
@@ -1012,7 +1024,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       auto taugenhadpair = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true ); // useHadronFlavor = true
       tauGenFlavor    = taugenpair.first;
       tauGenFlavorHad = taugenhadpair.first;
-
+      tauGenPt        = taugenpair.second.Pt();
+      tauGenEta       = taugenpair.second.Eta();
+      
       // correct for id,reco weights
       EfficiencyContainer effCont;
       pair<float, float> effs, errs;
@@ -1038,7 +1052,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
       //gen object weight
-      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
+      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta(), veryTightTauID) : 1.;
       if(useFakeTauSF) eventWeight *= genTauFlavorWeight;
       
       // correct for trigger.
@@ -1233,6 +1247,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       auto taugenhadpair = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true ); // useHadronFlavor = true
       tauGenFlavor    = taugenpair.first;
       tauGenFlavorHad = taugenhadpair.first;
+      tauGenPt        = taugenpair.second.Pt();
+      tauGenEta       = taugenpair.second.Eta();
 
       // correct for id,reco weights
       EfficiencyContainer effCont;
@@ -1257,7 +1273,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       leptonTwoRecoWeight = 1.0;
       leptonTwoRecoVar    = 0.0;
       eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
-      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta()) : 1.;
+      genTauFlavorWeight = (tauGenFlavor != 26) ? FakeTauSF(tauGenFlavor, taugenpair.second.Pt(), taugenpair.second.Eta(), veryTightTauID) : 1.;
       if(useFakeTauSF) eventWeight *= genTauFlavorWeight;
 
       if (nPhotons > 0) {
@@ -1723,23 +1739,56 @@ pair<int,TLorentzVector> ZTauTauAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
   return pair<int,TLorentzVector>(flavor, jetP4);
 }
 
-double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta) {
+double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta, bool isVeryTight = true) {
+  
+  if(isVeryTight) {
+    if(abs(pdgid) == 15) return 1.;
+  
+    //b-jet
+    if(abs(pdgid) == 5) {
+      if(pt < 25.)
+	return 1.061694561;
+      if(pt < 30.)
+	return 1.177661174;
+      if(pt < 40.)
+	return 1.488901406;
+      if(pt < 50.)
+	return 0.972327128;
+      if(pt < 65.)
+	return 0.897842372;
+      return 0.857519502;
+    }
+    //electron
+    if(abs(pdgid) == 11) {
+      if(abs(eta) < 1.479) //barrel region
+	return 1.4;
+      return 1.9;
+    }
+
+    //muon
+    if(abs(pdgid) == 13) 
+      return 1.;
+
+    //jet
+    if(abs(pdgid) < 7) {
+      if(pt < 25.)
+	return 0.976550401;
+      if(pt < 30.)
+	return 0.880820553;
+      if(pt < 40.)
+	return 0.818182921;
+      if(pt < 50.)
+	return 0.789590788;
+      if(pt < 65.)
+	return 0.896520371;
+      return 0.672976190;    
+    }
+    return 1.;
+  } //end if(isVeryTight)
+
+  //just tight ID
   if(abs(pdgid) == 15) return 1.;
   
-  //b-jet
-  if(abs(pdgid) == 5) {
-    if(pt < 25.)
-      return 1.061694561;
-    if(pt < 30.)
-      return 1.177661174;
-    if(pt < 40.)
-      return 1.488901406;
-    if(pt < 50.)
-      return 0.972327128;
-    if(pt < 65.)
-      return 0.897842372;
-    return 0.857519502;
-  }
   //electron
   if(abs(pdgid) == 11) {
     if(abs(eta) < 1.479) //barrel region
@@ -1749,23 +1798,25 @@ double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta) {
 
   //muon
   if(abs(pdgid) == 13) 
-      return 1.;
+    return 1.;
 
-  //jet
+  //jet (including b jets)
   if(abs(pdgid) < 7) {
     if(pt < 25.)
-      return 0.976550401;
+      return 0.994; //+- 0.056
     if(pt < 30.)
-      return 0.880820553;
-    if(pt < 40.)
-      return 0.818182921;
+      return 0.957; //+- 0.047
+    if(pt < 40.)   
+      return 0.967; //+- 0.044
     if(pt < 50.)
-      return 0.789590788;
-    if(pt < 65.)
-      return 0.896520371;
-    return 0.672976190;    
+      return 0.911; //+- 0.040
+    if(pt < 65.) 
+      return 0.930; //+- 0.042
+    return 0.720;   //+- 0.039
   }
+  
   return 1.;
+
 }
 
 pair<float, float> ZTauTauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
@@ -1858,6 +1909,7 @@ float ZTauTauAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyCon
 void ZTauTauAnalyzer::ResetJetCounters()
 {
   nJets = nBJets = 0;
+  nFwdJets = 0;
   nJetsCut       = nBJetsCut        = 0;
   nJetsJESUp     = nJetsJESDown     = 0;
   nJetsJERUp     = nJetsJERDown     = 0;

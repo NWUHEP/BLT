@@ -122,6 +122,7 @@ public:
 
     // tau variable
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
+    Float_t tauGenPt, tauGenEta;
     Float_t tauPt, tauEta, tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
 
     // ht
@@ -147,7 +148,7 @@ public:
     Float_t metCorr, metCorrPhi;
     
     // object counters
-    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nBJets;
+    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nFwdJets, nBJets;
     UInt_t nFailMuons, nFailElectrons;
 
     //SVFit variables
@@ -175,7 +176,7 @@ private:
     float GetMuonIsolation(const baconhep::TMuon*);
     float GetElectronIsolation(const baconhep::TElectron*, float);
     pair<int,TLorentzVector> GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
-    double FakeTauSF(int pdgid, double pt, double eta);
+    double FakeTauSF(int pdgid, double pt, double eta, bool isVeryTight);
     pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);

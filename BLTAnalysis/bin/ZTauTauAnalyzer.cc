@@ -864,6 +864,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	//end central jets
       } else if(jet->pt > 30. //forward jets
 		&& fabs(jet->eta) < 4.7
+		&& fabs(jet->eta) > 2.4
 		&& ((fabs(jet->eta) < 2.5 && jet->mva > -0.89) || (fabs(jet->eta) >  2.5))) {
 	nFwdJets++;
 	hadronicP4 += jetP4;

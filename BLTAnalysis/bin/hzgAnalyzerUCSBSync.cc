@@ -136,6 +136,7 @@ void hzgAnalyzerUCSBSync::Begin(TTree *tree)
     outTree->Branch("xPV", &xPV);
     outTree->Branch("yPV", &yPV);
     outTree->Branch("zPV", &zPV);
+    outTree->Branch("rho", &rho);
 
     outTree->Branch("met", &met);
     outTree->Branch("metPhi", &metPhi);
@@ -160,6 +161,7 @@ void hzgAnalyzerUCSBSync::Begin(TTree *tree)
     outTree->Branch("muonTrigWeightOne", &muonTrigWeightOne);
     outTree->Branch("muonTrigWeightTwo", &muonTrigWeightTwo);
     outTree->Branch("photonIDWeight", &photonIDWeight);
+    outTree->Branch("photonR9Weight", &photonR9Weight);
 
     // leptons
     outTree->Branch("leptonOnePt", &leptonOnePt);
@@ -198,6 +200,7 @@ void hzgAnalyzerUCSBSync::Begin(TTree *tree)
     outTree->Branch("photonOneEta", &photonOneEta);
     outTree->Branch("photonOnePhi", &photonOnePhi);
     outTree->Branch("photonOneR9", &photonOneR9);
+    outTree->Branch("photonOneRawR9", &photonOneRawR9);
     outTree->Branch("photonOneMVA", &photonOneMVA);
     outTree->Branch("photonOneERes", &photonOneERes);
     outTree->Branch("passElectronVeto", &passElectronVeto);
@@ -207,10 +210,22 @@ void hzgAnalyzerUCSBSync::Begin(TTree *tree)
     outTree->Branch("jetOneEta", &jetOneEta);
     outTree->Branch("jetOnePhi", &jetOnePhi);
     outTree->Branch("jetOneTag", &jetOneTag);
+    outTree->Branch("jetOneRawPt", &jetOneRawPt);
+    outTree->Branch("jetOneArea", &jetOneArea);
+    outTree->Branch("jetOneL1Corr", &jetOneL1Corr);
+    outTree->Branch("jetOneL2Corr", &jetOneL2Corr);
+    outTree->Branch("jetOneL3Corr", &jetOneL3Corr);
+    outTree->Branch("jetOneL4Corr", &jetOneL4Corr);
     outTree->Branch("jetTwoPt", &jetTwoPt);
     outTree->Branch("jetTwoEta", &jetTwoEta);
     outTree->Branch("jetTwoPhi", &jetTwoPhi);
     outTree->Branch("jetTwoTag", &jetTwoTag);
+    outTree->Branch("jetTwoRawPt", &jetTwoRawPt);
+    outTree->Branch("jetTwoArea", &jetTwoArea);
+    outTree->Branch("jetTwoL1Corr", &jetTwoL1Corr);
+    outTree->Branch("jetTwoL2Corr", &jetTwoL2Corr);
+    outTree->Branch("jetTwoL3Corr", &jetTwoL3Corr);
+    outTree->Branch("jetTwoL4Corr", &jetTwoL4Corr);
 
     // gen level objects 
     outTree->Branch("nGenPhotons", &nGenPhotons);
@@ -409,7 +424,7 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
 
             if ((fabs(particle->pdgId) == 11 || fabs(particle->pdgId) == 13) and particle->parent > 0) {
                 TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-                if (fabs(mother->pdgId) == 23) 
+                if (fabs(mother->pdgId) == 23 || fabs(mother->pdgId) == 15)
                     genLeptons.push_back(particle);
             }
                 
@@ -534,6 +549,7 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
     lumiSection   = fInfo->lumiSec;
     triggerStatus = passTrigger;
     nPV           = fPVArr->GetEntries();
+    rho           = fInfo->rhoJet;
     if (!isData) {
         nPU = fInfo->nPUmean;
         puWeight = weights->GetPUWeight(nPU); // pileup reweighting
@@ -712,6 +728,16 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
 
+        // 2017 EE noise veto
+        if (params->period == "2017") {
+            if (
+                jet->ptRaw < 50. 
+                && fabs(jet->eta) > 2.65 
+                && fabs(jet->eta) < 3.139
+                ) {
+                continue;
+            }
+        }
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
 
@@ -1060,10 +1086,6 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
         if (nLeptons < 2)
             return kTRUE;
         hTotalEvents->Fill(5);
-
-        if (photons.size() < 1)
-            return kTRUE;
-        hTotalEvents->Fill(6);
            
         TLorentzVector leptonOneP4, leptonTwoP4;
         unsigned int leptonOneIndex = 0;
@@ -1108,20 +1130,23 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
 
         if (!hasValidPair)
             return kTRUE;
-        hTotalEvents->Fill(7);
+        hTotalEvents->Fill(6);
 
         if (params->selection == "mumug") {
-            if (leptonOneP4.Pt() <= 20.0) 
-                return kTRUE;
-            if (leptonTwoP4.Pt() <= 10.0)
-                return kTRUE;
+            if (leptonOneP4.Pt() <= 20.0) return kTRUE;
         }
-        else if (params->selection == "elelg") {  
-            if (leptonOneP4.Pt() <= 25.0)
-                return kTRUE;
-            if (leptonTwoP4.Pt() <= 15.0)
-                return kTRUE;
+        else {
+            if (leptonOneP4.Pt() <= 25.0) return kTRUE;
         }
+        hTotalEvents->Fill(7);
+        
+        if (params->selection == "mumug") {
+            if (leptonTwoP4.Pt() <= 10.0) return kTRUE;
+        }
+        else {
+            if (leptonTwoP4.Pt() <= 15.0) return kTRUE;
+        }
+        hTotalEvents->Fill(8);
 
         TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
 
@@ -1135,7 +1160,10 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
                )
                 return kTRUE;
         }
-        hTotalEvents->Fill(8); 
+        hTotalEvents->Fill(9); 
+        
+        if (photons.size() < 1) return kTRUE;
+        hTotalEvents->Fill(10);
 
         bool hasValidPhoton = false;
         unsigned int photonIndex = 0;
@@ -1162,13 +1190,13 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
 
         if (!hasValidPhoton)
             return kTRUE;
-        hTotalEvents->Fill(9);
+        hTotalEvents->Fill(11);
 
         TLorentzVector photonOneP4;
         photonOneP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonOneP4.Pt() < 15.0)
             return kTRUE;
-        hTotalEvents->Fill(10);
+        hTotalEvents->Fill(12);
 
         TLorentzVector llgP4 = dileptonP4 + photonOneP4;
 
@@ -1346,6 +1374,7 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
                             break;
                         }  
                     }
+                    if (isDijetTag) break;
                 }
             }
         }
@@ -1357,11 +1386,27 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
             jetOneEta = jetOneP4.Eta();
             jetOnePhi = jetOneP4.Phi();
             jetOneM   = jetOneP4.M();
+            jetOneRawPt = jets[jetOneIndex]->ptRaw;
+            jetOneArea = jets[jetOneIndex]->area;
+
+            std::vector<float> jetOneSubcorrections = particleSelector->GetJetSubcorrections(jets[jetOneIndex], "NONE");
+            jetOneL1Corr = jetOneSubcorrections.at(0);
+            jetOneL2Corr = jetOneSubcorrections.at(1);
+            jetOneL3Corr = jetOneSubcorrections.at(2);
+            jetOneL4Corr = jetOneSubcorrections.at(3);
             
             jetTwoPt = jetTwoP4.Pt();
             jetTwoEta = jetTwoP4.Eta();
             jetTwoPhi = jetTwoP4.Phi();
             jetTwoM   = jetTwoP4.M();
+            jetTwoRawPt = jets[jetTwoIndex]->ptRaw;
+            jetTwoArea = jets[jetTwoIndex]->area;
+            
+            std::vector<float> jetTwoSubcorrections = particleSelector->GetJetSubcorrections(jets[jetTwoIndex], "NONE");
+            jetTwoL1Corr = jetTwoSubcorrections.at(0);
+            jetTwoL2Corr = jetTwoSubcorrections.at(1);
+            jetTwoL3Corr = jetTwoSubcorrections.at(2);
+            jetTwoL4Corr = jetTwoSubcorrections.at(3);
 
             TLorentzVector dijet = jetOneP4 + jetTwoP4;
             dijetPt = dijet.Pt();
@@ -1467,6 +1512,7 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
         }
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
+        photonOneRawR9 = photons[photonIndex]->r9_full5x5;
         if (!isData) {
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
             if (sync) {
@@ -1476,8 +1522,13 @@ Bool_t hzgAnalyzerUCSBSync::Process(Long64_t entry)
                              weights->GetCorrectedPhotonR9(*photons[photonIndex]) << std::endl;
             }
         }
-        else 
-            photonOneR9 = photons[photonIndex]->r9_full5x5;
+        else photonOneR9 = photons[photonIndex]->r9_full5x5;
+        if (photonOneRawR9 != 0.) {
+            photonR9Weight = photonOneR9 / photonOneRawR9;
+        }
+        else {
+            photonR9Weight = 1.;
+        }
 
         // kinematic fit
         KinZfitter* kinZfitter = new KinZfitter(isData);

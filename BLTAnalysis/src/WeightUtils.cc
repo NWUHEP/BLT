@@ -302,10 +302,10 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _mva_gammaSF = (TH2F *)f_mva_gammaIdSF->Get("EGamma_SF2D");
 
     // photon r9 reweighting
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9_reweighting_2016.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_r9/photon_r9_reweighting_" + _dataPeriod + ".root";
     TFile* f_photon_r9 = new TFile(fileName.c_str(), "OPEN"); 
-    _photon_r9_barrel = (TGraph *)f_photon_r9->Get("transffull5x5R9EB");
-    _photon_r9_endcap = (TGraph *)f_photon_r9->Get("transffull5x5R9EE");
+    _photon_r9_barrel = (TGraph *)f_photon_r9->Get("gR9_EB");
+    _photon_r9_endcap = (TGraph *)f_photon_r9->Get("gR9_EE");
 }
 
 void WeightUtils::SetDataBit(bool isRealData)

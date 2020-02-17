@@ -99,6 +99,7 @@ public:
     Float_t muonIDWeightOne, muonIDWeightTwo;
     Float_t muonTrigWeightOne, muonTrigWeightTwo;
     Float_t photonIDWeight;
+    Float_t photonR9Weight;
 
     // physics object Lorentz vectors
     Float_t leptonOnePt, leptonOneEta, leptonOnePhi;
@@ -123,9 +124,10 @@ public:
 
     // photon data
     Float_t photonOnePt, photonOneEta, photonOnePhi;
-    Float_t photonOneR9;
+    Float_t photonOneR9, photonOneRawR9;
     Float_t photonOneMVA;
     Float_t photonOneERes;
+    Float_t photonOneE, photonOneErrE;
     Bool_t passElectronVeto;
 
     Bool_t isLeptonTag;

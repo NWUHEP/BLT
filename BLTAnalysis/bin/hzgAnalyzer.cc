@@ -161,6 +161,7 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("muonTrigWeightOne", &muonTrigWeightOne);
     outTree->Branch("muonTrigWeightTwo", &muonTrigWeightTwo);
     outTree->Branch("photonIDWeight", &photonIDWeight);
+    outTree->Branch("photonR9Weight", &photonR9Weight);
 
     // leptons
     outTree->Branch("leptonOnePt", &leptonOnePt);
@@ -199,8 +200,11 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("photonOneEta", &photonOneEta);
     outTree->Branch("photonOnePhi", &photonOnePhi);
     outTree->Branch("photonOneR9", &photonOneR9);
+    outTree->Branch("photonOneRawR9", &photonOneRawR9);
     outTree->Branch("photonOneMVA", &photonOneMVA);
     outTree->Branch("photonOneERes", &photonOneERes);
+    outTree->Branch("photonOneE", &photonOneE);
+    outTree->Branch("photonOneErrE", &photonOneErrE);
     outTree->Branch("passElectronVeto", &passElectronVeto);
 
     // jets
@@ -375,8 +379,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     bool sync = false;
     if (sync) {
         if (!(
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 14) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1 && fInfo->evtNum == 809) 
+                (fInfo->runNum == 297178 && fInfo->lumiSec == 1178 && fInfo->evtNum == 1364598849) ||
+                (fInfo->runNum == 297178 && fInfo->lumiSec == 565 && fInfo->evtNum == 726698029) ||
+                (fInfo->runNum == 297604 && fInfo->lumiSec == 211 && fInfo->evtNum == 347252710) ||
+                (fInfo->runNum == 297484 && fInfo->lumiSec == 119 && fInfo->evtNum == 231034847) || 
+                (fInfo->runNum == 297484 && fInfo->lumiSec == 152 && fInfo->evtNum == 291871060)
             )) 
         {
             return kTRUE;
@@ -684,6 +691,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
+
+        // 2017 EE noise veto
+        if (params->period == "2017") {
+            if (
+                jet->ptRaw < 50. 
+                && fabs(jet->eta) > 2.65 
+                && fabs(jet->eta) < 3.139
+                ) {
+                continue;
+            }
+        }
 
         double jec = particleSelector->JetCorrector(jet, "NONE");
         jet->pt = jet->ptRaw*jec;
@@ -1466,14 +1484,20 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonOneMVA = photons[photonIndex]->mvaFall17V2;
         //photonOneERes = photons[photonIndex]->eRes;
        // photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / photons[photonIndex]->pt;
-        TLorentzVector tmpPhotonP4ForRes;
-        tmpPhotonP4ForRes.SetPtEtaPhiM(photons[photonIndex]->pt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
-        photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / tmpPhotonP4ForRes.E();
+        //TLorentzVector tmpPhotonP4ForRes;
+        //tmpPhotonP4ForRes.SetPtEtaPhiM(photons[photonIndex]->pt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
+        //photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / tmpPhotonP4ForRes.E();
+        
+        photonOneERes = photons[photonIndex]->ecalEnergyErrPostCorr / photonOneP4.E();
+        photonOneE = photonOneP4.E();
+        photonOneErrE = photons[photonIndex]->ecalEnergyErrPostCorr;
+        //std::cout << "photonOneE, photonOneErrE, photonOneERes: " << photonOneE << ", " << photonOneErrE << ", " << photonOneERes << std::endl;
         if (sync) {
             std::cout << "photon resolution = " << photonOneERes << std::endl;
         }
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
+        photonOneRawR9 = photons[photonIndex]->r9_full5x5;
         if (!isData) {
             photonOneR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
             if (sync) {
@@ -1483,8 +1507,13 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                              weights->GetCorrectedPhotonR9(*photons[photonIndex]) << std::endl;
             }
         }
-        else 
-            photonOneR9 = photons[photonIndex]->r9_full5x5;
+        else photonOneR9 = photons[photonIndex]->r9_full5x5;
+        if (photonOneRawR9 != 0.) {
+            photonR9Weight = photonOneR9 / photonOneRawR9;
+        }
+        else {
+            photonR9Weight = 1.;
+        }
 
         // kinematic fit
         KinZfitter* kinZfitter = new KinZfitter(isData);

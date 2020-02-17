@@ -88,6 +88,7 @@ public:
     Float_t nPU;
     Float_t xPV, yPV, zPV;
     UInt_t nJets, nCentralJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
+    Float_t rho;
    
     // weights
     Int_t genWeight;
@@ -98,6 +99,7 @@ public:
     Float_t muonIDWeightOne, muonIDWeightTwo;
     Float_t muonTrigWeightOne, muonTrigWeightTwo;
     Float_t photonIDWeight;
+    Float_t photonR9Weight;
 
     // physics object Lorentz vectors
     Float_t leptonOnePt, leptonOneEta, leptonOnePhi;
@@ -122,7 +124,7 @@ public:
 
     // photon data
     Float_t photonOnePt, photonOneEta, photonOnePhi;
-    Float_t photonOneR9;
+    Float_t photonOneR9, photonOneRawR9;
     Float_t photonOneMVA;
     Float_t photonOneERes;
     Bool_t passElectronVeto;
@@ -133,7 +135,11 @@ public:
 
     // jet data
     Float_t jetOnePt, jetOneEta, jetOnePhi, jetOneM;
+    Float_t jetOneL1Corr, jetOneL2Corr, jetOneL3Corr, jetOneL4Corr;
+    Float_t jetOneArea, jetOneRawPt;
     Float_t jetTwoPt, jetTwoEta, jetTwoPhi, jetTwoM;
+    Float_t jetTwoL1Corr, jetTwoL2Corr, jetTwoL3Corr, jetTwoL4Corr;
+    Float_t jetTwoArea, jetTwoRawPt;
     Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
     Float_t met, metPhi, metNC, metPhiNC, ht, htPhi, htSum;
 

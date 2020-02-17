@@ -671,6 +671,9 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, string idName) const
             }
         }
     }
+    //std::cout << "jet eta, neuHadFrac, neuEmFrac, nParticles, chHadFrac, nCharged, chEmFrac, nNeutrals, passID: " << 
+     //            jet->eta << ", " << jet->neuHadFrac << ", " << jet->neuEmFrac << ", " << jet->nParticles << ", " << 
+      //           jet->chHadFrac << ", " << jet->nCharged << "< " << jet->chEmFrac << ", " << jet->nNeutrals << ", " << jetPass << std::endl;
 
     return jetPass;
 }

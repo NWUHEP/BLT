@@ -314,7 +314,6 @@ mc_dict['ttbar_systematics'] = [
        ),
     ]
 
-
 mc_dict['t'] = [
     cfg(data_name = 'T_tW-channel',
         path     = '{0}/Summer16_ST_tW_top_5f_inclusiveDecays_TuneCUETP8M2T4'.format(path),

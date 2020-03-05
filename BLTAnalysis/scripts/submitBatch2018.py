@@ -31,7 +31,7 @@ data_dict['single_mu'] = [
             path      = '{0}/SingleMuonRun2018B_17Sep2018_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2018B'
-          ),
+            ),
         cfg(data_name = 'muon_2018C',
             path      = '{0}/SingleMuonRun2018C_17Sep2018_v1'.format(path),
             nJobs     = 50,

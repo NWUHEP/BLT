@@ -80,14 +80,28 @@ void MultilepAnalyzer::Begin(TTree *tree)
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt"; // 2018 mask
     }
 
-    
     cout<< "-- use lumi mask: " << jsonFileName <<endl;
     lumiMask.AddJSONFile(jsonFileName);
     
 
+
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3");
+    string muonCorrFileName = "";
+    if (params->period == "2016") {
+        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2016.txt";
+        // muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3"); // 2016 muonCorr
+    }
+    if (params->period == "2017"){
+        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2017.txt";
+    }
+    if (params->period == "2018"){
+        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2018.txt";
+    }
+    muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
+    cout<< "-- use muon Roc Correction: " << muonCorrFileName <<endl;
+    muonCorr = new RoccoR(muonCorrFileName);
+   
 
     // electron scale corrections
     cout<< "electron scale corrections"<<endl;
@@ -659,9 +673,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     
 
 
-
-
-    
     /* -------- ELECTRONS ---------*/
     vector<TElectron*> electrons,fail_electrons;
     vector<TLorentzVector> veto_electrons;

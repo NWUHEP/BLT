@@ -108,6 +108,7 @@ public:
     Float_t genWeight;
     UInt_t genCategory;
     UInt_t nGenElectrons, nGenMuons, nGenTausHad, nGenTausLep;
+    UInt_t nGenPromptElectrons, nGenPromptMuons, nGenPromptTaus;
 
     // weights and uncertainties
     Float_t eventWeight;

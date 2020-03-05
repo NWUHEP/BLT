@@ -93,7 +93,7 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
   string outHistName = params->get_output_treename("TotalEvents");
   hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
 
-  vector<std::string> channelNames = {"etau","mutau","emu"};
+  vector<std::string> channelNames = {"etau","mutau","emu","all"};
 
   for (unsigned i = 0; i < channelNames.size(); ++i) {
     string channel = channelNames[i];
@@ -119,7 +119,7 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("genTauFlavorWeight", &genTauFlavorWeight);
 
     // tau staff
-    if (channel == "etau" || channel == "mutau"){
+    if (channel == "etau" || channel == "mutau" || channel == "all"){
       tree->Branch("tauDecayMode",     &tauDecayMode);
       tree->Branch("tauMVA",           &tauMVA); 
       tree->Branch("tauGenFlavor",     &tauGenFlavor);
@@ -157,6 +157,9 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
     tree->Branch("nGenTausLep", &nGenTausLep);
     tree->Branch("nGenElectrons", &nGenElectrons);
     tree->Branch("nGenMuons", &nGenMuons);
+    tree->Branch("nGenPromptTaus", &nGenPromptTaus);
+    tree->Branch("nGenPromptElectrons", &nGenPromptElectrons);
+    tree->Branch("nGenPromptMuons", &nGenPromptMuons);
 
     // ht,met
     tree->Branch("htSum", &htSum);
@@ -229,10 +232,11 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   this->totalEvents++;
   hTotalEvents->Fill(1);
   //for debugging a specific event
-  bool debug = false;
+  bool debug = true;
   unsigned int event_debug = 210414177;
   unsigned int run_debug = 1;
   unsigned int lumi_debug = 442822;
+
   debug = debug && event_debug == fInfo->evtNum;
   debug = debug && lumi_debug  == fInfo->lumiSec;
   debug = debug && run_debug   == fInfo->runNum;
@@ -252,6 +256,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   bool useLogMTermNLL = true;
   Int_t kLogMTauMu = 4;
   Int_t kLogMTauE  = 4;
+
+  //For saving extra information for debugging/signal loss understanding
+  bool saveExtraInfo = false;
   
   //Whether or not to use fake tau scale factors
   bool useFakeTauSF = false; //currently using in the histogramming instead
@@ -325,6 +332,10 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     // 1.initialization
     //   1.a) counting parton for Drell-Yan samples
     unsigned partonCount= 0;
+    nGenPromptElectrons = 0;
+    nGenPromptMuons = 0;
+    nGenPromptTaus = 0;
+    
 
     //   1.b) counting top for top reweighting
     float topSF = 1.;
@@ -351,6 +362,13 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       if (abs(particle->pdgId) == 6 && particle->status == 62) {
 	topSF *= exp(0.0615 - 0.0005*particle->pt);
 	++topCount;
+      }
+
+      // 2.c) hard process lepton counting
+      if(particle->isHardProcess) {
+	if(abs(particle->pdgId) == 11) nGenPromptElectrons++;
+	if(abs(particle->pdgId) == 13) nGenPromptMuons++;
+	if(abs(particle->pdgId) == 15) nGenPromptTaus++;
       }
 
       // 2.d) This saves gen level tau, leptonic taus, electrons and muons
@@ -417,6 +435,9 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     genCategory = 0;
     nGenTausHad = 0;
     nGenTausLep = 0;
+    nGenPromptElectrons = 0;
+    nGenPromptMuons = 0;
+    nGenPromptTaus = 0;
   }
 
 
@@ -1004,7 +1025,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     //////////////////////////////////////
 
 
-    // test if selected lepton fire the trigger.
+    // test if selected lepton fired the trigger.
     bool triggered = (!requireSelectedTrigger)&&(electronTriggered);
     for (const auto& name: passTriggerNames) {
       if(triggered) break;
@@ -1038,8 +1059,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       errs = effCont.GetErr();
       leptonOneIDWeight = effs.first/effs.second;
       leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-      leptonTwoIDWeight = 0.95;
-      leptonTwoIDVar    = 0.05;
+      leptonTwoIDWeight = 1.0; //scale in fake tau sf
+      leptonTwoIDVar    = 0.05; //variance
       eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
       // reconstruction weight
@@ -1261,7 +1282,7 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       errs = effCont.GetErr();
       leptonOneIDWeight = effs.first/effs.second;
       leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-      leptonTwoIDWeight = 0.95;
+      leptonTwoIDWeight = 1.0; //scale in fake tau sf
       leptonTwoIDVar    = 0.05;
       eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
@@ -1598,9 +1619,31 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       if(o) delete o;
     }
 
+  } else if(saveExtraInfo) {
+    if(nElectrons + nMuons + nTaus == 2) {
+      if(nElectrons > 0)  leptonOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+      else if(nMuons > 0) leptonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
+      else { //both are taus
+	leptonOneP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+	leptonTwoP4.SetPtEtaPhiM(taus[1]->pt, taus[1]->eta, taus[1]->phi, taus[1]->m);
+      }
+      if(nElectrons > 1)  leptonTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6); // 2 electrons 
+      else if(nElectrons > 0 && nTaus > 0) leptonTwoP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m); // e tau
+      if(nMuons > 1)      leptonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.10566); // mu mu
+      else if(nMuons > 0 && nElectrons > 0) leptonTwoP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566); //e mu
+      else if(nMuons > 0 && nTaus > 0) leptonTwoP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m); //mu tau
+    } else if(nElectrons + nMuons + nTaus == 1) {
+      if(nElectrons > 0)  leptonOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+      else if(nMuons > 0) leptonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
+      else leptonOneP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+      leptonTwoP4.SetXYZT(0.,0.,0.,0.);
+    }
+    
   } else {
     return kTRUE;
   }
+
+  //Fill extra data
 
 
   ///////////////////
@@ -1608,7 +1651,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   ///////////////////
 
   outFile->cd(channel.c_str());
-  outTrees[channel]->Fill();
+  if(channel != "") outTrees[channel]->Fill();
+  if(saveExtraInfo) outTrees["all"]->Fill();
   this->passedEvents++;
   return kTRUE;
 }
@@ -1743,7 +1787,7 @@ pair<int,TLorentzVector> ZTauTauAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
 double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta, bool isVeryTight = true) {
   
   if(isVeryTight) {
-    if(abs(pdgid) == 15) return 1.;
+    if(abs(pdgid) == 15) return 0.95;
   
     //b-jet
     if(abs(pdgid) == 5) {
@@ -1788,7 +1832,7 @@ double ZTauTauAnalyzer::FakeTauSF(int pdgid, double pt, double eta, bool isVeryT
   } //end if(isVeryTight)
 
   //just tight ID
-  if(abs(pdgid) == 15) return 1.;
+  if(abs(pdgid) == 15) return 0.95;
   
   //electron
   if(abs(pdgid) == 11) {

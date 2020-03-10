@@ -117,9 +117,25 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         } 
 
 
-        // jet energy resolution
-        jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
-        jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
+        // // jet energy resolution
+        // jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_pt_resolution.dat");
+        // jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jer/jet_resolution_scale_factors.dat");
+
+        std::string jerPath;
+        if (parameters.period == "2016") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Summer16_25nsV1";
+        }
+        else if (parameters.period == "2017") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Fall17_V3";
+        }
+        else if (parameters.period == "2018") {
+            jerPath = cmssw_base + "/src/BLT/BLTAnalysis/data/jer/Autumn18_V7b";
+        }
+
+        std::cout << jerPath << std::endl;
+        jetResolution   = JME::JetResolution(jerPath + "_MC_PtResolution_AK4PFchs.txt");
+        jetResolutionSF = JME::JetResolutionScaleFactor(jerPath + "_MC_SF_AK4PFchs.txt");
+        
 
         // b tag scale factor and uncertainty payload files
         vector<string> btagUncSources {

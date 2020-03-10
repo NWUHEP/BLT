@@ -112,9 +112,9 @@ public:
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneFlavor, leptonTwoFlavor;
 
-    // tau variable
-    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
-    Float_t tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
+    // tau/prob variable
+    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad, leptonThreeIsoPassTight;
+    Float_t leptonThreeIso, tauVetoedJetPt, tauVetoedJetPtUnc;
 
     // ht
     Float_t htSum, ht, htPhi;
@@ -124,7 +124,7 @@ public:
 
     // object counters
     UInt_t nMuons, nElectrons, nTaus, nJets, nBJets;
-    UInt_t nFailMuons, nFailElectrons;
+    UInt_t nProbMuons, nProbElectrons;
 
     ////////////////////////////////
 

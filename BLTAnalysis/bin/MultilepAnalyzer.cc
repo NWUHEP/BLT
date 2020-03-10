@@ -51,16 +51,14 @@ void MultilepAnalyzer::Begin(TTree *tree)
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
     if (params->selection == "single_lepton") {
-        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*"); // HLT_Ele27_WPTight_Gsf_v // HLT_Ele32_WPTight_Gsf_v
+        if(params->period == "2018"){
+            triggerNames.push_back("HLT_Ele32_WPTight_Gsf_v*");
+        } else {
+            triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        }
+        // HLT_Ele27_WPTight_Gsf_v // HLT_Ele32_WPTight_Gsf_v
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
-
-    } else if (params->selection == "single_muon") {
-        triggerNames.push_back("HLT_IsoMu24_v*");
-        triggerNames.push_back("HLT_IsoTkMu24_v*");
-
-    } else if (params->selection == "single_electron") {
-        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
     }
 
     // Weight utility class
@@ -87,22 +85,11 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    string muonCorrFileName = "";
-    if (params->period == "2016") {
-        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2016.txt";
-        // muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3"); // 2016 muonCorr
-    }
-    if (params->period == "2017"){
-        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2017.txt";
-    }
-    if (params->period == "2018"){
-        muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_2018.txt";
-    }
-    muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
+    // string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_"+params->period+".txt";
+    string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
     cout<< "-- use muon Roc Correction: " << muonCorrFileName <<endl;
     muonCorr = new RoccoR(muonCorrFileName);
-   
-
+  
     // electron scale corrections
     cout<< "electron scale corrections"<<endl;
     electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data/electron_es");
@@ -933,7 +920,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         channel = "mumu";
         eventCounts[channel]->Fill(1);
-        // coutchannel
 
         if (muons[0]->pt < 25. || muons[1]->pt < 10.)
             return kTRUE;

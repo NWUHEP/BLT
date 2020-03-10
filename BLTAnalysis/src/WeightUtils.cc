@@ -28,10 +28,17 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     std::string fileName;
 
     const std::string cmssw_base = getenv("CMSSW_BASE");
+    if (_dataPeriod == "2016"){
+      fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup/pileup_sf_2016_full.root";
+      TFile* puFile = new TFile(fileName.c_str(), "OPEN");
+      _puReweight2016 = (TGraph*)puFile->Get("pileup_sf");
+    }
+    
     // PU weights
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup/pileup_sf_2016_full.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup/pu_weights_" + _dataPeriod + ".root";
     TFile* puFile = new TFile(fileName.c_str(), "OPEN");
-    _puReweight = (TGraph*)puFile->Get("pileup_sf");
+    _puReweight = (TH1D*)puFile->Get("mcwei_run000001");
+
 
     // muon trigger sf (BCDEF) 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_RunBtoF.root";
@@ -212,7 +219,8 @@ void WeightUtils::SetSelection(string selection)
 
 float WeightUtils::GetPUWeight(float nPU)
 {
-    return _puReweight->Eval(nPU); 
+    if(_dataPeriod=="2016") return _puReweight2016->Eval(nPU); 
+    else return _puReweight->GetBinContent(_puReweight->FindBin(nPU)); 
 }
 
 EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const

@@ -78,7 +78,8 @@ class WeightUtils: public TObject {
         bool   _isRealData;
 
         // pileup
-        TGraph  *_puReweight;
+        TGraph  *_puReweight2016; // this is for 2016 analysis
+        TH1D *_puReweight; 
 
         // muon trigger and ID/ISO scale factors
         TGraphAsymmErrors *_muSF_IsoMu24_DATA_BCDEF[4], *_muSF_IsoMu24_MC_BCDEF[4];

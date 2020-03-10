@@ -6,8 +6,10 @@ import sys
 # to run interactively
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
-# ExampleAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_000.root 1000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
-# MultilepAnalyzer /eos/uscms/store/user/zchen/Output_90.root 100 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+
+# MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
+# MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+
 
 
 
@@ -155,6 +157,7 @@ mc_dict['zjets'] = [
     #     nJobs    = 10,
     #     suffix   = 'z1jets_m-50_amcatnlo'
     #    ),
+
     # cfg(data_name = 'DYToLL_2J_amcatnlo',
     #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
     #     nJobs    = 10,

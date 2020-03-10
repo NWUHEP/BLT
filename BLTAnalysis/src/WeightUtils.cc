@@ -274,26 +274,6 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
         effMC   = 1.;
         errMC   = 0.;
 
-        // values from Kevin, et. al.
-        //int etaBin = 0;
-        //int ptBin = 0;
-        //for (int i = 0; i < 13; ++i) {
-        //    if (lepton.Eta() > _eleEtaBins[i] && lepton.Eta() <= _eleEtaBins[i+1]) {
-        //        etaBin = i;
-        //        break;
-        //    }
-        //}
-        //for (int i = 0; i < 8; ++i) {
-        //    if (lepton.Pt() > _elePtBins[i] && lepton.Pt() <= _elePtBins[i+1]) {
-        //        ptBin = i;
-        //        break;
-        //    }
-        //}
-        //effData = _ele_trigEff_data[etaBin][ptBin];
-        //effMC   = _ele_trigEff_mc[etaBin][ptBin];
-        //errData = 0.005*_ele_trigEff_data[etaBin][ptBin];
-        //errMC   = 0.005*_ele_trigEff_mc[etaBin][ptBin];
-
     }
 
     EfficiencyContainer effCont(effData, effMC, errData, errMC);

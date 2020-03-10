@@ -95,7 +95,7 @@ smearData EnergyScaleCorrection::GetSmearData(TElectron* electron)
 float EnergyScaleCorrection::GetSmearingFactor(TElectron* electron, int nSigRho, int nSigPhi)
 {
     smearData sdata = GetSmearData(electron);
-    float rho = sdata.rho + sdata.rhoErr*nSigRho;
+    float rho = sdata.rho + nSigRho*sdata.rhoErr;
     float phi = TMath::Pi()/2 + nSigPhi*TMath::Pi()/2;
 
     float c = rho*sin(phi);

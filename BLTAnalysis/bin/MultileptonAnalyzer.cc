@@ -101,7 +101,13 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     outFile->cd();
 
     string outHistName = params->get_output_treename("TotalEvents");
-    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
+    hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",14,0.5,14.5);
+
+    // count parton mulitplicities for DY events 
+    outHistName = params->get_output_treename("PartonCountsPlus");
+    partonCountsPlus =  new TH1D(outHistName.c_str(), "PartonCountsPlus", 4, -0.5, 3.5);
+    outHistName = params->get_output_treename("PartonCountsMinus");
+    partonCountsMinus =  new TH1D(outHistName.c_str(), "PartonCountsMinus", 4, -0.5, 3.5);
 
     // counts W decay modes for acceptance calculation
     outHistName = params->get_output_treename("GenCategory");
@@ -363,6 +369,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nPartons  = 0;
     if (!isData) {
 
+        //int nGenJets = fGenJetsArr->GetEntries();
+
         // loop over gen particle collection:
         //   * parton counting for combining inclusive and jet-binned Drell-Yan samples
         //   * categorization of W and tau decays in ttbar/tW events
@@ -490,6 +498,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
         if (genWeight < 0) {
             hTotalEvents->Fill(10);
+            partonCountsMinus->Fill(nPartons);
+        } else {
+            partonCountsPlus->Fill(nPartons);
         }
 
         // get weights for assessing PDF and QCD scale systematics
@@ -515,7 +526,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 }
             }
         }
-
 
         // categorize events
         genCategory = 0;
@@ -596,14 +606,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             genCategory = 21;
         }
 
+
         // top pt weights
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
             topPtWeight = sqrt(topSF);
-            topPtVar    = topPtWeight; // the official prescription is to use no topPt weight as the down variation and twice the weight as the up variation
+            topPtVar    = topPtWeight; 
         }
 
         // Z pt weights
-        if (params->datasetgroup.substr(0, 5) == "zjets" && (zPt > 0. || zP4.Pt() > 0.)) {
+        if (
+                (params->datasetgroup.substr(0, 5) == "zjets" 
+                || params->datasetgroup.substr(0, 6) == "z0jets" 
+                || params->datasetgroup.substr(0, 6) == "z1jets" 
+                || params->datasetgroup.substr(0, 6) == "z2jets") 
+                && (zPt > 0. || zP4.Pt() > 0.)) {
             if (zP4.Pt() > 0) 
                 zPt = zP4.Pt();
 
@@ -619,6 +635,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         // WW pt weights
         if (params->datasetgroup.substr(0, 5) == "ww_qq") {
             wwPtWeight = weights->GetWWPtWeight(wwP4.Pt(), wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown);
+            hTotalEvents->Fill(11, wwPtScaleUp);
+            hTotalEvents->Fill(12, wwPtScaleDown);
+            hTotalEvents->Fill(13, wwPtResumUp);
+            hTotalEvents->Fill(14, wwPtResumDown);
         }
 
         // pileup reweighting
@@ -876,7 +896,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     std::vector<TJet*> jets;
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
-
     ResetJetCounters();
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
@@ -1864,8 +1883,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.1052);
             tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
             dilepton = muonP4 + tauP4;
-            if (dilepton.M() < 12)
-                return kTRUE;
             eventCounts[channel]->Fill(3);
 
             //if (nJets < 2 || nBJets < 1)
@@ -1884,7 +1901,63 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        //} else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets >= 3 && nBJets >= 1))) {
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, muonP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+                pdgId           = GetGenId(genParticles, genMotherId, tauP4);
+                leptonTwoGenId  = pdgId.first;
+                leptonTwoMother = pdgId.second;
+
+                //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                // reconstruction weights
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+                leptonTwoRecoWeight = 1.;
+                leptonTwoRecoVar    = 0.;
+
+                // id/iso weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                effCont = weights->GetMuonIDEff(muonP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                if (genCategory == 8 || genCategory == 15) {
+                    leptonTwoIDWeight = 0.95;
+                    leptonTwoIDVar    = 0.05;
+                } else {
+                    leptonTwoIDWeight = 1.;
+                    leptonTwoIDVar    = 0.01;
+                }
+
+                // trigger weights
+                bool triggered = false;
+                for (const auto& name: passTriggerNames) {
+                    if (trigger->passObj(name, 1, fail_muons[0]->hltMatchBits)) {
+                        triggered = true;
+                        break;
+                    }
+                }
+
+                if (triggered) {
+                    effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                    effs          = effCont.GetEff();
+                    errs          = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+                } else {
+                    return kTRUE;
+                }
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
+            }
         } else if (isData && (nJets >= 4 && nBJets >= 1)) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
@@ -1977,8 +2050,71 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             leptonTwoDZ     = taus[0]->dzLeadChHad;
             leptonTwoD0     = taus[0]->d0LeadChHad;
 
-        //} else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets >= 3 && nBJets >= 1))) {
-        } else if (isData && (nJets >= 4 && nBJets >= 1)) {
+            tauDecayMode  = taus[0]->decaymode;
+            tauMVA        = taus[0]->rawIsoMVA3newDMwLT;
+
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, electronP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+                pdgId           = GetGenId(genParticles, genMotherId, tauP4);
+                leptonTwoGenId  = pdgId.first;
+                leptonTwoMother = pdgId.second;
+
+                //cout << "etau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                // reconstruction weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+                leptonTwoRecoWeight = 1.;
+                leptonTwoRecoVar    = 0.;
+
+                // id/iso weights
+                effCont = weights->GetElectronIDEff(electronP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                if (genCategory == 7 || genCategory == 12) {
+                    leptonTwoIDWeight = 0.95;
+                    leptonTwoIDVar    = 0.05;
+                } else {
+                    leptonTwoIDWeight = 1.;
+                    leptonTwoIDVar    = 0.01;
+                }
+
+                // trigger weights
+                bool triggered = false;
+                for (const auto& name: passTriggerNames) {
+                    if (trigger->passObj(name, 1, fail_electrons[0]->hltMatchBits)) {
+                        triggered = true;
+                        break;
+                    }
+                }
+
+                if (triggered) {
+                    effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                    effs = effCont.GetEff();
+                    errs = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                    eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                    eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+                } else {
+                    return kTRUE;
+                }
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
+
+            }
+        } else if (isData && nJets >= 4 && nBJets >= 1) {
             channel = "e4j_fakes";
             eventCounts[channel]->Fill(1);
             nElectrons = 1;

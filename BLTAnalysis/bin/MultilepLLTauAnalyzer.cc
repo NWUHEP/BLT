@@ -309,6 +309,13 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
         topPtWeight = 1.;
         topPtVar = 0.;
 
+
+        float zPt = -1.;
+        TLorentzVector zP4(0., 0., 0., 0);
+        zPtWeight = 1.;
+        zPtVar    = 0.;
+
+
         //   1.c) counting W,tau for WW categorization
         unsigned wCount     = 0;
         unsigned tauCount   = 0;
@@ -345,6 +352,17 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
                 topSF *= exp(0.0615 - 0.0005*particle->pt);
                 ++topCount;
             }
+            // identify Z boson
+            if (abs(particle->pdgId) == 23 && particle->status == 62) {
+                zPt = particle->pt;
+            }
+            // Z not included in low mass DY sample :(
+            if ( (abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 || abs(particle->pdgId) == 15) && particle->status == 23 && particle->parent == 0) {
+                TLorentzVector ellP4(0., 0., 0., 0.);
+                ellP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
+                zP4 += ellP4;
+            }
+
 
             // 2.c) Tag WW decay based on neutrino flavors: update wCount,tauCount,wDecay,tauDecay
             unsigned flavor = abs(particle->pdgId);
@@ -413,6 +431,29 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
             topPtVar    += pow(0.01*topPtWeight, 2);
             // eventWeight *= topPtWeight;
         } 
+
+        // 3.b) Z pt weights
+        if (
+                (params->datasetgroup.substr(0, 5) == "zjets" 
+                || params->datasetgroup.substr(0, 6) == "z0jets" 
+                || params->datasetgroup.substr(0, 6) == "z1jets" 
+                || params->datasetgroup.substr(0, 6) == "z2jets") 
+                && (zPt > 0. || zP4.Pt() > 0.)) {
+            if (zP4.Pt() > 0) 
+                zPt = zP4.Pt();
+
+            if (zPt < 140) {
+                zPtWeight = (0.876979 + 4.11598e-3*zPt - 2.3552e-5*zPt*zPt);
+                zPtWeight *= 1.10211*(0.958512 - 0.131835*erf((zPt - 14.1972)/10.1525));
+            } else {
+                zPtWeight = 0.891188;
+            }
+            zPtVar    = 0.01*zPtWeight;
+
+            // apply zPt reweighting
+            eventWeight *= zPtWeight;
+        }
+
         
         // 3.c) categorize events: save to genCategory
         genCategory = 0;
@@ -1401,6 +1442,7 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
 
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
+
             // reconstruction weight
             effCont = weights->GetMuonISOEff(muonOneP4);
             effs = effCont.GetEff();
@@ -1415,6 +1457,19 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
+
+
+            ///////////prob id iso correction///////////////////
+            effCont = weights->GetElectronIDEff(probeP4);
+            effs = effCont.GetEff();
+            eventWeight *= (effs.first/effs.second);
+            effCont = weights->GetElectronRecoEff(probeP4);
+            effs = effCont.GetEff();
+            eventWeight *= (effs.first/effs.second);
+            //////////////////////////////////////
+
+
 
             // correct for trigger.
 
@@ -1547,6 +1602,17 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
             leptonTwoRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+
+
+            ///////////prob id iso correction///////////////////
+            effCont = weights->GetMuonIDEff(probeP4);
+            effs = effCont.GetEff();
+            eventWeight *= (effs.first/effs.second);
+            effCont = weights->GetMuonISOEff(probeP4);
+            effs = effCont.GetEff();
+            eventWeight *= (effs.first/effs.second);
+            //////////////////////////////////////
+
 
             // correct for trigger.
 

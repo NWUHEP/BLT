@@ -18,14 +18,14 @@ cfg        = bm.JobConfig
 executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
-analyzer   = 'MultilepAnalyzer'
+analyzer   = 'MultilepLLTauAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
 
 # data_samples = []
-# mc_samples   = ['ttbar_systematics']
+# mc_samples   = ['zjets'] #['ttbar_systematics']
 
 ''' 
     Set job configurations.  
@@ -146,23 +146,23 @@ mc_dict['zjets'] = [
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
 
-    # cfg(data_name = 'DYToLL_0J_amcatnlo',
-    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
-    #     nJobs    = 10,
-    #     suffix   = 'z0jets_m-50_amcatnlo'
-    #    ),
+    cfg(data_name = 'DYToLL_0J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z0jets_m-50_amcatnlo'
+       ),
 
-    # cfg(data_name = 'DYToLL_1J_amcatnlo',
-    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
-    #     nJobs    = 10,
-    #     suffix   = 'z1jets_m-50_amcatnlo'
-    #    ),
+    cfg(data_name = 'DYToLL_1J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z1jets_m-50_amcatnlo'
+       ),
 
-    # cfg(data_name = 'DYToLL_2J_amcatnlo',
-    #     path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
-    #     nJobs    = 10,
-    #     suffix   = 'z2jets_m-50_amcatnlo'
-    #    ),
+    cfg(data_name = 'DYToLL_2J_amcatnlo',
+        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
+        nJobs    = 10,
+        suffix   = 'z2jets_m-50_amcatnlo'
+       ),
 
 
     # cfg(data_name = 'DYJetsToLL_M-50',

@@ -123,7 +123,7 @@ public:
     Float_t met, metPhi;
 
     // object counters
-    UInt_t nMuons, nElectrons, nTaus, nJets, nBJets;
+    UInt_t nMuons, nElectrons, nTaus, nJets, nBJets, nProbs;
     UInt_t nProbMuons, nProbElectrons;
 
     ////////////////////////////////

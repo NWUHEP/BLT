@@ -175,6 +175,7 @@ void MultilepLLTauAnalyzer::Begin(TTree *tree)
         // if prob
         if ( channel == "mumue" || channel == "eemu" ){
           tree->Branch("leptonThreeIsoPassTight",     &leptonThreeIsoPassTight);
+          tree->Branch("nProbs", &nProbs);
         }
         
 
@@ -194,6 +195,7 @@ void MultilepLLTauAnalyzer::Begin(TTree *tree)
         tree->Branch("nTaus", &nTaus);
         tree->Branch("nJets", &nJets);
         tree->Branch("nBJets", &nBJets);
+        
 
         // jet systematics
         tree->Branch("nJetsJESUp",      &nJetsJESUp);
@@ -1310,7 +1312,7 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
             }
             eventWeight *= triggerWeight;
         }
-    } else if (nMuons == 2 && nProbElectrons == 1 ){ // Z(mumu)+prob_e selection
+    } else if (nMuons == 2 && nProbElectrons >= 1 ){ // Z(mumu)+prob_e selection
         
 
         channel = "mumue";
@@ -1369,6 +1371,7 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(6);
 
         ///////////prob info///////////////////
+        nProbs = nProbElectrons;
         TLorentzVector probeP4;
         probeP4.SetPtEtaPhiM(prob_electrons[0]->pt, prob_electrons[0]->eta, prob_electrons[0]->phi, 511e-6);
         leptonThreeP4     = probeP4;
@@ -1442,10 +1445,10 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
             }
             eventWeight *= triggerWeight;
         }
-    } else if (nElectrons == 2 && nProbMuons == 1) { // Z(ee)+prob_mu selection
+    } else if (nElectrons == 2 && nProbMuons >= 1) { // Z(ee)+prob_mu selection
 
 
-        channel = "eetau";
+        channel = "eemu";
         eventCounts[channel]->Fill(1);
 
 
@@ -1501,6 +1504,7 @@ Bool_t MultilepLLTauAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(6);
 
         ///////////prob info///////////////////
+        nProbs = nProbMuons;
         TLorentzVector probeP4;
         probeP4.SetPtEtaPhiM(prob_muons[0]->pt, prob_muons[0]->eta, prob_muons[0]->phi, 0.10566);
         leptonThreeP4     = probeP4;

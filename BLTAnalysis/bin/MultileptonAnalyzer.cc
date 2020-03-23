@@ -809,11 +809,20 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             scaleData sdata = electronScaler->GetScaleData(electron, runNumber);
             electron->pt    *= sdata.scale;
             electron->pfPt   = sdata.scale; // since it's not used anywhere else...
+
         } else {
             float sFactor = electronScaler->GetSmearingFactor(electron, 0, 0);
             float eScale = rng->Gaus(1, sFactor);
-            electron->pt    *= eScale; 
-            electron->pfPt   = eScale; // since it's not used anywhere else...
+            electron->pt   *= eScale; 
+            electron->pfPt  = eScale; // since it's not used anywhere else...
+
+            float rhoErr = electronScaler->GetSmearingFactor(electron, 1, 0);
+            float phiErr = electronScaler->GetSmearingFactor(electron, 0, 1);
+
+            cout << sFactor << ", " 
+                << rhoErr << ", " 
+                << phiErr << ", " 
+                << endl;
         }
 
         TLorentzVector electronP4;
@@ -1873,7 +1882,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (taus.size() >= 1) {
             channel = "mutau_fakes";
             eventCounts[channel]->Fill(1);
-            nMuons = 1;
+            nMuons = fail_muons.size();
 
             if (fail_muons[0]->pt < 25)
                 return kTRUE;
@@ -1961,7 +1970,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } else if (isData && (nJets >= 4 && nBJets >= 1)) {
             channel = "mu4j_fakes";
             eventCounts[channel]->Fill(1);
-            nMuons = 1;
+            nMuons = fail_muons.size();
 
             // convert to TLorentzVectors
             TLorentzVector muonP4;
@@ -2000,6 +2009,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
+
         // remove fake electron candidate from the jet collection
         unsigned ix = 0;
         for (const auto& jet: jets) {
@@ -2020,7 +2030,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (taus.size() >= 1) {
             channel = "etau_fakes";
             eventCounts[channel]->Fill(1);
-            nElectrons = 1;
+            nElectrons = fail_electrons.size();
 
             if (fail_electrons[0]->pt < 25)
                 return kTRUE;
@@ -2117,7 +2127,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } else if (isData && nJets >= 4 && nBJets >= 1) {
             channel = "e4j_fakes";
             eventCounts[channel]->Fill(1);
-            nElectrons = 1;
+            nElectrons = fail_electrons.size();
 
             // convert to TLorentzVectors
             TLorentzVector electronP4;

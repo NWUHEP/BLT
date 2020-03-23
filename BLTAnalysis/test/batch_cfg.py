@@ -9,9 +9,9 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = []#'single_mu', 'single_el']
+data_samples = ['single_mu', 'single_el']
 mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
-#mc_samples   = ['zjets_ext'] 
+mc_samples   = ['wjets_alt'] 
 
 data_dict = {}
 mc_dict = {}
@@ -257,7 +257,7 @@ mc_dict['zjets_ext'] = [
 
 path = '/eos/uscms/store/group/lpcbacon/12'
 mc_dict['wjets'] = [
-    # W+jets
+    # W+jets (MADGRAPH jet binned)
     cfg(data_name = 'W1JetsToLNu',
         path     = '{0}/Summer16_W1JetsToLNu'.format(path),
         nJobs    = 40,
@@ -280,6 +280,27 @@ mc_dict['wjets'] = [
        ),
     ]
 
+path = '/eos/uscms/store/group/lpcbacon/mmackenz/crab_ntupler/WJetsToLNu_amcatnlo'
+mc_dict['wjets_alt'] = [
+    # W+jets (AMC@NLO)
+    cfg(data_name = 'WJetsToLNu',
+        path     = '{0}/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16'.format(path),
+        nJobs    = 40,
+        suffix   = 'wjets_alt'
+       ),
+    cfg(data_name = 'WJetsToLNu_ext1',
+        path     = '{0}/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16_ext1'.format(path),
+        nJobs    = 40,
+        suffix   = 'wjets_alt_ext1'
+       ),
+    cfg(data_name = 'WJetsToLNu_ext2',
+        path     = '{0}/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16_ext1'.format(path),
+        nJobs    = 40,
+        suffix   = 'wjets_alt_ext2'
+       ),
+    ]
+
+path = '/eos/uscms/store/group/lpcbacon/12'
 mc_dict['qcd'] = [
     # QCD
     cfg(data_name = 'QCD_HT50to100',

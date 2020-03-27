@@ -50,16 +50,13 @@ void MultilepAnalyzer::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
-    if (params->selection == "single_lepton") {
-        if(params->period == "2018"){
-            triggerNames.push_back("HLT_Ele32_WPTight_Gsf_v*");
-        } else {
-            triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
-        }
-        // HLT_Ele27_WPTight_Gsf_v // HLT_Ele32_WPTight_Gsf_v
-        triggerNames.push_back("HLT_IsoMu24_v*");
-        triggerNames.push_back("HLT_IsoTkMu24_v*");
-    }
+
+    singleElectronTriggerName = "HLT_Ele27_WPTight_Gsf_v*";
+    if(params->period == "2018") singleElectronTriggerName = "HLT_Ele32_WPTight_Gsf_v*";
+    triggerNames.push_back(singleElectronTriggerName);
+    triggerNames.push_back("HLT_IsoMu24_v*");
+    triggerNames.push_back("HLT_IsoTkMu24_v*");
+    
 
     // Weight utility class
     cout<< "Weight utility class"<<endl;
@@ -596,7 +593,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     }
 
-
+    // cout << nPU << endl;
     ///////////////////
     // Select objects//
     ///////////////////
@@ -632,7 +629,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end();
     muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
-    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_Ele27_WPTight_Gsf_v*") != passTriggerNames.end();
+    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleElectronTriggerName) != passTriggerNames.end();
 
     if (!passTrigger)
         return kTRUE;

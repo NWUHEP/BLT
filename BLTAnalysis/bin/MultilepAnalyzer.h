@@ -69,6 +69,8 @@ public:
     std::map<string, TH1D*> eventCounts;
     TH1D *hGenCat;
 
+    std::string singleElectronTriggerName = "";
+
     // Lumi mask
     RunLumiRangeMap lumiMask;
 

@@ -53,6 +53,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     if (params->selection == "single_lepton") {
         triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        triggerNames.push_back("HLT_Ele32_WPTight_Gsf_v*");
         triggerNames.push_back("HLT_IsoMu24_v*");
         triggerNames.push_back("HLT_IsoTkMu24_v*");
         //triggerNames.push_back("HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v*");
@@ -63,6 +64,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     } else if (params->selection == "single_electron") {
         triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        triggerNames.push_back("HLT_Ele32_WPTight_Gsf_v*");
 
     } else if (params->selection == "double_muon") {
         triggerNames.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*");
@@ -380,9 +382,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
             unsigned pid = abs(particle->pdgId);
 
-
             //cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
-            //cout << "\t" << particle->pt << ", " << particle->eta;
+            //cout << ",| " << particle->pt << ", " << particle->eta;
+            //cout << ",| " << particle->isHardProcess << ", " << particle->fromHardProcessDecayed;
             //cout << endl;
 
             // parton counting for jet-binned Drell-Yan samples
@@ -462,7 +464,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 //cout << particle->pdgId << ", " << mother->pdgId << endl; //", ";
                 int origin = abs(mother->pdgId);
                 bool isPrompt = false;
-                while (mother->parent != -2) {
+                while (mother->parent >= 2) {
                     int momID = abs(mother->pdgId);
                     if (momID == 23 || momID == 24) { 
                         isPrompt = true;
@@ -503,29 +505,29 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             partonCountsPlus->Fill(nPartons);
         }
 
-        // get weights for assessing PDF and QCD scale systematics
-        pdfWeight = 0.;
-        alphaS    = 1.;
-        qcdWeights.clear();
-        if (fLHEWeightArr != 0) {
-            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
-                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
-                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
-                //cout << id << " " << lheWeight << endl;
-                if (id >= 1001 && id <= 1009) {
-                    qcdWeights.push_back(lheWeight);
-                    qcdCountsInit->Fill(id - 1000, lheWeight);
-                } else if (id >= 2001 && id <= 2100) {      
-                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
-                    pdfVariations.push_back(lheWeight);
-                    pdfCountsInit->Fill(id - 2000, lheWeight);
-                } else if (id == 2101 || id == 2102) {
-                    alphaS = lheWeight;
-                    pdfVariations.push_back(lheWeight);
-                    pdfCountsInit->Fill(101, lheWeight);
-                }
-            }
-        }
+//        // get weights for assessing PDF and QCD scale systematics
+//        pdfWeight = 0.;
+//        alphaS    = 1.;
+//        qcdWeights.clear();
+//        if (fLHEWeightArr != 0) {
+//            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
+//                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
+//                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
+//                //cout << id << " " << lheWeight << endl;
+//                if (id >= 1001 && id <= 1009) {
+//                    qcdWeights.push_back(lheWeight);
+//                    qcdCountsInit->Fill(id - 1000, lheWeight);
+//                } else if (id >= 2001 && id <= 2100) {      
+//                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
+//                    pdfVariations.push_back(lheWeight);
+//                    pdfCountsInit->Fill(id - 2000, lheWeight);
+//                } else if (id == 2101 || id == 2102) {
+//                    alphaS = lheWeight;
+//                    pdfVariations.push_back(lheWeight);
+//                    pdfCountsInit->Fill(101, lheWeight);
+//                }
+//            }
+//        }
 
         // categorize events
         genCategory = 0;
@@ -672,6 +674,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         nPU = 0;
         nPartons = 0;
     }
+    
+    //cout << nPartons << endl;
+    //return kTRUE;
 
     /* Apply lumi mask */
     if (isData) {
@@ -819,10 +824,10 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             float rhoErr = electronScaler->GetSmearingFactor(electron, 1, 0);
             float phiErr = electronScaler->GetSmearingFactor(electron, 0, 1);
 
-            cout << sFactor << ", " 
-                << rhoErr << ", " 
-                << phiErr << ", " 
-                << endl;
+            //cout << sFactor << ", " 
+            //    << rhoErr << ", " 
+            //    << phiErr << ", " 
+            //    << endl;
         }
 
         TLorentzVector electronP4;
@@ -841,6 +846,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             }
         }
     }
+    //cout << fElectronArr->GetEntries() << ", " << electrons.size() << ", " << fail_electrons.size() << endl;
+
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
     sort(fail_electrons.begin(), fail_electrons.end(), sort_by_higher_pt<TElectron>);
 
@@ -1037,6 +1044,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     nMuons     = muons.size();
     nElectrons = electrons.size();
     nTaus      = taus.size();
+
+    //cout << nMuons << ", " << nElectrons << ", " << nTaus << ", " << nJetsCut << ", " << nBJetsCut << endl;
 
     // trigger selections
     bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end() 
@@ -1862,6 +1871,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         }
     } else if (fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
+        //for (const auto& muon: fail_muons) {
+        
         // remove fake muon candidate from the jet collection
         unsigned ix = 0;
         for (const auto& jet: jets) {
@@ -2008,7 +2019,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         }
     } else if (fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
-
+        //cout << fail_electrons.size() << endl;
 
         // remove fake electron candidate from the jet collection
         unsigned ix = 0;

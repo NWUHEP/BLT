@@ -10,8 +10,8 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
-mc_samples   = ['wjets_alt'] 
+mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets_alt']#, 'qcd']
+#mc_samples   = ['wjets_alt'] 
 
 data_dict = {}
 mc_dict = {}

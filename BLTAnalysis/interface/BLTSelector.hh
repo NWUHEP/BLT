@@ -136,7 +136,6 @@ void BLTSelector::Init(TTree *tree)
     fCurrentFile = tree->GetCurrentFile();
     //fChain->SetMakeClass(1);
 
-
     fInfo                    = 0;
     fGenEvtInfo              = 0;
     fGenParticleArr          = 0;
@@ -167,6 +166,7 @@ void BLTSelector::Init(TTree *tree)
     fChain->SetBranchAddress("Photon", &fPhotonArr, &b_PhotonArr);
     fChain->SetBranchAddress("PV", &fPVArr, &b_PVArr);
     fChain->SetBranchAddress("AK4CHS", &fAK4CHSArr, &b_AK4CHSArr);
+
     //fChain->SetBranchAddress("DimuonVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
     //fChain->SetBranchAddress("DielectronVertex", &fDimuonVertexArr, &b_DimuonVertexArr);
     //fChain->SetBranchAddress("AK8CHS", &fAK8CHSArr, &b_AK8CHSArr);

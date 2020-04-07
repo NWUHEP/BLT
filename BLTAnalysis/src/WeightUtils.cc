@@ -162,7 +162,7 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
 
 
     // electron reco efficiencies 
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_iso/egamma_eff_reco_2016.root";
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_reco/egamma_eff_reco_2016.root";
     TFile* f_eleRecoSF = new TFile(fileName.c_str(), "OPEN"); 
     _eleSF_RECO = (TGraphErrors*)f_eleRecoSF->Get("grSF1D_0");
     _eleSF_RECO->Sort();

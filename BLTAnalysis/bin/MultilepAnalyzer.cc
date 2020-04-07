@@ -82,8 +82,8 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    // string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_"+params->period+".txt";
-    string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
+    string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_"+params->period+".txt";
+    // string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
     cout<< "-- use muon Roc Correction: " << muonCorrFileName <<endl;
     muonCorr = new RoccoR(muonCorrFileName);
   

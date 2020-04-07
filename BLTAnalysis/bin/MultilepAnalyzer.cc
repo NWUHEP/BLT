@@ -251,13 +251,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
     // Set data period for 2016 MC scale factors
     mcEra = -1;
-    if (!isData) {
-        if (rng->Rndm() < 0.548) {  //0.468) {
-            weights->SetDataPeriod("2016BtoF"); 
-            mcEra = 0;
-        } else {
-            weights->SetDataPeriod("2016GH");
-            mcEra = 1;
+    if (params->period == "2016") {
+        if (!isData){
+            if (rng->Rndm() < 0.548) {  //0.468) {
+                weights->SetDataPeriod("2016BtoF"); 
+                mcEra = 0;
+            } else {
+                weights->SetDataPeriod("2016GH");
+                mcEra = 1;
+            }
         }
     }
 

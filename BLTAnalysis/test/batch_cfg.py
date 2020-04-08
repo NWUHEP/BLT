@@ -10,8 +10,10 @@ selection  = 'single_lepton'
 period     = '2016'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets_alt']#, 'qcd']
-#mc_samples   = ['wjets_alt'] 
+mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets']#, 'qcd']
+
+data_samples = []
+mc_samples   = ['wjets_alt'] 
 
 data_dict = {}
 mc_dict = {}
@@ -294,7 +296,7 @@ mc_dict['wjets_alt'] = [
         suffix   = 'wjets_alt_ext1'
        ),
     cfg(data_name = 'WJetsToLNu_ext2',
-        path     = '{0}/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16_ext1'.format(path),
+        path     = '{0}/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16_ext2'.format(path),
         nJobs    = 40,
         suffix   = 'wjets_alt_ext2'
        ),

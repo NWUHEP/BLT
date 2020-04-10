@@ -282,14 +282,17 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             int bin = _muSF_Trigger_2017->FindBin(lepton.Pt(),abs(lepton.Eta()));
             float sf = _muSF_Trigger_2017->GetBinContent(bin);
             float err = _muSF_Trigger_2017->GetBinError(bin);
-            // effCont.SetData(sf, 1., err, 0.);
+            if (_muSF_Trigger_2017->IsBinUnderflow(bin) || _muSF_Trigger_2017->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
+            effCont.SetData(sf, 1., err, 0.);
             effCont.SetData(1., 1., 0., 0.);
-
+            // if (lepton.Pt()>120 || lepton.Pt()<20) cout<< _muSF_Trigger_2017->IsBinUnderflow(bin)<< _muSF_Trigger_2017->IsBinOverflow(bin) <<"Muon Trigger: pt=" << lepton.Pt() << " GeV, sf=" << sf <<endl;
         } else if(_dataPeriod == "2018") {
             int bin = _muSF_Trigger_2018->FindBin(lepton.Pt(),abs(lepton.Eta()));
             float sf = _muSF_Trigger_2018->GetBinContent(bin);
             float err = _muSF_Trigger_2018->GetBinError(bin);
+            if (_muSF_Trigger_2018->IsBinUnderflow(bin) || _muSF_Trigger_2018->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
             effCont.SetData(sf, 1., err, 0.);
+            // if (lepton.Pt()>120 || lepton.Pt()<20) cout<< _muSF_Trigger_2018->IsBinUnderflow(bin)<< _muSF_Trigger_2018->IsBinOverflow(bin) << "Muon Trigger: pt=" << lepton.Pt() << " GeV, sf=" << sf <<endl;
         }
 
     } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
@@ -390,8 +393,9 @@ EfficiencyContainer WeightUtils::GetMuonIDEff(TLorentzVector& muon) const
         int bin = _muSF2D_ID->FindBin(muon.Pt(),abs(muon.Eta()));
         float sf = _muSF2D_ID->GetBinContent(bin);
         float err = _muSF2D_ID->GetBinError(bin);
+        if (_muSF2D_ID->IsBinUnderflow(bin) || _muSF2D_ID->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
         effCont.SetData(sf, 1., err, 0.);
-
+        // if (muon.Pt()>120 || muon.Pt()<20) cout<< _muSF2D_ID->IsBinUnderflow(bin)<< _muSF2D_ID->IsBinOverflow(bin) <<"Muon ID: pt=" << muon.Pt() << " GeV, sf=" << sf <<endl;
     }
     return effCont;
     
@@ -437,7 +441,9 @@ EfficiencyContainer WeightUtils::GetMuonISOEff(TLorentzVector& muon) const
         int bin = _muSF2D_ISO->FindBin(muon.Pt(),abs(muon.Eta()));
         float sf = _muSF2D_ISO->GetBinContent(bin);
         float err = _muSF2D_ISO->GetBinError(bin);
+        if (_muSF2D_ISO->IsBinUnderflow(bin) || _muSF2D_ISO->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
         effCont.SetData(sf, 1., err, 0.);
+        // if (muon.Pt()>120 || muon.Pt()<20) cout<< _muSF2D_ISO->IsBinUnderflow(bin)<< _muSF2D_ISO->IsBinOverflow(bin) <<"Muon Iso: pt=" << muon.Pt() << " GeV, sf=" << sf <<endl;
     }
     
     return effCont;
@@ -451,15 +457,19 @@ EfficiencyContainer WeightUtils::GetElectronRecoEff(TLorentzVector& electron) co
         int bin = _elSF2D_RECO_2017ls20->FindBin(electron.Eta(),electron.Pt());
         float sf = _elSF2D_RECO_2017ls20->GetBinContent(bin);
         float err = _elSF2D_RECO_2017ls20->GetBinError(bin);
+        if (_elSF2D_RECO_2017ls20->IsBinUnderflow(bin) || _elSF2D_RECO_2017ls20->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
         effCont.SetData(sf, 1., err, 0.);
+        // if (electron.Pt()>120 || electron.Pt()<20) cout<< "Electron Reco: pt=" << electron.Pt() << " GeV, sf=" << sf <<endl;
         
     } else{
         int bin = _elSF2D_RECO->FindBin(electron.Eta(),electron.Pt());
         float sf = _elSF2D_RECO->GetBinContent(bin);
         float err = _elSF2D_RECO->GetBinError(bin);
+        if (_elSF2D_RECO->IsBinUnderflow(bin) || _elSF2D_RECO->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
         effCont.SetData(sf, 1., err, 0.);
-    }
+        // if (electron.Pt()>120 || electron.Pt()<20) cout<< "Electron Reco: pt=" << electron.Pt() << " GeV, sf=" << sf <<endl;
 
+    }
     return effCont;
 
 
@@ -470,8 +480,9 @@ EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) cons
     int bin = _elSF2D_ID->FindBin(electron.Eta(),electron.Pt());
     float sf = _elSF2D_ID->GetBinContent(bin);
     float err = _elSF2D_ID->GetBinError(bin);
-    
+    if (_elSF2D_ID->IsBinUnderflow(bin) || _elSF2D_ID->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
     EfficiencyContainer effCont(sf, 1., err, 0.);
+    // if (electron.Pt()>120 || electron.Pt()<20) cout<< _elSF2D_ID->IsBinUnderflow(bin)<< _elSF2D_ID->IsBinOverflow(bin) <<"Electron Id: pt=" << electron.Pt() << " GeV, sf=" << sf <<endl;
     return effCont;
 }
 

@@ -11,7 +11,6 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2017'
 analyzer   = 'MultilepAnalyzer'
-
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
@@ -87,17 +86,17 @@ data_dict['single_el'] = [
 mc_dict['zjets'] = [
     cfg(data_name = 'DY0JetsToLL',
        path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
+       nJobs    = 50,
        suffix   = 'DY0JetsToLL'
       ),
     cfg(data_name = 'DY1JetsToLL',
        path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
+       nJobs    = 50,
        suffix   = 'DY1JetsToLL'
       ),
     cfg(data_name = 'DY2JetsToLL',
        path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
+       nJobs    = 50,
        suffix   = 'DY2JetsToLL'
       ),
 ] # need reformate folder

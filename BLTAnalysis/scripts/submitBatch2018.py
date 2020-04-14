@@ -5,6 +5,10 @@ import sys
 #MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_0.root 10000 ttbar_2l2nu ttbar_2l2nu single_lepton 2018 1
 #MultilepAnalyzer /eos/uscms/store/user/zchen/EGamma_20191120/2018_EGamma_prod_EGamma_Run2018D-PromptReco-v2/Output_1.root 100000 electron_2018D electron_2018D single_lepton 2018 1
 #MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/SingleMuonRun2018C_17Sep2018_v1/SingleMuonRun2018C_17Sep2018_v1_1.root 100000 muon_2018C muon_2018C single_lepton 2018 1
+
+
+# cp /eos/uscms/store/group/lpcbacon/15/$1/*/CRAB3/*/*/*.root WJetsToLNu_HT_100To200_TuneCP5_13TeV_10X/
+
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 executable = 'execBatch.sh'
@@ -81,55 +85,45 @@ data_dict['single_el'] = [
 
 
 mc_dict['zjets'] = [
-    cfg(data_name = 'DY0JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
-       suffix   = 'DY0JetsToLL'
-      ),
-    cfg(data_name = 'DY1JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
-       suffix   = 'DY1JetsToLL'
-      ),
-    cfg(data_name = 'DY2JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
-       nJobs    = 20,
-       suffix   = 'DY2JetsToLL'
+    cfg(data_name = 'DYJetsToLL_m-50',
+       path     = '{0}/DYJetsToLL_M_50_TuneCP5_13TeV_10X/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190213_170924'.format(path),
+       nJobs    = 50,
+       suffix   = 'DYJetsToLL_m-50'
       ),
 ] # need reformate folder
 
 mc_dict['wjets'] = [
       cfg(data_name = 'WJetsToLNu_HT_100To200',
-        path     = '{0}/WJetsToLNu_HT_100To200_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_100To200_TuneCP5_13TeV_10X/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_170447/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_100To200'
-        ), 
+        ),
         
       cfg(data_name = 'WJetsToLNu_HT_200To400',
-        path     = '{0}/WJetsToLNu_HT_200To400_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_200To400_TuneCP5_13TeV_10X/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_170612/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_200To400'
         ), 
       
       cfg(data_name = 'WJetsToLNu_HT_400To600',
-        path     = '{0}/WJetsToLNu_HT_400To600_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_400To600_TuneCP5_13TeV_10X/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_170736/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_400To600'
         ), 
         
       cfg(data_name = 'WJetsToLNu_HT_600To800',
-        path     = '{0}/WJetsToLNu_HT_600To800_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_600To800_TuneCP5_13TeV_10X/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_170841/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_600To800'
         ), 
       cfg(data_name = 'WJetsToLNu_HT_800To1200',
-        path     = '{0}/WJetsToLNu_HT_800To1200_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_800To1200_TuneCP5_13TeV_10X/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_170949/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_800To1200'
         ), 
         
       cfg(data_name = 'WJetsToLNu_HT_1200To2500',
-        path     = '{0}/WJetsToLNu_HT_1200To2500_TuneCP5_13TeV'.format(path),
+        path     = '{0}/WJetsToLNu_HT_1200To2500_TuneCP5_13TeV_10X/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/CRAB3/190125_171103/*'.format(path),
         nJobs    = 50,
         suffix   = 'WJetsToLNu_HT_1200To2500'
         ), 
@@ -138,17 +132,17 @@ mc_dict['wjets'] = [
 
 mc_dict['diboson'] = [
       cfg(data_name = 'ww',
-        path     = '{0}/WW_TuneCP5_13TeV_pythia8'.format(path),
+        path     = '{0}/WW_TuneCP5_13TeV_pythia8_10X/WW_TuneCP5_13TeV-pythia8/CRAB3/190111_062409/*'.format(path),
         nJobs    = 20,
         suffix   = 'ww'
        ),    
       cfg(data_name = 'wz',
-        path     = '{0}/WZ_TuneCP5_13TeV_pythia8'.format(path),
+        path     = '{0}/WZ_TuneCP5_13TeV_pythia8_10X/WZ_TuneCP5_13TeV-pythia8/CRAB3/190111_063729/*'.format(path),
         nJobs    = 20,
         suffix   = 'wz'
        ), 
       cfg(data_name = 'zz',
-        path     = '{0}/ZZ_TuneCP5_13TeV_pythia8'.format(path),
+        path     = '{0}/ZZ_TuneCP5_13TeV_pythia8_10X/ZZ_TuneCP5_13TeV-pythia8/CRAB3/190111_063916/*'.format(path),
         nJobs    = 20,
         suffix   = 'zz'
        ),    
@@ -158,17 +152,17 @@ mc_dict['diboson'] = [
 mc_dict['ttbar'] = [
     # top
     cfg(data_name = 'ttbar_2l2nu',
-        path     = '{0}/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8'.format(path),
+        path     = '{0}/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_10X/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/CRAB3/190207_094623/*'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_2l2nu'
        ),    
     cfg(data_name = 'ttbar_semilepton',
-        path     = '{0}/TTToSemiLeptonic_TuneCP5_13TeV_powheg_pythia8'.format(path),
+        path     = '{0}/TTToSemiLeptonic_TuneCP5_13TeV_powheg_pythia8_PS_10X/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/CRAB3/190207_134700/*'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_semilepton'
        ),
     cfg(data_name = 'ttbar_hadronic',
-        path     = '{0}/TTToHadronic_TuneCP5_13TeV_powheg_pythia8'.format(path),
+        path     = '{0}/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_10X/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/CRAB3/190206_235906/*'.format(path),
         nJobs    = 50,
         suffix   = 'ttbar_hadronic'
        )
@@ -177,12 +171,12 @@ mc_dict['ttbar'] = [
 
 mc_dict['t'] = [
     cfg(data_name = 'T_tW-channel',
-        path     = '{0}/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV_powheg_pythia8'.format(path),
+        path     = '{0}/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV_powheg_pythia8_10X/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/CRAB3/190125_170936/*'.format(path),
         nJobs    = 10,
         suffix   = 't_tw'
        ),
     cfg(data_name = 'Tbar_tW-channel',
-        path     = '{0}/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV_powheg_pythia8'.format(path),
+        path     = '{0}/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV_powheg_pythia8_10X/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/CRAB3/190125_171108/*'.format(path),
         nJobs    = 10,
         suffix   = 'tbar_tw'
        ),

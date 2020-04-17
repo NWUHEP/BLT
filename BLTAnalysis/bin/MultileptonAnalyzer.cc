@@ -515,29 +515,29 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             partonCountsPlus->Fill(nPartons);
         }
 
-        //        // get weights for assessing PDF and QCD scale systematics
-        //        pdfWeight = 0.;
-        //        alphaS    = 1.;
-        //        qcdWeights.clear();
-        //        if (fLHEWeightArr != 0) {
-        //            for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
-        //                float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
-        //                int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
-        //                //cout << id << " " << lheWeight << endl;
-        //                if (id >= 1001 && id <= 1009) {
-        //                    qcdWeights.push_back(lheWeight);
-        //                    qcdCountsInit->Fill(id - 1000, lheWeight);
-        //                } else if (id >= 2001 && id <= 2100) {      
-        //                    pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
-        //                    pdfVariations.push_back(lheWeight);
-        //                    pdfCountsInit->Fill(id - 2000, lheWeight);
-        //                } else if (id == 2101 || id == 2102) {
-        //                    alphaS = lheWeight;
-        //                    pdfVariations.push_back(lheWeight);
-        //                    pdfCountsInit->Fill(101, lheWeight);
-        //                }
-        //            }
-        //        }
+                // get weights for assessing PDF and QCD scale systematics
+                pdfWeight = 0.;
+                alphaS    = 1.;
+                qcdWeights.clear();
+                if (fLHEWeightArr != 0) {
+                    for (int i = 0; i < fLHEWeightArr->GetEntries(); ++i) {
+                        float lheWeight = ((TLHEWeight*)fLHEWeightArr->At(i))->weight;
+                        int id = ((TLHEWeight*)fLHEWeightArr->At(i))->id;
+                        //cout << id << " " << lheWeight << endl;
+                        if (id >= 1001 && id <= 1009) {
+                            qcdWeights.push_back(lheWeight);
+                            qcdCountsInit->Fill(id - 1000, lheWeight);
+                        } else if (id >= 2001 && id <= 2100) {      
+                            pdfWeight += pow(qcdWeights[0] - lheWeight, 2.);
+                            pdfVariations.push_back(lheWeight);
+                            pdfCountsInit->Fill(id - 2000, lheWeight);
+                        } else if (id == 2101 || id == 2102) {
+                            alphaS = lheWeight;
+                            pdfVariations.push_back(lheWeight);
+                            pdfCountsInit->Fill(101, lheWeight);
+                        }
+                    }
+                }
 
         // categorize events
         genCategory = 0;
@@ -1684,7 +1684,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        cout << nJets << " " << nBJets << endl;
+        //cout << nJets << " " << nBJets << endl;
 
         leptonOneP4     = electronP4;
         leptonOneIso    = electronIso;

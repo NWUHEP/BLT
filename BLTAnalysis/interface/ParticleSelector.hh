@@ -64,13 +64,19 @@ public:
     // Jets
     bool PassJetID(const baconhep::TJet* jet, const Cuts::jetIDCuts& cutLevel) const;
     bool PassJetPUID(const baconhep::TJet* jet) const;
-    bool BTagModifier(const baconhep::TJet* jet, string, string, float) const;
+    bool BTagModifier(const baconhep::TJet* jet, string, string, float, int btagLevel);
+    bool BTagModifier(const baconhep::TJet* jet, string tag, string syst, float r) {
+      return BTagModifier(jet, tag, syst, r, kBTagMVAT);
+    }
     double JetCorrector(const baconhep::TJet* jet, string) const;
     double JetUncertainty(const baconhep::TJet* jet, string) const;
     pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
     vector<string> GetJECSourceNames() { return this->_jecNames;}
     vector<string> GetBTagSourceNames() { return this->_btagNames;}
 
+    enum {kBTagMVAT, kBTagMVAM, kBTagMVAL, kBTagCSVM, kLASTBTAG}; //for choosing btag working point, klast to know maximum size of arrays
+    std::map<int,float> _BTagMVACuts;
+    unsigned _mcEra; //for setting different periods of the year
 private:
     Parameters _parameters;
     Cuts       _cuts;
@@ -100,8 +106,8 @@ private:
                              };
 
     // For getting b tag scale factors and their uncertainties
-    BTagCalibration *btagCalibrator, *mistagCalibrator;
-    BTagCalibrationReader *btagReader, *mistagReader;
+  BTagCalibration *btagCalibrator[2*kLASTBTAG], *mistagCalibrator[2*kLASTBTAG]; //2* for B-F and G-H split
+    BTagCalibrationReader *btagReader[2*kLASTBTAG], *mistagReader[2*kLASTBTAG];
     vector<string> _btagNames = {
                                  "bfragmentation", "btempcorr", "cb",
                                  "cfragmentation", "dmux", "gluonsplitting",
@@ -110,6 +116,7 @@ private:
                                  "mupt", "sampledependence", "pileup",
                                  "ptrel", "statistic",
                                 };
+  
 };
 
 #endif  // PARTICLESELECTOR_HH

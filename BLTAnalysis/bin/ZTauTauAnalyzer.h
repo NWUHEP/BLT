@@ -113,9 +113,13 @@ public:
     // weights and uncertainties
     Float_t eventWeight;
     Float_t genTauFlavorWeight;
+
+    //for jets study channel
+    const static UInt_t kMaxJets = 20; //maximum of 20 jets saved ever
+    Float_t jetsPt[kMaxJets], jetsEta[kMaxJets], jetsPhi[kMaxJets], jetsM[kMaxJets], jetsbMVA[kMaxJets], jetsGenFlavor[kMaxJets];
     
     // lepton variable
-    TLorentzVector leptonOneP4, leptonTwoP4, photonP4;    
+    TLorentzVector leptonOneP4, leptonTwoP4, photonOneP4, jetOneP4, tauOneP4;    
     TLorentzVector genLeptonOneP4, genLeptonTwoP4;
     Float_t leptonOneIso, leptonTwoIso, photonMVA;
     Float_t leptonOneD0, leptonTwoD0;
@@ -125,9 +129,11 @@ public:
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
     Float_t tauGenPt, tauGenEta;
     Float_t tauPt, tauEta, tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
-
+    unsigned long tauHPSDisc; //tau ids
+    
     // ht
     Float_t htSum, ht, htPhi;
+    Float_t htFwdSum, htFwd, htFwdPhi;
 
     // met
     Float_t met, metPhi;
@@ -149,23 +155,28 @@ public:
     Float_t metCorr, metCorrPhi;
     
     // object counters
-    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nFwdJets, nBJets;
+    UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nFwdJets, nBJets, nBJetsM, nBJetsL;
     UInt_t nFailMuons, nFailElectrons;
-
+    UInt_t nLowPtElectrons;
+    
     //SVFit variables
     Float_t massSVFit, massErrSVFit;
     Int_t svFitStatus;
     TLorentzVector leptonOneSVP4, leptonTwoSVP4; //corrected lorentz vectors    
     ////////////////////////////////
 
+    bool saveExtraInfo; //for debugging purposes
 
 private:
 
     //deleting svfit histograms
     Int_t trkhistos = 0;
     // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t triggerWeight, puWeight, topPtWeight, leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+
+    // for Drell-Yan pT
+    Float_t zPt, zDiLeptonPt, zPtWeight;
 
     // modified multiplicities for jet related uncertainties
     unsigned nJetsCut, nBJetsCut;
@@ -179,10 +190,11 @@ private:
     pair<int,TLorentzVector> GetTauGenFlavor(TLorentzVector, vector<baconhep::TGenParticle*>,  vector<TGenParticle*>, vector<TGenParticle*>, vector<baconhep::TJet*>, bool );
     double FakeTauSF(int pdgid, double pt, double eta, bool isVeryTight);
     pair<float, float> GetTauVetoedJetPt(TLorentzVector, vector<TJet*> );
+    float GetZPtWeight(float zpt);
     float GetTriggerSF(EfficiencyContainer, EfficiencyContainer);
     float GetTriggerSFError(EfficiencyContainer, EfficiencyContainer);
     void ResetJetCounters();
-    void JetCounting(TJet* jet, float , float);
+    bool JetCounting(TJet* jet, float , float);
 
 };
 

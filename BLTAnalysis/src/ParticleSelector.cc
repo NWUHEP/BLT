@@ -6,7 +6,7 @@
 using namespace baconhep;
 using namespace std;
 
-// Why the fuck is this not part of the standard library!?
+// Why is this not part of the standard library!?
 vector<string> split(const string &s, char delim) {
     stringstream ss(s);
     string item;
@@ -24,8 +24,13 @@ bool test_bits(unsigned int bits, unsigned int test) {
 ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cuts) {
     this->_parameters = parameters;
     this->_cuts = cuts;
-
     this->_rng = new TRandom3(1337);
+
+    //define the b-tag working points
+    this->_BTagMVACuts[kBTagMVAL] = -0.5884;
+    this->_BTagMVACuts[kBTagMVAM] =  0.4432;
+    this->_BTagMVACuts[kBTagMVAT] =  0.9432;
+    this->_BTagMVACuts[kBTagCSVM] =  0.8484;
 
     // offline jet corrections on-the-fly
     vector<string> ds = split(parameters.datasetgroup, '_');
@@ -94,6 +99,7 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
         jetResolutionSF = JME::JetResolutionScaleFactor(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_resolution_scale_factors.dat");
 
         // b tag scale factor and uncertainty payload files
+	_mcEra = 0;
         vector<string> btagUncSources {
                                        "up", "down",
                                        "up_bfragmentation", "up_btempcorr", "up_cb",
@@ -110,15 +116,69 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
                                        "down_ptrel", "down_statistic"
                                       };
 
-        btagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
-        btagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", btagUncSources);
-        btagReader->load(*btagCalibrator, BTagEntry::FLAV_B, "mujets");    
-        btagReader->load(*btagCalibrator, BTagEntry::FLAV_C, "mujets");    
+	//not operating point dependent --> only load this one and use for L,M,T
+        btagCalibrator[kBTagCSVM] = new BTagCalibration("csvv2", cmssw_base +
+							"/src/BLT/BLTAnalysis/data/CSVv2_Run2016_mujets_SystematicBreakdown.csv");
+        // btagReader[kBTagCSVL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE, "central", btagUncSources);
+        // btagReader[kBTagCSVL]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_B, "mujets");    
+        // btagReader[kBTagCSVL]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_C, "mujets");    
+        btagReader[kBTagCSVM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", btagUncSources);
+        btagReader[kBTagCSVM]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_B, "mujets");    
+        btagReader[kBTagCSVM]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_C, "mujets");    
+        // btagReader[kBTagCSVT] = new BTagCalibrationReader(BTagEntry::OP_TIGHT, "central", btagUncSources);
+        // btagReader[kBTagCSVT]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_B, "mujets");    
+        // btagReader[kBTagCSVT]->load(*btagCalibrator[kBTagCSVM], BTagEntry::FLAV_C, "mujets");    
 
+	//MVA btags
+	//not operating point dependent --> only load one per mcEra and use for L,M,T
+	//B-F (mcEra = 0)
+        btagCalibrator[kBTagMVAT] = new BTagCalibration("mvav2", cmssw_base +
+							"/src/BLT/BLTAnalysis/data/cMVAv2_Moriond17_B_F.csv");
+        btagReader[kBTagMVAL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE, "central", {"up", "down"});
+        btagReader[kBTagMVAL]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kBTagMVAL]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+        btagReader[kBTagMVAM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        btagReader[kBTagMVAM]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kBTagMVAM]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+        btagReader[kBTagMVAT] = new BTagCalibrationReader(BTagEntry::OP_TIGHT, "central", {"up", "down"});
+        btagReader[kBTagMVAT]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kBTagMVAT]->load(*btagCalibrator[kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+	//G-H (mcEra = 0)
+        btagCalibrator[kLASTBTAG+kBTagMVAT] = new BTagCalibration("mvav2", cmssw_base +
+								  "/src/BLT/BLTAnalysis/data/cMVAv2_Moriond17_G_H.csv");
+        btagReader[kLASTBTAG+kBTagMVAL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE, "central", {"up", "down"});
+        btagReader[kLASTBTAG+kBTagMVAL]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kLASTBTAG+kBTagMVAL]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+        btagReader[kLASTBTAG+kBTagMVAM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        btagReader[kLASTBTAG+kBTagMVAM]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kLASTBTAG+kBTagMVAM]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+        btagReader[kLASTBTAG+kBTagMVAT] = new BTagCalibrationReader(BTagEntry::OP_TIGHT, "central", {"up", "down"});
+        btagReader[kLASTBTAG+kBTagMVAT]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_B, "ttbar");    
+        btagReader[kLASTBTAG+kBTagMVAT]->load(*btagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_C, "ttbar");    
+	
         // mistag scale factor and uncertainty payload files
-        mistagCalibrator = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Moriond17_B_H.csv");
-        mistagReader = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
-        mistagReader->load(*mistagCalibrator, BTagEntry::FLAV_UDSG, "incl");    
+        mistagCalibrator[kBTagCSVM] = new BTagCalibration("csvv2", cmssw_base + "/src/BLT/BLTAnalysis/data/CSVv2_Moriond17_B_H.csv");
+        mistagReader[kBTagCSVM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        mistagReader[kBTagCSVM]->load(*mistagCalibrator[kBTagCSVM], BTagEntry::FLAV_UDSG, "incl");    
+
+	//B-F
+        mistagCalibrator[kBTagMVAT] = new BTagCalibration("mvav2", cmssw_base +
+							  "/src/BLT/BLTAnalysis/data/cMVAv2_Moriond17_B_F.csv");
+        mistagReader[kBTagMVAL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE, "central", {"up", "down"});
+        mistagReader[kBTagMVAL]->load(*mistagCalibrator[kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
+        mistagReader[kBTagMVAM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        mistagReader[kBTagMVAM]->load(*mistagCalibrator[kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
+        mistagReader[kBTagMVAT] = new BTagCalibrationReader(BTagEntry::OP_TIGHT, "central", {"up", "down"});
+        mistagReader[kBTagMVAT]->load(*mistagCalibrator[kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
+	//G-H
+        mistagCalibrator[kLASTBTAG+kBTagMVAT] = new BTagCalibration("mvav2", cmssw_base +
+								    "/src/BLT/BLTAnalysis/data/cMVAv2_Moriond17_G_H.csv");
+        mistagReader[kLASTBTAG+kBTagMVAL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE, "central", {"up", "down"});
+        mistagReader[kLASTBTAG+kBTagMVAL]->load(*mistagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
+        mistagReader[kLASTBTAG+kBTagMVAM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up", "down"});
+        mistagReader[kLASTBTAG+kBTagMVAM]->load(*mistagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
+        mistagReader[kLASTBTAG+kBTagMVAT] = new BTagCalibrationReader(BTagEntry::OP_TIGHT, "central", {"up", "down"});
+        mistagReader[kLASTBTAG+kBTagMVAT]->load(*mistagCalibrator[kLASTBTAG+kBTagMVAT], BTagEntry::FLAV_UDSG, "incl");    
     }
 }
 
@@ -567,7 +627,9 @@ bool ParticleSelector::PassJetPUID(const baconhep::TJet* jet) const {
     return pass;
 }
 
-bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, string systName, float rNumber) const
+// loosness: 0 = tightest, 1 = medium, 2 = loose
+bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, string systName,
+				    float rNumber, int btagLevel = kBTagMVAT) 
 {
     bool  isBTagged = false;
     float jetPt     = jet->pt;
@@ -589,13 +651,12 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
     float mcEff  = 1.;
     if (tagName == "CSVM") { 
         bTag = jet->csv;
-        if (bTag > 0.8484) 
-            isBTagged = true;
-
+        if (bTag > this->_BTagMVACuts[btagLevel]) 
+	  isBTagged = true;
 
         if (abs(jetFlavor) == 5) {
             if (systName=="up" || systName=="down"){
-                btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+                btagSF   = btagReader[kBTagCSVM]->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
                 float effs[] = {0.45627061, 0.49951863, 0.51055844, 0.50376574, 0.49186896, 0.45660833, 0.38828584};
                 mcEff = effs[ptBin];           
             } 
@@ -603,7 +664,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
 
         } else if (abs(jetFlavor) == 4) {
             if (systName=="up" || systName=="down"){
-                btagSF = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+                btagSF = btagReader[kBTagCSVM]->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
                 float effs[] = {0.04953503, 0.04814725, 0.05118469, 0.05404756, 0.0643619 , 0.05808081, 0.07079646};
                 mcEff  = effs[ptBin];
             }
@@ -611,52 +672,72 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
 
         } else {
             if (systName == "upMistag") {
-                btagSF = mistagReader->eval_auto_bounds("up", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+                btagSF = mistagReader[kBTagCSVM]->eval_auto_bounds("up", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
                 float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
                 mcEff  = effs[ptBin];
             } 
             if (systName == "downMistag") {
-                btagSF = mistagReader->eval_auto_bounds("down", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+                btagSF = mistagReader[kBTagCSVM]->eval_auto_bounds("down", BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
                 float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
                 mcEff  = effs[ptBin];
             }           
         }
 
-    } else if (tagName == "MVAT") {
+    } else if (tagName == "MVA") {
+      if(btagLevel == kBTagMVAT) { //tight b-tag
         bTag = jet->bmva;
-        if (bTag > 0.9432) 
-            isBTagged = true;
-
-        btagSF   = 0.517971*(1.+0.332528*jetPt) / (1. + 0.174914*jetPt); 
-        mistagSF = 0.985864 + 122.8/(jetPt*jetPt) + 0.000416939*jetPt;
-
-        if (abs(jetFlavor) == 5) {
-            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
-            mcEff = bEff[ptBin];
-
-            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
-            if (systName == "up") {
-                btagSF += scale[ptBin];
-            } else if (systName == "down") {
-                btagSF -= scale[ptBin];
-            }
-        } else if (abs(jetFlavor) == 4) {
-
-            mcEff = 0.03;
-            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
-            if (systName == "up") {
-                btagSF += scale[ptBin];
-            } else if (systName == "down") {
-                btagSF -= scale[ptBin];
-            }
-        } else {
-            mcEff = 0.002;
-            if (systName == "upMistag") {
-                mistagSF *= (1 + (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            } else if (systName == "downMistag") {
-                mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            }
-        }
+        if (bTag > this->_BTagMVACuts[btagLevel]) 
+	  isBTagged = true;
+        if (abs(jetFlavor) == 5) { //true b-jets
+	  btagSF   = btagReader[kBTagMVAT+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+	  float effs[] = {0.44209, 0.496234, 0.512855, 0.512881, 0.490063, 0.43645, 0.355234};
+	  mcEff = effs[ptBin];
+        } else if (abs(jetFlavor) == 4) { //c-jets
+	  btagSF = btagReader[kBTagMVAT+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+	  float effs[] = {0.0245871, 0.0281465, 0.0302593, 0.0324758, 0.0328596, 0.031942, 0.032537};
+	  mcEff  = effs[ptBin];
+        } else { //udsg-jets
+	  mistagSF = mistagReader[kBTagMVAT+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+	  float effs[] = {0.00174914, 0.0013178, 0.001262, 0.00144956, 0.00170886, 0.00205872, 0.00327515}; 
+	  mcEff  = effs[ptBin];
+        }	
+      } //end tight b-tag ID
+      else if(btagLevel == kBTagMVAM) { //medium b-tag
+        bTag = jet->bmva;
+        if (bTag > this->_BTagMVACuts[btagLevel]) 
+	  isBTagged = true;
+        if (abs(jetFlavor) == 5) { //true b-jets
+	  btagSF   = btagReader[kBTagMVAM+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+	  float effs[] = {0.645459, 0.689443, 0.708177, 0.711061, 0.701379, 0.668631, 0.623636};
+	  mcEff = effs[ptBin];
+        } else if (abs(jetFlavor) == 4) { //c-jets
+	  btagSF = btagReader[kBTagMVAM+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+	  float effs[] = {0.127154, 0.136049, 0.143137, 0.146914, 0.150344, 0.149071, 0.157098};
+	  mcEff  = effs[ptBin];
+        } else { //udsg-jets
+	  mistagSF = mistagReader[kBTagMVAM+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+	  float effs[] = {0.011332, 0.0101566, 0.010858, 0.0120828, 0.0151716, 0.0191084, 0.0264264}; 
+	  mcEff  = effs[ptBin];
+        }	
+      } //end medium b-tag ID
+      else if(btagLevel == kBTagMVAL) { //loose b-tag
+        bTag = jet->bmva;
+        if (bTag > this->_BTagMVACuts[btagLevel]) 
+	  isBTagged = true;
+        if (abs(jetFlavor) == 5) { //true b-jets
+	  btagSF   = btagReader[kBTagMVAL+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
+	  float effs[] = {0.836311, 0.864787,  0.879155, 0.884378, 0.88678, 0.8781, 0.865072};
+	  mcEff = effs[ptBin];
+        } else if (abs(jetFlavor) == 4) { //c-jets
+	  btagSF = btagReader[kBTagMVAL+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+	  float effs[] = {0.396046, 0.416373, 0.433649, 0.442893, 0.462809, 0.47551, 0.512201};
+	  mcEff  = effs[ptBin];
+        } else { //udsg-jets
+	  mistagSF = mistagReader[kBTagMVAL+_mcEra*kLASTBTAG]->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+	  float effs[] = {0.097719, 0.0937078, 0.0998718, 0.109096, 0.135816, 0.165499, 0.213616}; 
+	  mcEff  = effs[ptBin];
+        }	
+      } //end loose b-tag ID
     } 
 
     // Upgrade or downgrade jet

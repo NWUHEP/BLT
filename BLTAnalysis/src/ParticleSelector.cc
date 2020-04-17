@@ -6,7 +6,7 @@
 using namespace baconhep;
 using namespace std;
 
-// Why the fuck is this not part of the standard library!?
+// not part of the standard library apparently :(
 vector<string> split(const string &s, char delim) {
     stringstream ss(s);
     string item;
@@ -539,8 +539,7 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
     float mcEff  = 1.;
     if (tagName == "CSVM") { 
         bTag = jet->csv;
-        if (bTag > 0.8484) 
-            isBTagged = true;
+        if (bTag > 0.8484) isBTagged = true;
 
         if (abs(jetFlavor) == 5) {
             btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);

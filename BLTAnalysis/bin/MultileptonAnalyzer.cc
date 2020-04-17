@@ -1182,8 +1182,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
 
-            //cout << leptonOneRecoVar << ", " << leptonTwoRecoVar << ", " << triggerVar << endl;
-
             // update the event weight
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
@@ -1306,8 +1304,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             } else {
                 return kTRUE;
             }
-
-            //cout << triggered << ", " << triggerWeight << ", " << sqrt(triggerVar) << endl;
 
             // update event weight
             eventWeight *= triggerWeight;
@@ -1688,7 +1684,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        //cout << nJetsCut << " " << nBJetsCut << endl;
+        cout << nJets << " " << nBJets << endl;
 
         leptonOneP4     = electronP4;
         leptonOneIso    = electronIso;
@@ -1808,15 +1804,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
         //jets = KinematicTopTag(jets, metP2, muonP4);
 
-        jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-        jetOneTag      = jets[0]->csv;
-        jetOneFlavor   = jets[0]->hadronFlavor;
-        jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-        jetTwoTag      = jets[1]->csv;
-        jetTwoFlavor   = jets[1]->hadronFlavor;
-        jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-        jetThreeTag    = jets[2]->csv;
-        jetThreeFlavor = jets[2]->hadronFlavor;
+
+        if (nJets >= 3) {
+            jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+            jetOneTag      = jets[0]->csv;
+            jetOneFlavor   = jets[0]->hadronFlavor;
+            jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+            jetTwoTag      = jets[1]->csv;
+            jetTwoFlavor   = jets[1]->hadronFlavor;
+            jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+            jetThreeTag    = jets[2]->csv;
+            jetThreeFlavor = jets[2]->hadronFlavor;
+        }
         if (nJets >= 4) {
             jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
             jetFourTag     = jets[3]->csv;
@@ -2020,15 +2019,18 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 // Collect the highest pt jets in the event
                 std::sort(jets.begin(), jets.end(), sort_by_higher_pt<TJet>);
                 //jets = KinematicTopTag(jets, metP2, muonP4);
-                jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
-                jetOneTag      = jets[0]->csv;
-                jetOneFlavor   = jets[0]->hadronFlavor;
-                jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
-                jetTwoTag      = jets[1]->csv;
-                jetTwoFlavor   = jets[1]->hadronFlavor;
-                jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
-                jetThreeTag    = jets[2]->csv;
-                jetThreeFlavor = jets[2]->hadronFlavor;
+                if (nJets >= 3) {
+                    jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
+                    jetOneTag      = jets[0]->csv;
+                    jetOneFlavor   = jets[0]->hadronFlavor;
+                    jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
+                    jetTwoTag      = jets[1]->csv;
+                    jetTwoFlavor   = jets[1]->hadronFlavor;
+                    jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
+                    jetThreeTag    = jets[2]->csv;
+                    jetThreeFlavor = jets[2]->hadronFlavor;
+                }
+
                 if (nJets >= 4) {
                     jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
                     jetFourTag     = jets[3]->csv;
@@ -2198,15 +2200,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
                     // Collect the highest pt jets in the event
                     //jets = KinematicTopTag(jets, metP2, electronP4);
-                    jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
-                    jetOneTag      = new_jets[0]->csv;
-                    jetOneFlavor   = new_jets[0]->hadronFlavor;
-                    jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
-                    jetTwoTag      = new_jets[1]->csv;
-                    jetTwoFlavor   = new_jets[1]->hadronFlavor;
-                    jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
-                    jetThreeTag    = new_jets[2]->csv;
-                    jetThreeFlavor = new_jets[2]->hadronFlavor;
+                    if (nJets >= 3) {
+                        jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
+                        jetOneTag      = new_jets[0]->csv;
+                        jetOneFlavor   = new_jets[0]->hadronFlavor;
+                        jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
+                        jetTwoTag      = new_jets[1]->csv;
+                        jetTwoFlavor   = new_jets[1]->hadronFlavor;
+                        jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
+                        jetThreeTag    = new_jets[2]->csv;
+                        jetThreeFlavor = new_jets[2]->hadronFlavor;
+                    }
 
                     if (nJets >= 4) {
                         jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);

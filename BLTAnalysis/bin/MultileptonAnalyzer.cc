@@ -279,10 +279,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("nJetsJERUp", &nJetsJERUp);
         tree->Branch("nJetsJERDown", &nJetsJERDown);
 
-        tree->Branch("nBJetsJESUp", &nBJetsJESUp);
-        tree->Branch("nBJetsJESDown", &nBJetsJESDown);
-        tree->Branch("nBJetsJERUp", &nBJetsJERUp);
-        tree->Branch("nBJetsJERDown", &nBJetsJERDown);
         tree->Branch("nBJetsBTagUp", &nBJetsBTagUp);
         tree->Branch("nBJetsBTagDown", &nBJetsBTagDown);
         tree->Branch("nBJetsCTagUp", &nBJetsCTagUp);
@@ -322,8 +318,6 @@ void MultileptonAnalyzer::Begin(TTree *tree)
     vector<unsigned> counters(particleSelector->GetJECSourceNames().size(), 0);
     nJetsJESUp    = counters;
     nJetsJESDown  = counters;
-    nBJetsJESUp   = counters;
-    nBJetsJESDown = counters;
 
     vector<unsigned> bcounters(particleSelector->GetBTagSourceNames().size(), 0);
     nBJetsBTagUp   = bcounters;
@@ -1021,8 +1015,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             nBJetsMistagUp, nBJetsMistagDown,
             nBJetsCTagUp, nBJetsCTagDown
         };
-        nBJetList.insert(nBJetList.end(), nBJetsJESUp.begin(), nBJetsJESUp.end());
-        nBJetList.insert(nBJetList.end(), nBJetsJESDown.begin(), nBJetsJESDown.end());
         nBJetList.insert(nBJetList.end(), nBJetsBTagUp.begin(), nBJetsBTagUp.end());
         nBJetList.insert(nBJetList.end(), nBJetsBTagDown.begin(), nBJetsBTagDown.end());
         nBJetsCut = *max_element(begin(nBJetList), end(nBJetList));
@@ -2498,11 +2490,8 @@ void MultileptonAnalyzer::ResetJetCounters()
     std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
 
     nBJets = nBJetsCut = nBJetsRaw = 0;
-    nBJetsJERUp    = nBJetsJERDown    = 0;
     nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
-    std::fill(nBJetsJESUp.begin(), nBJetsJESUp.end(), 0);
-    std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
     std::fill(nBJetsBTagUp.begin(), nBJetsBTagUp.end(), 0);
     std::fill(nBJetsBTagDown.begin(), nBJetsBTagDown.end(), 0);
 }
@@ -2510,7 +2499,8 @@ void MultileptonAnalyzer::ResetJetCounters()
 void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
 {
     float jetPt = jet->pt;
-    //cout << jetPt << " ";
+
+    cout << jet->ptRaw << ", " << jet->pt << ", " << jerc_nominal << endl;
 
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {
@@ -2587,29 +2577,24 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     for (const auto& name: particleSelector->GetJECSourceNames()) {
 
         // JES up
+        cout << name << " : ";
         float jecUnc = particleSelector->JetUncertainty(jet, name);
         jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
+        cout << jet->pt << ", ";
         if (jet->pt > 30) {
             ++nJetsJESUp[count];
-            if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
-                ++nBJetsJESUp[count];
-            } 
         }
 
         // JES down
         jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
-        //cout << jet->pt << endl;
+        cout << jet->pt << ", ";
         if (jet->pt > 30) {
             ++nJetsJESDown[count];
-            if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) { 
-                ++nBJetsJESDown[count];
-            }
         }
-        //cout << name << ": " << jecUnc << endl;
+        cout << jecUnc << endl;
         count++;
     }
 
-    //cout << jet->ptRaw << " " << jerc_nominal << " " << jec << " " << jecUnc << endl;
 
     // JER up
     pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 1);

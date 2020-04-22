@@ -60,10 +60,6 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
 
         _jetCorrector = new FactorizedJetCorrector(vPar);
 
-        // jec uncertainties
-        //JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", "Total");
-        //_jecUncertainty = new JetCorrectionUncertainty(*jecUnc);
-
     } else { // MC 
         // jet energy corrections
         std::string jecPath = cmssw_base + "/src/BLT/BLTAnalysis/data/Summer16_23Sep2016V4_MC/Summer16_23Sep2016V4_MC";
@@ -85,7 +81,6 @@ ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cut
            JetCorrectorParameters *jecUnc  = new JetCorrectorParameters(jecPath + "_UncertaintySources_AK4PFchs.txt", name);
            _jecUncertaintyMap[name] = new JetCorrectionUncertainty(*jecUnc);
         } 
-
 
         // jet energy resolution
         jetResolution   = JME::JetResolution(cmssw_base + "/src/BLT/BLTAnalysis/data/jet_pt_resolution.dat");

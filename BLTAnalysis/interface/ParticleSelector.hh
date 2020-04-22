@@ -87,15 +87,18 @@ private:
 
     // jec uncertainty names
     vector<string> _jecNames {
-                              "AbsoluteScale", "AbsoluteStat",
-                              "Fragmentation", "AbsoluteMPFBias", //"CorrelationGroupIntercalibration", 
-                              "PileUpDataMC", "PileUpPtBB", "PileUpPtEC1", "PileUpPtRef",
-                              "RelativeBal", "RelativeJEREC1",
-                              "RelativePtBB","RelativePtEC1",
-                              "RelativeStatFSR", "RelativeStatEC",
+                              "AbsoluteScale", "AbsoluteStat", "AbsoluteMPFBias",
+                              "AbsoluteFlavMap", "Fragmentation", 
                               "SinglePionECAL", "SinglePionHCAL",
-                              "TimePtEta", "FlavorQCD",
+                              "FlavorQCD", "TimePtEta", 
+                              "RelativeBal", "RelativePtBB","RelativePtEC1", 
+                              "RelativeFSR", "RelativeStatFSR", "RelativeStatEC",
+                              "PileUpDataMC", "PileUpPtBB", "PileUpPtEC1", "PileUpPtRef",
+                              "SubTotalPileUp", "SubTotalRelative", "SubTotalPt", 
+                              "SubTotalScale", "SubTotalAbsolute", "SubTotalMC", 
                               "Total"
+                              //"RelativeJERBB", "RelativeJEREC1",
+                              //"RelativeSample", "CorrelationGroupIntercalibration", 
                              };
 
     // For getting b tag scale factors and their uncertainties

@@ -529,96 +529,37 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
     }
 
     // Get b tag efficiency and mistag scale factor
-    float btagSF   = 1.;
-    float mistagSF = 1.;
+    float scaleFactor   = 1.;
     float mcEff  = 1.;
     if (tagName == "CSVM") { 
         bTag = jet->csv;
         if (bTag > 0.8484) isBTagged = true;
 
         if (abs(jetFlavor) == 5) {
-            btagSF   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
-
+            scaleFactor   = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_B, jet->eta, jet->pt);
             float effs[] = {0.45627061, 0.49951863, 0.51055844, 0.50376574, 0.49186896, 0.45660833, 0.38828584};
             mcEff = effs[ptBin];
         } else if (abs(jetFlavor) == 4) {
-            btagSF = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
+            scaleFactor = btagReader->eval_auto_bounds(systName, BTagEntry::FLAV_C, jet->eta, jet->pt);
             float effs[] = {0.04953503, 0.04814725, 0.05118469, 0.05404756, 0.0643619 , 0.05808081, 0.07079646};
             mcEff  = effs[ptBin];
         } else {
-            mistagSF = mistagReader->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
+            scaleFactor = mistagReader->eval_auto_bounds(systName, BTagEntry::FLAV_UDSG, jet->eta, jet->pt);
             float effs[] = {0.00608701, 0.00446983, 0.00457529, 0.00496787, 0.00541783, 0.00666792, 0.01310125};
             mcEff  = effs[ptBin];
         }
 
-    } else if (tagName == "MVAT") {
-        bTag = jet->bmva;
-        if (bTag > 0.9432) 
-            isBTagged = true;
-
-        btagSF   = 0.517971*(1.+0.332528*jetPt) / (1. + 0.174914*jetPt); 
-        mistagSF = 0.985864 + 122.8/(jetPt*jetPt) + 0.000416939*jetPt;
-
-        if (abs(jetFlavor) == 5) {
-            float bEff[] = {0.41637905, 0.45007627, 0.47419147, 0.48388148, 0.4745329, 0.45031636, 0.40974969};
-            mcEff = bEff[ptBin];
-
-            float scale[] = {0.01889, 0.01466, 0.01362, 0.0129, 0.0164, 0.0229, 0.0939}; 
-            if (systName == "up") {
-                btagSF += scale[ptBin];
-            } else if (systName == "down") {
-                btagSF -= scale[ptBin];
-            }
-        } else if (abs(jetFlavor) == 4) {
-
-            mcEff = 0.03;
-            float scale[] = {0.0661, 0.0513, 0.0477, 0.0453, 0.0575, 0.0802, 0.3285}; 
-            if (systName == "up") {
-                btagSF += scale[ptBin];
-            } else if (systName == "down") {
-                btagSF -= scale[ptBin];
-            }
-        } else {
-            mcEff = 0.002;
-            if (systName == "up") {
-                mistagSF *= (1 + (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            } else if (systName == "down") {
-                mistagSF *= (1 - (0.253674 - 0.000127486*jetPt + 8.91567e-08*jetPt*jetPt));
-            }
-        }
     } 
 
     // Upgrade or downgrade jet
-    if (abs(jetFlavor) == 5 || abs(jetFlavor) == 4) {
-        if (btagSF > 1) {  // use this if SF>1
-            if (!isBTagged) { // upgrade to b tagged
-                float tagRate = (1. - btagSF) / (1. - 1./mcEff);
-                if (rNumber < tagRate) 
-                    isBTagged = true;
-            }
-        } else if (btagSF < 1) { // downgrade b tagged to untagged
-            if (isBTagged) {
-                float tagRate = 1. - btagSF; 
-                if (rNumber < tagRate) 
-                    isBTagged = false;
-            }
-        }
-    } else {
-        //cout << mistagSF << " " << mistagSyst << " " << isBTagged << " ";
-        if (mistagSF > 1) {  // use this if SF>1
-            if (!isBTagged) { //upgrade to tagged
-                float tagRate = (1. - mistagSF) / (1. - 1./mcEff);
-                if (rNumber < tagRate) 
-                    isBTagged = true;
-            }
-        } else if (mistagSF < 1) { //downgrade tagged to untagged
-            if (isBTagged) {
-                float tagRate = 1. - btagSF; 
-                if (rNumber < tagRate) 
-                    isBTagged = false;
-            }
-        }
-        //cout << isBTagged << endl;
+    if (scaleFactor > 1 && !isBTagged) {  // upgrade to b tagged w/ probability of tagRate
+            float tagRate = (1. - scaleFactor) / (1. - 1./mcEff);
+            if (rNumber < tagRate) 
+                isBTagged = true;
+    } else if (scaleFactor < 1 && isBTagged) { // downgrade b tagged to untagged
+        float tagRate = 1. - scaleFactor; 
+        if (rNumber < tagRate) 
+            isBTagged = false;
     }
 
     return isBTagged;

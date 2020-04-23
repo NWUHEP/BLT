@@ -2484,11 +2484,13 @@ float MultileptonAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, Efficienc
 
 void MultileptonAnalyzer::ResetJetCounters()
 {
+    // jet mulitplicity counters
     nJets = nFwdJets = nJetsCut = 0;
     nJetsJERUp = nJetsJERDown = 0;
     std::fill(nJetsJESUp.begin(), nJetsJESUp.end(), 0);
     std::fill(nJetsJESDown.begin(), nJetsJESDown.end(), 0);
 
+    // b tag mulitplicity counters
     nBJets = nBJetsCut = nBJetsRaw = 0;
     nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
@@ -2505,7 +2507,9 @@ void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRa
     float rNumber = rng->Uniform(1.);
     if (jet->pt > 30) {
 
-        // nominal
+        // nominal counters: the systematic counters associated with flavors
+        // that differ from current jet should be incremented so they
+        // correspond to the nominal values here
         ++nJets;
         if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) {
             ++nBJets;

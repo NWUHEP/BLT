@@ -1,25 +1,33 @@
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
 
-WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
+WeightUtils::WeightUtils(string dataPeriod, string selection)
 {
     _dataPeriod = dataPeriod;
     _selection  = selection;
-    _isRealData = isRealData;
     std::string fileName;
 
     rng = new TRandom3();
 
-
     const std::string cmssw_base = getenv("CMSSW_BASE");
 
-    //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pileup_sf_2016_full.root";
-    //TFile* puFile = new TFile(fileName.c_str(), "OPEN");
-    //_puReweight = (TGraph*)puFile->Get("pileup_sf");
-    
     // PU weights
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pu_weights/pu_weights_" + _dataPeriod + ".root";
-    TFile* puFile = new TFile(fileName.c_str(), "OPEN");
-    _puReweight = (TH1D*)puFile->Get("mcwei_run000001");
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pu_weights/pu_weights_" 
+                          + _dataPeriod + "_nom.root";
+    std::cout << fileName << std::endl;
+    TFile* puFileNom = new TFile(fileName.c_str(), "OPEN");
+    _puReweightNom = (TH1D*)puFileNom->Get("mcwei_run000001");
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pu_weights/pu_weights_" 
+                          + _dataPeriod + "_up.root";
+    std::cout << fileName << std::endl;
+    TFile* puFileUp = new TFile(fileName.c_str(), "OPEN");
+    _puReweightUp = (TH1D*)puFileUp->Get("mcwei_run000001");
+    
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/pu_weights/pu_weights_" 
+                          + _dataPeriod + "_down.root";
+    std::cout << fileName << std::endl;
+    TFile* puFileDown = new TFile(fileName.c_str(), "OPEN");
+    _puReweightDown = (TH1D*)puFileDown->Get("mcwei_run000001");
 
     // muon trigger efficiencies 
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_trigger/EfficienciesAndSF_BCDEF.root";
@@ -308,11 +316,6 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _photon_r9_endcap = (TGraph *)f_photon_r9->Get("gR9_EE");
 }
 
-void WeightUtils::SetDataBit(bool isRealData)
-{
-    _isRealData = isRealData;
-}
-
 void WeightUtils::SetDataPeriod(string dataPeriod)
 {
     _dataPeriod = dataPeriod;
@@ -323,10 +326,13 @@ void WeightUtils::SetSelection(string selection)
     _selection = selection;
 }
 
-float WeightUtils::GetPUWeight(float nPU)
+std::map<std::string, float> WeightUtils::GetPUWeight(float nPU)
 {
-    //return _puReweight->Eval(nPU); 
-    return _puReweight->GetBinContent(_puReweight->FindBin(nPU)); 
+    std::map<std::string, float> weights;
+    weights["nom"] = _puReweightNom->GetBinContent(_puReweightNom->FindBin(nPU)); 
+    weights["up"] = _puReweightUp->GetBinContent(_puReweightUp->FindBin(nPU)); 
+    weights["down"] = _puReweightDown->GetBinContent(_puReweightDown->FindBin(nPU)); 
+    return weights; 
 }
 
 std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLorentzVector &lepton) const

@@ -20,9 +20,8 @@ bool test_bits(unsigned int bits, unsigned int test) {
     return (bits & test) == test;
 }
 
-ParticleSelector::ParticleSelector(const Parameters& parameters, const Cuts& cuts) {
+ParticleSelector::ParticleSelector(const Parameters& parameters) {
     this->_parameters = parameters;
-    this->_cuts = cuts;
 
     const std::string _cmssw_base = getenv("CMSSW_BASE");
     _rng = new TRandom3();
@@ -205,63 +204,6 @@ bool ParticleSelector::PassMuonID(const baconhep::TMuon* mu, string idName) cons
     return muPass;
 }
 
-
-bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muIsoCuts& cutLevel) const {
-    bool isoPass = false;
-    if (cutLevel.cutName == "tightMuIso" || cutLevel.cutName == "looseMuIso") {
-        float combIso = (mu->chHadIso + std::max(0.,(double)mu->neuHadIso + mu->gammaIso - 0.5*mu->puIso));
-        if (combIso/mu->pt < cutLevel.relCombIso04) 
-            isoPass = true;
-
-    }     return isoPass;
-}
-
-bool ParticleSelector::PassMuonIso(const baconhep::TMuon* mu, const Cuts::muDetIsoCuts& cutLevel) const {
-    bool isoPass = false;
-    if (
-            mu->trkIso/mu->pt < cutLevel.trkIso
-            && mu->hcalIso/mu->pt < cutLevel.hcalIso
-            && mu->ecalIso/mu->pt < cutLevel.ecalIso
-       ) 
-        isoPass = true;
-    return isoPass;
-}
-
-bool ParticleSelector::PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const 
-{
-    bool elPass = false;
-    float energyInverse = fabs(1. - el->eoverp)/el->ecalEnergy;
-
-    if (fabs(el->scEta) < 1.479) { // barrel
-        if (
-                el->sieie           < 0.00998
-                && fabs(el->dEtaIn) < 0.00308
-                && fabs(el->dPhiIn) < 0.0816
-                && el->hovere       < 0.0414
-                && energyInverse    < 0.0129
-                && el->nMissingHits <= 1
-                && fabs(el->d0)     < 1.
-                && fabs(el->dz)     < 1.
-                && !el->isConv
-           ) elPass = true;
-    } else if (fabs(el->scEta) > 1.4446 && fabs(el->scEta) < 1.566) { // transition
-        elPass = false;
-    } else if (fabs(el->scEta) > 1.566) { // endcap
-        if (
-                el->sieie           < 0.0292
-                && fabs(el->dEtaIn) < 0.00605
-                && fabs(el->dPhiIn) < 0.0394
-                && el->hovere       < 0.0641
-                && energyInverse    < 0.0129
-                && el->nMissingHits <= 1
-                && fabs(el->d0)     < 1.
-                && fabs(el->dz)     < 1.
-                && !el->isConv    
-           ) elPass = true;
-    }    
-    return elPass;
-}
-
 bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idName) const {
     bool elPass = false;
 
@@ -354,24 +296,30 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     else if (idName == "looseFall17V2") {
         if (el->pt > 5. && el->pt < 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaFall17V2Iso > 0.604775)
+                //if (el->mvaFall17V2Iso > 0.604775)
+                if (el->mvaFall17V2Iso > 0.700642584415)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaFall17V2Iso > 0.628743)  
+                //if (el->mvaFall17V2Iso > 0.628743)  
+                if (el->mvaFall17V2Iso > 0.739335420875)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaFall17V2Iso > 0.896462)  
+                //if (el->mvaFall17V2Iso > 0.896462)  
+                if (el->mvaFall17V2Iso > 1.45390456109)  
                    elPass = true;
             }
         } else if (el->pt > 10.) {
             if (fabs(el->scEta) < 0.8) {
-                if (el->mvaFall17V2Iso > -0.145237)
+                //if (el->mvaFall17V2Iso > -0.145237)
+                if (el->mvaFall17V2Iso > -0.146270871164)
                     elPass = true;
             } else if (fabs(el->scEta) < 1.479) {
-                if (el->mvaFall17V2Iso > -0.0315746)  
+                //if (el->mvaFall17V2Iso > -0.0315746)  
+                if (el->mvaFall17V2Iso > -0.0315850882679)  
                     elPass = true;
             } else if (fabs(el->scEta) < 2.5) {
-                if (el->mvaFall17V2Iso > -0.032173)
+                //if (el->mvaFall17V2Iso > -0.032173)
+                if (el->mvaFall17V2Iso > -0.0321841194737)
                     elPass = true;
             }
         }
@@ -380,121 +328,10 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
     return elPass;
 }
 
-bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel, float EAEl[7]) const 
-{
-    int iEta = 0;
-    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
-    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
-    for (unsigned i = 0; i < 8; ++i) {
-        if (fabs(el->scEta) > etaBins[i] && fabs(el->scEta) < etaBins[i+1]) {
-            iEta = i;
-            break;
-        }
-    }
-
-    float combIso = el->chHadIso 
-                    + std::max(0.,(double)el->neuHadIso 
-                            + el->gammaIso 
-                            - _rhoFactor*effArea[iEta]);
-
-    bool isoPass = false;
-    if (fabs(el->scEta) <= 1.479) {
-        if (combIso/el->pt < 0.0588) isoPass = true;
-    } else {
-        if (combIso/el->pt < 0.0571) isoPass = true;
-    }
-
-    return isoPass;
-}
-
-bool ParticleSelector::PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phIDCuts& cutLevel) const {
-    bool phoPass = false;
-    bool phoPass1 = false;
-    bool phoPass2 = false;
-
-    //if (fabs(ph->scEta) > 2.5) return phoPass;  // uncomment to apply eta requirement
-    if (cutLevel.cutName == "preSelPhID") {
-        if (fabs(ph->scEta) > 1.4442 && fabs(ph->scEta) < 1.566) return phoPass;
-        if (fabs(ph->scEta) < 1.479) {
-            if (
-                    (!ph->isConv) == cutLevel.PassedEleSafeVeto[0] 
-                    && ph->sieie < cutLevel.sigmaIetaIeta[0]
-               ) {
-                if (ph->r9 > 0.9) {
-                    if (ph->hovere < cutLevel.HadOverEm[0]) phoPass1 = true;
-                } else {
-                    if (ph->hovere < cutLevel.HadOverEm[1]) phoPass1 = true;
-                }
-            }
-        } else {
-            if (
-                    (!ph->isConv) == cutLevel.PassedEleSafeVeto[1]
-                    && ph->sieie  < cutLevel.sigmaIetaIeta[1]
-                    && ph->hovere < cutLevel.HadOverEm[1]
-               ) phoPass1 = true;
-        }
-
-        if (ph->r9 > 0.9) {
-            if (
-                    //ph->hcalIso - 0.005*ph->pt     < cutLevel.HcalIso[0]  //FIXME
-                    //&& ph->trkIso - 0.002*ph->pt   < cutLevel.TrkIso[0]   //FIXME
-                    //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[0]  //FIXME
-                    1
-               ) phoPass2 = true;
-        } else {
-            if (
-                    //ph->hcalIso - 0.005*ph->pt     < cutLevel.HcalIso[1]  //FIXME
-                    //&& ph->trkIso - 0.002*ph->pt   < cutLevel.TrkIso[1]   //FIXME
-                    //&& ph->cicPF4chgpfIso02          < cutLevel.ChPfIso[1]  //FIXME
-                    1
-               ) phoPass2 = true;
-        }
-        if (phoPass1 && phoPass2) phoPass = true;
-
-    } else if (cutLevel.cutName == "medPhID"){
-        if (fabs(ph->scEta) > 1.4442 && fabs(ph->scEta) < 1.566) return phoPass;
-        if (
-                (
-                 fabs(ph->scEta)  < 1.4442
-                 && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[0]
-                 && ph->hovere                    < cutLevel.HadOverEm[0]
-                 && ph->sieie                     < cutLevel.sigmaIetaIeta[0]
-                ) || (
-                    fabs(ph->scEta)  > 1.566
-                    && (!ph->isConv)                == cutLevel.PassedEleSafeVeto[1]
-                    && ph->hovere                    < cutLevel.HadOverEm[1]
-                    && ph->sieie                     < cutLevel.sigmaIetaIeta[1]
-                    )
-           ) phoPass = true;
-    }
-    return phoPass;
-}
-
 bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName) const 
 {
     bool phoPass = false;
-    //if (_parameters.period == "2016") {
-    //    if (idName == "loose") {
-    //        if (ph->mvaSpring16 > 0.2) {
-    //            phoPass = true;
-    //        }
-    //    }
-    //    else if (idName == "tight") {
-    //        if (fabs(ph->scEta) <= 1.479) { // barrel
-    //            if (ph->mvaSpring16 > 0.68) {
-    //                phoPass = true;
-    //            }
-    //        }
-    //        else { //endcap
-    //            if (ph->mvaSpring16 > 0.60) {
-    //                phoPass = true;
-    //            }
-    //        }
-    //    }
-    //}
-    //else { // 2017 or 2018 
-    
-    // 2016, 2017, 2018 
+
     if (idName == "loose") {
         if (fabs(ph->scEta) <= 1.479) { // barrel
             if (ph->mvaFall17V2 > -0.02) {
@@ -519,78 +356,8 @@ bool ParticleSelector::PassPhotonMVA(const baconhep::TPhoton* ph, string idName)
             }
         }
     }
-    //}
     
     return phoPass;
-}
-
-bool ParticleSelector::PassPhotonIso(const baconhep::TPhoton* ph, const Cuts::phIsoCuts& cutLevel, float EAPho[7][3]) const {
-    bool isoPass = false;
-
-    float chEA, nhEA, phEA, chIsoCor, nhIsoCor, phIsoCor;
-    if (fabs(ph->scEta) < 1.0) {
-        chEA = EAPho[0][0];
-        nhEA = EAPho[0][1];
-        phEA = EAPho[0][2];
-    } else if (fabs(ph->scEta) < 1.479) {
-        chEA = EAPho[1][0];
-        nhEA = EAPho[1][1];
-        phEA = EAPho[1][2];
-    } else if (fabs(ph->scEta) < 2.0) {
-        chEA = EAPho[2][0];
-        nhEA = EAPho[2][1];
-        phEA = EAPho[2][2];
-    } else if (fabs(ph->scEta) < 2.2) {
-        chEA = EAPho[3][0];
-        nhEA = EAPho[3][1];
-        phEA = EAPho[3][2];
-    } else if (fabs(ph->scEta) < 2.3) {
-        chEA = EAPho[4][0];
-        nhEA = EAPho[4][1];
-        phEA = EAPho[4][2];
-    } else if (fabs(ph->scEta) < 2.4) {
-        chEA = EAPho[5][0];
-        nhEA = EAPho[5][1];
-        phEA = EAPho[5][2];
-    } else {
-        chEA = EAPho[6][0];
-        nhEA = EAPho[6][1];
-        phEA = EAPho[6][2];
-    }
-
-    chIsoCor = ph->chHadIso - _rhoFactor*chEA;
-    nhIsoCor = ph->neuHadIso - _rhoFactor*nhEA;
-    phIsoCor = ph->gammaIso -_rhoFactor*phEA;
-
-    if (cutLevel.cutName == "loosePhIso"){
-        if (
-                (
-                 fabs(ph->scEta) < 1.4442
-                 && max((double)chIsoCor,0.)      < cutLevel.chIso[0]
-                 && max((double)nhIsoCor,0.)      < cutLevel.nhIso[0] + 0.04*ph->pt
-                 && max((double)phIsoCor,0.)      < cutLevel.phIso[0] + 0.005*ph->pt
-                ) || (
-                    fabs(ph->scEta) > 1.566
-                    && max((double)chIsoCor,0.)      < cutLevel.chIso[1]
-                    && max((double)nhIsoCor,0.)      < cutLevel.nhIso[1] + 0.04*ph->pt
-                    )
-           ) isoPass = true;
-    } else {
-        if (
-                (
-                 fabs(ph->scEta) < 1.4442
-                 && max((double)chIsoCor,0.)      < cutLevel.chIso[0]
-                 && max((double)nhIsoCor,0.)      < cutLevel.nhIso[0] + 0.04*ph->pt
-                 && max((double)phIsoCor,0.)      < cutLevel.phIso[0] + 0.005*ph->pt
-                ) || (
-                    fabs(ph->scEta) > 1.566
-                    && max((double)chIsoCor,0.)      < cutLevel.chIso[1]
-                    && max((double)nhIsoCor,0.)      < cutLevel.nhIso[1] + 0.04*ph->pt
-                    && max((double)phIsoCor,0.)      < cutLevel.phIso[1] + 0.005*ph->pt
-                    )
-           ) isoPass = true;
-    }
-    return isoPass;
 }
 
 bool ParticleSelector::PassJetID(const baconhep::TJet* jet, string idName) const {
@@ -633,7 +400,7 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, string idName) const
                     }
                 }
             } else if (fabs(jet->eta) <= 3.0) { 
-                if (jet->neuEmFrac > 0.02 && jet->neuHadFrac < 0.99 && jet->nNeutrals > 2) 
+                if (jet->neuEmFrac > 0.02 && jet->neuEmFrac < 0.99 && jet->nNeutrals > 2) 
                     jetPass = true;
             } else {
                 if (jet->neuEmFrac < 0.9 && jet->neuHadFrac > 0.02 && jet->nNeutrals > 10) 
@@ -662,7 +429,7 @@ bool ParticleSelector::PassJetID(const baconhep::TJet* jet, string idName) const
                 }
             }
             else if (fabs(jet->eta) <= 3.0) { 
-                if (jet->neuEmFrac > 0.02 && jet->neuHadFrac < 0.99 && jet->nNeutrals > 2) 
+                if (jet->neuEmFrac > 0.02 && jet->neuEmFrac < 0.99 && jet->nNeutrals > 2) 
                     jetPass = true;
             }
             else {
@@ -924,6 +691,12 @@ float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const f
     return combIso;
 }
 
+// on hold
+//float ParticleSelector::GetPhotonWorstChargedIsolation(baconhep::TPhoton* pho, TClonesArray* pfCands, TClonesArray* vertices, baconhep::TVertex* pv) const
+//{
+//    return 1.;
+//}
+
 void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData) const
 {
     double muonSF = 1.;
@@ -945,4 +718,3 @@ void ParticleSelector::ApplyTauEnergyScaleCorrection(baconhep::TTau* tau) const
         tau->pt *= 1.006;
     }
 }
-

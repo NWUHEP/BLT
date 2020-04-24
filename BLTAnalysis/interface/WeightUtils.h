@@ -36,14 +36,14 @@ class WeightUtils: public TObject {
     public:
         WeightUtils() {};
         virtual ~WeightUtils() {};
-        WeightUtils(string dataPeriod, string selection, bool isRealData);
+        WeightUtils(string dataPeriod, string selection);
 
         void    Initialize();
         void    SetDataBit(bool);
         void    SetDataPeriod(string);
         void    SetSelection(string);
 
-        float   GetPUWeight(float);
+        std::map<std::string, float>  GetPUWeight(float);
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
         //pair<float, float>   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         //pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
@@ -67,13 +67,11 @@ class WeightUtils: public TObject {
         string _dataPeriod;
         string _sampleName;
         string _selection;
-        bool   _isRealData;
 
         // rng
         TRandom3 *rng;
 
-        //TGraph  *_puReweight;
-        TH1D  *_puReweight;
+        TH1D  *_puReweightNom, *_puReweightUp, *_puReweightDown;
         TGraphAsymmErrors *_eff_IsoMu24_DATA[4]; 
         TGraphAsymmErrors *_muSF_ID_DATA_BCDEF[4], *_muSF_ID_MC_BCDEF[4]; 
         TGraphAsymmErrors *_muSF_ISO_DATA_BCDEF[4], *_muSF_ISO_MC_BCDEF[4]; 

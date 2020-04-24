@@ -20,7 +20,6 @@
 #include "BLT/BLTAnalysis/interface/BLTSelector.hh"
 #include "BLT/BLTAnalysis/interface/BLTHelper.hh"
 #include "BLT/BLTAnalysis/interface/Parameters.hh"
-#include "BLT/BLTAnalysis/interface/Cuts.hh"
 #include "BLT/BLTAnalysis/interface/TriggerSelector.hh"
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
@@ -68,9 +67,8 @@ public:
 
     TRandom3 *rng;
 
-    // Params and cuts
+    // Params 
     std::unique_ptr<Parameters>         params;
-    std::unique_ptr<Cuts>               cuts;
 
     // Utilities
     std::unique_ptr<ParticleSelector>   particleSelector;
@@ -84,7 +82,6 @@ public:
     // event data
     UInt_t runNumber, lumiSection, nPV, nPartons;
     ULong64_t evtNumber;
-    Bool_t triggerStatus;
     Float_t nPU;
     Float_t xPV, yPV, zPV;
     UInt_t nJets, nCentralJets, nFwdJets, nBJets, nMuons, nElectrons, nTaus, nPhotons;
@@ -92,12 +89,11 @@ public:
    
     // weights
     Int_t genWeight;
-    Float_t eventWeight, triggerWeight, puWeight;
+    Float_t eventWeight, triggerWeight;
+    Float_t puWeight, puWeightUp, puWeightDown;
     Float_t prefWeight;
-    Float_t elIDWeightOne, elIDWeightTwo;
-    Float_t elTrigWeightOne, elTrigWeightTwo;
-    Float_t muonIDWeightOne, muonIDWeightTwo;
-    Float_t muonTrigWeightOne, muonTrigWeightTwo;
+    Float_t leptonOneIDWeight, leptonTwoIDWeight;
+    Float_t trigOneWeight, trigTwoWeight;
     Float_t photonIDWeight;
     Float_t photonR9Weight;
 
@@ -109,13 +105,9 @@ public:
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso;
-    Int_t leptonOneMother, leptonTwoMother;
     Int_t leptonOneFlavor, leptonTwoFlavor;
     Float_t leptonOneD0, leptonTwoD0;
     Float_t leptonOneDZ, leptonTwoDZ;
-    Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
-
-    Bool_t leptonOneECALDriven, leptonTwoECALDriven;
     
     // tau data
     Int_t tauDecayMode;
@@ -123,11 +115,14 @@ public:
     //UInt_t tauPhotonMult, tauChHadMult;
 
     // photon data
-    Float_t photonOnePt, photonOneEta, photonOnePhi;
-    Float_t photonOneR9, photonOneRawR9;
-    Float_t photonOneMVA;
-    Float_t photonOneERes;
-    Float_t photonOneE, photonOneErrE;
+    Float_t photonPt, photonEta, photonPhi;
+    Float_t photonRawPt;
+    Float_t photonSCPt, photonSCEta, photonSCPhi;
+    Float_t photonR9, photonRawR9;
+    Float_t photonMVA;
+    Float_t photonERes;
+    Float_t photonE, photonErrE;
+    //Float_t photonWorstChIso; // on hold
     Bool_t passElectronVeto;
 
     Bool_t isLeptonTag;
@@ -146,15 +141,12 @@ public:
 
     // generator level data
 
-    UInt_t nGenPhotons;
+    UInt_t nGenPhotons, nGenMuons, nGenElectrons, nGenTaus;
+    Int_t genLeptonOneId, genLeptonTwoId;
     Float_t genLeptonOnePt, genLeptonOneEta, genLeptonOnePhi;
     Float_t genLeptonTwoPt, genLeptonTwoEta, genLeptonTwoPhi;
     Float_t genPhotonPt, genPhotonEta, genPhotonPhi;
-    Int_t genLeptonOneId, genLeptonTwoId;
-    Bool_t genPhotonFHPFS, genPhotonIPFS;
     Bool_t vetoDY;
-    Int_t phoMotherId;
-    Bool_t phoMotherFHPFS, phoMotherIPFS; 
 
     // dilepton data
     Float_t dileptonPt, dileptonEta, dileptonPhi, dileptonM;
@@ -184,6 +176,8 @@ public:
     Float_t lPhotonDRMax, lPhotonDRMin;
     Float_t dileptonPhotonDEta, dileptonPhotonDPhi, dileptonPhotonDR;
     Float_t ptt;
+
+    // angles
     Float_t zgBigTheta, zgLittleTheta, zgPhi;
     Float_t zgBigThetaMY, zgLittleThetaMY, zgPhiMY;
     Float_t zgBigThetaJames, zgLittleThetaJames, zgPhiJames;
@@ -194,6 +188,9 @@ public:
     Float_t zepp, photonZepp;
     Float_t vbfPtBalance;
     Bool_t jetOneMatched, jetTwoMatched;
+    Bool_t leptonOneMatched, leptonTwoMatched;
+    Bool_t photonMatched;
+    Bool_t sizePassingPhotonList;
 
     //ClassDef(hzgAnalyzer,0);
 };

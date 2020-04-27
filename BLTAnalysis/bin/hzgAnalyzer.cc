@@ -46,6 +46,8 @@ void hzgAnalyzer::Begin(TTree *tree)
     params.reset(new Parameters());
     params->setup(options);
 
+    particleSelector.reset(new ParticleSelector(*params));
+
     // Trigger bits mapping file
     const std::string cmssw_base = getenv("CMSSW_BASE");
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
@@ -340,9 +342,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     GetEntry(entry, 1);  // load all branches
     this->totalEvents++;
     hTotalEvents->Fill(1);
-    
+
     const bool isData = (fInfo->runNum != 1);
-    particleSelector->SetRealData(isData);
     
     genWeight = 1;
     if (!isData) {
@@ -352,7 +353,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             hTotalEvents->Fill(maxBin);
         }
     }
-
+    
     if (entry%10000==0)  
         std::cout << "... Processing event " << entry 
             << " Run: " << fInfo->runNum 
@@ -518,6 +519,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     lumiSection   = fInfo->lumiSec;
     nPV           = fPVArr->GetEntries();
     rho           = fInfo->rhoJet;
+
     if (!isData) {
         nPU = fInfo->nPUmean;
         std::map<std::string, float> puWeights = weights->GetPUWeight(nPU);
@@ -534,6 +536,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     ///////////////////
 
     /* Vertices */
+
     if (fInfo->hasGoodPV) {
         assert(fPVArr->GetEntries() != 0);
         TVector3 pv;
@@ -541,12 +544,11 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         xPV = pv.X();
         yPV = pv.Y();
         zPV = pv.Z();
-        particleSelector->SetPV(pv);
     } else {
         return kTRUE;
     }
     hTotalEvents->Fill(4);
-    particleSelector->SetNPV(fInfo->nPU + 1);
+
     particleSelector->SetRho(fInfo->rhoJet);
 
     /* MUONS */
@@ -602,10 +604,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 electron->calibPt > 7.
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronMVA(electron, "looseFall17V2")
-                //&& particleSelector->GetElectronIsolation(electron, fInfo->rhoJet)/electron->calibPt < 0.35
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
-                //&& fabs(electron->sip3d) < 4.0 
            ) {
             electrons.push_back(electron); // electrons for analysis
             TLorentzVector electronP4;
@@ -642,8 +642,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
 
         // apply tau energy scale correction 
-        if (!isData) 
-            particleSelector->ApplyTauEnergyScaleCorrection(tau);
+        if (!isData) particleSelector->ApplyTauEnergyScaleCorrection(tau);
 
         if ( 
                 tau->pt > 18
@@ -1162,7 +1161,30 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             std::cout << "lepton two pt, eta, phi: " << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << std::endl;
         }
 
+
+        // lepton systematic four vectors
+        
+        TLorentzVector leptonOneP4ScaleUp, leptonOneP4ScaleDown, leptonTwoP4ScaleUp, leptonTwoP4ScaleDown;
+        leptonOneP4ScaleUp.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+        leptonOneP4ScaleDown.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
+        leptonTwoP4ScaleUp.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+        leptonTwoP4ScaleDown.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
+
+        if (params->selection == "mmg") {
+            std::cout << "TBD" << std::endl;
+        }
+        else if (params->selection == "eeg") {
+            std::pair<float, float> electronOneEScale = particleSelector->GetElectronScaleErr(electrons[leptonOneIndex]);
+            leptonOneP4ScaleUp *= electronOneEScale.first/leptonOneP4ScaleUp.E();
+            leptonOneP4ScaleDown *= electronOneEScale.second/leptonOneP4ScaleDown.E();
+            std::pair<float, float> electronTwoEScale = particleSelector->GetElectronScaleErr(electrons[leptonTwoIndex]);
+            leptonTwoP4ScaleUp *= electronTwoEScale.first/leptonTwoP4ScaleUp.E();
+            leptonTwoP4ScaleDown *= electronTwoEScale.second/leptonTwoP4ScaleDown.E();
+        }
+
         TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
+        TLorentzVector dileptonP4ScaleUp = leptonOneP4ScaleUp + leptonTwoP4ScaleUp;
+        TLorentzVector dileptonP4ScaleDown = leptonOneP4ScaleDown + leptonTwoP4ScaleDown;
 
         // L1EMTF cut 
         if (params->selection == "mmg") {

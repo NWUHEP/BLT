@@ -37,9 +37,6 @@ public:
     ~ParticleSelector() {}
 
     // Setters
-    void SetRealData(bool isRealData)       { _isRealData = isRealData; }
-    void SetPV(const TVector3& pv)          { _pv = pv; }
-    void SetNPV(int npv)                    { _npv = npv; }
     void SetRho(float rhoFactor)            { _rhoFactor = rhoFactor; }
 
     // Muons
@@ -50,6 +47,7 @@ public:
     // Electrons
     bool PassElectronMVA(const baconhep::TElectron* el, string) const;
     float GetElectronIsolation(const baconhep::TElectron* el, const float rho) const;
+    pair<float, float> GetElectronScaleErr(const baconhep::TElectron* el) const;
 
     // Photons
     bool PassPhotonMVA(const baconhep::TPhoton* ph, string) const;
@@ -72,9 +70,6 @@ public:
 
 private:
     Parameters _parameters;
-    bool       _isRealData;
-    TVector3   _pv;
-    int        _npv;
     float      _rhoFactor;
     TRandom3*  _rng;
 

@@ -718,3 +718,24 @@ void ParticleSelector::ApplyTauEnergyScaleCorrection(baconhep::TTau* tau) const
         tau->pt *= 1.006;
     }
 }
+
+pair<float, float> ParticleSelector::GetElectronScaleErr(const baconhep::TElectron* el) const
+{
+    float energyNominal = el->calibE;
+
+    float statUp = fabs(el->energyScaleStatUp - energyNominal)/energyNominal;
+    float statDown = fabs(el->energyScaleStatDown - energyNominal)/energyNominal;
+    float systUp = fabs(el->energyScaleSystUp - energyNominal)/energyNominal;
+    float systDown = fabs(el->energyScaleSystDown - energyNominal)/energyNominal;
+    float gainUp = fabs(el->energyScaleGainUp - energyNominal)/energyNominal;
+    float gainDown = fabs(el->energyScaleGainDown - energyNominal)/energyNominal;
+
+    float scaleUp = sqrt(pow(statUp, 2) + pow(systUp, 2) + pow(gainUp, 2));
+    float scaleDown = sqrt(pow(statDown, 2) + pow(systDown, 2) + pow(gainDown, 2));
+
+    float energyUp = energyNominal + scaleUp*energyNominal;
+    float energyDown = energyNominal - scaleDown*energyNominal;
+
+    return make_pair(energyUp, energyDown);
+}
+

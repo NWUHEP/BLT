@@ -328,6 +328,19 @@ mc_dict['t'] = [
         nJobs    = 10,
         suffix   = 'tbar_tw'
        ),
+
+    cfg(data_name = 'T_t-channel',
+        path     = '{0}/Summer16_ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+        nJobs    = 10,
+        suffix   = 't_t'
+       ),
+    cfg(data_name = 'Tbar_t-channel',
+        path     = '{0}/Summer16_ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4'.format(path),
+        nJobs    = 10,
+        suffix   = 'tbar_t'
+       ),
+
+    
     ]
 
 

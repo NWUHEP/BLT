@@ -147,6 +147,8 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("trigTwoWeight", &trigTwoWeight);
     outTree->Branch("triggerWeight", &triggerWeight);
     outTree->Branch("prefWeight", &prefWeight);
+    outTree->Branch("prefWeightUp", &prefWeightUp);
+    outTree->Branch("prefWeightDown", &prefWeightDown);
     outTree->Branch("photonR9Weight", &photonR9Weight);
 
     // leptons
@@ -158,6 +160,8 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonTwoPhi", &leptonTwoPhi);
     outTree->Branch("leptonOnePtKin", &leptonOnePtKin);
     outTree->Branch("leptonTwoPtKin", &leptonTwoPtKin);
+    outTree->Branch("leptonOnePtKinErr", &leptonOnePtKinErr);
+    outTree->Branch("leptonTwoPtKinErr", &leptonTwoPtKinErr);
     outTree->Branch("leptonOneIso", &leptonOneIso);
     outTree->Branch("leptonTwoIso", &leptonTwoIso);
     outTree->Branch("leptonOneFlavor", &leptonOneFlavor);
@@ -328,7 +332,6 @@ void hzgAnalyzer::Begin(TTree *tree)
     outTree->Branch("leptonOneMatched", &leptonOneMatched);
     outTree->Branch("leptonTwoMatched", &leptonTwoMatched);
     outTree->Branch("photonMatched", &photonMatched);
-    outTree->Branch("sizePassingPhotonList", &sizePassingPhotonList);
 
     // event counter
     string outHistName = params->get_output_treename("TotalEvents");
@@ -1161,30 +1164,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             std::cout << "lepton two pt, eta, phi: " << leptonTwoP4.Pt() << ", " << leptonTwoP4.Eta() << ", " << leptonTwoP4.Phi() << std::endl;
         }
 
-
-        // lepton systematic four vectors
-        
-        TLorentzVector leptonOneP4ScaleUp, leptonOneP4ScaleDown, leptonTwoP4ScaleUp, leptonTwoP4ScaleDown;
-        leptonOneP4ScaleUp.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
-        leptonOneP4ScaleDown.SetPtEtaPhiM(leptonOneP4.Pt(), leptonOneP4.Eta(), leptonOneP4.Phi(), leptonOneP4.M());
-        leptonTwoP4ScaleUp.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
-        leptonTwoP4ScaleDown.SetPtEtaPhiM(leptonTwoP4.Pt(), leptonTwoP4.Eta(), leptonTwoP4.Phi(), leptonTwoP4.M());
-
-        if (params->selection == "mmg") {
-            std::cout << "TBD" << std::endl;
-        }
-        else if (params->selection == "eeg") {
-            std::pair<float, float> electronOneEScale = particleSelector->GetElectronScaleErr(electrons[leptonOneIndex]);
-            leptonOneP4ScaleUp *= electronOneEScale.first/leptonOneP4ScaleUp.E();
-            leptonOneP4ScaleDown *= electronOneEScale.second/leptonOneP4ScaleDown.E();
-            std::pair<float, float> electronTwoEScale = particleSelector->GetElectronScaleErr(electrons[leptonTwoIndex]);
-            leptonTwoP4ScaleUp *= electronTwoEScale.first/leptonTwoP4ScaleUp.E();
-            leptonTwoP4ScaleDown *= electronTwoEScale.second/leptonTwoP4ScaleDown.E();
-        }
-
         TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
-        TLorentzVector dileptonP4ScaleUp = leptonOneP4ScaleUp + leptonTwoP4ScaleUp;
-        TLorentzVector dileptonP4ScaleDown = leptonOneP4ScaleDown + leptonTwoP4ScaleDown;
 
         // L1EMTF cut 
         if (params->selection == "mmg") {
@@ -1213,9 +1193,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         bool hasValidPhoton = false;
         unsigned int photonIndex = 0;
 
-        std::vector<unsigned int> passingPhotonIndices;
-        sizePassingPhotonList = 0;
-
         for (unsigned int i = 0; i < photons.size(); ++i) {
             TLorentzVector tempPhoton;
             TLorentzVector tempLLG;
@@ -1230,20 +1207,15 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 tempLLG.M() > 100. && tempLLG.M() < 180. &&
                 this_dr1 > 0.4 && this_dr2 > 0.4
                 ) {
-                if (!hasValidPhoton) {
-                    hasValidPhoton = true;
-                    photonIndex = i;
-                }
-                passingPhotonIndices.push_back(i);
-                //break;
+                hasValidPhoton = true;
+                photonIndex = i;
+                break;
             }
         }
 
         if (!hasValidPhoton)
             return kTRUE;
         hTotalEvents->Fill(9);
-
-        sizePassingPhotonList = passingPhotonIndices.size();
 
         TLorentzVector photonP4;
         photonP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
@@ -1521,6 +1493,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         // kinematic fit
         KinZfitter* kinZfitter = new KinZfitter(isData);
         std::vector<TObject *> selectedLeptons;
+        std::vector<double> pTerr;
         if (params->selection == "mmg") {
             selectedLeptons.push_back(muons[leptonOneIndex]);
             selectedLeptons.push_back(muons[leptonTwoIndex]);
@@ -1531,7 +1504,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
 
         std::map<unsigned int, TLorentzVector> selectedFsrMap;
-        kinZfitter->Setup(selectedLeptons, selectedFsrMap);
+        kinZfitter->Setup(selectedLeptons, selectedFsrMap, pTerr);
         kinZfitter->KinRefitZ();
         std::vector<TLorentzVector> refitP4s;
         refitP4s = kinZfitter->GetRefitP4s();
@@ -1542,6 +1515,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         leptonOnePtKin = leptonOneP4KinFit.Pt();
         leptonTwoPtKin = leptonTwoP4KinFit.Pt();
+        leptonOnePtKinErr = pTerr[0];
+        leptonTwoPtKinErr = pTerr[1];
 
         dileptonPt = dileptonP4.Pt();
         dileptonEta = dileptonP4.Eta();
@@ -1766,6 +1741,9 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             eventWeight *= photonIDWeight;
 
             prefWeight = fInfo->prefweight;
+            prefWeightUp = fInfo->prefweightUp;
+            prefWeightDown = fInfo->prefweightDown;
+
             eventWeight *= prefWeight;
         }
 

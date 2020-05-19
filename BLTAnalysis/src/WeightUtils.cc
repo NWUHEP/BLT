@@ -186,6 +186,17 @@ WeightUtils::WeightUtils(string dataPeriod, string selection)
     _eff_doubleg_leg2_MC   = (TH2F*)f_elTrigSF_leg2->Get("EGamma_EffMC2D");
     _sf_doubleg_leg2 = (TH2F *)f_elTrigSF_leg2->Get("EGamma_SF2D");
 
+    // double electron 2017 trigger efficiencies from Laurent
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/triggeffcymapsRA5_Run2_ALL.root";
+    TFile* f_elTrigSF_Laurent;
+    if (_dataPeriod == "2017") {
+        _eff_doubleg_leg1_DATA = (TH2F*)f_elTrigSF_Laurent->Get("2017BtoF/ele23|leg24_diele");
+        _eff_doubleg_leg1_MC = (TH2F*)f_elTrigSF_Laurent->Get("2017BtoF/ele23|leg24_diele_mc");
+        _eff_doubleg_leg2_DATA = (TH2F*)f_elTrigSF_Laurent->Get("2017BtoF/ele12_diele");
+        _eff_doubleg_leg2_MC = (TH2F*)f_elTrigSF_Laurent->Get("2017BtoF/ele12_diele_mc");
+    }
+
+
     // double muon trigger efficiencies
     
     const char* hist_str;
@@ -390,12 +401,30 @@ float WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &el
     float weight = 1.;
     float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
 
-    if (triggerName == "HLT_DoubleEG_leg1") 
-        weight *= _sf_doubleg_leg1->GetBinContent(_sf_doubleg_leg1->FindBin(electron.scEta, tmpElePt));
-    else if (triggerName == "HLT_DoubleEG_leg2") 
-        weight *= _sf_doubleg_leg2->GetBinContent(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
+        if (triggerName == "HLT_DoubleEG_leg1") {
+            if (_dataPeriod == "2017") {
+                float eff_data, eff_mc;
+                eff_data = _eff_doubleg_leg1_DATA->GetBinContent(_eff_doubleg_leg1_DATA->FindBin(electron.scEta, tmpElePt));
+                eff_mc = _eff_doubleg_leg1_MC->GetBinContent(_eff_doubleg_leg1_MC->FindBin(electron.scEta, tmpElePt));
+                weight *= eff_data/eff_mc;
+            }
+            else {
+                weight *= _sf_doubleg_leg1->GetBinContent(_sf_doubleg_leg1->FindBin(electron.scEta, tmpElePt));
+            }
+        }
+        else if (triggerName == "HLT_DoubleEG_leg2") {
+            if (_dataPeriod == "2017") {
+                float eff_data, eff_mc;
+                eff_data = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, tmpElePt));
+                eff_mc = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, tmpElePt));
+                weight *= eff_data/eff_mc;
+            }
+            else {
+                weight *= _sf_doubleg_leg2->GetBinContent(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
+            }
+        }
 
-    return weight;
+        return weight;
 }
 
 /*std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const

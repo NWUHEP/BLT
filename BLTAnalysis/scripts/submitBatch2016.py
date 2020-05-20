@@ -18,14 +18,14 @@ cfg        = bm.JobConfig
 executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
-analyzer   = 'MultilepLLTauAnalyzer'
+analyzer   = 'MultilepAnalyzer'
 
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+#data_samples = ['single_mu', 'single_el']
+#mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
 
 
-# data_samples = []
-# mc_samples   = ['zjets'] #['ttbar_systematics']
+data_samples = []
+mc_samples   = ['ttbar_systematics']
 
 ''' 
     Set job configurations.  
@@ -267,7 +267,7 @@ mc_dict['ttbar'] = [
 mc_dict['ttbar_systematics'] = [
     # top full gen
     cfg(data_name = 'ttbar_inclusive_tauReweight',
-        path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/190627_132039/0000',
+        path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/200516_193931/0000',
         nJobs    = 50,
         suffix   = 'ttbar_inclusive_tauReweight'
        ),

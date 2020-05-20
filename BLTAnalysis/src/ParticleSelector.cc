@@ -529,8 +529,8 @@ bool ParticleSelector::BTagModifier(const baconhep::TJet* jet, string tagName, s
     }
 
     // Get b tag efficiency and mistag scale factor
-    float scaleFactor   = 1.;
-    float mcEff  = 1.;
+    float scaleFactor = 1.;
+    float mcEff = 1.;
     if (tagName == "CSVM") { 
         bTag = jet->csv;
         if (bTag > 0.8484) isBTagged = true;

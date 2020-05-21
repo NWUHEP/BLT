@@ -60,7 +60,9 @@ public:
     void   ReportPostTerminate();
 
     TFile *outFile;
-    TTree *outTree;
+    std::map<string, TTree*> outTrees;
+    std::map<string, TH1D*> eventCounts;
+    //TTree *outTree;
 
     // Lumi mask
     RunLumiRangeMap lumiMask;
@@ -92,9 +94,15 @@ public:
     Float_t eventWeight, triggerWeight;
     Float_t puWeight, puWeightUp, puWeightDown;
     Float_t prefWeight, prefWeightUp, prefWeightDown;
+    Float_t leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t leptonOneRecoErr, leptonTwoRecoErr;
     Float_t leptonOneIDWeight, leptonTwoIDWeight;
+    Float_t leptonOneIDErr, leptonTwoIDErr;
+    Float_t leptonOneRecoIDWeight, leptonTwoRecoIDWeight;
     Float_t trigOneWeight, trigTwoWeight;
-    Float_t photonIDWeight;
+    Float_t trigOneErr, trigTwoErr;
+    Float_t photonCSEVWeight, photonIDWeight;
+    Float_t photonCSEVErr, photonIDErr;
     Float_t photonR9Weight;
 
     // physics object Lorentz vectors
@@ -102,6 +110,7 @@ public:
     Float_t leptonTwoPt, leptonTwoEta, leptonTwoPhi;
     Float_t leptonOnePtKin, leptonTwoPtKin;
     Float_t leptonOnePtKinErr, leptonTwoPtKinErr;
+    Float_t leptonOnePtKinRes, leptonTwoPtKinRes;
 
     // Additional lepton data
     Float_t leptonOneIso, leptonTwoIso;

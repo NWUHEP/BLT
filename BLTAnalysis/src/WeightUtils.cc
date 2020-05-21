@@ -396,35 +396,38 @@ std::pair<float,float> WeightUtils::GetTriggerEffWeight(string triggerName, TLor
     return std::make_pair(effData, effMC);
 }*/
 
-float WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
+std::pair<float, float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerName, TElectron &electron) const
 {
     float weight = 1.;
+    float err = 0.;
     float tmpElePt = (electron.pt < 200.) ? electron.pt : 199.;
 
         if (triggerName == "HLT_DoubleEG_leg1") {
-            if (_dataPeriod == "2017") {
+            /*if (_dataPeriod == "2017") {
                 float eff_data, eff_mc;
                 eff_data = _eff_doubleg_leg1_DATA->GetBinContent(_eff_doubleg_leg1_DATA->FindBin(electron.scEta, tmpElePt));
                 eff_mc = _eff_doubleg_leg1_MC->GetBinContent(_eff_doubleg_leg1_MC->FindBin(electron.scEta, tmpElePt));
                 weight *= eff_data/eff_mc;
-            }
-            else {
+            }*/
+            //else {
                 weight *= _sf_doubleg_leg1->GetBinContent(_sf_doubleg_leg1->FindBin(electron.scEta, tmpElePt));
-            }
+                err = _sf_doubleg_leg1->GetBinError(_sf_doubleg_leg1->FindBin(electron.scEta, tmpElePt));
+            //}
         }
         else if (triggerName == "HLT_DoubleEG_leg2") {
-            if (_dataPeriod == "2017") {
+            /*if (_dataPeriod == "2017") {
                 float eff_data, eff_mc;
                 eff_data = _eff_doubleg_leg2_DATA->GetBinContent(_eff_doubleg_leg2_DATA->FindBin(electron.scEta, tmpElePt));
                 eff_mc = _eff_doubleg_leg2_MC->GetBinContent(_eff_doubleg_leg2_MC->FindBin(electron.scEta, tmpElePt));
                 weight *= eff_data/eff_mc;
-            }
-            else {
+            }*/
+            //else {
                 weight *= _sf_doubleg_leg2->GetBinContent(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
-            }
+                err = _sf_doubleg_leg2->GetBinError(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
+            //}
         }
 
-        return weight;
+        return std::make_pair(weight, err);
 }
 
 /*std::pair<float,float> WeightUtils::GetDoubleMuonTriggerEffWeight(string triggerName, TMuon &muon) const
@@ -625,57 +628,108 @@ float WeightUtils::GetHZZElectronRecoIdEff(TElectron& electron) const
     return weight;
 }
 
-float WeightUtils::GetElectronMVARecoIdEff(TElectron& electron) const
+std::pair<float, float> WeightUtils::GetElectronMVARecoEff(TElectron& electron) const
 {
     float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
-    float weight = 1;
+    float weight = 1.;
+    float err = 0.;
 
     if (tmpElePt < 20.) {
         weight *= _eleSF_MVA_LOW_RECO_2D->GetBinContent(_eleSF_MVA_LOW_RECO_2D->FindBin(electron.scEta, 15.));
+        err = _eleSF_MVA_LOW_RECO_2D->GetBinError(_eleSF_MVA_LOW_RECO_2D->FindBin(electron.scEta, 15.));
     }
     else {
         weight *= _eleSF_MVA_RECO_2D->GetBinContent(_eleSF_MVA_RECO_2D->FindBin(electron.scEta, tmpElePt));
+        err = _eleSF_MVA_RECO_2D->GetBinContent(_eleSF_MVA_RECO_2D->FindBin(electron.scEta, tmpElePt));
     }
+    
+    return std::make_pair(weight, err);
+}
+
+std::pair<float, float> WeightUtils::GetElectronMVAIdEff(TElectron& electron) const
+{
+    float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
+    float weight = 1.;
+    float err = 0.;
 
     weight *= _eleSF_MVA_ID_2D->GetBinContent(_eleSF_MVA_ID_2D->FindBin(electron.scEta, tmpElePt));
+    err = _eleSF_MVA_ID_2D->GetBinError(_eleSF_MVA_ID_2D->FindBin(electron.scEta, tmpElePt));
     
-    return weight;
+    return std::make_pair(weight, err);
 }
     
 
-float WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
+std::pair<float, float> WeightUtils::GetPhotonMVAIdEff(TPhoton& photon) const
 {
-    /*float binningPt[] = {20., 35., 50., 90., 150.};
-    int ptBin = 0;
-    for (int i = 0; i < 4; ++i) {
-        if (fabs(photon.calibPt) > binningPt[i] && fabs(photon.calibPt) <= binningPt[i+1]) {
-            ptBin = i;
-            break;
-        }
-    }*/
     float tmpPhotonPt = (photon.pt < 150.) ? photon.pt : 149.;
     float weight = 1.;
-    //if (photon.calibPt < 150.) {
-    //    weight *= _mva_gammaSF_ID[ptBin]->Eval(photon.scEta);
-    //}
+    float err = 0.;
+
     weight *= _mva_gammaSF->GetBinContent(_mva_gammaSF->FindBin(photon.scEta, tmpPhotonPt));
-
-    // electron veto scale factor
-    if (fabs(photon.scEta) <= 1.49) {
-        if      (_dataPeriod == "2016") weight *= 0.9938;
-        else if (_dataPeriod == "2017") weight *= 0.967;
-        else if (_dataPeriod == "2018") weight *= 0.967;
-    }
-    else if (fabs(photon.scEta) > 1.49) {
-        if      (_dataPeriod == "2016") weight *= 0.9875;
-        else if (_dataPeriod == "2017") weight *= 0.915;
-        else if (_dataPeriod == "2018") weight *= 0.915;
-    }
-
-    if (weight == 0)
-        weight = 1.;
+    err = _mva_gammaSF->GetBinError(_mva_gammaSF->FindBin(photon.scEta, tmpPhotonPt));
     
-    return weight;
+    return std::make_pair(weight, err);
+}
+
+std::pair<float, float> WeightUtils::GetPhotonMVACSEVEff(TPhoton& photon) const
+{
+    float tmpPhotonPt = (photon.pt < 150.) ? photon.pt : 149.;
+    float weight = 1.;
+    float err = 0.;
+
+    if (_dataPeriod == "2016") {
+        if (fabs(photon.scEta <= 1.49)) {
+            weight *= 0.9938;
+            err = 0.0010;
+        }
+        else {
+            weight *= 0.9875;
+            err = 0.027;
+        }
+    }
+    else if (_dataPeriod == "2017") {
+        if (fabs(photon.scEta <= 1.49)) {
+            weight *= 0.984;
+            err = 0.0037;
+        }
+        else {
+            weight *= 0.966;
+            err = 0.0038;
+        }
+    }
+    else if (_dataPeriod == "2018") {
+        if (fabs(photon.scEta <= 1.49)) {
+            if (tmpPhotonPt <= 30.) {
+                weight *= 0.9869;
+                err = 0.0043;
+            }
+            else if (tmpPhotonPt <= 60.) {
+                weight *= 0.9908;
+                err = 0.0111;
+            }
+            else {
+                weight *= 1.0084;
+                err = 0.0857;
+            }
+        }
+        else {
+            if (tmpPhotonPt <= 30.) {
+                weight *= 0.9535;
+                err = 0.0054;
+            }
+            else if (tmpPhotonPt <= 60.) {
+                weight *= 0.9646;
+                err = 0.0076;
+            }
+            else {
+                weight *= 1.0218;
+                err = 0.1178;
+            }
+        }
+    }
+
+    return std::make_pair(weight, err);
+
 }
 
 float WeightUtils::GetCorrectedPhotonR9(TPhoton& photon) const 

@@ -47,7 +47,8 @@ class WeightUtils: public TObject {
         pair<float, float>   GetTriggerEffWeight(string, TLorentzVector&) const;
         //pair<float, float>   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         //pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
-        float   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
+        //float   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
+        pair<float, float> GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         float   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
@@ -56,8 +57,11 @@ class WeightUtils: public TObject {
         float   GetHZZMuonIDEff(TMuon&) const;
         float   GetElectronRecoIdEff(TLorentzVector&) const;
         float   GetHZZElectronRecoIdEff(TElectron&) const;
-        float   GetElectronMVARecoIdEff(TElectron&) const;
-        float   GetPhotonMVAIdEff(TPhoton&) const;
+        pair<float, float> GetElectronMVARecoEff(TElectron&) const;
+        pair<float, float> GetElectronMVAIdEff(TElectron&) const;
+        //float   GetElectronMVARecoIdEff(TElectron&) const;
+        pair<float, float> GetPhotonMVAIdEff(TPhoton&) const;
+        pair<float, float> GetPhotonMVACSEVEff(TPhoton &) const;
         float   GetCorrectedPhotonR9(TPhoton&) const;
 
         ClassDef(WeightUtils, 0);

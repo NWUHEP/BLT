@@ -5,6 +5,7 @@ import sys
 #MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8/TTTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_0.root 10000 ttbar_2l2nu ttbar_2l2nu single_lepton 2018 1
 #MultilepAnalyzer /eos/uscms/store/user/zchen/EGamma_20191120/2018_EGamma_prod_EGamma_Run2018D-PromptReco-v2/Output_1.root 100000 electron_2018D electron_2018D single_lepton 2018 1
 #MultilepAnalyzer /eos/uscms/store/group/lpcbacon/15/SingleMuonRun2018C_17Sep2018_v1/SingleMuonRun2018C_17Sep2018_v1_1.root 100000 muon_2018C muon_2018C single_lepton 2018 1
+#MultilepAnalyzer /eos/uscms/store/user/zchen/EGamma/2018_EGamma_prod_EGamma_Run2018A-17Sep2018-v2/200511_190043/0000/Output_1.root 100000 electron_2018A electron_2018A single_lepton 2018 1
 
 
 # cp /eos/uscms/store/group/lpcbacon/15/$1/*/CRAB3/*/*/*.root WJetsToLNu_HT_100To200_TuneCP5_13TeV_10X/
@@ -18,6 +19,7 @@ analyzer   = 'MultilepAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
 mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+
 
 ''' 
     Set job configurations.  
@@ -33,52 +35,46 @@ data_dict['single_mu'] = [
             ),
         cfg(data_name = 'muon_2018B',
             path      = '{0}/SingleMuonRun2018B_17Sep2018_v1'.format(path),
-            nJobs     = 50,
+            nJobs     = 40,
             suffix    = 'muon_2018B'
             ),
         cfg(data_name = 'muon_2018C',
             path      = '{0}/SingleMuonRun2018C_17Sep2018_v1'.format(path),
-            nJobs     = 50,
+            nJobs     = 40,
             suffix    = 'muon_2018C'
             ),
         cfg(data_name = 'muon_2018D',
             path      = '{0}/SingleMuonRun2018D_PromptReco_v2_v3'.format(path),
-            nJobs     = 100,
+            nJobs     = 150,
             suffix    = 'muon_2018D'
             )
     ]
 
-pathzchen = '/eos/uscms/store/user/zchen/EGamma_20191120'
+pathzchen = '/eos/uscms/store/user/zchen'
 data_dict['single_el'] = [
         cfg(data_name = 'electron_2018A',
             nJobs    = 50,
-            path     = '{0}/2018_EGamma_prod_EGamma_Run2018A-PromptReco-v3'.format(pathzchen),
+            path     = '{0}/EGamma/2018_EGamma_prod_EGamma_Run2018A-17Sep2018-v2/200511_190043/*'.format(pathzchen),
             suffix   = 'electron_2018A'
            ),
 
         cfg(data_name = 'electron_2018B',
-            path     = '{0}/2018_EGamma_prod_EGamma_Run2018B-PromptReco-v2'.format(pathzchen),
-            nJobs    = 50,
+            path     = '{0}/EGamma/2018_EGamma_prod_EGamma_Run2018B-17Sep2018-v1/200511_185909/*'.format(pathzchen),
+            nJobs    = 40,
             suffix   = 'electron_2018B'
            ),
 
         cfg(data_name = 'electron_2018C',
-            path     = '{0}/2018_EGamma_prod_EGamma_Run2018C-PromptReco-v3'.format(pathzchen),
-            nJobs    = 50,
+            path     = '{0}/EGamma/2018_EGamma_prod_EGamma_Run2018C-17Sep2018-v1/200511_185734/*'.format(pathzchen),
+            nJobs    = 40,
             suffix   = 'electron_2018C'
            ),
            
         cfg(data_name = 'electron_2018D',
-            path     = '{0}/2018_EGamma_prod_EGamma_Run2018D-PromptReco-v2'.format(pathzchen),
-            nJobs    = 100,
+            path     = '{0}/EGamma/2018_EGamma_prod_EGamma_Run2018D-22Jan2019-v2/200511_185243/*'.format(pathzchen),
+            nJobs    = 150,
             suffix   = 'electron_2018D'
-           ),
-
-        cfg(data_name = 'electron_2018D',
-            path     = '{0}/2018_EGamma_prod_EGamma_Run2018E-PromptReco-v1'.format(pathzchen),
-            nJobs    = 10,
-            suffix   = 'electron_2018D'
-        )
+           )
 
     ]
 

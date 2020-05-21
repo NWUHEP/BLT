@@ -72,7 +72,7 @@ void MultilepAnalyzer::Begin(TTree *tree)
         jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt"; // 2017 mask
     }
     if (params->period == "2018"){
-        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt"; // 2018 mask
+        jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"; // 2018 mask
     }
 
     cout<< "-- use lumi mask: " << jsonFileName <<endl;

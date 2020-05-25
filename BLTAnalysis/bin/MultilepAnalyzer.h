@@ -113,6 +113,9 @@ public:
     TLorentzVector leptonOneP4, leptonTwoP4;
     Float_t leptonOneIso, leptonTwoIso;
     Int_t leptonOneFlavor, leptonTwoFlavor;
+    Float_t leptonOneD0, leptonTwoD0;
+    Float_t leptonOneDz, leptonTwoDz;
+    Float_t leptonOneSip3d, leptonTwoSip3d;
 
     // tau variable
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;

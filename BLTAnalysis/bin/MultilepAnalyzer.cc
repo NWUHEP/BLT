@@ -159,11 +159,17 @@ void MultilepAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonOneP4" , &leptonOneP4);
         tree->Branch("leptonOneIso", &leptonOneIso);
         tree->Branch("leptonOneFlavor", &leptonOneFlavor);
+        tree->Branch("leptonOneD0" , &leptonOneD0);
+        tree->Branch("leptonOneDz" , &leptonOneDz);
+        tree->Branch("leptonOneSip3d" , &leptonOneSip3d);
 
         if ( channel == "mumu" || channel =="ee" || channel == "emu" || channel == "mutau" || channel == "etau"|| channel == "mutau_fakes" || channel == "etau_fakes"){
             tree->Branch("leptonTwoP4" , &leptonTwoP4);
             tree->Branch("leptonTwoIso", &leptonTwoIso);
             tree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
+            tree->Branch("leptonTwoD0" , &leptonTwoD0);
+            tree->Branch("leptonTwoDz" , &leptonTwoDz);
+            tree->Branch("leptonTwoSip3d" , &leptonTwoSip3d);
         }
 
 
@@ -979,9 +985,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonOneP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
         leptonOneFlavor = muons[0]->q*13;
+        leptonOneD0     = muons[0]->d0;
+        leptonOneDz     = muons[0]->dz;
+        leptonOneSip3d  = muons[0]->sip3d;
         leptonTwoP4     = muonTwoP4;
         leptonTwoIso    = GetMuonIsolation(muons[1]);
         leptonTwoFlavor = muons[1]->q*13;
+        leptonTwoD0     = muons[1]->d0;
+        leptonTwoDz     = muons[1]->dz;
+        leptonTwoSip3d  = muons[1]->sip3d;
 
         // test if selected lepton fire the trigger.
         bitset<2> triggered;
@@ -1101,9 +1113,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*electrons[0]->q;
+        leptonOneD0     = electrons[0]->d0;
+        leptonOneDz     = electrons[0]->dz;
+        leptonOneSip3d  = electrons[0]->sip3d;
+
         leptonTwoP4     = electronTwoP4;
         leptonTwoIso    = GetElectronIsolation(electrons[1], fInfo->rhoJet);
         leptonTwoFlavor = 11*electrons[1]->q;
+        leptonTwoD0     = electrons[1]->d0;
+        leptonTwoDz     = electrons[1]->dz;
+        leptonTwoSip3d  = electrons[1]->sip3d;
+
 
 
         // test if selected lepton fire the trigger.
@@ -1243,10 +1263,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
         leptonOneFlavor = 13*muons[0]->q;
+        leptonOneD0     = muons[0]->d0;
+        leptonOneDz     = muons[0]->dz;
+        leptonOneSip3d  = muons[0]->sip3d;
+
         leptonTwoP4     = electronP4;
         leptonTwoIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonTwoFlavor = 11*electrons[0]->q;
-
+        leptonTwoD0     = electrons[0]->d0;
+        leptonTwoDz     = electrons[0]->dz;
+        leptonTwoSip3d  = electrons[0]->sip3d;
 
         // test if selected lepton fire the trigger.
         bitset<2> triggered;        
@@ -1369,9 +1395,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*electrons[0]->q;
+        leptonOneD0     = electrons[0]->d0;
+        leptonOneDz     = electrons[0]->dz;
+        leptonOneSip3d  = electrons[0]->sip3d;
         leptonTwoP4     = tauP4;
         leptonTwoIso    = 0.;
         leptonTwoFlavor = 15*taus[0]->q;
+        leptonTwoD0     = taus[0]->d0LeadChHad;
+        leptonTwoDz     = taus[0]->dzLeadChHad;
+        leptonTwoSip3d  = 0;
 
         ///////////tau info///////////////////
         tauDecayMode      = taus[0]->decaymode;
@@ -1480,10 +1512,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
         leptonOneFlavor = 13*muons[0]->q;
+        leptonOneD0     = muons[0]->d0;
+        leptonOneDz     = muons[0]->dz;
+        leptonOneSip3d  = muons[0]->sip3d;
+
         leptonTwoP4     = tauP4;
         leptonTwoIso    = 0.;
         leptonTwoFlavor = 15*taus[0]->q;
-
+        leptonTwoD0     = taus[0]->d0LeadChHad;
+        leptonTwoDz     = taus[0]->dzLeadChHad;
+        leptonTwoSip3d  = 0;
 
         ///////////tau info///////////////////
         tauDecayMode      = taus[0]->decaymode;
@@ -1588,9 +1626,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(fail_electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*fail_electrons[0]->q;
+        leptonOneD0     = fail_electrons[0]->d0;
+        leptonOneDz     = fail_electrons[0]->dz;
+        leptonOneSip3d  = fail_electrons[0]->sip3d;
+
         leptonTwoP4     = tauP4;
         leptonTwoIso    = 0.;
         leptonTwoFlavor = 15*taus[0]->q;
+        leptonTwoD0     = taus[0]->d0LeadChHad;
+        leptonTwoDz     = taus[0]->dzLeadChHad;
+        leptonTwoSip3d  = 0;
 
         ///////////tau info///////////////////
         tauDecayMode      = taus[0]->decaymode;
@@ -1696,10 +1741,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(fail_muons[0]);
         leptonOneFlavor = 13*fail_muons[0]->q;
+        leptonOneD0     = fail_muons[0]->d0;
+        leptonOneDz     = fail_muons[0]->dz;
+        leptonOneSip3d  = fail_muons[0]->sip3d;
+
         leptonTwoP4     = tauP4;
         leptonTwoIso    = 0.;
         leptonTwoFlavor = 15*taus[0]->q;
-
+        leptonTwoD0     = taus[0]->d0LeadChHad;
+        leptonTwoDz     = taus[0]->dzLeadChHad;
+        leptonTwoSip3d  = 0;
 
         ///////////tau info///////////////////
         tauDecayMode      = taus[0]->decaymode;
@@ -1802,6 +1853,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*electrons[0]->q;
+        leptonOneD0     = electrons[0]->d0;
+        leptonOneDz     = electrons[0]->dz;
+        leptonOneSip3d  = electrons[0]->sip3d;
 
 
         // test if selected lepton fire the trigger.
@@ -1891,7 +1945,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
         leptonOneFlavor = 13*muons[0]->q;
-
+        leptonOneD0     = muons[0]->d0;
+        leptonOneDz     = muons[0]->dz;
+        leptonOneSip3d  = muons[0]->sip3d;
 
 
 
@@ -1983,7 +2039,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = muonP4;
         leptonOneIso    = GetMuonIsolation(fail_muons[0]);
         leptonOneFlavor = 13*fail_muons[0]->q;
-
+        leptonOneD0     = fail_muons[0]->d0;
+        leptonOneDz     = fail_muons[0]->dz;
+        leptonOneSip3d  = fail_muons[0]->sip3d;
 
         // test if selected lepton fire the trigger.
         bool triggered = false;
@@ -2074,6 +2132,10 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         leptonOneP4     = electronP4;
         leptonOneIso    = GetElectronIsolation(fail_electrons[0], fInfo->rhoJet);
         leptonOneFlavor = 11*fail_electrons[0]->q;
+        leptonOneD0     = fail_electrons[0]->d0;
+        leptonOneDz     = fail_electrons[0]->dz;
+        leptonOneSip3d  = fail_electrons[0]->sip3d;
+        
 
 
         // test if selected lepton fire the trigger.

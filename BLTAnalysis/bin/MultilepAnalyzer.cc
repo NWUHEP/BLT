@@ -425,7 +425,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         if (params->datasetgroup.substr(0, 5) == "ttbar") {
             topPtWeight *= sqrt(topSF);
             topPtVar    += pow(0.01*topPtWeight, 2);
-            // eventWeight *= topPtWeight;
+            eventWeight *= topPtWeight;
         }
 
         // 3.b) Z pt weights

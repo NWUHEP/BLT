@@ -134,9 +134,9 @@ void MultileptonAnalyzer::Begin(TTree *tree)
 
     vector<std::string> channelNames = {"mumu", "ee", "emu", 
         "etau", "mutau", 
-        "e4j", "mu4j", //"tau4j",
-        "mutau_fakes", "mu4j_fakes",
-        "etau_fakes", "e4j_fakes"
+        "ejet", "mujet", //"tau4j",
+        "mutau_fakes", "mujet_fakes",
+        "etau_fakes", "ejet_fakes"
     };
     for (unsigned i = 0; i < channelNames.size(); ++i) {
         string channel = channelNames[i];
@@ -177,8 +177,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("triggerVar", &triggerVar);
 
         if (
-                channel != "e4j" && channel != "mu4j" 
-                && channel != "e4j_fakes" && channel != "mu4j_fakes"
+                channel != "ejet" && channel != "mujet" 
+                && channel != "ejet_fakes" && channel != "mujet_fakes"
            ) {
             tree->Branch("leptonTwoIDVar", &leptonTwoIDVar);
             tree->Branch("leptonTwoRecoVar", &leptonTwoRecoVar);
@@ -186,7 +186,7 @@ void MultileptonAnalyzer::Begin(TTree *tree)
             tree->Branch("leptonTwoIDWeight", &leptonTwoIDWeight);
         }
 
-        if (channel == "ee" || channel == "etau" || channel == "emu" || channel == "e4j") {
+        if (channel == "ee" || channel == "etau" || channel == "emu" || channel == "ejet") {
             tree->Branch("eleTriggerVarTagSyst", &eleTriggerVarTagSyst);
             tree->Branch("eleTriggerVarProbeSyst", &eleTriggerVarProbeSyst);
         }
@@ -209,8 +209,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("leptonOneDZ", &leptonOneDZ);
 
         if (
-                channel != "e4j" && channel != "mu4j" 
-                && channel != "e4j_fakes" && channel != "mu4j_fakes"
+                channel != "ejet" && channel != "mujet" 
+                && channel != "ejet_fakes" && channel != "mujet_fakes"
            ) {
             tree->Branch("leptonTwoP4", &leptonTwoP4);
             tree->Branch("leptonTwoPtCorr", &leptonTwoPtCorr);
@@ -242,8 +242,8 @@ void MultileptonAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoFlavor", &jetTwoFlavor);
 
         if (
-                channel == "mu4j" || channel == "mu4j_fakes" 
-                || channel == "e4j" || channel == "e4j_fakes"
+                channel == "mujet" || channel == "mujet_fakes" 
+                || channel == "ejet" || channel == "ejet_fakes"
                 //|| channel == "tau4j"
            ) {
             tree->Branch("jetThreeP4", &jetThreeP4);
@@ -1663,7 +1663,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
         }
     } else if (muons.size() == 0 && electrons.size() == 1 && taus.size() == 0) { // e+h selection
-        channel = "e4j";
+        channel = "ejet";
         eventCounts[channel]->Fill(1);
 
         // convert to TLorentzVectors
@@ -1786,7 +1786,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= leptonOneRecoWeight*leptonOneIDWeight;
         }
     }  else if (muons.size() == 1 && electrons.size() == 0 && taus.size() == 0) { // mu+h selection
-        channel = "mu4j";
+        channel = "mujet";
         eventCounts[channel]->Fill(1);
 
         // convert to TLorentzVectors
@@ -1931,7 +1931,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 }
             }
 
-            if (taus.size() >= 1) {
+            // check that fake object passes the trigger requirement
+            bool triggered = false;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, fmuon->hltMatchBits)) {
+                    triggered = true;
+                    break;
+                }
+            }
+
+            if (!triggered) 
+                continue;
+
+            if (taus.size() == 1) {
                 channel = "mutau_fakes";
                 eventCounts[channel]->Fill(1);
                 nMuons = fail_muons.size();
@@ -1997,7 +2009,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     leptonOneRecoWeight = 1.;
                     leptonOneRecoVar    = 1.;
                     leptonTwoRecoWeight = 1.;
-                    leptonTwoRecoVar    = 0.;
+                    leptonTwoRecoVar    = 1.;
 
                     // id/iso weights
                     EfficiencyContainer effCont;
@@ -2013,34 +2025,21 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                         leptonTwoIDVar    = 0.05;
                     } else {
                         leptonTwoIDWeight = 1.;
-                        leptonTwoIDVar    = 0.01;
+                        leptonTwoIDVar    = 0.1;
                     }
 
-                    // trigger weights
-                    bool triggered = false;
-                    for (const auto& name: passTriggerNames) {
-                        if (trigger->passObj(name, 1, fmuon->hltMatchBits)) {
-                            triggered = true;
-                            break;
-                        }
-                    }
-
-                    if (triggered) {
-                        effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                        effs          = effCont.GetEff();
-                        errs          = effCont.GetErr();
-                        triggerWeight = effs.first/effs.second;
-                        triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-                    } else {
-                        return kTRUE;
-                    }
+                    effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                    effs          = effCont.GetEff();
+                    errs          = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
                     // update event weight
                     eventWeight *= triggerWeight;
                     eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
                 }
-            } else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2))) {
-                channel = "mu4j_fakes";
+            } else if ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2) && taus.size() == 0) {
+                channel = "mujet_fakes";
                 eventCounts[channel]->Fill(1);
                 nMuons = fail_muons.size();
 
@@ -2093,11 +2092,43 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     jetFourTag    = 0.;
                     jetFourFlavor = 0;
                 }
+
+                if (!isData) {
+                    pair<int, int> pdgId;           
+                    pdgId           = GetGenId(genParticles, genMotherId, muonP4);
+                    leptonOneGenId  = pdgId.first;
+                    leptonOneMother = pdgId.second;
+
+                    //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                    // reconstruction weights
+                    leptonOneRecoWeight = 1.;
+                    leptonOneRecoVar    = 1.;
+
+                    // id/iso weights
+                    EfficiencyContainer effCont;
+                    pair<float, float> effs, errs;
+                    effCont = weights->GetMuonIDEff(muonP4);
+                    effs = effCont.GetEff();
+                    errs = effCont.GetErr();
+                    leptonOneIDWeight = effs.first/effs.second;
+                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                    effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                    effs          = effCont.GetEff();
+                    errs          = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                    // update event weight
+                    eventWeight *= triggerWeight;
+                    eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
+                }
             } else {
                 return kTRUE;
             }
 
-            // fill once for each fakeable electron
+            // fill once for each fakeable muon
             outFile->cd(channel.c_str());
             outTrees[channel]->Fill();
         }
@@ -2129,7 +2160,19 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 }
             }
 
-            if (taus.size() >= 1) {
+            // check that fake object passes the trigger requirement
+            bool triggered = false;
+            for (const auto& name: passTriggerNames) {
+                if (trigger->passObj(name, 1, felectron->hltMatchBits)) {
+                    triggered = true;
+                    break;
+                }
+            }
+
+            if (!triggered) 
+                continue;
+
+            if (taus.size() == 1) {
                 channel = "etau_fakes";
                 eventCounts[channel]->Fill(1);
                 nElectrons = fail_electrons.size();
@@ -2219,34 +2262,22 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     }
 
                     // trigger weights
-                    bool triggered = false;
-                    for (const auto& name: passTriggerNames) {
-                        if (trigger->passObj(name, 1, felectron->hltMatchBits)) {
-                            triggered = true;
-                            break;
-                        }
-                    }
+                    effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                    effs = effCont.GetEff();
+                    errs = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
 
-                    if (triggered) {
-                        effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
-                        effs = effCont.GetEff();
-                        errs = effCont.GetErr();
-                        triggerWeight = effs.first/effs.second;
-                        triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                        eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
-                        eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
-                    } else {
-                        return kTRUE;
-                    }
+                    eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                    eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
 
                     // update event weight
                     eventWeight *= triggerWeight;
                     eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
 
                 }
-            } else if (isData && ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2))) {
-                channel = "e4j_fakes";
+            } else if (((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2)) && taus.size() == 0) {
+                channel = "ejet_fakes";
                 eventCounts[channel]->Fill(1);
                 nElectrons = fail_electrons.size();
 
@@ -2302,6 +2333,40 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                     jetFourFlavor = 0;
                 }
 
+                if (!isData) {
+                    pair<int, int> pdgId;           
+                    pdgId           = GetGenId(genParticles, genMotherId, electronP4);
+                    leptonOneGenId  = pdgId.first;
+                    leptonOneMother = pdgId.second;
+
+                    // reconstruction weights
+                    EfficiencyContainer effCont;
+                    pair<float, float> effs, errs;
+                    leptonOneRecoWeight = 1.;
+                    leptonOneRecoVar    = 1.;
+
+                    // id/iso weights
+                    effCont = weights->GetElectronIDEff(electronP4);
+                    effs = effCont.GetEff();
+                    errs = effCont.GetErr();
+                    leptonOneIDWeight = effs.first/effs.second;
+                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                    // trigger weights
+                    effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                    effs = effCont.GetEff();
+                    errs = effCont.GetErr();
+                    triggerWeight = effs.first/effs.second;
+                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                    eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                    eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
+                    // update event weight
+                    eventWeight *= triggerWeight;
+                    eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
+                }
+
             } else {
                 return kTRUE;
             }
@@ -2310,6 +2375,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             outFile->cd(channel.c_str());
             outTrees[channel]->Fill();
         }
+        this->passedEvents++;
         return kTRUE;
 
     } else {
@@ -2321,8 +2387,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     ///////////////////
 
     if (//channel != "tau4j" 
-            channel != "mu4j" && channel != "e4j" 
-            && channel != "mu4j_fakes" && channel != "e4j_fakes"
+            channel != "mujet" && channel != "ejet" 
+            && channel != "mujet_fakes" && channel != "ejet_fakes"
             && channel != "mutau_fakes" && channel != "etau_fakes"
        ) { // jets are handled differently for the lepton + jet and anti-iso fake selections
         if (jets.size() > 0) {
@@ -2584,6 +2650,7 @@ void MultileptonAnalyzer::ResetJetCounters()
     nBJets = nBJetsCut = nBJetsRaw = 0;
     nBJetsCTagUp   = nBJetsCTagDown   = 0;
     nBJetsMistagUp = nBJetsMistagDown = 0;
+    nBJetsJERUp    = nBJetsJERDown    = 0;
     std::fill(nBJetsJESUp.begin(), nBJetsJESUp.end(), 0);
     std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
     std::fill(nBJetsBTagUp.begin(), nBJetsBTagUp.end(), 0);

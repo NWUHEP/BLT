@@ -379,6 +379,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     wwPtScaleUp = wwPtScaleDown = 1.;
     wwPtResumUp = wwPtResumDown = 1.;
     nPartons  = 0;
+    genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
+    genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
     if (!isData) {
 
         //int nGenJets = fGenJetsArr->GetEntries();
@@ -797,17 +799,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 fail_muons.push_back(muon);
             }
         }
-
-        // muons for jet veto
-        //if (
-        //        muonP4.Pt() > 10
-        //        && fabs(muonP4.Eta()) < 2.4
-        //        // tight muon ID and ISO
-        //        && (muon->pogIDBits & baconhep::kPOGTightMuon)
-        //        && GetMuonIsolation(muon)/muonP4.Pt() < 0.15
-        //   ) {
-        //    veto_muons.push_back(muonP4);
-        //}
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
     sort(fail_muons.begin(), fail_muons.end(), sort_by_higher_pt<TMuon>);
@@ -1703,32 +1694,17 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
             jetTwoTag      = jets[1]->csv;
             jetTwoFlavor   = jets[1]->hadronFlavor;
-        } else {
-            jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetOneTag    = 0.;
-            jetOneFlavor = 0;
-            jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetTwoTag    = 0.;
-            jetTwoFlavor = 0;
-        }
+        }         
         if (nJets >= 3) {
             jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
             jetThreeTag    = jets[2]->csv;
             jetThreeFlavor = jets[2]->hadronFlavor;
-        } else { 
-            jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetThreeTag    = 0.;
-            jetThreeFlavor = 0;
-        }
+        } 
         if (nJets >= 4) {
             jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
-        } else { 
-            jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetFourTag    = 0.;
-            jetFourFlavor = 0;
-        }
+        } 
 
         if (!isData) {
             pair<int, int> pdgId;           
@@ -1827,31 +1803,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
             jetTwoTag      = jets[1]->csv;
             jetTwoFlavor   = jets[1]->hadronFlavor;
-        } else {
-            jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetOneTag    = 0.;
-            jetOneFlavor = 0;
-            jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetTwoTag    = 0.;
-            jetTwoFlavor = 0;
-        }
+        } 
         if (nJets >= 3) {
             jetThreeP4.SetPtEtaPhiM(jets[2]->pt, jets[2]->eta, jets[2]->phi, jets[2]->mass);
             jetThreeTag    = jets[2]->csv;
             jetThreeFlavor = jets[2]->hadronFlavor;
-        } else { 
-            jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetThreeTag    = 0.;
-            jetThreeFlavor = 0;
         }
         if (nJets >= 4) {
             jetFourP4.SetPtEtaPhiM(jets[3]->pt, jets[3]->eta, jets[3]->phi, jets[3]->mass);
             jetFourTag     = jets[3]->csv;
             jetFourFlavor  = jets[3]->hadronFlavor;
-        } else { 
-            jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetFourTag    = 0.;
-            jetFourFlavor = 0;
         }
 
         if (!isData) {
@@ -1906,509 +1867,477 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             eventWeight *= leptonOneRecoWeight*leptonOneIDWeight;
         }
-    } else if (fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
+    } 
+    
+    // get fakes for ejet, etau, mujet, and mutau selections
+    if (fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
-        //fill these with 
-        genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
-        genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
+        TMuon* fmuon = fail_muons[0]; // if size of fakeables > 1 => do something?
 
-        //cout << fail_electrons.size() << " " << nJets << " " << nBJets << endl;
-        for (const auto& fmuon: fail_muons) {
-
-            // remove fake muon candidate from the jet collection
-            vector<TJet*> new_jets;
-            nJets = nBJets = 0;
-            for (const auto& jet: jets) {
-                TLorentzVector jetP4, muonP4; 
-                jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-                muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
-                if (jetP4.DeltaR(muonP4) > 0.4) {
-                    new_jets.push_back(jet);
-                    ++nJets;
-                    if (jet->csv > 0.8484) { 
-                        ++nBJets;
-                    } 
-                }
+        // remove fake muon candidate from the jet collection
+        vector<TJet*> new_jets;
+        nJets = nBJets = 0;
+        for (const auto& jet: jets) {
+            TLorentzVector jetP4, muonP4; 
+            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
+            if (jetP4.DeltaR(muonP4) > 0.4) {
+                new_jets.push_back(jet);
+                ++nJets;
+                if (jet->csv > 0.8484) { 
+                    ++nBJets;
+                } 
             }
-
-            // check that fake object passes the trigger requirement
-            bool triggered = false;
-            for (const auto& name: passTriggerNames) {
-                if (trigger->passObj(name, 1, fmuon->hltMatchBits)) {
-                    triggered = true;
-                    break;
-                }
-            }
-
-            if (!triggered) 
-                continue;
-
-            if (taus.size() == 1) {
-                channel = "mutau_fakes";
-                eventCounts[channel]->Fill(1);
-                nMuons = fail_muons.size();
-
-                if (fmuon->pt < 25)
-                    return kTRUE;
-                eventCounts[channel]->Fill(2);
-
-                TLorentzVector muonP4, tauP4, dilepton;
-                muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
-                tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
-                dilepton = muonP4 + tauP4;
-                eventCounts[channel]->Fill(3);
-
-                //if (nJets < 2 || nBJets < 1)
-                //    return kTRUE;
-                //eventCounts[channel]->Fill(4);
-
-                leptonOneP4     = muonP4;
-                leptonOneIso    = GetMuonIsolation(fmuon);
-                leptonOneFlavor = 13*fmuon->q;
-                leptonOneDZ     = fmuon->dz;
-                leptonOneD0     = fmuon->d0;
-
-                leptonTwoP4     = tauP4;
-                leptonTwoIso    = 0.;
-                leptonTwoFlavor = 15*taus[0]->q;
-                leptonTwoDZ     = taus[0]->dzLeadChHad;
-                leptonTwoD0     = taus[0]->d0LeadChHad;
-
-                if (nJets >= 1) {
-                    jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
-                    jetOneTag      = new_jets[0]->csv;
-                    jetOneFlavor   = new_jets[0]->hadronFlavor;
-                } else {
-                    jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetOneTag    = 0.;
-                    jetOneFlavor = 0;
-                }
-
-                if (nJets >= 2) {
-                    jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
-                    jetTwoTag      = new_jets[1]->csv;
-                    jetTwoFlavor   = new_jets[1]->hadronFlavor;
-                } else {
-                    jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetTwoTag    = 0.;
-                    jetTwoFlavor = 0;
-                }
-
-                if (!isData) {
-                    pair<int, int> pdgId;           
-                    pdgId           = GetGenId(genParticles, genMotherId, muonP4);
-                    leptonOneGenId  = pdgId.first;
-                    leptonOneMother = pdgId.second;
-                    pdgId           = GetGenId(genParticles, genMotherId, tauP4);
-                    leptonTwoGenId  = pdgId.first;
-                    leptonTwoMother = pdgId.second;
-
-                    //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
-
-                    // reconstruction weights
-                    leptonOneRecoWeight = 1.;
-                    leptonOneRecoVar    = 1.;
-                    leptonTwoRecoWeight = 1.;
-                    leptonTwoRecoVar    = 1.;
-
-                    // id/iso weights
-                    EfficiencyContainer effCont;
-                    pair<float, float> effs, errs;
-                    effCont = weights->GetMuonIDEff(muonP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    leptonOneIDWeight = effs.first/effs.second;
-                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    if (genCategory == 8 || genCategory == 15) {
-                        leptonTwoIDWeight = 0.95;
-                        leptonTwoIDVar    = 0.05;
-                    } else {
-                        leptonTwoIDWeight = 1.;
-                        leptonTwoIDVar    = 0.1;
-                    }
-
-                    effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                    effs          = effCont.GetEff();
-                    errs          = effCont.GetErr();
-                    triggerWeight = effs.first/effs.second;
-                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    // update event weight
-                    eventWeight *= triggerWeight;
-                    eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
-                }
-            } else if ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2) && taus.size() == 0) {
-                channel = "mujet_fakes";
-                eventCounts[channel]->Fill(1);
-                nMuons = fail_muons.size();
-
-                // convert to TLorentzVectors
-                if (fmuon->pt < 25.)
-                    return kTRUE;
-                eventCounts[channel]->Fill(2);
-
-                TLorentzVector muonP4;
-                muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
-                leptonOneP4     = muonP4;
-                leptonOneIso    = GetMuonIsolation(fmuon);
-                leptonOneFlavor = fmuon->q*13;
-                leptonOneDZ     = fmuon->dz;
-                leptonOneD0     = fmuon->d0;
-
-                // Collect the highest pt jets in the event
-                std::sort(new_jets.begin(), new_jets.end(), sort_by_higher_pt<TJet>);
-                //new_jets = KinematicTopTag(new_jets, metP2, muonP4);
-                if (nJets >= 2) { //save at least two new_jets
-                    jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
-                    jetOneTag      = new_jets[0]->csv;
-                    jetOneFlavor   = new_jets[0]->hadronFlavor;
-                    jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
-                    jetTwoTag      = new_jets[1]->csv;
-                    jetTwoFlavor   = new_jets[1]->hadronFlavor;
-                } else {
-                    jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetOneTag    = 0.;
-                    jetOneFlavor = 0;
-                    jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetTwoTag    = 0.;
-                    jetTwoFlavor = 0;
-                }
-                if (nJets >= 3) {
-                    jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
-                    jetThreeTag    = new_jets[2]->csv;
-                    jetThreeFlavor = new_jets[2]->hadronFlavor;
-                } else { 
-                    jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetThreeTag    = 0.;
-                    jetThreeFlavor = 0;
-                }
-                if (nJets >= 4) {
-                    jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
-                    jetFourTag     = new_jets[3]->csv;
-                    jetFourFlavor  = new_jets[3]->hadronFlavor;
-                } else { 
-                    jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetFourTag    = 0.;
-                    jetFourFlavor = 0;
-                }
-
-                if (!isData) {
-                    pair<int, int> pdgId;           
-                    pdgId           = GetGenId(genParticles, genMotherId, muonP4);
-                    leptonOneGenId  = pdgId.first;
-                    leptonOneMother = pdgId.second;
-
-                    //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
-
-                    // reconstruction weights
-                    leptonOneRecoWeight = 1.;
-                    leptonOneRecoVar    = 1.;
-
-                    // id/iso weights
-                    EfficiencyContainer effCont;
-                    pair<float, float> effs, errs;
-                    effCont = weights->GetMuonIDEff(muonP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    leptonOneIDWeight = effs.first/effs.second;
-                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                    effs          = effCont.GetEff();
-                    errs          = effCont.GetErr();
-                    triggerWeight = effs.first/effs.second;
-                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    // update event weight
-                    eventWeight *= triggerWeight;
-                    eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
-                }
-            } else {
-                return kTRUE;
-            }
-
-            // fill once for each fakeable muon
-            outFile->cd(channel.c_str());
-            outTrees[channel]->Fill();
         }
-        return kTRUE;
+
+        // check that fake object passes the trigger requirement
+        bool triggered = false;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, fmuon->hltMatchBits)) {
+                triggered = true;
+                break;
+            }
+        }
+
+        if (triggered && taus.size() == 1) {
+            channel = "mutau_fakes";
+            eventCounts[channel]->Fill(1);
+            nMuons = fail_muons.size();
+
+            if (fmuon->pt < 25)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            TLorentzVector muonP4, tauP4, dilepton;
+            muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+            dilepton = muonP4 + tauP4;
+            eventCounts[channel]->Fill(3);
+
+            //if (nJets < 2 || nBJets < 1)
+            //    return kTRUE;
+            //eventCounts[channel]->Fill(4);
+
+            leptonOneP4     = muonP4;
+            leptonOneIso    = GetMuonIsolation(fmuon);
+            leptonOneFlavor = 13*fmuon->q;
+            leptonOneDZ     = fmuon->dz;
+            leptonOneD0     = fmuon->d0;
+
+            leptonTwoP4     = tauP4;
+            leptonTwoIso    = 0.;
+            leptonTwoFlavor = 15*taus[0]->q;
+            leptonTwoDZ     = taus[0]->dzLeadChHad;
+            leptonTwoD0     = taus[0]->d0LeadChHad;
+
+            if (nJets >= 1) {
+                jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
+                jetOneTag      = new_jets[0]->csv;
+                jetOneFlavor   = new_jets[0]->hadronFlavor;
+            } else {
+                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetOneTag    = 0.;
+                jetOneFlavor = 0;
+            }
+
+            if (nJets >= 2) {
+                jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
+                jetTwoTag      = new_jets[1]->csv;
+                jetTwoFlavor   = new_jets[1]->hadronFlavor;
+            } else {
+                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetTwoTag    = 0.;
+                jetTwoFlavor = 0;
+            }
+
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, muonP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+                pdgId           = GetGenId(genParticles, genMotherId, tauP4);
+                leptonTwoGenId  = pdgId.first;
+                leptonTwoMother = pdgId.second;
+
+                //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                // reconstruction weights
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+                leptonTwoRecoWeight = 1.;
+                leptonTwoRecoVar    = 1.;
+
+                // id/iso weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                effCont = weights->GetMuonIDEff(muonP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                if (genCategory == 8 || genCategory == 15) {
+                    leptonTwoIDWeight = 0.95;
+                    leptonTwoIDVar    = 0.05;
+                } else {
+                    leptonTwoIDWeight = 1.;
+                    leptonTwoIDVar    = 0.1;
+                }
+
+                effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effs          = effCont.GetEff();
+                errs          = effCont.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
+            }
+        } else if (triggered && taus.size() == 0 && (nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2)) {
+            channel = "mujet_fakes";
+            eventCounts[channel]->Fill(1);
+            nMuons = fail_muons.size();
+
+            // convert to TLorentzVectors
+            if (fmuon->pt < 25.)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            TLorentzVector muonP4;
+            muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
+            leptonOneP4     = muonP4;
+            leptonOneIso    = GetMuonIsolation(fmuon);
+            leptonOneFlavor = fmuon->q*13;
+            leptonOneDZ     = fmuon->dz;
+            leptonOneD0     = fmuon->d0;
+
+            // Collect the highest pt jets in the event
+            std::sort(new_jets.begin(), new_jets.end(), sort_by_higher_pt<TJet>);
+            //new_jets = KinematicTopTag(new_jets, metP2, muonP4);
+            if (nJets >= 2) { //save at least two new_jets
+                jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
+                jetOneTag      = new_jets[0]->csv;
+                jetOneFlavor   = new_jets[0]->hadronFlavor;
+                jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
+                jetTwoTag      = new_jets[1]->csv;
+                jetTwoFlavor   = new_jets[1]->hadronFlavor;
+            } else {
+                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetOneTag    = 0.;
+                jetOneFlavor = 0;
+                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetTwoTag    = 0.;
+                jetTwoFlavor = 0;
+            }
+            if (nJets >= 3) {
+                jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
+                jetThreeTag    = new_jets[2]->csv;
+                jetThreeFlavor = new_jets[2]->hadronFlavor;
+            } else { 
+                jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetThreeTag    = 0.;
+                jetThreeFlavor = 0;
+            }
+            if (nJets >= 4) {
+                jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
+                jetFourTag     = new_jets[3]->csv;
+                jetFourFlavor  = new_jets[3]->hadronFlavor;
+            } else { 
+                jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetFourTag    = 0.;
+                jetFourFlavor = 0;
+            }
+
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, muonP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+
+                //cout << "mutau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                // reconstruction weights
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+
+                // id/iso weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                effCont = weights->GetMuonIDEff(muonP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                effCont       = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effs          = effCont.GetEff();
+                errs          = effCont.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
+            }
+        } else {
+            return kTRUE;
+        }
 
     } else if (fail_electrons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
         //cout << fail_electrons.size() << endl;
 
-        //fill these with 
-        genOneP4.SetPtEtaPhiM(0., 0., 0., 0.); 
-        genTwoP4.SetPtEtaPhiM(0., 0., 0., 0.); 
+        TElectron* felectron = fail_electrons[0];
 
-        //cout << fail_electrons.size() << " " << nJets << " " << nBJets << endl;
-        for (const auto& felectron: fail_electrons) {
-
-            // remove fake electron candidate from the jet collection
-            vector<TJet*> new_jets;
-            nJets = nBJets = 0;
-            for (const auto& jet: jets) {
-                TLorentzVector jetP4, electronP4; 
-                jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-                electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
-                if (jetP4.DeltaR(electronP4) > 0.4) {
-                    new_jets.push_back(jet);
-                    ++nJets;
-                    if (jet->csv > 0.8484) { 
-                        ++nBJets;
-                    } 
-                }
+        // remove fake electron candidate from the jet collection
+        vector<TJet*> new_jets;
+        nJets = nBJets = 0;
+        for (const auto& jet: jets) {
+            TLorentzVector jetP4, electronP4; 
+            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
+            if (jetP4.DeltaR(electronP4) > 0.4) {
+                new_jets.push_back(jet);
+                ++nJets;
+                if (jet->csv > 0.8484) { 
+                    ++nBJets;
+                } 
             }
-
-            // check that fake object passes the trigger requirement
-            bool triggered = false;
-            for (const auto& name: passTriggerNames) {
-                if (trigger->passObj(name, 1, felectron->hltMatchBits)) {
-                    triggered = true;
-                    break;
-                }
-            }
-
-            if (!triggered) 
-                continue;
-
-            if (taus.size() == 1) {
-                channel = "etau_fakes";
-                eventCounts[channel]->Fill(1);
-                nElectrons = fail_electrons.size();
-
-                if (felectron->pt < 30)
-                    return kTRUE;
-                eventCounts[channel]->Fill(2);
-
-                TLorentzVector electronP4, tauP4, dilepton;
-                electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
-                tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
-                dilepton = electronP4 + tauP4;
-                if (dilepton.M() < 12)
-                    return kTRUE;
-                eventCounts[channel]->Fill(3);
-
-                //if (nJets < 2 || nBJets < 1)
-                //    return kTRUE;
-                //eventCounts[channel]->Fill(4);
-
-                leptonOneP4     = electronP4;
-                leptonOneIso    = GetElectronIsolation(felectron, fInfo->rhoJet);
-                leptonOneFlavor = 13*felectron->q;
-                leptonOneDZ     = felectron->dz;
-                leptonOneD0     = felectron->d0;
-
-                leptonTwoP4     = tauP4;
-                leptonTwoIso    = 0.;
-                leptonTwoFlavor = 15*taus[0]->q;
-                leptonTwoDZ     = taus[0]->dzLeadChHad;
-                leptonTwoD0     = taus[0]->d0LeadChHad;
-
-                tauDecayMode  = taus[0]->decaymode;
-                tauMVA        = taus[0]->rawIsoMVA3newDMwLT;
-
-                if (nJets >= 1) {
-                    jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
-                    jetOneTag      = new_jets[0]->csv;
-                    jetOneFlavor   = new_jets[0]->hadronFlavor;
-                } else {
-                    jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetOneTag    = 0.;
-                    jetOneFlavor = 0;
-                }
-                if (nJets >= 2) {
-                    jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
-                    jetTwoTag      = new_jets[1]->csv;
-                    jetTwoFlavor   = new_jets[1]->hadronFlavor;
-                } else {
-                    jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetTwoTag    = 0.;
-                    jetTwoFlavor = 0;
-                }
-
-                if (!isData) {
-                    pair<int, int> pdgId;           
-                    pdgId           = GetGenId(genParticles, genMotherId, electronP4);
-                    leptonOneGenId  = pdgId.first;
-                    leptonOneMother = pdgId.second;
-                    pdgId           = GetGenId(genParticles, genMotherId, tauP4);
-                    leptonTwoGenId  = pdgId.first;
-                    leptonTwoMother = pdgId.second;
-
-                    //cout << "etau: " << leptonOneMother << " " << leptonTwoMother << endl;
-
-                    // reconstruction weights
-                    EfficiencyContainer effCont;
-                    pair<float, float> effs, errs;
-                    leptonOneRecoWeight = 1.;
-                    leptonOneRecoVar    = 1.;
-                    leptonTwoRecoWeight = 1.;
-                    leptonTwoRecoVar    = 0.;
-
-                    // id/iso weights
-                    effCont = weights->GetElectronIDEff(electronP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    leptonOneIDWeight = effs.first/effs.second;
-                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    if (genCategory == 7 || genCategory == 12) {
-                        leptonTwoIDWeight = 0.95;
-                        leptonTwoIDVar    = 0.05;
-                    } else {
-                        leptonTwoIDWeight = 1.;
-                        leptonTwoIDVar    = 0.01;
-                    }
-
-                    // trigger weights
-                    effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    triggerWeight = effs.first/effs.second;
-                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
-                    eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
-
-                    // update event weight
-                    eventWeight *= triggerWeight;
-                    eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
-
-                }
-            } else if (((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2)) && taus.size() == 0) {
-                channel = "ejet_fakes";
-                eventCounts[channel]->Fill(1);
-                nElectrons = fail_electrons.size();
-
-                // convert to TLorentzVectors
-                TLorentzVector electronP4;
-                electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
-                if (felectron->pt < 30.)
-                    return kTRUE;
-                eventCounts[channel]->Fill(2);
-
-                leptonOneP4     = electronP4;
-                leptonOneIso    = GetElectronIsolation(felectron, fInfo->rhoJet);
-                leptonOneFlavor = felectron->q*13;
-                leptonOneDZ     = felectron->dz;
-                leptonOneD0     = felectron->d0;
-
-                // Collect the highest pt jets in the event
-                std::sort(new_jets.begin(), new_jets.end(), sort_by_higher_pt<TJet>);
-                //jets = KinematicTopTag(jets, metP2, electronP4);
-                if (nJets >= 2) { //save at least two jets
-                    jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
-                    jetOneTag      = new_jets[0]->csv;
-                    jetOneFlavor   = new_jets[0]->hadronFlavor;
-                    jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
-                    jetTwoTag      = new_jets[1]->csv;
-                    jetTwoFlavor   = new_jets[1]->hadronFlavor;
-                } else {
-                    jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetOneTag    = 0.;
-                    jetOneFlavor = 0;
-                    jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetTwoTag    = 0.;
-                    jetTwoFlavor = 0;
-                }
-
-                if (nJets >= 3) {
-                    jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
-                    jetThreeTag    = new_jets[2]->csv;
-                    jetThreeFlavor = new_jets[2]->hadronFlavor;
-                } else { 
-                    jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetThreeTag    = 0.;
-                    jetThreeFlavor = 0;
-                }
-
-                if (nJets >= 4) {
-                    jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
-                    jetFourTag     = new_jets[3]->csv;
-                    jetFourFlavor  = new_jets[3]->hadronFlavor;
-                } else { 
-                    jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                    jetFourTag    = 0.;
-                    jetFourFlavor = 0;
-                }
-
-                if (!isData) {
-                    pair<int, int> pdgId;           
-                    pdgId           = GetGenId(genParticles, genMotherId, electronP4);
-                    leptonOneGenId  = pdgId.first;
-                    leptonOneMother = pdgId.second;
-
-                    // reconstruction weights
-                    EfficiencyContainer effCont;
-                    pair<float, float> effs, errs;
-                    leptonOneRecoWeight = 1.;
-                    leptonOneRecoVar    = 1.;
-
-                    // id/iso weights
-                    effCont = weights->GetElectronIDEff(electronP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    leptonOneIDWeight = effs.first/effs.second;
-                    leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    // trigger weights
-                    effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
-                    effs = effCont.GetEff();
-                    errs = effCont.GetErr();
-                    triggerWeight = effs.first/effs.second;
-                    triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-
-                    eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
-                    eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
-
-                    // update event weight
-                    eventWeight *= triggerWeight;
-                    eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
-                }
-
-            } else {
-                return kTRUE;
-            }
-
-            // fill once for each fakeable electron
-            outFile->cd(channel.c_str());
-            outTrees[channel]->Fill();
         }
-        this->passedEvents++;
-        return kTRUE;
 
-    } else {
-        return kTRUE;
+        // check that fake object passes the trigger requirement
+        bool triggered = false;
+        for (const auto& name: passTriggerNames) {
+            if (trigger->passObj(name, 1, felectron->hltMatchBits)) {
+                triggered = true;
+                break;
+            }
+        }
+
+        if (triggered && taus.size() == 1) {
+            channel = "etau_fakes";
+            eventCounts[channel]->Fill(1);
+            nElectrons = fail_electrons.size();
+
+            if (felectron->pt < 30)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            TLorentzVector electronP4, tauP4, dilepton;
+            electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
+            tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+            dilepton = electronP4 + tauP4;
+            if (dilepton.M() < 12)
+                return kTRUE;
+            eventCounts[channel]->Fill(3);
+
+            //if (nJets < 2 || nBJets < 1)
+            //    return kTRUE;
+            //eventCounts[channel]->Fill(4);
+
+            leptonOneP4     = electronP4;
+            leptonOneIso    = GetElectronIsolation(felectron, fInfo->rhoJet);
+            leptonOneFlavor = 13*felectron->q;
+            leptonOneDZ     = felectron->dz;
+            leptonOneD0     = felectron->d0;
+
+            leptonTwoP4     = tauP4;
+            leptonTwoIso    = 0.;
+            leptonTwoFlavor = 15*taus[0]->q;
+            leptonTwoDZ     = taus[0]->dzLeadChHad;
+            leptonTwoD0     = taus[0]->d0LeadChHad;
+
+            tauDecayMode  = taus[0]->decaymode;
+            tauMVA        = taus[0]->rawIsoMVA3newDMwLT;
+
+            if (nJets >= 1) {
+                jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
+                jetOneTag      = new_jets[0]->csv;
+                jetOneFlavor   = new_jets[0]->hadronFlavor;
+            } else {
+                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetOneTag    = 0.;
+                jetOneFlavor = 0;
+            }
+            if (nJets >= 2) {
+                jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
+                jetTwoTag      = new_jets[1]->csv;
+                jetTwoFlavor   = new_jets[1]->hadronFlavor;
+            } else {
+                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetTwoTag    = 0.;
+                jetTwoFlavor = 0;
+            }
+
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, electronP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+                pdgId           = GetGenId(genParticles, genMotherId, tauP4);
+                leptonTwoGenId  = pdgId.first;
+                leptonTwoMother = pdgId.second;
+
+                //cout << "etau: " << leptonOneMother << " " << leptonTwoMother << endl;
+
+                // reconstruction weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+                leptonTwoRecoWeight = 1.;
+                leptonTwoRecoVar    = 0.;
+
+                // id/iso weights
+                effCont = weights->GetElectronIDEff(electronP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                if (genCategory == 7 || genCategory == 12) {
+                    leptonTwoIDWeight = 0.95;
+                    leptonTwoIDVar    = 0.05;
+                } else {
+                    leptonTwoIDWeight = 1.;
+                    leptonTwoIDVar    = 0.01;
+                }
+
+                // trigger weights
+                effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
+
+            }
+        } else if (triggered && taus.size() == 0 && ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2))) {
+            channel = "ejet_fakes";
+            eventCounts[channel]->Fill(1);
+            nElectrons = fail_electrons.size();
+
+            // convert to TLorentzVectors
+            TLorentzVector electronP4;
+            electronP4.SetPtEtaPhiM(felectron->pt, felectron->eta, felectron->phi, 0.1052);
+            if (felectron->pt < 30.)
+                return kTRUE;
+            eventCounts[channel]->Fill(2);
+
+            leptonOneP4     = electronP4;
+            leptonOneIso    = GetElectronIsolation(felectron, fInfo->rhoJet);
+            leptonOneFlavor = felectron->q*13;
+            leptonOneDZ     = felectron->dz;
+            leptonOneD0     = felectron->d0;
+
+            // Collect the highest pt jets in the event
+            std::sort(new_jets.begin(), new_jets.end(), sort_by_higher_pt<TJet>);
+            //jets = KinematicTopTag(jets, metP2, electronP4);
+            if (nJets >= 2) { //save at least two jets
+                jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
+                jetOneTag      = new_jets[0]->csv;
+                jetOneFlavor   = new_jets[0]->hadronFlavor;
+                jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
+                jetTwoTag      = new_jets[1]->csv;
+                jetTwoFlavor   = new_jets[1]->hadronFlavor;
+            } else {
+                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetOneTag    = 0.;
+                jetOneFlavor = 0;
+                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetTwoTag    = 0.;
+                jetTwoFlavor = 0;
+            }
+
+            if (nJets >= 3) {
+                jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
+                jetThreeTag    = new_jets[2]->csv;
+                jetThreeFlavor = new_jets[2]->hadronFlavor;
+            } else { 
+                jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetThreeTag    = 0.;
+                jetThreeFlavor = 0;
+            }
+
+            if (nJets >= 4) {
+                jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
+                jetFourTag     = new_jets[3]->csv;
+                jetFourFlavor  = new_jets[3]->hadronFlavor;
+            } else { 
+                jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
+                jetFourTag    = 0.;
+                jetFourFlavor = 0;
+            }
+
+            if (!isData) {
+                pair<int, int> pdgId;           
+                pdgId           = GetGenId(genParticles, genMotherId, electronP4);
+                leptonOneGenId  = pdgId.first;
+                leptonOneMother = pdgId.second;
+
+                // reconstruction weights
+                EfficiencyContainer effCont;
+                pair<float, float> effs, errs;
+                leptonOneRecoWeight = 1.;
+                leptonOneRecoVar    = 1.;
+
+                // id/iso weights
+                effCont = weights->GetElectronIDEff(electronP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneIDWeight = effs.first/effs.second;
+                leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                // trigger weights
+                effCont = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                triggerWeight = effs.first/effs.second;
+                triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+
+                eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronP4);
+                eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronP4);
+
+                // update event weight
+                eventWeight *= triggerWeight;
+                eventWeight *= leptonOneIDWeight*leptonOneRecoWeight;
+            }
+
+        } else {
+            return kTRUE;
+        }
     }
+
+    if (channel == "") return kTRUE;
 
     ///////////////////
     // Fill jet info //
     ///////////////////
 
-    if (//channel != "tau4j" 
-            channel != "mujet" && channel != "ejet" 
-            && channel != "mujet_fakes" && channel != "ejet_fakes"
-            && channel != "mutau_fakes" && channel != "etau_fakes"
-       ) { // jets are handled differently for the lepton + jet and anti-iso fake selections
-        if (jets.size() > 0) {
+    if (
+            channel == "ee" 
+            || channel == "mumu" 
+            || channel == "emu"
+            || channel == "etau" 
+            || channel == "mutau"
+       ) {
+
+        if (jets.size() >= 1) {
             jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass);
             jetOneTag    = jets[0]->csv;
             jetOneFlavor = jets[0]->hadronFlavor;
-        } else {
-            jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetOneTag    = 0.;
-            jetOneFlavor = 0;
         }
 
-        if (jets.size() > 1) {
+        if (jets.size() >= 2) {
             jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass);
             jetTwoTag    = jets[1]->csv;
             jetTwoFlavor = jets[1]->hadronFlavor;
-        } else {
-            jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-            jetTwoTag    = 0.;
-            jetTwoFlavor = 0;
         } 
     }
 
@@ -2416,7 +2345,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (genParticles.size() >= 1) {
             genOneId = genParticles[0]->pdgId;
             genOneP4.SetPtEtaPhiM(genParticles[0]->pt, genParticles[0]->eta, genParticles[0]->phi, genParticles[0]->mass); 
-        } else if (genParticles.size() >= 2) {
+        }  
+
+        if (genParticles.size() >= 2) {
             genTwoId = genParticles[1]->pdgId;
             genTwoP4.SetPtEtaPhiM(genParticles[1]->pt, genParticles[1]->eta, genParticles[1]->phi, genParticles[1]->mass); 
         }
@@ -2655,6 +2586,20 @@ void MultileptonAnalyzer::ResetJetCounters()
     std::fill(nBJetsJESDown.begin(), nBJetsJESDown.end(), 0);
     std::fill(nBJetsBTagUp.begin(), nBJetsBTagUp.end(), 0);
     std::fill(nBJetsBTagDown.begin(), nBJetsBTagDown.end(), 0);
+
+    // set placeholder values for jet data
+    jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
+    jetOneTag    = 0.;
+    jetOneFlavor = 0;
+    jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
+    jetTwoTag    = 0.;
+    jetTwoFlavor = 0;
+    jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
+    jetThreeTag    = 0.;
+    jetThreeFlavor = 0;
+    jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
+    jetFourTag    = 0.;
+    jetFourFlavor = 0;
 }
 
 void MultileptonAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)

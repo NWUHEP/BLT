@@ -179,6 +179,11 @@ WeightUtils::WeightUtils(string dataPeriod, string selection)
     _eff_doubleg_leg1_MC   = (TH2F*)f_elTrigSF_leg1->Get("EGamma_EffMC2D"); 
     _sf_doubleg_leg1 = (TH2F *)f_elTrigSF_leg1->Get("EGamma_SF2D");
 
+    // single electron trigger efficiencies
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/single_electron_trigger/single_electron_" + _dataPeriod + ".root";
+    TFile* f_elTrigSF_single = new TFile(fileName.c_str(), "OPEN");
+    _sf_single_electron_trig = (TH2F *)f_elTrigSF_single->Get("SF2D");
+
     //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/SFs_Leg2_Ele12_HZZSelection_Tag35.root";
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/doubleg_trigger/doubleg_leg2_" + _dataPeriod + ".root";
     TFile* f_elTrigSF_leg2 = new TFile(fileName.c_str(), "OPEN");
@@ -305,10 +310,22 @@ WeightUtils::WeightUtils(string dataPeriod, string selection)
     fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_HZZ_" + _dataPeriod + ".root";
     TFile* f_hzz_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
     _hzz_eleSF_ID_2D = (TH2F *)f_hzz_eleIdSF->Get("EGamma_SF2D");
+   
+
+    // Fall17V2Iso WP80 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_MVA_" + _dataPeriod + "_WP80.root";
+    TFile* f_mva_eleIdSF_wp80 = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_MVA_ID_2D_WP80 = (TH2F *)f_mva_eleIdSF_wp80->Get("EGamma_SF2D");
     
-    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_MVA_" + _dataPeriod + ".root";
-    TFile* f_mva_eleIdSF = new TFile(fileName.c_str(), "OPEN"); 
-    _eleSF_MVA_ID_2D = (TH2F *)f_mva_eleIdSF->Get("EGamma_SF2D");
+    // Fall17V2Iso WP90 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_MVA_" + _dataPeriod + "_WP90.root";
+    TFile* f_mva_eleIdSF_wp90 = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_MVA_ID_2D_WP90 = (TH2F *)f_mva_eleIdSF_wp90->Get("EGamma_SF2D");
+    
+    // Fall17V2Iso WPLoose 
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_id/eleSelectionSF_MVA_" + _dataPeriod + "_WPLoose.root";
+    TFile* f_mva_eleIdSF_wpLoose = new TFile(fileName.c_str(), "OPEN"); 
+    _eleSF_MVA_ID_2D_WPLoose = (TH2F *)f_mva_eleIdSF_wpLoose->Get("EGamma_SF2D");
 
     // photon mva id (90%) efficiencies
     //fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/photon_id/photon_mva_id_2016.root";
@@ -426,6 +443,18 @@ std::pair<float, float> WeightUtils::GetDoubleEGTriggerEffWeight(string triggerN
                 err = _sf_doubleg_leg2->GetBinError(_sf_doubleg_leg2->FindBin(electron.scEta, tmpElePt));
             //}
         }
+
+        return std::make_pair(weight, err);
+}
+
+std::pair<float, float> WeightUtils::GetSingleElectronTriggerEffWeight(TElectron &electron) const
+{
+    float weight = 1.;
+    float err = 0.;
+    float tmpElePt = (electron.pt < 500.) ? electron.pt : 499.;
+
+                weight *= _sf_single_electron_trig->GetBinContent(_sf_single_electron_trig->FindBin(electron.scEta, tmpElePt));
+                err = _sf_single_electron_trig->GetBinError(_sf_single_electron_trig->FindBin(electron.scEta, tmpElePt));
 
         return std::make_pair(weight, err);
 }
@@ -646,14 +675,24 @@ std::pair<float, float> WeightUtils::GetElectronMVARecoEff(TElectron& electron) 
     return std::make_pair(weight, err);
 }
 
-std::pair<float, float> WeightUtils::GetElectronMVAIdEff(TElectron& electron) const
+std::pair<float, float> WeightUtils::GetElectronMVAIdEff(TElectron& electron, string WP) const
 {
     float tmpElePt = (electron.calibPt < 200.) ? electron.calibPt : 199.;
     float weight = 1.;
     float err = 0.;
 
-    weight *= _eleSF_MVA_ID_2D->GetBinContent(_eleSF_MVA_ID_2D->FindBin(electron.scEta, tmpElePt));
-    err = _eleSF_MVA_ID_2D->GetBinError(_eleSF_MVA_ID_2D->FindBin(electron.scEta, tmpElePt));
+    if (WP == "80") {
+        weight *= _eleSF_MVA_ID_2D_WP80->GetBinContent(_eleSF_MVA_ID_2D_WP80->FindBin(electron.scEta, tmpElePt));
+        err = _eleSF_MVA_ID_2D_WP80->GetBinError(_eleSF_MVA_ID_2D_WP80->FindBin(electron.scEta, tmpElePt));
+    }
+    else if (WP == "90") {
+        weight *= _eleSF_MVA_ID_2D_WP90->GetBinContent(_eleSF_MVA_ID_2D_WP90->FindBin(electron.scEta, tmpElePt));
+        err = _eleSF_MVA_ID_2D_WP90->GetBinError(_eleSF_MVA_ID_2D_WP90->FindBin(electron.scEta, tmpElePt));
+    }
+    else if (WP == "Loose") {
+        weight *= _eleSF_MVA_ID_2D_WPLoose->GetBinContent(_eleSF_MVA_ID_2D_WPLoose->FindBin(electron.scEta, tmpElePt));
+        err = _eleSF_MVA_ID_2D_WPLoose->GetBinError(_eleSF_MVA_ID_2D_WPLoose->FindBin(electron.scEta, tmpElePt));
+    }
     
     return std::make_pair(weight, err);
 }

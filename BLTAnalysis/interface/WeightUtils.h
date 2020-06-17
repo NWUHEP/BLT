@@ -49,6 +49,7 @@ class WeightUtils: public TObject {
         //pair<float, float>   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
         //float   GetDoubleEGTriggerEffWeight(string, TElectron&) const;
         pair<float, float> GetDoubleEGTriggerEffWeight(string, TElectron&) const;
+        pair<float, float> GetSingleElectronTriggerEffWeight(TElectron&) const;
         float   GetDoubleMuonTriggerEffWeight(string, TMuon&) const;
         float   GetMuonIDEff(TLorentzVector&) const; 
         float   GetMuonISOEff(TLorentzVector&) const; 
@@ -58,7 +59,7 @@ class WeightUtils: public TObject {
         float   GetElectronRecoIdEff(TLorentzVector&) const;
         float   GetHZZElectronRecoIdEff(TElectron&) const;
         pair<float, float> GetElectronMVARecoEff(TElectron&) const;
-        pair<float, float> GetElectronMVAIdEff(TElectron&) const;
+        pair<float, float> GetElectronMVAIdEff(TElectron&, string) const;
         //float   GetElectronMVARecoIdEff(TElectron&) const;
         pair<float, float> GetPhotonMVAIdEff(TPhoton&) const;
         pair<float, float> GetPhotonMVACSEVEff(TPhoton &) const;
@@ -92,7 +93,8 @@ class WeightUtils: public TObject {
 
         TGraphErrors *_eleSF_RECO, *_eleSF_ID[5], *_hzz_eleSF_ID[13];
         TH2F *_eleSF_RECO_2D, *_hzz_eleSF_ID_2D;
-        TH2F *_eleSF_MVA_RECO_2D, *_eleSF_MVA_LOW_RECO_2D, *_eleSF_MVA_ID_2D;
+        TH2F *_eleSF_MVA_RECO_2D, *_eleSF_MVA_LOW_RECO_2D;
+        TH2F *_eleSF_MVA_ID_2D_WP80, *_eleSF_MVA_ID_2D_WP90, *_eleSF_MVA_ID_2D_WPLoose;
 
         TGraphErrors *_mva_gammaSF_ID[5];
         TH2F *_mva_gammaSF;
@@ -102,6 +104,7 @@ class WeightUtils: public TObject {
         TH2F *_eff_doubleg_leg1_DATA, *_eff_doubleg_leg1_MC;
         TH2F *_eff_doubleg_leg2_DATA, *_eff_doubleg_leg2_MC;
         TH2F *_sf_doubleg_leg1, *_sf_doubleg_leg2;
+        TH2F *_sf_single_electron_trig;
 
         TH2F *_hzz_muIdSF;
 

@@ -635,9 +635,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         if (
                 electron->calibPt > 7.
                 && fabs(electron->scEta) < 2.5
-                && particleSelector->PassElectronMVA(electron, "looseFall17V2")
+                //&& particleSelector->PassElectronMVA(electron, "looseFall17V2")
+                && particleSelector->PassElectronMVA(electron, "wp80Fall17V2") // for test
+                //&& particleSelector->PassElectronMVA(electron, "tightFall17V1NoIso") // for test
                 && fabs(electron->d0) < 0.5
                 && fabs(electron->dz) < 1.0
+                //&& fabs(electron->sip3d) < 4 // only for test
+                //&& !electron->isConv // only for test
+                //&& electron->nMissingHits == 0 // only for test
            ) {
             electrons.push_back(electron); // electrons for analysis
             TLorentzVector electronP4;
@@ -956,14 +961,17 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
         hTotalEvents->Fill(7);
 
-        if (electrons[0]->q == electrons[1]->q)
-            return kTRUE;
-        hTotalEvents->Fill(8);
+        if (electrons[0]->q == electrons[1]->q) {
+            region = "same_sign";
+        }
+        //hTotalEvents->Fill(8);
 
         TLorentzVector dielectron = electronOneP4 + electronTwoP4;
         if (dielectron.M() < 80.0 || dielectron.M() > 100.0)
             return kTRUE;
-        hTotalEvents->Fill(9);   
+
+        eventCounts[region]->Fill(1);
+        //hTotalEvents->Fill(9);   
         
         leptonOnePt     = electronOneP4.Pt();
         leptonOneEta    = electronOneP4.Eta();
@@ -980,6 +988,21 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         leptonTwoFlavor = electrons[1]->q*11;
         leptonTwoDZ     = electrons[1]->dz;
         leptonTwoD0     = electrons[1]->d0;
+
+        if (photons.size() > 0) {
+            photonRawPt = photons[0]->pt;
+            photonPt = photons[0]->calibPt;
+            photonEta = photons[0]->eta;
+            photonPhi = photons[0]->phi;
+            photonSCPt = photons[0]->scEt;
+            photonSCEta = photons[0]->scEta;
+            photonSCPhi = photons[0]->scPhi;
+            photonMVA = photons[0]->mvaFall17V2;
+        
+            photonERes = photons[0]->ecalEnergyErrPostCorr / photons[0]->calibE;
+            photonE = photons[0]->calibE;
+            photonErrE = photons[0]->ecalEnergyErrPostCorr;
+        }
            
         if (!isData) {
             std::pair<float, float> leptonOneRecoPair = weights->GetElectronMVARecoEff(*electrons[0]);
@@ -989,10 +1012,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             leptonTwoRecoWeight = leptonTwoRecoPair.first;
             leptonTwoRecoErr = leptonTwoRecoPair.second;
 
-            std::pair<float, float> leptonOneIDPair = weights->GetElectronMVAIdEff(*electrons[0]); 
+            std::pair<float, float> leptonOneIDPair = weights->GetElectronMVAIdEff(*electrons[0], "80"); 
             leptonOneIDWeight = leptonOneIDPair.first;
             leptonOneIDErr = leptonOneIDPair.second;
-            std::pair<float, float> leptonTwoIDPair = weights->GetElectronMVAIdEff(*electrons[1]); 
+            std::pair<float, float> leptonTwoIDPair = weights->GetElectronMVAIdEff(*electrons[1], "80"); 
             leptonTwoIDWeight = leptonTwoIDPair.first;
             leptonTwoIDErr = leptonTwoIDPair.second;
 
@@ -1001,6 +1024,33 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
             eventWeight *= leptonOneRecoIDWeight; 
             eventWeight *= leptonTwoRecoIDWeight; 
+
+            std::pair<float, float> trigOnePair = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg1", *electrons[0]);
+            trigOneWeight = trigOnePair.first;
+            trigOneErr = trigOnePair.second;
+            
+            std::pair<float, float> trigTwoPair = weights->GetDoubleEGTriggerEffWeight("HLT_DoubleEG_leg2", *electrons[1]);
+            trigTwoWeight = trigTwoPair.first;
+            trigTwoErr = trigTwoPair.second;
+            
+            triggerWeight = trigOneWeight*trigTwoWeight;
+            eventWeight *= triggerWeight;
+
+            if (photons.size() > 0) {     
+                std::pair<float, float> photonCSEVPair = weights->GetPhotonMVACSEVEff(*photons[0]);
+                photonCSEVWeight = photonCSEVPair.first;
+                photonCSEVErr = photonCSEVPair.second;
+                
+                std::pair<float, float> photonIDPair = weights->GetPhotonMVAIdEff(*photons[0]);
+                photonIDWeight = photonIDPair.first;
+                photonIDErr = photonIDPair.second; 
+            }
+
+            prefWeight = fInfo->prefweight;
+            prefWeightUp = fInfo->prefweightUp;
+            prefWeightDown = fInfo->prefweightDown;
+
+            eventWeight *= prefWeight;
         }
 
     } // end ee selection
@@ -1889,10 +1939,10 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 leptonTwoRecoWeight = leptonTwoRecoPair.first;
                 leptonTwoRecoErr = leptonTwoRecoPair.second;
 
-                std::pair<float, float> leptonOneIDPair = weights->GetElectronMVAIdEff(*electrons[leptonOneIndex]); 
+                std::pair<float, float> leptonOneIDPair = weights->GetElectronMVAIdEff(*electrons[leptonOneIndex], "80"); 
                 leptonOneIDWeight = leptonOneIDPair.first;
                 leptonOneIDErr = leptonOneIDPair.second;
-                std::pair<float, float> leptonTwoIDPair = weights->GetElectronMVAIdEff(*electrons[leptonTwoIndex]); 
+                std::pair<float, float> leptonTwoIDPair = weights->GetElectronMVAIdEff(*electrons[leptonTwoIndex], "80"); 
                 leptonTwoIDWeight = leptonTwoIDPair.first;
                 leptonTwoIDErr = leptonTwoIDPair.second;
 

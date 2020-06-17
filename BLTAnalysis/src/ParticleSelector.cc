@@ -1,6 +1,7 @@
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 
 #include <iostream>
+#include <math.h>
 
 using namespace baconhep;
 using namespace std;
@@ -320,6 +321,87 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, string idN
             } else if (fabs(el->scEta) < 2.5) {
                 //if (el->mvaFall17V2Iso > -0.032173)
                 if (el->mvaFall17V2Iso > -0.0321841194737)
+                    elPass = true;
+            }
+        }
+    }
+
+    else if (idName == "wp90Fall17V2") {
+        double rawMVAValue = 0.5*log((1+el->mvaFall17V2Iso)/(1-el->mvaFall17V2Iso));
+        if (el->calibPt > 5. && el->calibPt < 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (2.84704783417 - exp(-1*el->calibPt / 3.32529515837) * 9.38050947827))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (2.03833922005 - exp(-1*el->calibPt / 1.93288758682) *  15.364588247))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (1.82704158461 - exp(-1*el->calibPt / 1.89796754399) *  19.1236071158))
+                   elPass = true;
+            }
+        } else if (el->calibPt > 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (6.12931925263 - exp(-1*el->calibPt / 13.281753835) *  8.71138432196))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (5.26289004857 - exp(-1*el->calibPt / 13.2154971491) *  8.0997882835))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (4.37338792902 - exp(-1*el->calibPt / 14.0776094696) *  8.48513324496))
+                    elPass = true;
+            }
+        }
+    }
+    
+    else if (idName == "wp80Fall17V2") {
+        double rawMVAValue = 0.5*log((1+el->mvaFall17V2Iso)/(1-el->mvaFall17V2Iso));
+        if (el->calibPt > 5. && el->calibPt < 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (3.53495358797 - exp(-1*el->calibPt / 3.07272325141) * 9.94262764352))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (3.06015605623 - exp(-1*el->calibPt / 1.95572234114) *  14.3091184421))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (3.02052519639 - exp(-1*el->calibPt / 1.59784164742) *  28.719380105))
+                   elPass = true;
+            }
+        } else if (el->calibPt > 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (7.35752275071 - exp(-1*el->calibPt / 15.87907864) *  7.61288809226))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (6.41811074032 - exp(-1*el->calibPt / 14.730562874) *  6.96387331587))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (5.64936312428 - exp(-1*el->calibPt / 16.3664949747) *  7.19607610311))
+                    elPass = true;
+            }
+        }
+    }
+
+    else if (idName == "tightFall17V1NoIso") {
+        double rawMVAValue = 0.5*log((1+el->mvaFall17V1NoIso)/(1-el->mvaFall17V1NoIso));
+        if (el->calibPt > 5. && el->calibPt < 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (0.9530240956555949 - exp(-1*el->calibPt / 2.7591425841003647) *  0.4669644718545271))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (0.9336564763961019 - exp(-1*el->calibPt / 2.709276284272272) *  0.33512286599215946))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (0.9313133688365339 - exp(-1*el->calibPt / 1.5821934800715558) *  3.8889462619659265))
+                   elPass = true;
+            }
+        } else if (el->calibPt > 10.) {
+            if (fabs(el->scEta) < 0.8) {
+                if (rawMVAValue > (0.9825268564943458 - exp(-1*el->calibPt / 8.702601455860762) *  1.1974861596609097))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 1.479) {
+                if (rawMVAValue > (0.9727509457929913 - exp(-1*el->calibPt / 8.179525631018565) *  1.7111755094657688))
+                    elPass = true;
+            } else if (fabs(el->scEta) < 2.5) {
+                if (rawMVAValue > (0.9562619539540145 - exp(-1*el->calibPt / 8.109845366281608) *  3.013927699126942))
                     elPass = true;
             }
         }

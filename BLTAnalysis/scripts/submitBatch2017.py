@@ -22,27 +22,27 @@ data_dict, mc_dict = {},{}
 path       = '/eos/uscms/store/group/lpcbacon/15'
 data_dict['single_mu'] = [
         cfg(data_name = 'muon_2017B',
-            path      = '{0}/SingleMuonRun2017B_17Nov2017_v1'.format(path),
+            path      = '/eos/uscms/store/user/zchen/SingleMuon/2017_SingleMuon_prod_SingleMuon_Run2017B-31Mar2018-v1/200609_211401/*', #'{0}/SingleMuonRun2017B_17Nov2017_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2017B'
             ),
         cfg(data_name = 'muon_2017C',
-            path      = '{0}/SingleMuonRun2017C_17Nov2017_v1'.format(path),
+            path      = '/eos/uscms/store/user/zchen/SingleMuon/2017_SingleMuon_prod_SingleMuon_Run2017C-31Mar2018-v1/200609_211539/*', #'{0}/SingleMuonRun2017C_17Nov2017_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2017C'
           ),
         cfg(data_name = 'muon_2017D',
-            path      = '{0}/SingleMuonRun2017D_17Nov2017_v1'.format(path),
+            path      = '/eos/uscms/store/user/zchen/SingleMuon/2017_SingleMuon_prod_SingleMuon_Run2017D-31Mar2018-v1/200609_211716/*', #'{0}/SingleMuonRun2017D_17Nov2017_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2017D'
             ),
         cfg(data_name = 'muon_2017E',
-            path      = '{0}/SingleMuonRun2017E_17Nov2017_v1'.format(path),
+            path      = '/eos/uscms/store/user/zchen/SingleMuon/2017_SingleMuon_prod_SingleMuon_Run2017E-31Mar2018-v1/200609_211857/*', #'{0}/SingleMuonRun2017E_17Nov2017_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2017E'
             ),
         cfg(data_name = 'muon_2017F',
-            path      = '{0}/SingleMuonRun2017F_17Nov2017_v1'.format(path),
+            path      = '/eos/uscms/store/user/zchen/SingleMuon/2017_SingleMuon_prod_SingleMuon_Run2017F-31Mar2018-v1/200609_212037/*', #'{0}/SingleMuonRun2017F_17Nov2017_v1'.format(path),
             nJobs     = 50,
             suffix    = 'muon_2017F'
             ),
@@ -85,17 +85,17 @@ data_dict['single_el'] = [
 
 mc_dict['zjets'] = [
     cfg(data_name = 'DY0JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       path     = '{0}/DYJetsToLL_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Samples/190824_160412/*'.format(path),
        nJobs    = 50,
        suffix   = 'DY0JetsToLL'
       ),
     cfg(data_name = 'DY1JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       path     = '{0}/DYJetsToLL_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Samples/190824_160820/*'.format(path),
        nJobs    = 50,
        suffix   = 'DY1JetsToLL'
       ),
     cfg(data_name = 'DY2JetsToLL',
-       path     = '/eos/uscms/store/user/zchen/lpcbacon/15/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8',
+       path     = '{0}/DYJetsToLL_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/Samples/190824_161718/*'.format(path),
        nJobs    = 50,
        suffix   = 'DY2JetsToLL'
       ),

@@ -53,9 +53,19 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
     singleElectronTriggerName = "HLT_Ele27_WPTight_Gsf_v*";
     if(params->period == "2018") singleElectronTriggerName = "HLT_Ele32_WPTight_Gsf_v*";
+    
+
+    singleMuonTriggerName  = "HLT_IsoMu24_v*";
+    singleMuonTriggerName2 = "HLT_IsoTkMu24_v*";
+ 
+    if(params->period == "2017"){
+        singleMuonTriggerName = "HLT_IsoMu27_v*";
+        singleMuonTriggerName2 = "HLT_IsoTkMu27_v*";
+    }
+    
     triggerNames.push_back(singleElectronTriggerName);
-    triggerNames.push_back("HLT_IsoMu24_v*");
-    triggerNames.push_back("HLT_IsoTkMu24_v*");
+    triggerNames.push_back(singleMuonTriggerName);
+    triggerNames.push_back(singleMuonTriggerName2);
     
 
     // Weight utility class
@@ -635,8 +645,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         }
     }
 
-    bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end();
-    muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
+    bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName) != passTriggerNames.end();
+    muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName2) != passTriggerNames.end();
     bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleElectronTriggerName) != passTriggerNames.end();
 
     if (!passTrigger)
@@ -1067,18 +1077,18 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             
             EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
-                effCont2      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                effCont1      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonOneP4);
+                effCont2      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonTwoP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
             } else if (triggered.test(0)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonOneP4);
+                effCont1      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonOneP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             } else if (triggered.test(1)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonTwoP4);
+                effCont1      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonTwoP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1196,15 +1206,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // efficiency for detecting either
             EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
-                effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
+                effCont1      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronOneP4);
+                effCont2      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronTwoP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
 
                 eleTriggerVarTagSyst   = weights->GetEleTriggerSyst("tag", electronOneP4);
                 eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
             } else if (triggered.test(0)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronOneP4);
+                effCont1      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronOneP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1214,7 +1224,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 eleTriggerVarProbeSyst = weights->GetEleTriggerSyst("probe", electronOneP4);
 
             } else if (triggered.test(1)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronTwoP4);
+                effCont1      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronTwoP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1344,18 +1354,18 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // efficiency for detecting either
             EfficiencyContainer effCont1, effCont2;
             if (triggered.all()) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
-                effCont2      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
+                effCont2      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 triggerWeight = GetTriggerSF(effCont1, effCont2);
                 triggerVar    = GetTriggerSFError(effCont1, effCont2);
             } else if (triggered.test(0)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont1      = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
                 triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             } else if (triggered.test(1)) {
-                effCont1      = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1      = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 effs          = effCont1.GetEff();
                 errs          = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1470,7 +1480,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1 = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1589,7 +1599,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont1 = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1701,7 +1711,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1 = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1819,7 +1829,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont1 = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -1909,7 +1919,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1 = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -2007,7 +2017,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont1 = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -2100,7 +2110,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", muonP4);
+                effCont1 = weights->GetTriggerEffWeight(singleMuonTriggerName, muonP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;
@@ -2189,7 +2199,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             // correct for trigger.
             EfficiencyContainer effCont1;
             if (triggered) {
-                effCont1 = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", electronP4);
+                effCont1 = weights->GetTriggerEffWeight(singleElectronTriggerName, electronP4);
                 effs = effCont1.GetEff();
                 errs = effCont1.GetErr();
                 triggerWeight = effs.first/effs.second;

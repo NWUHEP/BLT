@@ -70,6 +70,8 @@ public:
     TH1D *hGenCat;
 
     std::string singleElectronTriggerName = "";
+    std::string singleMuonTriggerName = "";
+    std::string singleMuonTriggerName2 = "";
 
     // Lumi mask
     RunLumiRangeMap lumiMask;

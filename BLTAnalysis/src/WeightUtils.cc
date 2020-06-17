@@ -252,7 +252,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
 
     EfficiencyContainer effCont(1, 1, 0, 0);
 
-    if (triggerName == "HLT_IsoMu24_v*") {
+    if (triggerName == "HLT_IsoMu24_v*" || triggerName == "HLT_IsoMu27_v*") {
         float binningEta[] = {0., 0.9, 1.2, 2.1, 2.4};
         int etaBin = 0;
         for (int i = 0; i < 4; ++i) {
@@ -284,7 +284,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             float err = _muSF_Trigger_2017->GetBinError(bin);
             if (_muSF_Trigger_2017->IsBinUnderflow(bin) || _muSF_Trigger_2017->IsBinOverflow(bin)) { sf = 1.0; err = 0.0; }
             effCont.SetData(sf, 1., err, 0.);
-            effCont.SetData(1., 1., 0., 0.);
+            // effCont.SetData(1., 1., 0., 0.);
             // if (lepton.Pt()>120 || lepton.Pt()<20) cout<< _muSF_Trigger_2017->IsBinUnderflow(bin)<< _muSF_Trigger_2017->IsBinOverflow(bin) <<"Muon Trigger: pt=" << lepton.Pt() << " GeV, sf=" << sf <<endl;
         } else if(_dataPeriod == "2018") {
             int bin = _muSF_Trigger_2018->FindBin(lepton.Pt(),abs(lepton.Eta()));
@@ -295,7 +295,7 @@ EfficiencyContainer WeightUtils::GetTriggerEffWeight(string triggerName, TLorent
             // if (lepton.Pt()>120 || lepton.Pt()<20) cout<< _muSF_Trigger_2018->IsBinUnderflow(bin)<< _muSF_Trigger_2018->IsBinOverflow(bin) << "Muon Trigger: pt=" << lepton.Pt() << " GeV, sf=" << sf <<endl;
         }
 
-    } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*") {
+    } else if (triggerName == "HLT_Ele27_WPTight_Gsf_v*" || triggerName == "HLT_Ele32_WPTight_Gsf_v*") {
         // official numbers
         if (_dataPeriod == "2016BtoF") {
             int bin = _elSF_Trigger_BCDEF->FindBin(lepton.Pt(), lepton.Eta());

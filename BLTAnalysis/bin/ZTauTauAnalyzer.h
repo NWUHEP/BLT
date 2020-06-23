@@ -26,7 +26,6 @@
 #include "BLT/BLTAnalysis/interface/ParticleSelector.hh"
 #include "BLT/BLTAnalysis/interface/WeightUtils.h"
 #include "BLT/BLTAnalysis/interface/ElectronCorrector.h"
-
 #include "BLT/BLTAnalysis/interface/RoccoR.h"
 
 // BaconAna class definitions (might need to add more)
@@ -156,6 +155,9 @@ public:
     
     // object counters
     UInt_t nMuons, nElectrons, nTaus,nPhotons, nJets, nFwdJets, nBJets, nBJetsM, nBJetsL;
+    UInt_t nJets25, nFwdJets25, nBJets25, nBJets25M, nBJets25L;
+    UInt_t nJets20, nFwdJets20, nBJets20, nBJets20M, nBJets20L;
+
     UInt_t nFailMuons, nFailElectrons;
     UInt_t nLowPtElectrons;
     

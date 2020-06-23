@@ -176,10 +176,18 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       tree->Branch("nLowPtElectrons", &nLowPtElectrons);
       tree->Branch("nPhotons", &nPhotons);
       tree->Branch("nJets", &nJets);
+      tree->Branch("nJets25", &nJets25);
+      tree->Branch("nJets20", &nJets20);
       tree->Branch("nFwdJets", &nFwdJets);
       tree->Branch("nBJets", &nBJets); //tight b-jets
       tree->Branch("nBJetsM", &nBJetsM); //medium b-jets
       tree->Branch("nBJetsL", &nBJetsL); //loose b-jets
+      tree->Branch("nBJets25" , &nBJets25); //tight b-jets
+      tree->Branch("nBJets25M", &nBJets25M); //medium b-jets
+      tree->Branch("nBJets25L", &nBJets25L); //loose b-jets
+      tree->Branch("nBJets20" , &nBJets20); //tight b-jets
+      tree->Branch("nBJets20M", &nBJets20M); //medium b-jets
+      tree->Branch("nBJets20L", &nBJets20L); //loose b-jets
       tree->Branch("nGenTausHad", &nGenTausHad);
       tree->Branch("nGenTausLep", &nGenTausLep);
       tree->Branch("nGenElectrons", &nGenElectrons);
@@ -202,13 +210,13 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       tree->Branch("pfMETCCov00"  , &pfMETCCov00  );
       tree->Branch("pfMETCCov01"  , &pfMETCCov01  );
       tree->Branch("pfMETCCov11"  , &pfMETCCov11  );
-      // tree->Branch("puppMET"      , &puppMET      );
-      // tree->Branch("puppMETphi"   , &puppMETphi   );
+      tree->Branch("puppMET"      , &puppMET      );
+      tree->Branch("puppMETphi"   , &puppMETphi   );
       // tree->Branch("puppMETCov00" , &puppMETCov00 );
       // tree->Branch("puppMETCov01" , &puppMETCov01 );
       // tree->Branch("puppMETCov11" , &puppMETCov11 );
-      // tree->Branch("puppMETC"     , &puppMETC     );
-      // tree->Branch("puppMETCphi"  , &puppMETCphi  );
+      tree->Branch("puppMETC"     , &puppMETC     );
+      tree->Branch("puppMETCphi"  , &puppMETCphi  );
       // tree->Branch("puppMETCCov00", &puppMETCCov00);
       // tree->Branch("puppMETCCov01", &puppMETCCov01);
       // tree->Branch("puppMETCCov11", &puppMETCCov11);
@@ -216,8 +224,8 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       // tree->Branch("alpacaMETphi" , &alpacaMETphi );
       // tree->Branch("pcpMET"       , &pcpMET       );
       // tree->Branch("pcpMETphi"    , &pcpMETphi    );
-      tree->Branch("trkMET"       , &trkMET       );
-      tree->Branch("trkMETphi"    , &trkMETphi    );
+      // tree->Branch("trkMET"       , &trkMET       );
+      // tree->Branch("trkMETphi"    , &trkMETphi    );
       //correction to the met due to particle pt scalings
       tree->Branch("metCorr"      , &metCorr      );
       tree->Branch("metCorrPhi"   , &metCorrPhi   );
@@ -248,6 +256,12 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       tree->Branch("nBJets", &nBJets); //tight b-jets
       tree->Branch("nBJetsM", &nBJetsM); //medium b-jets
       tree->Branch("nBJetsL", &nBJetsL); //loose b-jets
+      tree->Branch("nBJets25" , &nBJets25); //tight b-jets
+      tree->Branch("nBJets25M", &nBJets25M); //medium b-jets
+      tree->Branch("nBJets25L", &nBJets25L); //loose b-jets
+      tree->Branch("nBJets20" , &nBJets20); //tight b-jets
+      tree->Branch("nBJets20M", &nBJets20M); //medium b-jets
+      tree->Branch("nBJets20L", &nBJets20L); //loose b-jets
     }
     
     outTrees[channel] = tree;
@@ -948,7 +962,20 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
 	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAM]) ++nBJetsM;
 	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAL]) ++nBJetsL;
 	    jets.push_back(jet);
+	  } else if (jet->pt > 25){
+	    ++nJets25;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAT]) ++nBJets25;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAM]) ++nBJets25M;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAL]) ++nBJets25L;
+	    // jets.push_back(jet);
+	  } else if (jet->pt > 20){
+	    ++nJets20;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAT]) ++nBJets20;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAM]) ++nBJets20M;
+	    if (jet->bmva > particleSelector->_BTagMVACuts[ParticleSelector::kBTagMVAL]) ++nBJets20L;
+	    // jets.push_back(jet);
 	  }
+
 	} else {
 	  // for MC apply corrections and variate systematics
 	  if(JetCounting(jet,jerc,gRand)) jets.push_back(jet);
@@ -2289,7 +2316,11 @@ float ZTauTauAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyCon
 void ZTauTauAnalyzer::ResetJetCounters()
 {
   nJets = nBJets = 0;
-  nBJetsL = 0; nBJetsM = 0;
+  nJets25 = nBJets25 = 0;
+  nJets20 = nBJets20 = 0;
+  nBJetsL   = 0; nBJetsM   = 0;
+  nBJets25L = 0; nBJets25M = 0;
+  nBJets20L = 0; nBJets20M = 0;
   nFwdJets = 0;
   nJetsCut       = nBJetsCut        = 0;
   nJetsJESUp     = nJetsJESDown     = 0;
@@ -2308,7 +2339,6 @@ bool ZTauTauAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
   bool passNominal = false;
   float rNumber = rng->Uniform(1.);
   if (jet->pt > 30) {
-
     // nominal
     ++nJets;
     passNominal = true;
@@ -2327,8 +2357,19 @@ bool ZTauTauAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
         
     // mistag down
     if (particleSelector->BTagModifier(jet, bTagMethod, "down", rNumber, ParticleSelector::kBTagMVAT)) ++nBJetsMistagDown;
+  } else if (jet->pt > 25) {
+    ++nJets25;
+    // passNominal = true;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAT)) ++nBJets25;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAM)) ++nBJets25M;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAL)) ++nBJets25L;
+  } else if (jet->pt > 20) {
+    ++nJets20;
+    // passNominal = true;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAT)) ++nBJets20;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAM)) ++nBJets20M;
+    if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber, ParticleSelector::kBTagMVAL)) ++nBJets20L;
   }
-
   // jet energy corrections
   double jec = particleSelector->JetCorrector(jet, "DummyName");
   float jecUnc = particleSelector->JetUncertainty(jet,"Total");

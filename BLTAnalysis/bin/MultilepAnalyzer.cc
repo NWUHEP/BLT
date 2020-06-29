@@ -52,12 +52,11 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
 
     singleElectronTriggerName = "HLT_Ele27_WPTight_Gsf_v*";
+    if(params->period == "2017") singleElectronTriggerName = "HLT_Ele35_WPTight_Gsf_v*";
     if(params->period == "2018") singleElectronTriggerName = "HLT_Ele32_WPTight_Gsf_v*";
-    
 
     singleMuonTriggerName  = "HLT_IsoMu24_v*";
     singleMuonTriggerName2 = "HLT_IsoTkMu24_v*";
- 
     if(params->period == "2017"){
         singleMuonTriggerName = "HLT_IsoMu27_v*";
         singleMuonTriggerName2 = "HLT_IsoTkMu27_v*";
@@ -257,13 +256,58 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     const bool isData = (fInfo->runNum != 1);
     particleSelector->SetRealData(isData);
 
-    /* Apply lumi mask */
+
+    /* -------- lumi mask ---------*/
     if (isData) {
         RunLumiRangeMap::RunLumiPairType rl(fInfo->runNum, fInfo->lumiSec);
         if(!lumiMask.HasRunLumi(rl)) 
             return kTRUE;
     }
     hTotalEvents->Fill(2);
+
+
+    /* -------- Vertices ---------*/
+
+    if (fInfo->hasGoodPV) {
+        assert(fPVArr->GetEntries() != 0);
+        TVector3 pv;
+        copy_xyz((TVertex*) fPVArr->At(0), pv);
+        particleSelector->SetPV(pv);
+    } else {
+        return kTRUE;
+    }
+    hTotalEvents->Fill(3);
+    particleSelector->SetNPV(fInfo->nPU + 1);
+    particleSelector->SetRho(fInfo->rhoJet);
+
+
+
+    /* -------- Trigger --------- */
+    bool passTrigger = false;
+    vector<string> passTriggerNames;
+    for (unsigned i = 0; i < triggerNames.size(); ++i) {
+        bool triggered = false;
+        
+        triggered = trigger->pass(triggerNames[i], fInfo->triggerBits);
+        // cout<<triggerNames[i]<<triggered<<endl;
+        passTrigger |= triggered;
+
+        if (triggered) {
+            passTriggerNames.push_back(triggerNames[i]);
+        }
+    }
+
+    bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName) != passTriggerNames.end();
+    muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName2) != passTriggerNames.end();
+    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleElectronTriggerName) != passTriggerNames.end();
+
+    if (!passTrigger)
+        return kTRUE;
+    hTotalEvents->Fill(4);
+
+
+
+
 
     // Set data period for 2016 MC scale factors
     mcEra = -1;
@@ -615,45 +659,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     ///////////////////
     // Select objects//
     ///////////////////
-
-    /* -------- Vertices ---------*/
-
-    if (fInfo->hasGoodPV) {
-        assert(fPVArr->GetEntries() != 0);
-        TVector3 pv;
-        copy_xyz((TVertex*) fPVArr->At(0), pv);
-        particleSelector->SetPV(pv);
-    } else {
-        return kTRUE;
-    }
-    hTotalEvents->Fill(3);
-    particleSelector->SetNPV(fInfo->nPU + 1);
-    particleSelector->SetRho(fInfo->rhoJet);
-
-
-
-    /* -------- Trigger --------- */
-    bool passTrigger = false;
-    vector<string> passTriggerNames;
-    for (unsigned i = 0; i < triggerNames.size(); ++i) {
-        bool triggered = false;
-        triggered = trigger->pass(triggerNames[i], fInfo->triggerBits);
-        passTrigger |= triggered;
-
-        if (triggered) {
-            passTriggerNames.push_back(triggerNames[i]);
-        }
-    }
-
-    bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName) != passTriggerNames.end();
-    muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), singleMuonTriggerName2) != passTriggerNames.end();
-    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleElectronTriggerName) != passTriggerNames.end();
-
-    if (!passTrigger)
-        return kTRUE;
-    hTotalEvents->Fill(4);
-
-
 
 
     /* -------- MUONS ---------*/

@@ -103,14 +103,15 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
   //For saving extra information for debugging/signal loss understanding
   saveExtraInfo = false;
 
-  vector<std::string> channelNames = {"etau","mutau","emu","mumu","all","jets"};
+  dollgStudy = true; //whether to do llg study analysis
+  vector<std::string> channelNames = {"etau","mutau","emu","mumu","all","jets", "llg_study"};
 
   for (unsigned i = 0; i < channelNames.size(); ++i) {
     string channel = channelNames[i];
     if(channel == "all" && !saveExtraInfo) continue; // only make this selection if filling it
     if(channel != "jets" && params->selection == "jet_study") continue; //only do jets channel
     if(channel == "jets" && params->selection != "jet_study") continue; //don't do jets channel
-    
+    if(channel == "llg_study" && !dollgStudy) continue; //only initialize llg data if asked to
     outFile->mkdir(channel.c_str());
     outFile->cd(channel.c_str());
     string treeName = "bltTree_" + params->datasetgroup;
@@ -156,9 +157,13 @@ void ZTauTauAnalyzer::Begin(TTree *tree)
       tree->Branch("leptonOneFlavor", &leptonOneFlavor);
       tree->Branch("leptonTwoFlavor", &leptonTwoFlavor);
       tree->Branch("photonP4",        &photonOneP4); //highest pT photon
+      tree->Branch("photonMVA",       &photonMVA); //highest pT photon mva score
       tree->Branch("jetP4",           &jetOneP4); //highest pT jet
       tree->Branch("tauP4",           &tauOneP4); //only for mumu/ee channels
-
+      tree->Branch("tauFlavor",       &tauFlavor); //to store charge 
+      if (channel == "llg_study") {
+	tree->Branch("jetTwoP4", &jetTwoP4);
+      }
       tree->Branch("genLeptonOneP4",  &genLeptonOneP4); //closest true lepton p4
       tree->Branch("genLeptonTwoP4",  &genLeptonTwoP4);
 
@@ -301,7 +306,8 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
     std::cout << "... Processing event " << entry 
 	      << " Run: " << fInfo->runNum 
 	      << " Lumi: " << fInfo->lumiSec 
-	      << " Event: " << fInfo->evtNum 
+	      << " Event: " << fInfo->evtNum
+	      << ", so far there are " << this->passedEvents << " passed events"
 	      << std::endl;
   }
   //Whether or not to filter out events where selected
@@ -1809,12 +1815,14 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       tauVetoedJetPtPair= GetTauVetoedJetPt(tauOneP4, vetoedJets);
       tauVetoedJetPt    = tauVetoedJetPtPair.first;
       tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
+      tauFlavor         = taus[0]->q*15;
     } else {
       tauOneP4.SetXYZT(0.,0.,0.,0.);
       tauDecayMode      = -100;
       tauMVA            = -100.;
       tauVetoedJetPt    = -100.;
       tauVetoedJetPtUnc = -100.;
+      tauFlavor         = 0.;
     }
 
     // test if selected lepton fire the trigger.
@@ -1978,9 +1986,168 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
       jetsbMVA[index] = jets[index]->bmva;      
       jetsGenFlavor[index] = jets[index]->partonFlavor;      
     }
-  } else {
-    return kTRUE;
+  } //end exclusive selections
+
+  //save the state from the channel selections above
+  if(channel != "") {
+    outFile->cd(channel.c_str());
+    outTrees[channel]->Fill();
+    this->passedEvents++;
   }
+  
+  //llg study selection
+  // at least 2 jets, a photon, an electron/muon to trigger, no more than 2 electrons + muons, but at least 2 leptons for qcd sign test
+  if(dollgStudy && nJets > 1 && (nElectrons + nMuons) < 3 && (nElectrons + nMuons) > 0 && nPhotons > 0 && (nElectrons + nMuons + nTaus) > 1) {
+    std::string channelPrev = channel;
+    channel = "llg_study";
+    bool passElectronTrigger = false;
+    bool passMuonTrigger = false;
+    for(unsigned index = 0; index < nElectrons; ++index) {
+      passElectronTrigger |= electronTriggered && electrons[index]->pt > 30.;
+    }
+    for(unsigned index = 0; index < nMuons; ++index) {
+      passMuonTrigger |= muonTriggered && muons[index]->pt > 25.;
+    }
+
+    if (!passElectronTrigger && !passMuonTrigger)
+      return kTRUE;
+    eventCounts[channel]->Fill(2);
+    TLorentzVector lv[2];
+    int lf[2]      ;
+    float liso[2]  ;
+    float ld0[2]   ;
+    float lid[2]   ;
+    float lidv[2]  ;
+    float lreco[2] ;
+    float lrecov[2];
+    pair<float, float>  effs;
+    pair<float, float>  errs;
+    EfficiencyContainer effConts[2];
+    unsigned nfilled = 0;
+    for(unsigned nelec = 0; nelec < nElectrons; ++nelec) {
+      lv[nfilled].SetPtEtaPhiM(electrons[nelec]->pt,electrons[nelec]->eta,electrons[nelec]->phi,0.511e-3);
+      lf[nfilled] = electrons[nelec]->q*11;
+      liso[nfilled] = GetElectronIsolation(electrons[nelec], fInfo->rhoJet);
+      ld0[nfilled] = electrons[nelec]->d0;
+      if(!isData) {
+	//ID weights
+	EfficiencyContainer effCont = weights->GetElectronIDEff(lv[nfilled]);
+	effs = effCont.GetEff();
+	errs = effCont.GetErr();
+	lid[nfilled] = effs.first/effs.second;
+	lidv[nfilled] = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+	eventWeight *= lid[nfilled];
+	//Reco weights
+	effCont = weights->GetElectronRecoEff(lv[nfilled]);
+	effs = effCont.GetEff();
+	errs = effCont.GetErr();
+	lreco[nfilled] = effs.first/effs.second;
+	lrecov[nfilled] = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+	eventWeight *= lreco[nfilled];
+	//Trigger information
+	effConts[nfilled] = weights->GetTriggerEffWeight("HLT_Ele27_WPTight_Gsf_v*", lv[nfilled]);
+      }
+      ++nfilled;      
+    }
+    for(unsigned nmu = 0; nmu < nMuons; ++nmu) {
+      lv[nfilled].SetPtEtaPhiM(muons[nmu]->pt,muons[nmu]->eta,muons[nmu]->phi,105.66e-3);
+      lf[nfilled] = muons[nmu]->q*13;
+      liso[nfilled] = GetMuonIsolation(muons[nmu]);
+      ld0[nfilled] = muons[nmu]->d0;
+      if(!isData) {
+	//ID weights
+	EfficiencyContainer effCont = weights->GetMuonIDEff(lv[nfilled]);
+	effs = effCont.GetEff();
+	errs = effCont.GetErr();
+	lid[nfilled] = effs.first/effs.second;
+	lidv[nfilled] = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+	eventWeight *= lid[nfilled];
+	//ISO weights
+	effCont = weights->GetMuonISOEff(lv[nfilled]);
+	effs = effCont.GetEff();
+	errs = effCont.GetErr();
+	lreco[nfilled] = effs.first/effs.second;
+	lrecov[nfilled] = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+	eventWeight *= lreco[nfilled];
+	//Trigger information
+	effConts[nfilled] = weights->GetTriggerEffWeight("HLT_IsoMu24_v*", lv[nfilled]);
+      }
+      ++nfilled;      
+    }
+    
+    if(!isData) {
+      //apply the trigger weights
+      if(nfilled == 1) {
+	effs = effConts[0].GetEff();
+	errs = effConts[0].GetErr();
+	triggerWeight = effs.first/effs.second;
+	triggerVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+      } else {
+	triggerWeight = GetTriggerSF(effConts[0], effConts[1]);
+	triggerVar    = GetTriggerSFError(effConts[0], effConts[1]);
+      }
+      eventWeight *= triggerWeight;
+    }    
+    photonOneP4.SetPtEtaPhiM(photons[0]->pt, photons[0]->eta, photons[0]->phi, 0.); //save highest pT photon
+    photonMVA = photons[0]->mva;
+    jetOneP4.SetPtEtaPhiM(jets[0]->pt, jets[0]->eta, jets[0]->phi, jets[0]->mass); //save two highest pT jets
+    jetTwoP4.SetPtEtaPhiM(jets[1]->pt, jets[1]->eta, jets[1]->phi, jets[1]->mass); //save two highest pT jets
+    ///////////tau info///////////////////
+    if(nTaus > 0) {
+      tauOneP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+      tauDecayMode      = taus[0]->decaymode;
+      tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
+      pair <float, float> tauVetoedJetPtPair;
+      tauVetoedJetPtPair= GetTauVetoedJetPt(tauOneP4, vetoedJets);
+      tauVetoedJetPt    = tauVetoedJetPtPair.first;
+      tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
+      tauFlavor         = taus[0]->q*15;
+    } else {
+      tauOneP4.SetXYZT(0.,0.,0.,0.);
+      tauDecayMode      = -100;
+      tauMVA            = -100.;
+      tauVetoedJetPt    = -100.;
+      tauVetoedJetPtUnc = -100.;
+      tauFlavor         = 0.;
+    }
+    //save which triggers passed
+    triggerLeptonStatus = (passElectronTrigger) + 2*(passMuonTrigger);
+
+    //save information from looping over electrons/muons
+    leptonOneP4         = lv[0];
+    leptonOneFlavor     = lf[0];
+    leptonOneIso        = liso[0];
+    leptonOneD0         = ld0[0];
+    leptonOneIDWeight   = lid[0];
+    leptonOneIDVar      = lidv[0];
+    leptonOneRecoWeight = lreco[0];
+    leptonOneRecoVar    = lrecov[0];
+    if(nfilled > 1) {
+      leptonTwoP4         = lv[1];
+      leptonTwoFlavor     = lf[1];
+      leptonTwoIso        = liso[1];
+      leptonTwoD0         = ld0[1];
+      leptonTwoIDWeight   = lid[1];
+      leptonTwoIDVar      = lidv[1];
+      leptonTwoRecoWeight = lreco[1];
+      leptonTwoRecoVar    = lrecov[1];
+    } else {
+      leptonTwoP4.SetPxPyPzE(0.,0.,0.,0.);
+      leptonTwoFlavor     = 0.;
+      leptonTwoIso        = 0.;
+      leptonTwoD0         = 0.;
+      leptonTwoIDWeight   = 0.;
+      leptonTwoIDVar      = 0.;
+      leptonTwoRecoWeight = 0.;
+      leptonTwoRecoVar    = 0.;
+    }
+    outFile->cd(channel.c_str());
+    outTrees[channel]->Fill();
+    this->passedEvents++;
+    if(channelPrev != "") channel = channelPrev;
+    else if(!saveExtraInfo) return kTRUE;
+  } else if (channel == "" && !saveExtraInfo)//no selection
+    return kTRUE;
 
   if(debug)
     cout << "DEBUG: channel: " << channel.c_str()  << endl
@@ -1992,10 +2159,12 @@ Bool_t ZTauTauAnalyzer::Process(Long64_t entry)
   // Fill jet info //
   ///////////////////
 
-  if(!jetStudy && saveExtraInfo && channel == "") channel = "all";
-  outFile->cd(channel.c_str());
-  if(channel != "") outTrees[channel]->Fill();
-  this->passedEvents++;
+  //only fill if saving extra data, since filled above
+  if(!jetStudy && saveExtraInfo && channel == "") {
+    channel = "all";
+    outFile->cd(channel.c_str());
+    outTrees[channel]->Fill();
+  }
   return kTRUE;
 }
 
@@ -2251,11 +2420,6 @@ float ZTauTauAnalyzer::GetZPtWeight(float pt) {
     printf("Warning! Z pT weight < 0: weight = %.3e, pt = %.2f\n", weight, pt);
   }
   return weight;
-  // //4th order polynomial between Z pT 0 - 70 GeV/c from mu+mu no jets/photons/taus selection
-  // if(zpt < 70.)
-  //   zSF *= 1.07803 + zpt*(-0.00331379 + zpt*(-0.000408173 + zpt*(1.31555e-5 - 9.7868e-8*zpt)));
-  // // +-    0.000842871     0.000189752        1.22499e-5         2.83176e-7   2.08083e-9
-  // // chisq / ndof = 2837 / 36
 }
 
 

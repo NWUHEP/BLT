@@ -118,14 +118,14 @@ public:
     Float_t jetsPt[kMaxJets], jetsEta[kMaxJets], jetsPhi[kMaxJets], jetsM[kMaxJets], jetsbMVA[kMaxJets], jetsGenFlavor[kMaxJets];
     
     // lepton variable
-    TLorentzVector leptonOneP4, leptonTwoP4, photonOneP4, jetOneP4, tauOneP4;    
+    TLorentzVector leptonOneP4, leptonTwoP4, photonOneP4, jetOneP4, jetTwoP4, tauOneP4;    
     TLorentzVector genLeptonOneP4, genLeptonTwoP4;
     Float_t leptonOneIso, leptonTwoIso, photonMVA;
     Float_t leptonOneD0, leptonTwoD0;
     Int_t leptonOneFlavor, leptonTwoFlavor;
 
     // tau variable
-    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
+    Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad, tauFlavor;
     Float_t tauGenPt, tauGenEta;
     Float_t tauPt, tauEta, tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
     unsigned long tauHPSDisc; //tau ids
@@ -168,7 +168,8 @@ public:
     ////////////////////////////////
 
     bool saveExtraInfo; //for debugging purposes
-
+    bool dollgStudy; //for saving info for llg study
+  
 private:
 
     //deleting svfit histograms

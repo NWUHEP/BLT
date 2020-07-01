@@ -595,10 +595,8 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
 
 
         // mt cut
-        TLorentzVector metP4;
-        metP4.SetPtEtaPhiM(met, 0, metPhi, 0);
-        leptonOneMetMt = (metP4+electronP4).Mt();
-        if (leptonOneMetMt<40)
+        leptonOneMetMt = sqrt(2*electronP4.Pt()*met*(1-cos(electronP4.Phi() - metPhi)));
+	if (leptonOneMetMt>40)
             return kTRUE;
         eventCounts[channel]->Fill(6);
 
@@ -685,10 +683,8 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(5);
 
         // mt cut
-        TLorentzVector metP4;
-        metP4.SetPtEtaPhiM(met, 0, metPhi, 0);
-        leptonOneMetMt = (metP4+muonP4).Mt();
-        if (leptonOneMetMt<40)
+	leptonOneMetMt = sqrt(2*muonP4.Pt()*met*(1-cos(muonP4.Phi() - metPhi)));
+        if (leptonOneMetMt>40)
             return kTRUE;
         eventCounts[channel]->Fill(6);
 

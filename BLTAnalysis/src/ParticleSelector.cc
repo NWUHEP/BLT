@@ -368,7 +368,7 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
                     + std::max(0., (double)el->neuHadIso + el->gammaIso - _rhoFactor*effArea[iEta]);
 
     bool isoPass = false;
-    if (cutLevel.cutName == "ightElIso"){
+    if (cutLevel.cutName == "tightElIso"){
         if (fabs(el->scEta) <= 1.479) {
             if (combIso/el->pt < 0.0588) isoPass = true;
         } else {

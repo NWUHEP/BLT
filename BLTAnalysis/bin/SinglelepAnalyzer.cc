@@ -74,7 +74,6 @@ void SinglelepAnalyzer::Begin(TTree *tree)
     lumiMask.AddJSONFile(jsonFileName);
     
 
-
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
     string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
@@ -161,6 +160,16 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     eventWeight = 1.;
     this->totalEvents++;
     hTotalEvents->Fill(1);
+
+    const bool isData = (fInfo->runNum != 1);
+    particleSelector->SetRealData(isData);
+    if (!isData) {
+        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
+        if (genWeight < 0) {
+            hTotalEvents->Fill(10);
+        }
+        eventWeight *= genWeight;
+    }
     
     if (entry%10000==0) {
         std::cout << "... Processing event " << entry 
@@ -171,8 +180,7 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     }
 
 
-    const bool isData = (fInfo->runNum != 1);
-    particleSelector->SetRealData(isData);
+
 
 
      /* -------- Apply lumi mask  ---------*/
@@ -246,14 +254,6 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     vector<TGenParticle*> genElectrons, genMuons;
 
     if (!isData) {
-
-
-        // save gen weight for amc@nlo Drell-Yan sample
-        genWeight = fGenEvtInfo->weight > 0 ? 1 : -1;
-        if (genWeight < 0) {
-            hTotalEvents->Fill(10);
-        }
-        eventWeight *= genWeight;
 
 
         // pileup reweighting
@@ -578,34 +578,36 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
 
-
-        // lepton jet separation
-        bool separation = true;
-        for (const auto& jet: jets) {
-            TLorentzVector jetP4;
-            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            if (jetP4.DeltaR(electronP4) < 0.7) {
-                separation = false;
-                break;
+        if (nJets<4){
+            // lepton jet separation
+            bool separation = true;
+            for (const auto& jet: jets) {
+                TLorentzVector jetP4;
+                jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+                if (jetP4.DeltaR(electronP4) < 0.7) {
+                    separation = false;
+                    break;
+                }
             }
+            if (!separation)
+                return kTRUE;
+            eventCounts[channel]->Fill(5);
+
+
+            // mt cut
+            leptonOneMetMt = sqrt(2*electronP4.Pt()*met*(1-cos(electronP4.Phi() - metPhi)));
+            if (leptonOneMetMt>40)
+                return kTRUE;
+            eventCounts[channel]->Fill(6);
         }
-        if (!separation)
-            return kTRUE;
-        eventCounts[channel]->Fill(5);
 
-
-        // mt cut
-        leptonOneMetMt = sqrt(2*electronP4.Pt()*met*(1-cos(electronP4.Phi() - metPhi)));
-	if (leptonOneMetMt>40)
-            return kTRUE;
-        eventCounts[channel]->Fill(6);
 
 
         // save other lepton variables
         leptonOnePt     = electronP4.Pt();
         leptonOneEta    = electronP4.Eta();
         leptonOnePhi    = electronP4.Phi();
-        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
+        leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet)/electronP4.Pt();
         leptonOneIsoPass= particleSelector->PassElectronIso(electrons[0], cuts->tightElIso, cuts->EAEl);
 
         // correct for MC, including reconstruction and trigger
@@ -667,33 +669,33 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         TLorentzVector muonP4;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
 
-
-        // lepton jet separation
-        bool separation = true;
-        for (const auto& jet: jets) {
-            TLorentzVector jetP4;
-            jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            if (jetP4.DeltaR(muonP4) < 0.7) {
-                separation = false;
-                break;
+        if (nJets<4){
+            // lepton jet separation
+            bool separation = true;
+            for (const auto& jet: jets) {
+                TLorentzVector jetP4;
+                jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+                if (jetP4.DeltaR(muonP4) < 0.7) {
+                    separation = false;
+                    break;
+                }
             }
+            if (!separation)
+                return kTRUE;
+            eventCounts[channel]->Fill(5);
+
+            // mt cut
+            leptonOneMetMt = sqrt(2*muonP4.Pt()*met*(1-cos(muonP4.Phi() - metPhi)));
+            if (leptonOneMetMt>40)
+                return kTRUE;
+            eventCounts[channel]->Fill(6);
         }
-        if (!separation)
-            return kTRUE;
-        eventCounts[channel]->Fill(5);
-
-        // mt cut
-	leptonOneMetMt = sqrt(2*muonP4.Pt()*met*(1-cos(muonP4.Phi() - metPhi)));
-        if (leptonOneMetMt>40)
-            return kTRUE;
-        eventCounts[channel]->Fill(6);
-
 
         // save other lepton variables
         leptonOnePt     = muonP4.Pt();
         leptonOneEta    = muonP4.Eta();
         leptonOnePhi    = muonP4.Phi();
-        leptonOneIso    = GetMuonIsolation(muons[0]);
+        leptonOneIso    = GetMuonIsolation(muons[0])/muonP4.Pt();
         leptonOneIsoPass=(GetMuonIsolation(muons[0])/muonP4.Pt()<0.15);
 
 

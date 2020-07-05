@@ -528,7 +528,8 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
             if (isData){ 
                 if (jet->bmva > 0.9432) ++nBJets;
             } else {
-                if (particleSelector->BTagModifier(jet, "MVAT", "central", gRand)) ++nBJets;
+                float rNumber = rng->Uniform(1.);
+                if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) ++nBJets;
             }
         }
     }

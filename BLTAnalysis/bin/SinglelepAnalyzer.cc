@@ -526,10 +526,10 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
             sumJetPt += jetP4.Pt();
 
             if (isData){ 
-                if (jet->bmva > 0.9432) ++nBJets;
+                if (jet->csv > 0.8484) ++nBJets;
             } else {
                 float rNumber = rng->Uniform(1.);
-                if (particleSelector->BTagModifier(jet, "MVAT", "central", rNumber)) ++nBJets;
+                if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) ++nBJets;
             }
         }
     }

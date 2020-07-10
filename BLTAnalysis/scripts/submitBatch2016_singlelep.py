@@ -252,3 +252,5 @@ batch = bm.BatchMaster(config_list = batch_list,
                        analyzer    = analyzer
                      )
 batch.submit_to_batch()
+
+

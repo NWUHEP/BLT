@@ -10,9 +10,6 @@ import sys
 # MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
 # MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 
-# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
-# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_W1JetsToLNu/Summer16_W1JetsToLNu_bacon_00.root 100000 w1jet w1jet single_lepton 2016 1
-
 
 
 ''' Specify parameters '''
@@ -81,7 +78,6 @@ data_dict['single_mu'] = [
            nJobs     = 30,
            suffix    = 'muon_2016H'
           ),
-
         ]
 
 data_dict['single_el'] = [
@@ -139,12 +135,12 @@ mc_dict['zjets'] = [
     # Drell-Yan
     cfg(data_name = 'DYJetsToLL_M-50_amcatnlo',
         path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo',
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'zjets_m-50_amcatnlo'
        ),
     cfg(data_name = 'DYJetsToLL_M-10to50_amcatnlo',
         path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-10to50_amcatnlo',
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
 
@@ -225,22 +221,22 @@ mc_dict['wjets'] = [
     # W+jets
     cfg(data_name = 'W1JetsToLNu',
         path     = '{0}/Summer16_W1JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w1jets'
        ),
     cfg(data_name = 'W2JetsToLNu',
         path     = '{0}/Summer16_W2JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w2jets'
        ),
     cfg(data_name = 'W3JetsToLNu',
         path     = '{0}/Summer16_W3JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w3jets'
        ),
     cfg(data_name = 'W4JetsToLNu',
         path     = '{0}/Summer16_W4JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w4jets'
        ),
     ]
@@ -249,19 +245,19 @@ mc_dict['ttbar'] = [
     # top
     cfg(data_name = 'ttbar_inclusive',
         path     = '{0}/Summer16_TT_powheg'.format(path),
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'ttbar_inclusive'
        ),    
     # leptonic top
     cfg(data_name = 'ttbar_2l2nu',
         path     = '{0}/Summer16_TTTo2L2Nu_powheg'.format(path),
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'ttbar_2l2nu'
        ),
     # semi leptonic top
     cfg(data_name = 'ttbar_semilepton',
         path     = '{0}/Summer16_TTToSemilepton_powheg'.format(path),
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'ttbar_semilepton'
        )
     ]
@@ -270,51 +266,51 @@ mc_dict['ttbar_systematics'] = [
     # top full gen
     cfg(data_name = 'ttbar_inclusive_tauReweight',
         path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/200520_221006/0000',
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_tauReweight'
        ),
     # fsr
     cfg(data_name = 'ttbar_inclusive_fsrUp',
         path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_fsrUp'
        ),
     cfg(data_name = 'ttbar_inclusive_fsrDown',
         path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_fsrDown'
        ),
     # isr
     cfg(data_name = 'ttbar_inclusive_isrUp',
         path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_isrUp'
        ),
     cfg(data_name = 'ttbar_inclusive_isrDown',
         path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_isrDown'
        ),
     # underline event
     cfg(data_name = 'ttbar_inclusive_ueUp',
         path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_ueUp'
        ),
     cfg(data_name = 'ttbar_inclusive_ueDown',
         path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_ueDown'
        ),
     # matrix element and parton shower matching
     cfg(data_name = 'ttbar_inclusive_mepsUp',
         path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_mepsUp'
        ),
     cfg(data_name = 'ttbar_inclusive_mepsDown',
         path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
-        nJobs    = 50,
+        nJobs    = 20,
         suffix   = 'ttbar_inclusive_mepsDown'
        ),
     ]
@@ -380,39 +376,40 @@ mc_dict['diboson'] = [
       ),
     ]
 
-path = '/eos/uscms/store/user/jbueghly/sync_mc'
-mc_dict['hzg'] = [
-    cfg(data_name = 'hzg_gluglu',
-        path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
-        nJobs     = 9,
-        suffix    = 'hzg_gluglu'
-        ),
-    cfg(data_name = 'hzg_vbf',
-        path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
-        nJobs     = 26,
-        suffix    = 'hzg_vbf'
-        ),
-    cfg(data_name = 'hzg_wplus',
-        path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
-        nJobs     = 61,
-        suffix    = 'hzg_wh'
-        ),
-    cfg(data_name = 'hzg_wminus',
-        path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
-        nJobs     = 59,
-        suffix    = 'hzg_wh'
-        ),
-    cfg(data_name = 'hzg_zh',
-        path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
-        nJobs     = 60,
-        suffix    = 'hzg_zh'
-        ),
-    cfg(data_name = 'hzg_tth',
-        path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
-        nJobs     = 40, 
-        suffix    = 'hzg_tth'
-        ),
-    ]
+# path = '/eos/uscms/store/user/jbueghly/sync_mc'
+# mc_dict['hzg'] = [
+#     cfg(data_name = 'hzg_gluglu',
+#         path      = '{0}/GluGluHToZG_M-125_powheg_calib'.format(path),
+#         nJobs     = 9,
+#         suffix    = 'hzg_gluglu'
+#         ),
+#     cfg(data_name = 'hzg_vbf',
+#         path      = '{0}/VBFHToZG_M-125_powheg_calib'.format(path),
+#         nJobs     = 26,
+#         suffix    = 'hzg_vbf'
+#         ),
+#     cfg(data_name = 'hzg_wplus',
+#         path      = '{0}/WplusHtoZG_M-125_powheg'.format(path),
+#         nJobs     = 61,
+#         suffix    = 'hzg_wh'
+#         ),
+#     cfg(data_name = 'hzg_wminus',
+#         path      = '{0}/WminusHtoZG_M-125_powheg'.format(path),
+#         nJobs     = 59,
+#         suffix    = 'hzg_wh'
+#         ),
+#     cfg(data_name = 'hzg_zh',
+#         path      = '{0}/ZHtoZG_M-125_powheg'.format(path),
+#         nJobs     = 60,
+#         suffix    = 'hzg_zh'
+#         ),
+#     cfg(data_name = 'hzg_tth',
+#         path      = '{0}/ttHtoZG_M-125_powheg'.format(path),
+#         nJobs     = 40, 
+#         suffix    = 'hzg_tth'
+#         ),
+#     ]
+
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 

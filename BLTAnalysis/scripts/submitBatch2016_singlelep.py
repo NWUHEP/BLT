@@ -18,7 +18,7 @@ period     = '2016'
 analyzer   = 'SinglelepAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets']
 
 
 # data_samples = []
@@ -167,6 +167,36 @@ mc_dict['wjets'] = [
         path     = '{0}/Summer16_W4JetsToLNu'.format(path),
         nJobs    = 40,
         suffix   = 'w4jets'
+       ),
+    ]
+
+
+mc_dict['gjets'] = [
+    # g+jets
+    cfg(data_name = 'gjets_ht40to100',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_201210/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht40to100'
+       ),
+    cfg(data_name = 'gjets_ht100to200',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_200727/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht100to200'
+       ),
+    cfg(data_name = 'gjets_ht200to400',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_200045/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht200to400'
+       ),
+    cfg(data_name = 'gjets_ht400to600',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_195447/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht400to600'
+       ),
+    cfg(data_name = 'gjets_ht600toinf',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_185407/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht600toinf'
        ),
     ]
 

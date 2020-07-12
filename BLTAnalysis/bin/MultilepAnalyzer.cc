@@ -75,7 +75,6 @@ void MultilepAnalyzer::Begin(TTree *tree)
 
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    // string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/roccor_"+params->period+".txt";
     string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
     cout<< "-- use muon Roc Correction: " << muonCorrFileName <<endl;
     muonCorr = new RoccoR(muonCorrFileName);
@@ -976,11 +975,22 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(4);
 
 
+
+
         // convert to TLorentzVectors
         TLorentzVector muonOneP4, muonTwoP4, dimuonP4;
         muonOneP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
         muonTwoP4.SetPtEtaPhiM(muons[1]->pt, muons[1]->eta, muons[1]->phi, 0.10566);
         dimuonP4 = muonOneP4 + muonTwoP4;
+
+        if  ( (muons[0]->q * muons[1]->q) >0)
+            return kTRUE;
+        eventCounts[channel]->Fill(5);
+
+        if (dimuonP4.M()<12 || (dimuonP4.M() > 80 && dimuonP4.M() < 102))
+            return kTRUE;
+        eventCounts[channel]->Fill(6);
+
 
         leptonOneP4     = muonOneP4;
         leptonOneIso    = GetMuonIsolation(muons[0]);
@@ -1101,6 +1111,14 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
         electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6);
         dielectronP4 = electronOneP4 + electronTwoP4;
+
+        if  ( (electrons[0]->q * electrons[1]->q) >0)
+            return kTRUE;
+        eventCounts[channel]->Fill(5);
+
+        if (dielectronP4.M()<12 || (dielectronP4.M() > 80 && dielectronP4.M() < 102))
+            return kTRUE;
+        eventCounts[channel]->Fill(6);
 
         leptonOneP4     = electronOneP4;
         leptonOneIso    = GetElectronIsolation(electrons[0], fInfo->rhoJet);
@@ -1364,9 +1382,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         TLorentzVector electronP4, tauP4;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
@@ -1476,9 +1494,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         TLorentzVector muonP4, tauP4;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
@@ -1584,9 +1602,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         TLorentzVector electronP4, tauP4;
         electronP4.SetPtEtaPhiM(fail_electrons[0]->pt, fail_electrons[0]->eta, fail_electrons[0]->phi, 511e-6);
@@ -1695,9 +1713,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        // if (nJetsCut < 2 || nBJetsCut < 1)
-        //     return kTRUE;
-        // eventCounts[channel]->Fill(4);
+        if (nJetsCut < 2 || nBJetsCut < 1)
+            return kTRUE;
+        eventCounts[channel]->Fill(4);
 
         TLorentzVector muonP4, tauP4;
         muonP4.SetPtEtaPhiM(fail_muons[0]->pt, fail_muons[0]->eta, fail_muons[0]->phi, 0.10566);

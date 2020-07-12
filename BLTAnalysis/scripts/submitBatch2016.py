@@ -20,7 +20,7 @@ period     = '2016'
 analyzer   = 'MultilepAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson'] + ['ttbar_systematics']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets'] #+ ['ttbar_systematics']
 
 
 # data_samples = []
@@ -144,24 +144,23 @@ mc_dict['zjets'] = [
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
 
-    cfg(data_name = 'DYToLL_0J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z0jets_m-50_amcatnlo'
-       ),
+#    cfg(data_name = 'DYToLL_0J_amcatnlo',
+#        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_0J_amcatnlo',
+#        nJobs    = 10,
+#        suffix   = 'z0jets_m-50_amcatnlo'
+#       ),
 
-    cfg(data_name = 'DYToLL_1J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z1jets_m-50_amcatnlo'
-       ),
+#    cfg(data_name = 'DYToLL_1J_amcatnlo',
+#        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_1J_amcatnlo',
+#        nJobs    = 10,
+#        suffix   = 'z1jets_m-50_amcatnlo'
+#       ),
 
-    cfg(data_name = 'DYToLL_2J_amcatnlo',
-        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
-        nJobs    = 10,
-        suffix   = 'z2jets_m-50_amcatnlo'
-       ),
-
+#    cfg(data_name = 'DYToLL_2J_amcatnlo',
+#        path     = '/eos/uscms/store/user/naodell/bacontuples/Summer16_DYToLL_2J_amcatnlo',
+#        nJobs    = 10,
+#        suffix   = 'z2jets_m-50_amcatnlo'
+#       ),
 
     # cfg(data_name = 'DYJetsToLL_M-50',
     #    path     = '{0}/DYJetsToLL_M-50_madgraph'.format(path),
@@ -240,6 +239,38 @@ mc_dict['wjets'] = [
         suffix   = 'w4jets'
        ),
     ]
+
+
+
+mc_dict['gjets'] = [
+    # g+jets
+    cfg(data_name = 'gjets_ht40to100',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-40To100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_201210/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht40to100'
+       ),
+    cfg(data_name = 'gjets_ht100to200',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_200727/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht100to200'
+       ),
+    cfg(data_name = 'gjets_ht200to400',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_200045/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht200to400'
+       ),
+    cfg(data_name = 'gjets_ht400to600',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_195447/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht400to600'
+       ),
+    cfg(data_name = 'gjets_ht600toinf',
+        path     = '/eos/uscms/store/user/zchen/GJets_DR-0p4_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/CRAB3/200709_185407/*/',
+        nJobs    = 10,
+        suffix   = 'gjets_ht600toinf'
+       ),
+    ]
+
 
 mc_dict['ttbar'] = [
     # top

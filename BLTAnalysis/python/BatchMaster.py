@@ -1,4 +1,4 @@
-import sys, os, subprocess, fileinput, math, datetime
+import sys, os, glob, subprocess, fileinput, math, datetime
 
 def get_current_time():
     now = datetime.datetime.now()
@@ -33,7 +33,8 @@ class BatchMaster():
         self._location    = location
     
     def split_jobs_by_dataset(self, directory, nJobs):
-        fileList = os.listdir(directory)
+        query = directory+"*.root" if directory[-1]=="/" else directory+"/*.root"
+        fileList = glob.glob(query)
         nFiles = len(fileList)
         
         # Split files to requested number.  Cannot exceed
@@ -79,13 +80,19 @@ class BatchMaster():
 
             ## make file with list of inputs ntuples for the analyzer
             input_file = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._data_name, str(i+1)), 'w')
-            path = cfg._path
             if self._location == 'lpc':
-                path = 'root://cmseos.fnal.gov/' + cfg._path[10:]
-
-            for file in source:
-                input_file.write(path+'/'+file+'\n')
+                for file in source:
+                    input_file.write('root://cmseos.fnal.gov/'+file[10:]+'\n')
+            else:
+                for file in source:
+                    input_file.write(file+'\n')
             input_file.close()
+
+            # path = cfg._path
+            # path = 'root://cmseos.fnal.gov/' + cfg._path[10:]
+            # for file in source:
+            #     input_file.write(path+'/'+file+'\n')
+            # input_file.close()
 
             ### set output directory
 

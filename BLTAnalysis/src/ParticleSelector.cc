@@ -300,7 +300,7 @@ bool ParticleSelector::PassElectronMVA(const baconhep::TElectron* el, const Cuts
     return elPass;
 }
 
-bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel, float EAEl[7]) const 
+bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const int cutLevel) const 
 {
     int iEta = 0;
     float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
@@ -316,12 +316,19 @@ bool ParticleSelector::PassElectronIso(const baconhep::TElectron* el, const Cuts
                     + std::max(0., (double)el->neuHadIso + el->gammaIso - _rhoFactor*effArea[iEta]);
 
     bool isoPass = false;
-    if (fabs(el->scEta) <= 1.479) {
-        if (combIso/el->pt < 0.0588) isoPass = true;
-    } else {
-        if (combIso/el->pt < 0.0571) isoPass = true;
+    if (cutLevel == 0) {
+        if (fabs(el->scEta) <= 1.479) {
+            if (combIso/el->pt < 0.0588) isoPass = true;
+        } else {
+            if (combIso/el->pt < 0.0571) isoPass = true;
+        }
+    } else if (cutLevel == 1) {
+        if (fabs(el->scEta) <= 1.479) {
+            if (combIso/el->pt < 0.2) isoPass = true;
+        } else {
+            if (combIso/el->pt < 0.0821) isoPass = true;
+        }
     }
-
     return isoPass;
 }
 

@@ -792,10 +792,11 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && fabs(muon->d0)   < 0.2
                 && fabs(muon->dz)   < 0.5
            ) {
-            if (GetMuonIsolation(muon)/muonP4.Pt() < 0.15) {
+            float relIso = GetMuonIsolation(muon)/muonP4.Pt();
+            if (relIso < 0.15) {
                 muons.push_back(muon);
                 veto_muons.push_back(muonP4);
-            } else {
+            } else if (relIso < 0.25) {
                 fail_muons.push_back(muon);
             }
         }
@@ -839,15 +840,15 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
            ) {
-            if (particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl)) {
+
+            if (particleSelector->PassElectronIso(electron, 0)) {
                 electrons.push_back(electron);
                 veto_electrons.push_back(electronP4);
-            } else {
+            } else if (particleSelector->PassElectronIso(electron, 1)) {
                 fail_electrons.push_back(electron);
             }
         }
     }
-    //cout << fElectronArr->GetEntries() << ", " << electrons.size() << ", " << fail_electrons.size() << endl;
 
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
     sort(fail_electrons.begin(), fail_electrons.end(), sort_by_higher_pt<TElectron>);
@@ -1872,7 +1873,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
     // get fakes for ejet, etau, mujet, and mutau selections
     if (fail_muons.size() >= 1 && muons.size() == 0 && electrons.size() == 0) {
 
-        TMuon* fmuon = fail_muons[0]; // if size of fakeables > 1 => do something?
+        TMuon* fmuon = fail_muons[0]; // if size of fakeables > 1 => do something else?
+        nMuons = fail_muons.size();
 
         // remove fake muon candidate from the jet collection
         vector<TJet*> new_jets;
@@ -1902,7 +1904,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (triggered && taus.size() == 1) {
             channel = "mutau_fakes";
             eventCounts[channel]->Fill(1);
-            nMuons = fail_muons.size();
 
             if (fmuon->pt < 25)
                 return kTRUE;
@@ -1934,21 +1935,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
                 jetOneTag      = new_jets[0]->csv;
                 jetOneFlavor   = new_jets[0]->hadronFlavor;
-            } else {
-                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetOneTag    = 0.;
-                jetOneFlavor = 0;
-            }
-
+            } 
             if (nJets >= 2) {
                 jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
                 jetTwoTag      = new_jets[1]->csv;
                 jetTwoFlavor   = new_jets[1]->hadronFlavor;
-            } else {
-                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetTwoTag    = 0.;
-                jetTwoFlavor = 0;
-            }
+            } 
 
             if (!isData) {
                 pair<int, int> pdgId;           
@@ -1994,10 +1986,9 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 eventWeight *= triggerWeight;
                 eventWeight *= leptonOneIDWeight*leptonTwoIDWeight*leptonOneRecoWeight*leptonTwoRecoWeight;
             }
-        } else if (triggered && taus.size() == 0 && (nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2)) {
+        } else if (triggered && taus.size() == 0 && ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2))) {
             channel = "mujet_fakes";
             eventCounts[channel]->Fill(1);
-            nMuons = fail_muons.size();
 
             // convert to TLorentzVectors
             if (fmuon->pt < 25.)
@@ -2006,6 +1997,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
             TLorentzVector muonP4;
             muonP4.SetPtEtaPhiM(fmuon->pt, fmuon->eta, fmuon->phi, 0.1052);
+
             leptonOneP4     = muonP4;
             leptonOneIso    = GetMuonIsolation(fmuon);
             leptonOneFlavor = fmuon->q*13;
@@ -2022,31 +2014,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
                 jetTwoTag      = new_jets[1]->csv;
                 jetTwoFlavor   = new_jets[1]->hadronFlavor;
-            } else {
-                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetOneTag    = 0.;
-                jetOneFlavor = 0;
-                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetTwoTag    = 0.;
-                jetTwoFlavor = 0;
-            }
+            } 
             if (nJets >= 3) {
                 jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
                 jetThreeTag    = new_jets[2]->csv;
                 jetThreeFlavor = new_jets[2]->hadronFlavor;
-            } else { 
-                jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetThreeTag    = 0.;
-                jetThreeFlavor = 0;
-            }
+            } 
             if (nJets >= 4) {
                 jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
                 jetFourTag     = new_jets[3]->csv;
                 jetFourFlavor  = new_jets[3]->hadronFlavor;
-            } else { 
-                jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetFourTag    = 0.;
-                jetFourFlavor = 0;
             }
 
             if (!isData) {
@@ -2088,6 +2065,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         //cout << fail_electrons.size() << endl;
 
         TElectron* felectron = fail_electrons[0];
+        nElectrons = fail_electrons.size();
 
         // remove fake electron candidate from the jet collection
         vector<TJet*> new_jets;
@@ -2117,7 +2095,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         if (triggered && taus.size() == 1) {
             channel = "etau_fakes";
             eventCounts[channel]->Fill(1);
-            nElectrons = fail_electrons.size();
 
             if (felectron->pt < 30)
                 return kTRUE;
@@ -2154,20 +2131,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jetOneP4.SetPtEtaPhiM(new_jets[0]->pt, new_jets[0]->eta, new_jets[0]->phi, new_jets[0]->mass);
                 jetOneTag      = new_jets[0]->csv;
                 jetOneFlavor   = new_jets[0]->hadronFlavor;
-            } else {
-                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetOneTag    = 0.;
-                jetOneFlavor = 0;
-            }
+            } 
             if (nJets >= 2) {
                 jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
                 jetTwoTag      = new_jets[1]->csv;
                 jetTwoFlavor   = new_jets[1]->hadronFlavor;
-            } else {
-                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetTwoTag    = 0.;
-                jetTwoFlavor = 0;
-            }
+            } 
 
             if (!isData) {
                 pair<int, int> pdgId;           
@@ -2221,7 +2190,6 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         } else if (triggered && taus.size() == 0 && ((nJets >= 4 && nBJets >= 1) || (nJets == 3 && nBJets >= 2))) {
             channel = "ejet_fakes";
             eventCounts[channel]->Fill(1);
-            nElectrons = fail_electrons.size();
 
             // convert to TLorentzVectors
             TLorentzVector electronP4;
@@ -2246,33 +2214,16 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
                 jetTwoP4.SetPtEtaPhiM(new_jets[1]->pt, new_jets[1]->eta, new_jets[1]->phi, new_jets[1]->mass);
                 jetTwoTag      = new_jets[1]->csv;
                 jetTwoFlavor   = new_jets[1]->hadronFlavor;
-            } else {
-                jetOneP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetOneTag    = 0.;
-                jetOneFlavor = 0;
-                jetTwoP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetTwoTag    = 0.;
-                jetTwoFlavor = 0;
-            }
-
+            } 
             if (nJets >= 3) {
                 jetThreeP4.SetPtEtaPhiM(new_jets[2]->pt, new_jets[2]->eta, new_jets[2]->phi, new_jets[2]->mass);
                 jetThreeTag    = new_jets[2]->csv;
                 jetThreeFlavor = new_jets[2]->hadronFlavor;
-            } else { 
-                jetThreeP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetThreeTag    = 0.;
-                jetThreeFlavor = 0;
-            }
-
+            } 
             if (nJets >= 4) {
                 jetFourP4.SetPtEtaPhiM(new_jets[3]->pt, new_jets[3]->eta, new_jets[3]->phi, new_jets[3]->mass);
                 jetFourTag     = new_jets[3]->csv;
                 jetFourFlavor  = new_jets[3]->hadronFlavor;
-            } else { 
-                jetFourP4.SetPtEtaPhiM(0., 0., 0., 0.);
-                jetFourTag    = 0.;
-                jetFourFlavor = 0;
             }
 
             if (!isData) {

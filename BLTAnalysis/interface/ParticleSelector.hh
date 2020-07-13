@@ -53,7 +53,7 @@ public:
     // Electrons
     bool PassElectronID(const baconhep::TElectron* el, const Cuts::elIDCuts& cutLevel) const;
     bool PassElectronMVA(const baconhep::TElectron* el, const Cuts::elMVACuts& cutLevel) const;
-    bool PassElectronIso(const baconhep::TElectron* el, const Cuts::elIsoCuts& cutLevel, float EAEl[7]) const;
+    bool PassElectronIso(const baconhep::TElectron* el, const int cutLevel) const;
 
     // Photons
     bool PassPhotonID(const baconhep::TPhoton* ph, const Cuts::phIDCuts& cutLevel) const;

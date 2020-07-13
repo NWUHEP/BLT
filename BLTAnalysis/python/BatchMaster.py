@@ -13,11 +13,11 @@ def make_directory(filePath, clear = True):
 
 class JobConfig():
     '''Class for storing configuration for each dataset'''
-    def __init__(self, data_name, path, suffix, nJobs=1):
-        self._data_name  = data_name
+    def __init__(self, dataname, path, suffix, n_jobs=1):
+        self._dataname  = dataname
         self._path      = path
         self._suffix    = suffix
-        self._nJobs     = nJobs
+        self._n_jobs    = n_jobs
 
 class BatchMaster():
     '''A tool for submitting batch jobs'''
@@ -31,19 +31,29 @@ class BatchMaster():
         self._executable  = executable
         self._location    = location
     
-    def split_jobs_by_dataset(self, directory, nJobs):
-        fileList = os.listdir(directory)
-        nFiles = len(fileList)
+    def split_jobs_by_dataset(self, directory, n_jobs):
+
+        file_list = []
+        if directory[-1] == '*':
+            directory = directory[:-1]
+            subdirs = os.listdir(directory)
+            for subdir in subdirs:
+                new_path = '{0}/{1}'.format(directory, subdir)
+                file_names = ['{0}/{1}'.format(subdir, fn) for fn in os.listdir(new_path)]
+                file_list.extend(file_names)
+        else:
+            file_list = os.listdir(directory)
+        n_files = len(file_list)
         
         # Split files to requested number.  Cannot exceed
         # the number of files being run over.
-        if nJobs > nFiles:
-            nJobs = nFiles
+        if n_jobs > n_files:
+            n_jobs = n_files
 
-        nFilesPerJob = int(math.ceil(float(nFiles)/float(nJobs)))
-        fileSplit = [fileList[i:i+nFilesPerJob] for i in range(0, len(fileList), nFilesPerJob)]
+        n_files_per_job = int(math.ceil(float(n_files)/float(n_jobs)))
+        file_split = [file_list[i:i+n_files_per_job] for i in range(0, len(file_list), n_files_per_job)]
 
-        return fileSplit
+        return file_split
 
     def make_batch_lpc(self, cfg, sources):
         '''
@@ -55,12 +65,11 @@ class BatchMaster():
 
         if self._location == 'lpc':
             output_dir = 'root://cmseos.fnal.gov/' + self._output_dir
-            print output_dir
         else:
             output_dir = self._output_dir
 
         ## Writing the batch config file
-        batch_tmp = open('.batch_tmp_{0}'.format(cfg._data_name,), 'w')
+        batch_tmp = open('.batch_tmp_{0}'.format(cfg._dataname,), 'w')
         batch_tmp.write('Universe              = vanilla\n')
         batch_tmp.write('Should_Transfer_Files = YES\n')
         batch_tmp.write('WhenToTransferOutput  = ON_EXIT\n')
@@ -77,23 +86,27 @@ class BatchMaster():
         for i, source in enumerate(sources):
 
             ## make file with list of inputs ntuples for the analyzer
-            input_file = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._data_name, str(i+1)), 'w')
-            path = cfg._path
+            input_file = open('input_{1}_{2}.txt'.format(self._stage_dir, cfg._dataname, str(i+1)), 'w')
             if self._location == 'lpc':
                 path = 'root://cmseos.fnal.gov/' + cfg._path[10:]
+            else:
+                path = cfg._path
 
-            for file in source:
-                input_file.write(path+'/'+file+'\n')
+            if path[-1] == '*':
+                path = path[:-2]
+
+            for filename in source:
+                input_file.write('{0}/{1}\n'.format(path, filename))
             input_file.close()
 
             ### set output directory
 
-            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._data_name, i+1, cfg._suffix, self._selection, self._period, output_dir))
+            batch_tmp.write('Arguments             = {0} {1} {2} {3} {4} {5}\n'.format(cfg._dataname, i+1, cfg._suffix, self._selection, self._period, output_dir))
             batch_tmp.write('Executable            = {0}\n'.format(self._executable))
-            batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._data_name, i+1))
-            batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._data_name, i+1))
-            batch_tmp.write('Error                 = reports/{0}_{1}_$(Cluster)_$(Process).stderr\n'.format(cfg._data_name, i+1))
-            batch_tmp.write('Log                   = reports/{0}_{1}_$(Cluster)_$(Process).log   \n'.format(cfg._data_name, i+1))
+            batch_tmp.write('Transfer_Input_Files  = source.tar.gz, input_{0}_{1}.txt\n'.format(cfg._dataname, i+1))
+            batch_tmp.write('Output                = reports/{0}_{1}_$(Cluster)_$(Process).stdout\n'.format(cfg._dataname, i+1))
+            batch_tmp.write('Error                 = reports/{0}_{1}_$(Cluster)_$(Process).stderr\n'.format(cfg._dataname, i+1))
+            batch_tmp.write('Log                   = reports/{0}_{1}_$(Cluster)_$(Process).log   \n'.format(cfg._dataname, i+1))
             batch_tmp.write('Queue\n\n')
 
         batch_tmp.close()
@@ -130,7 +143,8 @@ class BatchMaster():
         print 'Ready to submit to batch system {0}!'.format(self._location)
         if self._location in ['lpc', 'nut3']:
             for cfg in self._config_list:
-                print cfg._data_name
-                sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._nJobs)
+                print cfg._dataname
+                sourceFiles = self.split_jobs_by_dataset(cfg._path, cfg._n_jobs)
                 self.make_batch_lpc(cfg, sourceFiles)
-                subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._data_name), shell=True)
+                subprocess.call('condor_submit .batch_tmp_{0}'.format(cfg._dataname), shell=True)
+

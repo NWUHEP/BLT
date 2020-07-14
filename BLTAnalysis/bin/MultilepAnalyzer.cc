@@ -718,7 +718,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
 
         if (
-                electron->pt > 10
+                electron->pt > 20
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
                 && particleSelector->PassElectronIso(electron, cuts->looseElIso, cuts->EAEl)

@@ -1187,8 +1187,8 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(2);
 
         TLorentzVector electronOneP4, electronTwoP4, dielectronP4;
-        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
-        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->eta, electrons[1]->phi, 511e-6);
+        electronOneP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->scEta, electrons[0]->phi, 511e-6);
+        electronTwoP4.SetPtEtaPhiM(electrons[1]->pt, electrons[1]->scEta, electrons[1]->phi, 511e-6);
         dielectronP4 = electronOneP4 + electronTwoP4;
 
         if (dielectronP4.M() < 12.)
@@ -1332,7 +1332,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         TLorentzVector muonP4, electronP4, dilepton;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.1052);
-        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->scEta, electrons[0]->phi, 511e-6);
         dilepton = muonP4 + electronP4;
         if (dilepton.M() < 12)
             return kTRUE;
@@ -1449,7 +1449,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
         eventCounts[channel]->Fill(2);
 
         TLorentzVector electronP4, tauP4, dilepton;
-        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->scEta, electrons[0]->phi, 511e-6);
         tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
         dilepton = electronP4 + tauP4;
         if (dilepton.M() < 12)
@@ -1660,7 +1660,7 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
 
         // convert to TLorentzVectors
         TLorentzVector electronP4;
-        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
+        electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->scEta, electrons[0]->phi, 511e-6);
         float electronIso = GetElectronIsolation(electrons[0], fInfo->rhoJet);
 
         if (electrons[0]->pt < 30. || !electronTriggered)

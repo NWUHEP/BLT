@@ -134,6 +134,8 @@ void MultilepAnalyzer::Begin(TTree *tree)
         if (channel =="ee" || channel == "emu" || channel == "etau"|| channel == "etau_fakes" || channel == "e4j" || channel == "e4j_fakes") {
           tree->Branch("eleTriggerVarTagSyst", &eleTriggerVarTagSyst);
           tree->Branch("eleTriggerVarProbeSyst", &eleTriggerVarProbeSyst);
+          tree->Branch("prefiringWeight", &prefiringWeight);
+          tree->Branch("prefiringVar", &prefiringVar);
         }
 
         tree->Branch("leptonOneIDWeight", &leptonOneIDWeight);
@@ -842,13 +844,27 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     nTaus = taus.size();
     
 
-    
+    /* -------- PHOTONS --------  */
+    vector<TLorentzVector> prefiring_photons;
+    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
+        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
+        TLorentzVector photonP4;
+        photonP4.SetPtEtaPhiM(photon->pt, photon->eta, photon->phi, 0.);
+        // prefiring_photons
+        if( photon->pt>20 && fabs(photon->eta)<3.0 && fabs(photon->eta)>2.0 ){
+            prefiring_photons.push_back(photonP4);
+        }
+    }
+
+
     /* -------- JETS ---------*/
     TClonesArray* jetCollection;
     jetCollection = fAK4CHSArr;
 
     //std::vector<TJet*> jets;
-    std::vector<TJet*> vetoedJets;
+    std::vector<TJet*> vetoed_jets;
+    vector<TLorentzVector> prefiring_jets;
+
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
 
@@ -857,7 +873,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
-
+        
+        // prefiring_jets
+        if (jet->pt>20 && fabs(jet->eta) < 3.0 && fabs(jet->eta)>2.0 ){
+            TLorentzVector jetP4_raw; 
+            jetP4_raw.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            prefiring_jets.push_back(jetP4_raw);
+        }
+        
+        
         // apply JEC offline and get scale uncertainties
         double jec = particleSelector->JetCorrector(jet, "DummyName");
         jet->pt = jet->ptRaw*jec;
@@ -895,7 +919,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         for (const auto& tau: veto_taus) {
             if (jetP4.DeltaR(tau) < 0.4) {
                 tauOverlap = true;
-                vetoedJets.push_back(jet);
+                vetoed_jets.push_back(jet);
                 break;
             }
         }
@@ -1193,6 +1217,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
             eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
+
             // correct for trigger.
 
             // check if lepton could pass the trigger threshold and is matched
@@ -1230,6 +1255,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
+
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
+            
 
         }
     } else if (nElectrons == 1 && nMuons == 1 && nTaus == 0) { // e+mu selection
@@ -1367,6 +1403,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
+
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
+
         }
     } else if (nElectrons == 1 && nMuons == 0 && nTaus == 1 && nFailElectrons == 0 ) { // e+tau selection
         
@@ -1409,7 +1456,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
 
         pair <float, float> tauVetoedJetPtPair;
-        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoed_jets);
         tauVetoedJetPt    = tauVetoedJetPtPair.first;
         tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
         //////////////////////////////////////
@@ -1433,8 +1480,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, true);  // useHadronFlavor = true
 
             // correct for id,reco weights
             EfficiencyContainer effCont;
@@ -1477,7 +1524,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             }
             eventWeight *= triggerWeight;
             
-            
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
 
         }
     } else if (nElectrons == 0 && nMuons == 1 && nTaus == 1 && nFailMuons== 0) { // mu+tau selection
@@ -1521,7 +1576,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
 
         pair <float, float> tauVetoedJetPtPair;
-        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoed_jets);
         tauVetoedJetPt    = tauVetoedJetPtPair.first;
         tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
         //////////////////////////////////////
@@ -1546,8 +1601,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, true);  // useHadronFlavor = true
 
             // correct for id,reco weights
             EfficiencyContainer effCont;
@@ -1630,7 +1685,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
 
         pair <float, float> tauVetoedJetPtPair;
-        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoed_jets);
         tauVetoedJetPt    = tauVetoedJetPtPair.first;
         tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
         //////////////////////////////////////
@@ -1653,8 +1708,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         // correct for MC, including reconstruction and trigger
         if (!isData) {
 
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, true);  // useHadronFlavor = true
 
             // correct for id,reco weights
             EfficiencyContainer effCont;
@@ -1695,6 +1750,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
+
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
             
             
 
@@ -1740,7 +1805,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
         tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
 
         pair <float, float> tauVetoedJetPtPair;
-        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+        tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoed_jets);
         tauVetoedJetPt    = tauVetoedJetPtPair.first;
         tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
         //////////////////////////////////////
@@ -1763,8 +1828,8 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
 
         // correct for MC, including reconstruction and trigger
         if (!isData) {
-            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
-            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+            tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, false); // useHadronFlavor = false
+            tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, true);  // useHadronFlavor = true
 
             // correct for id,reco weights
             EfficiencyContainer effCont;
@@ -1890,6 +1955,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
+
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
         }
     } else if (nElectrons == 0 && nMuons == 1 && nTaus == 0 && nFailMuons== 0) { // mu+4j selection
 
@@ -2150,6 +2225,17 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 return kTRUE;
             }
             eventWeight *= triggerWeight;
+
+            // l1 prefiring
+            if(electronTriggered) {
+                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                prefiringWeight = effs.first/effs.second;
+                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            }
+            eventWeight *= prefiringWeight;
+
         }
     } else {
         return kTRUE;
@@ -2243,7 +2329,7 @@ int MultilepAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
                                         vector<TGenParticle*> genTausHad, 
                                         vector<TGenParticle*> genElectrons, 
                                         vector<TGenParticle*> genMuons,
-                                        vector<TJet*> vetoedJets, 
+                                        vector<TJet*> vetoed_jets, 
                                         bool useHadronFlavor )
 {
     int flavor = 26;
@@ -2286,16 +2372,16 @@ int MultilepAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
     // check if can be tagged by jet flavor
     if (flavor==26){
         float jetPtMax = - 1.0;
-        for (unsigned i = 0; i < vetoedJets.size(); ++i) {
+        for (unsigned i = 0; i < vetoed_jets.size(); ++i) {
 
 
             TLorentzVector jetP4; 
-            jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
+            jetP4.SetPtEtaPhiM(vetoed_jets[i]->pt, vetoed_jets[i]->eta, vetoed_jets[i]->phi, vetoed_jets[i]->mass);
             if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
                 if(useHadronFlavor) {
-                    flavor = vetoedJets[i]->hadronFlavor;
+                    flavor = vetoed_jets[i]->hadronFlavor;
                 } else {
-                    flavor = abs(vetoedJets[i]->partonFlavor);
+                    flavor = abs(vetoed_jets[i]->partonFlavor);
                 }
                 jetPtMax = jetP4.Pt();
             }
@@ -2308,7 +2394,7 @@ int MultilepAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
 }
 
 
-pair<float, float> MultilepAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
+pair<float, float> MultilepAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoed_jets)
 {
 
     float jetPt = -1;
@@ -2318,17 +2404,17 @@ pair<float, float> MultilepAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector
     // check if can be tagged by jet flavor
 
     float jetPtMax = - 1.0;
-    for (unsigned i = 0; i < vetoedJets.size(); ++i) {
+    for (unsigned i = 0; i < vetoed_jets.size(); ++i) {
 
         TLorentzVector jetP4; 
-        jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
+        jetP4.SetPtEtaPhiM(vetoed_jets[i]->pt, vetoed_jets[i]->eta, vetoed_jets[i]->phi, vetoed_jets[i]->mass);
 
         if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
             // cout<<"Energy Jet: "<<jetPtMax<<","<< jetP4.Pt() << endl;
 
             // save 
             jetPt       = jetP4.Pt();
-            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoedJets[i], "Total"));
+            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoed_jets[i], "Total"));
             jetPtUnc    = abs(jetPtUnc);
 
             jetPtMax = jetP4.Pt();

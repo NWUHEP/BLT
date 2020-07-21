@@ -62,6 +62,8 @@ class WeightUtils: public TObject {
         EfficiencyContainer GetMuonISOEff(TLorentzVector&) const; 
         EfficiencyContainer GetElectronIDEff(TLorentzVector&) const;
         EfficiencyContainer GetElectronRecoEff(TLorentzVector&) const;
+        EfficiencyContainer GetElectronPrefiringWeight(vector<TLorentzVector>, vector<TLorentzVector>) const;
+        double  GetPrefiringRate(double, double, TH2D*, int) const;
 
 
         float   GetPhotonMVAIdEff(TPhoton&) const;
@@ -97,6 +99,10 @@ class WeightUtils: public TObject {
         TH2D *_elSF_Trigger_BCDEF, *_elSF_Trigger_GH;
         TH2D *_elSF_Trigger_BCDEF_tag, *_elSF_Trigger_GH_tag;
         TH2D *_elSF_Trigger_BCDEF_probe, *_elSF_Trigger_GH_probe;
+
+        // electron prefiring weights
+        TH2D *_elSF_Prefiring_photon, *_elSF_Prefiring_jet;
+        double prefiringRateSystUnc_ = 0.2; // official value https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc#L221
 
         // // electron trigger efficiencies (the bins for 2.1 < |eta| < 2.4 are copies of the 1.6 to 2.1 bins 
         // float _elePtBins[8] = {30, 32, 35, 40, 50, 60, 120, 9999};

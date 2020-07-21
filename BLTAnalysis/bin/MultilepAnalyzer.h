@@ -138,8 +138,8 @@ private:
 
 
     // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight, zPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
+    Float_t prefiringWeight, triggerWeight, puWeight, topPtWeight, zPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
     Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
 
 

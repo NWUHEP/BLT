@@ -461,13 +461,24 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     }
 
     
-
+    /* -------- PHOTONS --------  */
+    vector<TLorentzVector> prefiring_photons;
+    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
+        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
+        TLorentzVector photonP4;
+        photonP4.SetPtEtaPhiM(photon->pt, photon->eta, photon->phi, 0.);
+        // prefiring_photons
+        if( photon->pt>20 && fabs(photon->eta)<3.0 && fabs(photon->eta)>2.0 ){
+            prefiring_photons.push_back(photonP4);
+        }
+    }
     
     /* -------- JETS ---------*/
     TClonesArray* jetCollection;
     jetCollection = fAK4CHSArr;
 
     std::vector<TJet*> jets;
+    vector<TLorentzVector> prefiring_jets;
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
 
@@ -476,6 +487,14 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
+
+        // prefiring_jets
+        if (jet->pt>20 && fabs(jet->eta) < 3.0 && fabs(jet->eta)>2.0 ){
+            TLorentzVector jetP4_raw; 
+            jetP4_raw.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
+            prefiring_jets.push_back(jetP4_raw);
+        }
+
 
         // apply JEC offline and get scale uncertainties
         double jec = particleSelector->JetCorrector(jet, "DummyName");
@@ -542,6 +561,11 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
     htPhi = hadronicP4.Phi();
 
 
+
+
+
+
+
     /* -------- MET ---------*/
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
@@ -580,20 +604,6 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
 
         if (nJets<4){
-            // // lepton jet separation
-            // bool separation = true;
-            // for (const auto& jet: jets) {
-            //     TLorentzVector jetP4;
-            //     jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            //     if (jetP4.DeltaR(electronP4) < 0.7) {
-            //         separation = false;
-            //         break;
-            //     }
-            // }
-            // if (!separation)
-            //     return kTRUE;
-            // eventCounts[channel]->Fill(5);
-
 
             // mt cut
             leptonOneMetMt = sqrt(2*electronP4.Pt()*met*(1-cos(electronP4.Phi() - metPhi)));
@@ -643,6 +653,15 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
             triggerWeight = effs.first/effs.second;
             triggerVar    = pow(triggerWeight, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= triggerWeight;
+
+            // prefiring
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            eventWeight *= prefiringWeight;
+            
         }
 
     } else if (nMuons == 1 && nElectrons == 0) { // mu selection
@@ -671,19 +690,6 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);
 
         if (nJets<4){
-            // // lepton jet separation
-            // bool separation = true;
-            // for (const auto& jet: jets) {
-            //     TLorentzVector jetP4;
-            //     jetP4.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            //     if (jetP4.DeltaR(muonP4) < 0.7) {
-            //         separation = false;
-            //         break;
-            //     }
-            // }
-            // if (!separation)
-            //     return kTRUE;
-            // eventCounts[channel]->Fill(5);
 
             // mt cut
             leptonOneMetMt = sqrt(2*muonP4.Pt()*met*(1-cos(muonP4.Phi() - metPhi)));
@@ -715,13 +721,16 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
             leptonOneIDVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= leptonOneIDWeight;
 
-            // reconstruction weight
-            effCont = weights->GetMuonISOEff(muonP4);
-            effs = effCont.GetEff();
-            errs = effCont.GetErr();
-            leptonOneRecoWeight = effs.first/effs.second;
-            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            eventWeight *= leptonOneRecoWeight;
+            // iso weight
+            if (leptonOneIsoPass){
+                effCont = weights->GetMuonISOEff(muonP4);
+                effs = effCont.GetEff();
+                errs = effCont.GetErr();
+                leptonOneRecoWeight = effs.first/effs.second;
+                leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+                eventWeight *= leptonOneRecoWeight;
+            }
+
 
 
             // correct for trigger.

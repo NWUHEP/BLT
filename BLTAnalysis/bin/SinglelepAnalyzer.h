@@ -139,8 +139,8 @@ private:
 
 
     // weights and uncertainties
-    Float_t triggerWeight, puWeight, topPtWeight, zPtWeight,leptonOneIDWeight, leptonOneRecoWeight;
-    Float_t triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonOneRecoVar;
+    Float_t prefiringWeight, triggerWeight, puWeight, topPtWeight, zPtWeight,leptonOneIDWeight, leptonOneRecoWeight;
+    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonOneRecoVar;
 
 
     // helper functions

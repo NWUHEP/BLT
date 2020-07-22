@@ -1257,13 +1257,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
             // l1 prefiring
-            if(electronTriggered) {
-                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
-                effs = effCont.GetEff();
-                errs = effCont.GetErr();
-                prefiringWeight = effs.first/effs.second;
-                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            }
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
             
 
@@ -1405,14 +1403,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
             // l1 prefiring
-            if(electronTriggered) {
+            if(!muonTriggered) { // no prefiring effect if triggerred on muon HLT
                 effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
                 effs = effCont.GetEff();
                 errs = effCont.GetErr();
                 prefiringWeight = effs.first/effs.second;
                 prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+                eventWeight *= prefiringWeight;
             }
-            eventWeight *= prefiringWeight;
+            
 
         }
     } else if (nElectrons == 1 && nMuons == 0 && nTaus == 1 && nFailElectrons == 0 ) { // e+tau selection
@@ -1525,13 +1524,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
             
             // l1 prefiring
-            if(electronTriggered) {
-                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
-                effs = effCont.GetEff();
-                errs = effCont.GetErr();
-                prefiringWeight = effs.first/effs.second;
-                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            }
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
 
         }
@@ -1752,13 +1749,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
             // l1 prefiring
-            if(electronTriggered) {
-                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
-                effs = effCont.GetEff();
-                errs = effCont.GetErr();
-                prefiringWeight = effs.first/effs.second;
-                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            }
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
             
             
@@ -1845,15 +1840,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             leptonTwoIDVar    = 0.05;
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
-            // reconstruction weight
-            effCont = weights->GetMuonISOEff(muonP4);
-            effs = effCont.GetEff();
-            errs = effCont.GetErr();
-            leptonOneRecoWeight = effs.first/effs.second;
-            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 1.0;
-            leptonTwoRecoVar    = 0.0;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+            // // reconstruction weight
+            // effCont = weights->GetMuonISOEff(muonP4);
+            // effs = effCont.GetEff();
+            // errs = effCont.GetErr();
+            // leptonOneRecoWeight = effs.first/effs.second;
+            // leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            // leptonTwoRecoWeight = 1.0;
+            // leptonTwoRecoVar    = 0.0;
+            // eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
             // correct for trigger.
             EfficiencyContainer effCont1;
@@ -1957,13 +1952,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
             // l1 prefiring
-            if(electronTriggered) {
-                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
-                effs = effCont.GetEff();
-                errs = effCont.GetErr();
-                prefiringWeight = effs.first/effs.second;
-                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            }
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
         }
     } else if (nElectrons == 0 && nMuons == 1 && nTaus == 0 && nFailMuons== 0) { // mu+4j selection
@@ -2115,15 +2108,15 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             leptonTwoIDVar    = 0.0;
             eventWeight *= leptonOneIDWeight*leptonTwoIDWeight;
 
-            // reconstruction weight
-            effCont = weights->GetMuonISOEff(muonP4);
-            effs = effCont.GetEff();
-            errs = effCont.GetErr();
-            leptonOneRecoWeight = effs.first/effs.second;
-            leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            leptonTwoRecoWeight = 1.0;
-            leptonTwoRecoVar    = 0.0;
-            eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
+            // // reconstruction weight
+            // effCont = weights->GetMuonISOEff(muonP4);
+            // effs = effCont.GetEff();
+            // errs = effCont.GetErr();
+            // leptonOneRecoWeight = effs.first/effs.second;
+            // leptonOneRecoVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
+            // leptonTwoRecoWeight = 1.0;
+            // leptonTwoRecoVar    = 0.0;
+            // eventWeight *= leptonOneRecoWeight*leptonTwoRecoWeight;
 
 
             // correct for trigger.
@@ -2227,13 +2220,11 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
             // l1 prefiring
-            if(electronTriggered) {
-                effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
-                effs = effCont.GetEff();
-                errs = effCont.GetErr();
-                prefiringWeight = effs.first/effs.second;
-                prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
-            }
+            effCont = weights->GetElectronPrefiringWeight(prefiring_photons, prefiring_jets);
+            effs = effCont.GetEff();
+            errs = effCont.GetErr();
+            prefiringWeight = effs.first/effs.second;
+            prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
 
         }

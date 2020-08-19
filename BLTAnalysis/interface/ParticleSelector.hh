@@ -22,6 +22,7 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <map>
 
 //CMSSW libraries
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
@@ -66,7 +67,10 @@ public:
     double JetCorrector(const baconhep::TJet* jet, string) const;
     std::vector<float> GetJetSubcorrections(const baconhep::TJet* jet, string) const;
     double JetUncertainty(const baconhep::TJet* jet) const;
-    pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
+    //pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int) const;
+    pair<float, float> JetResolutionAndSF(const baconhep::TJet* jet, int);
+
+    vector<float> GetCorrectedPhotonMVA(const baconhep::TPhoton* ph, bool isData) const;
 
 private:
     Parameters _parameters;
@@ -76,8 +80,10 @@ private:
     // For offline jet corrections
     FactorizedJetCorrector* _jetCorrector;
     JetCorrectionUncertainty* _jecUncertainty;
-    JME::JetResolution jetResolution;
-    JME::JetResolutionScaleFactor jetResolutionSF;
+    //JME::JetResolution jetResolution;
+    //JME::JetResolutionScaleFactor jetResolutionSF;
+    std::map<std::string, JME::JetResolution> jetResolution;
+    std::map<std::string, JME::JetResolutionScaleFactor> jetResolutionSF;
 
     // For offline Rochester muon corrections
     RoccoR *muonCorr;

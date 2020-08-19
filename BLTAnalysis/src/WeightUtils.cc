@@ -739,29 +739,29 @@ std::pair<float, float> WeightUtils::GetPhotonMVACSEVEff(TPhoton& photon) const
     else if (_dataPeriod == "2018") {
         if (fabs(photon.scEta <= 1.49)) {
             if (tmpPhotonPt <= 30.) {
-                weight *= 0.9869;
+                weight *= 0.987613;
                 err = 0.0043;
             }
             else if (tmpPhotonPt <= 60.) {
-                weight *= 0.9908;
+                weight *= 0.98895;
                 err = 0.0111;
             }
             else {
-                weight *= 1.0084;
+                weight *= 1.00006;
                 err = 0.0857;
             }
         }
         else {
             if (tmpPhotonPt <= 30.) {
-                weight *= 0.9535;
+                weight *= 0.95461;
                 err = 0.0054;
             }
             else if (tmpPhotonPt <= 60.) {
-                weight *= 0.9646;
+                weight *= 0.962451;
                 err = 0.0076;
             }
             else {
-                weight *= 1.0218;
+                weight *= 0.99791;
                 err = 0.1178;
             }
         }

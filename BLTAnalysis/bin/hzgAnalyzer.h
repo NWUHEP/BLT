@@ -104,6 +104,8 @@ public:
     Float_t photonCSEVWeight, photonIDWeight;
     Float_t photonCSEVErr, photonIDErr;
     Float_t photonR9Weight;
+    Float_t addLeptonRecoWeight, addLeptonIDWeight, addLeptonRecoIDWeight;
+    Int_t addLeptonFlavor;
 
     // physics object Lorentz vectors
     Float_t leptonOnePt, leptonOneEta, leptonOnePhi;

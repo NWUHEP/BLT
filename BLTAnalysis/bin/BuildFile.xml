@@ -2,4 +2,6 @@
 <use name="root"/>
 <flags CXXFLAGS="-g -Wall"/>
 <bin file="hzgAnalyzer.cc" name="hzgAnalyzer"></bin>
+<bin file="hltPrintoutAnalyzer.cc" name="hltPrintoutAnalyzer"></bin>
+<bin file="electronEfficAnalyzer.cc" name="electronEfficAnalyzer"></bin>
 <!--<bin file="hzgAnalyzerUCSBSync.cc" name="hzgAnalyzerUCSBSync"></bin>-->

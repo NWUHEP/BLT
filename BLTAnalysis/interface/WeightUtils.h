@@ -58,6 +58,8 @@ class WeightUtils: public TObject {
         EfficiencyContainer GetMuonISOEff(TLorentzVector&) const; 
         EfficiencyContainer GetElectronRecoEff(TLorentzVector&) const;
         EfficiencyContainer GetElectronIDEff(TLorentzVector&) const;
+        EfficiencyContainer GetElectronPrefiringWeight(vector<TLorentzVector>, vector<TLorentzVector>) const;
+        double  GetPrefiringRate(double, double, TH2D*, int) const;
         float GetEleTriggerSyst(string, TLorentzVector&) const;
 
         ClassDef(WeightUtils, 0);
@@ -91,6 +93,10 @@ class WeightUtils: public TObject {
         TH2D *_elSF_Trigger_BCDEF, *_elSF_Trigger_GH;
         TH2D *_elSF_Trigger_BCDEF_tag, *_elSF_Trigger_GH_tag;
         TH2D *_elSF_Trigger_BCDEF_probe, *_elSF_Trigger_GH_probe;
+
+         // electron prefiring weights
+        TH2D *_elSF_Prefiring_photon, *_elSF_Prefiring_jet;
+        double prefiringRateSystUnc_ = 0.2; // official value https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc#L221
 };
 
 #endif

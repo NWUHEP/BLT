@@ -9,8 +9,9 @@ executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
 
-data_samples = []#'single_mu', 'single_el']
-mc_samples   = ['gjets']#'zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets']#, 'wjets_alt', 'qcd']
+data_samples = ['single_mu', 'single_el']
+mc_samples   = ['zjets', 'zjets_ext', 'ttbar', 'diboson', 't', 'wjets', 'ttbar_syst']#, 'wjets_alt', 'qcd']
+mc_samples.extend(['qcd', 'gjets'])
 
 data_dict = {}
 mc_dict = {}
@@ -21,51 +22,51 @@ mc_dict = {}
 
 path = '/eos/uscms/store/group/lpcbacon/12a'
 data_dict['single_mu'] = [
-#        cfg(dataname = 'muon_2016B_v1',
-#            path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016B'
-#           ),
-#        cfg(dataname = 'muon_2016B_v2',
-#            path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016B'
-#           ),
-#        cfg(dataname = 'muon_2016C',
-#            path      = '{0}/SingleMuon_Run2016C-03Feb2017-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016C'
-#           ),
-#        cfg(dataname = 'muon_2016D',
-#            path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016D'
-#           ),
-#        cfg(dataname = 'muon_2016E',
-#            path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016E'
-#           ),
-#        cfg(dataname = 'muon_2016F',
-#            path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016F'
-#           ),
+        cfg(dataname = 'muon_2016B_v1',
+            path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver1-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016B'
+           ),
+        cfg(dataname = 'muon_2016B_v2',
+            path      = '{0}/SingleMuon_Run2016B-03Feb2017_ver2-v2'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016B'
+           ),
+        cfg(dataname = 'muon_2016C',
+            path      = '{0}/SingleMuon_Run2016C-03Feb2017-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016C'
+           ),
+        cfg(dataname = 'muon_2016D',
+            path      = '{0}/SingleMuon_Run2016D-03Feb2017-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016D'
+           ),
+        cfg(dataname = 'muon_2016E',
+            path      = '{0}/SingleMuon_Run2016E-03Feb2017-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016E'
+           ),
+        cfg(dataname = 'muon_2016F',
+            path      = '{0}/SingleMuon_Run2016F-03Feb2017-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016F'
+           ),
         cfg(dataname = 'muon_2016G',
             path      = '{0}/SingleMuon_Run2016G-03Feb2017-v1'.format(path),
             n_jobs     = 30,
             suffix    = 'muon_2016G'
            ),
-#        cfg(dataname = 'muon_2016H_v2',
-#            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016H'
-#           ),
-#        cfg(dataname = 'muon_2016H_v3',
-#            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
-#            n_jobs     = 30,
-#            suffix    = 'muon_2016H'
-#           ),
+        cfg(dataname = 'muon_2016H_v2',
+            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver2-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016H'
+           ),
+        cfg(dataname = 'muon_2016H_v3',
+            path      = '{0}/SingleMuon_Run2016H-03Feb2017_ver3-v1'.format(path),
+            n_jobs     = 30,
+            suffix    = 'muon_2016H'
+           ),
         ]
 
 data_dict['single_el'] = [

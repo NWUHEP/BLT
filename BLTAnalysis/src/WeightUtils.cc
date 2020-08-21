@@ -173,6 +173,15 @@ WeightUtils::WeightUtils(string dataPeriod, string selection, bool isRealData)
     _eleSF_ID[3]->Sort();
     _eleSF_ID[4]->Sort();
 
+    // electron l1 prefiring
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_prefiring/L1prefiring_jetpt_2016BtoH.root";
+    TFile* f_elePrefiringSF_jet = new TFile(fileName.c_str(), "OPEN");
+    _elSF_Prefiring_jet = (TH2D*)f_elePrefiringSF_jet->Get("L1prefiring_jetpt_2016BtoH");
+
+    fileName = cmssw_base + "/src/BLT/BLTAnalysis/data/electron_prefiring/L1prefiring_photonpt_2016BtoH.root";
+    TFile* f_elePrefiringSF_photon = new TFile(fileName.c_str(), "OPEN");
+    _elSF_Prefiring_photon = (TH2D*)f_elePrefiringSF_photon->Get("L1prefiring_photonpt_2016BtoH");
+
 }
 
 void WeightUtils::SetDataBit(bool isRealData)
@@ -377,6 +386,79 @@ EfficiencyContainer WeightUtils::GetElectronIDEff(TLorentzVector& electron) cons
     
     EfficiencyContainer effCont(sf, 1., err, 0.);
     return effCont;
+}
+
+//https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc
+EfficiencyContainer WeightUtils::GetElectronPrefiringWeight(vector<TLorentzVector> prefiring_photons, vector<TLorentzVector> prefiring_jets) const
+{
+
+    //Probability for the event NOT to prefire, computed with the prefiring maps per object.
+    //Up and down values correspond to the resulting value when shifting up/down all prefiring rates in prefiring maps.
+
+    double nonPrefiringProba[3] = {1., 1., 1.};
+    //0: central, 1: up, 2: down
+    for (int fluct = 0; fluct<3; fluct++) {
+
+        for (const auto& photon : prefiring_photons) {
+            nonPrefiringProba[fluct] *= (1. - GetPrefiringRate(photon.Eta(), photon.Pt(), _elSF_Prefiring_photon, fluct));
+        }
+
+        //Now applying the prefiring maps to jets in the affected regions.
+        for (const auto& jet : prefiring_jets) {
+
+            //Loop over photons to remove overlap
+            double nonprefiringprobfromoverlappingphotons = 1.;
+            for (const auto& photon : prefiring_photons) {
+                double dR = jet.DeltaR(photon);
+                if (dR > 0.4)
+                    continue;
+                nonprefiringprobfromoverlappingphotons *= (1. - GetPrefiringRate(photon.Eta(), photon.Pt(), _elSF_Prefiring_photon, fluct));
+            }
+
+            double nonprefiringprobfromoverlappingjet = 1. - GetPrefiringRate(jet.Eta(), jet.Pt(), _elSF_Prefiring_jet, fluct);
+
+            // if not overlap
+            if (nonprefiringprobfromoverlappingphotons == 1.) {
+                nonPrefiringProba[fluct] *= nonprefiringprobfromoverlappingjet;
+            }
+            //If overlapping photons have a non prefiring rate larger than the jet, then replace these weights by the jet one
+            else if (nonprefiringprobfromoverlappingphotons > nonprefiringprobfromoverlappingjet) {
+                if (nonprefiringprobfromoverlappingphotons != 0.) {
+                    nonPrefiringProba[fluct] *= nonprefiringprobfromoverlappingjet / nonprefiringprobfromoverlappingphotons;
+                } else {
+                    nonPrefiringProba[fluct] = 0.;
+                }
+            }
+            //Last case: if overlapping photons have a non prefiring rate smaller than the jet, don't consider the jet in the event weight, and do nothing.
+        }
+    }
+
+    float sf   = nonPrefiringProba[0];
+    float err  = abs(nonPrefiringProba[1]-nonPrefiringProba[2])/2;
+    EfficiencyContainer effCont(sf, 1., err, 0.);
+    // cout << sf << "," << err << endl; // about ~ 0.985775,0.00459289
+    return effCont;
+
+}
+
+double WeightUtils::GetPrefiringRate(double eta, double pt, TH2D* h_prefmap, int fluctuation) const {
+    //same as https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc#L185
+
+    //Check pt is not above map overflow
+    int nbinsy = h_prefmap->GetNbinsY();
+    double maxy = h_prefmap->GetYaxis()->GetBinLowEdge(nbinsy + 1);
+    if (pt >= maxy)
+        pt = maxy - 0.01;
+    int thebin       = h_prefmap->FindBin(eta, pt);
+    double prefrate  = h_prefmap->GetBinContent(thebin);
+    double statuncty = h_prefmap->GetBinError(thebin);
+    double systuncty = prefiringRateSystUnc_ * prefrate;
+
+    if (fluctuation == 1) // up
+        prefrate = std::min(1., prefrate + sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+    if (fluctuation == 2) // down
+        prefrate = std::max(0., prefrate - sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+    return prefrate;
 }
 
 //

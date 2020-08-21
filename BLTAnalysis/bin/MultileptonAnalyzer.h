@@ -111,8 +111,8 @@ public:
     unsigned nBJetsCTagUp, nBJetsCTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
     // weights and uncertainties
-    Float_t eventWeight, triggerWeight, puWeight, topPtWeight, zPtWeight, wwPtWeight, genWeight;
-    Float_t triggerVar, puVar, topPtVar, zPtVar, wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown;
+    Float_t prefiringWeight, eventWeight, triggerWeight, puWeight, topPtWeight, zPtWeight, wwPtWeight, genWeight;
+    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar, wwPtScaleUp, wwPtScaleDown, wwPtResumUp, wwPtResumDown;
     Float_t leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
     Float_t leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
     Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
@@ -141,7 +141,7 @@ public:
     TLorentzVector jetOneP4, jetTwoP4, jetThreeP4, jetFourP4;
     Float_t jetOneTag, jetTwoTag, jetThreeTag, jetFourTag;
     Int_t jetOneFlavor, jetTwoFlavor, jetThreeFlavor, jetFourFlavor;
-    Float_t met, metPhi, ht, htPhi, htSum;
+    Float_t met, metPhi, metCorr, metPhiCorr, ht, htPhi, htSum;
 
     // generator level data
     Int_t genOneId, genTwoId, genOneMother, genTwoMother, genCategory;
@@ -157,8 +157,10 @@ public:
     pair<int, int> GetGenId(vector<baconhep::TGenParticle*>, vector<int>, TLorentzVector);
     vector<baconhep::TJet*> KinematicTopTag(vector<baconhep::TJet*>, TVector2, TLorentzVector);
     void FillPDFHist(vector<float>, string);
+    void ResetEventWeights();
     void ResetJetCounters();
     void JetCounting(TJet* jet, float, float);
+    vector<TJet*> JetCountingForFakes(vector<TJet*>, TLorentzVector&, bool);
 
     //ClassDef(MultileptonAnalyzer,0);
 };

@@ -398,10 +398,12 @@ Bool_t MultileptonAnalyzer::Process(Long64_t entry)
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
             unsigned pid = abs(particle->pdgId);
 
-            //cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
-            //cout << ",| " << particle->pt << ", " << particle->eta;
-            //cout << ",| " << particle->isHardProcess << ", " << particle->fromHardProcessDecayed;
-            //cout << endl;
+            //if (particle->pdgId == 22) {
+            //    cout << i  << ", " << particle->parent << ", " << particle->pdgId << ", " << particle->status;
+            //    cout << ",| " << particle->pt << ", " << particle->eta;
+            //    cout << ",| " << particle->isHardProcess << ", " << particle->fromHardProcessDecayed;
+            //    cout << endl;
+            //}
 
             // parton counting for jet-binned Drell-Yan samples
             if (

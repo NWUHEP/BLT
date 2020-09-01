@@ -18,7 +18,7 @@ period     = '2016'
 analyzer   = 'SinglelepAnalyzer'
 
 data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets', 'qcd']
 
 
 # data_samples = []
@@ -142,7 +142,6 @@ mc_dict['zjets'] = [
         nJobs    = 50,
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
-
     ]
 
 path = '/eos/uscms/store/group/lpcbacon/12'
@@ -268,6 +267,58 @@ mc_dict['diboson'] = [
       ),
     ]
 
+mc_dict['qcd'] = [
+    # qcd
+    cfg(data_name = 'qcd_ht50to100',
+        path     = '{0}/Summer16_QCD_HT50to100'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht50to100'
+       ),
+    cfg(data_name = 'qcd_ht100to200',
+        path     = '{0}/Summer16_QCD_HT100to200'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht100to200'
+       ),
+    cfg(data_name = 'qcd_ht200to300',
+        path     = '{0}/Summer16_QCD_HT200to300'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht200to300'
+       ),
+    
+    cfg(data_name = 'qcd_ht300to500',
+        path     = '{0}/Summer16_QCD_HT300to500'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht300to500'
+       ),
+       
+    cfg(data_name = 'qcd_ht500to700',
+        path     = '{0}/Summer16_QCD_HT500to700'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht500to700'
+       ),
+    cfg(data_name = 'qcd_ht700to1000',
+        path     = '{0}/Summer16_QCD_HT700to1000'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht700to1000'
+       ),
+    cfg(data_name = 'qcd_ht1000to1500',
+        path     = '{0}/Summer16_QCD_HT1000to1500'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht1000to1500'
+       ),
+    
+    cfg(data_name = 'qcd_ht1500to2000',
+        path     = '{0}/Summer16_QCD_HT1500to2000'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht1500to2000'
+       ),
+
+    cfg(data_name = 'qcd_ht2000toInf',
+        path     = '{0}/Summer16_QCD_HT2000toInf'.format(path),
+        nJobs    = 20,
+        suffix   = 'qcd_ht2000toInf'
+       ),
+    ]
 
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 

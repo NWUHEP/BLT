@@ -602,10 +602,10 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
 
         TLorentzVector electronP4;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
-	// mt
+	    // mt
         leptonOneMetMt = sqrt(2*electronP4.Pt()*met*(1-cos(electronP4.Phi() - metPhi)));
  
-        if (nJets<3){
+        if (nJets<=3){
            if (leptonOneMetMt>40)
                 return kTRUE;
             eventCounts[channel]->Fill(6);
@@ -690,7 +690,7 @@ Bool_t SinglelepAnalyzer::Process(Long64_t entry)
         // mt cut
         leptonOneMetMt = sqrt(2*muonP4.Pt()*met*(1-cos(muonP4.Phi() - metPhi)));
 
-        if (nJets<3){
+        if (nJets<=3){
            if (leptonOneMetMt>40)
                 return kTRUE;
             eventCounts[channel]->Fill(6);

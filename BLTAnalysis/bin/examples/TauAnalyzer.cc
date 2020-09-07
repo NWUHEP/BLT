@@ -50,38 +50,35 @@ void TauAnalyzer::Begin(TTree *tree)
     std::string trigfilename = cmssw_base + "/src/BaconAna/DataFormats/data/HLTFile_25ns";
     trigger.reset(new baconhep::TTrigger(trigfilename));
 
+    if (params->selection == "single_lepton") {
+        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+        triggerNames.push_back("HLT_IsoMu24_v*");
+        triggerNames.push_back("HLT_IsoTkMu24_v*");
 
-    singleElectronTriggerName = "HLT_Ele27_WPTight_Gsf_v*";
-    triggerNames.push_back(singleElectronTriggerName);
-    triggerNames.push_back("HLT_IsoMu24_v*");
-    triggerNames.push_back("HLT_IsoTkMu24_v*");
-    
+    } else if (params->selection == "single_muon") {
+        triggerNames.push_back("HLT_IsoMu24_v*");
+        triggerNames.push_back("HLT_IsoTkMu24_v*");
+
+    } else if (params->selection == "single_electron") {
+        triggerNames.push_back("HLT_Ele27_WPTight_Gsf_v*");
+    }
 
     // Weight utility class
     cout<< "Weight utility class"<<endl;
-    cout<< "-- period " << params->period << ", selection " << params->selection <<endl;
     weights.reset(new WeightUtils(params->period, params->selection, false)); // Lumi mask
     // Set up object to handle good run-lumi filtering if necessary
     lumiMask = RunLumiRangeMap();
-    string jsonFileName = "";
-    jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
-    
-   
-
-    cout<< "-- use lumi mask: " << jsonFileName <<endl;
+    string jsonFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"; // 2016 mask
     lumiMask.AddJSONFile(jsonFileName);
     
 
-
     // muon momentum corrections
     cout<< "muon momentum corrections"<<endl;
-    string muonCorrFileName = cmssw_base + "/src/BLT/BLTAnalysis/data/muon_es/rcdata.2016.v3";
-    cout<< "-- use muon Roc Correction: " << muonCorrFileName <<endl;
-    muonCorr = new RoccoR(muonCorrFileName);
-  
+    muonCorr = new RoccoR(cmssw_base + "/src/BLT/BLTAnalysis/data/rcdata.2016.v3");
+
     // electron scale corrections
     cout<< "electron scale corrections"<<endl;
-    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data/electron_es");
+    electronScaler = new EnergyScaleCorrection(cmssw_base + "/src/BLT/BLTAnalysis/data");
 
     // Prepare the output tree
     cout<< "Prepare the output tree"<<endl;
@@ -92,8 +89,6 @@ void TauAnalyzer::Begin(TTree *tree)
 
     string outHistName = params->get_output_treename("TotalEvents");
     hTotalEvents = new TH1D(outHistName.c_str(),"TotalEvents",10,0.5,10.5);
-    outHistName = params->get_output_treename("GenCategory");
-    hGenCat = new TH1D(outHistName.c_str(), "WW decay modes",30,0.5,30.5);
 
     vector<std::string> channelNames = {"tau"};
 
@@ -110,25 +105,15 @@ void TauAnalyzer::Begin(TTree *tree)
         tree->Branch("lumiSection", &lumiSection);
         tree->Branch("nPV", &nPV);
         tree->Branch("nPU", &nPU);
-
-
-        tree->Branch("genTauOneDaughters", &genTauOneDaughters);
-        tree->Branch("genTauTwoDaughters", &genTauTwoDaughters);
-
-
-        // gen level objects
-        tree->Branch("nPartons", &nPartons);
-        tree->Branch("genWeight", &genWeight);
-        tree->Branch("genCategory", &genCategory);
-
+        tree->Branch("mcEra",&mcEra);
+        
         // weights and their uncertainties
         tree->Branch("eventWeight", &eventWeight);
-        tree->Branch("topPtWeight", &topPtWeight);
+        tree->Branch("genWeight", &genWeight);
         tree->Branch("puWeight", &puWeight);
-        tree->Branch("triggerWeight", &triggerWeight);
-        tree->Branch("topPtVar", &topPtVar);
-        
-        // tau stuff
+        tree->Branch("topPtWeight", &topPtWeight);
+
+        // tau staff
         tree->Branch("tauPt",     &tauPt);
         tree->Branch("tauEta",     &tauEta);
         tree->Branch("tauDecayMode",     &tauDecayMode);
@@ -137,31 +122,22 @@ void TauAnalyzer::Begin(TTree *tree)
         tree->Branch("tauGenFlavorHad",  &tauGenFlavorHad);
         tree->Branch("tauVetoedJetPt",   &tauVetoedJetPt);
         tree->Branch("tauVetoedJetPtUnc",&tauVetoedJetPtUnc);
-        
-
-        // ht
-        tree->Branch("htSum", &htSum);
-        tree->Branch("ht", &ht);
-        tree->Branch("htPhi", &htPhi);
-
-        // met
-        tree->Branch("met", &met);
-        tree->Branch("metPhi", &metPhi);
-
+      
         // object counters
         tree->Branch("nMuons", &nMuons);
         tree->Branch("nElectrons", &nElectrons);
         tree->Branch("nTaus", &nTaus);
         tree->Branch("nJets", &nJets);
         tree->Branch("nBJets", &nBJets);
-
+        // ht,met
+        tree->Branch("htSum", &htSum);
+        tree->Branch("ht", &ht);
+        tree->Branch("htPhi", &htPhi);
+        tree->Branch("met", &met);
+        tree->Branch("metPhi", &metPhi);
 
 
         outTrees[channel] = tree;
-
-        // event counter
-        string outHistName = params->get_output_treename("TotalEvents_" + channel);
-        eventCounts[channel] = new TH1D(outHistName.c_str(),"ChannelCounts",10,0.5,10.5);
     }
     cout<< "Done with initialization"<<endl;
     ReportPostBegin();
@@ -224,7 +200,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
     ///////////////////////
 
     vector<TGenParticle*> genTausHad, genElectrons, genMuons;
-
     if (!isData) {
 
 
@@ -253,32 +228,14 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
         topPtWeight = 1.;
         topPtVar = 0.;
 
-        float zPt = -1.;
-        TLorentzVector zP4(0., 0., 0., 0);
-        zPtWeight = 1.;
-        zPtVar    = 0.;
-
-        //   1.c) counting W,tau for WW categorization
-        unsigned wCount     = 0;
-        unsigned tauCount   = 0;
-        bitset<6> wDecay;
-        bitset<4> tauDecay;
-
-
         //   1.d) save gen level tau and leptonic taus, and e.mu
-        vector<TGenParticle*> genTaus, genTausLep, genTausDaughters;
-        
+        vector<TGenParticle*> genTaus, genTausLep;
         
         // 2. loop over gen particles
         for (int i = 0; i < fGenParticleArr->GetEntries(); ++i) {
+            
             TGenParticle* particle = (TGenParticle*) fGenParticleArr->At(i);
-            
-            // // [test] print out gen particles
-            // if  (particle->parent >=0 ){
-            //     TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-            //     if (abs(mother->pdgId) != abs(particle->pdgId) ) std::cout<< " (" << abs(mother->pdgId) << ")" << abs(particle->pdgId); 
-            // }
-            
+            cout<<i << particle->pdgId<<endl;
 
             // 2.a) parton counting: update partonCount
             if (
@@ -294,45 +251,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                 topSF *= exp(0.0615 - 0.0005*particle->pt);
                 ++topCount;
             }
-            // identify Z boson
-            if (abs(particle->pdgId) == 23 && particle->status == 62) {
-                zPt = particle->pt;
-            }
-            // Z not included in low mass DY sample :(
-            if ((abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 || abs(particle->pdgId) == 15) && particle->status == 23 && particle->parent == 0) {
-                TLorentzVector ellP4(0., 0., 0., 0.);
-                ellP4.SetPtEtaPhiM(particle->pt, particle->eta, particle->phi, particle->mass);
-                zP4 += ellP4;
-            }
-
-
-            // 2.c) Tag WW decay based on neutrino flavors: update wCount,tauCount,wDecay,tauDecay
-            unsigned flavor = abs(particle->pdgId);
-            if (
-                    (flavor == 12 || flavor == 14 || flavor == 16)
-                    && particle->parent >=0
-               ) {
-                
-                TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(particle->parent);
-                
-                if (abs(mother->pdgId) == 24) {
-                    wDecay.set(3*wCount + (flavor - 12)/2);
-                    ++wCount;
-                } 
-
-                if (abs(mother->pdgId) == 15 && flavor != 16 && mother->parent >=0) {
-                    TGenParticle* gmother = (TGenParticle*) fGenParticleArr->At(mother->parent); // gmother should not from initial quark
-                    
-                    bool isHard = gmother->status != 2 && gmother->parent != -2;
-                    if (isHard && tauCount<2){
-                        tauDecay.set(2*tauCount + (flavor - 12)/2);
-                        ++tauCount;
-                        // cout<<abs(gmother->pdgId)<<"-"<<abs(mother->pdgId)<<"-"<<abs(particle->pdgId)<<endl;
-                    }                      
-                      
-                } 
-            }
-
 
             // 2.d) This saves gen level tau, leptonic taus, electrons and muons
             if ( particle->parent >=0 ) {
@@ -343,7 +261,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                     bool isHard = gmother->status != 2 && gmother->parent != -2;
 
                     if (isHard && abs(particle->pdgId) == 16) genTaus.push_back(mother); 
-                    if (isHard && abs(particle->pdgId) != 16) genTausDaughters.push_back(particle);
                 }
 
                 if ( abs(particle->pdgId) == 11 || abs(particle->pdgId) == 13 ) {
@@ -359,9 +276,8 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                 
                 
             }
-        }
-        // cout << endl;
-        // cout << "nGenElectron=" << genElectrons.size() << ", nGenMuon= " << genMuons.size() << ", nGenTau= " << genTaus.size() << endl;
+        } cout<<"finish loop"<<endl;
+
         // 3. finish loop over gen particles. now conclude gen level infomation
 
         // 3.a) counting partons: save to nPartons
@@ -372,111 +288,7 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
             topPtWeight *= sqrt(topSF);
             topPtVar    += pow(0.01*topPtWeight, 2);
             eventWeight *= topPtWeight;
-        }
-
-        // 3.b) Z pt weights
-        if (
-                (params->datasetgroup.substr(0, 5) == "zjets" 
-                || params->datasetgroup.substr(0, 6) == "z0jets" 
-                || params->datasetgroup.substr(0, 6) == "z1jets" 
-                || params->datasetgroup.substr(0, 6) == "z2jets") 
-                && (zPt > 0. || zP4.Pt() > 0.)) {
-            if (zP4.Pt() > 0) 
-                zPt = zP4.Pt();
-
-            if (zPt < 140) {
-                zPtWeight = (0.876979 + 4.11598e-3*zPt - 2.3552e-5*zPt*zPt);
-                zPtWeight *= 1.10211*(0.958512 - 0.131835*erf((zPt - 14.1972)/10.1525));
-            } else {
-                zPtWeight = 0.891188;
-            }
-            zPtVar    = 0.01*zPtWeight;
-
-            // apply zPt reweighting
-            eventWeight *= zPtWeight;
-        }
-
-        
-        // 3.c) categorize events: save to genCategory
-        genCategory = 0;
-        
-        if (wCount == 2) { // fully leptonic
-            if (wDecay.test(0) && wDecay.test(3)) {// W->e, W->e
-                hGenCat->Fill(1); 
-                genCategory = 1;
-            } else if (wDecay.test(1) && wDecay.test(4)) {// W->mu, W->mu
-                hGenCat->Fill(2); 
-                genCategory = 2;
-            } else if ((wDecay.test(0) && wDecay.test(4)) || (wDecay.test(1) && wDecay.test(3))) {// W->e, W->mu
-                hGenCat->Fill(3); 
-                genCategory = 3;
-            } else if (wDecay.test(2) && wDecay.test(5)) {// W->tau, W->tau
-                if (tauDecay.test(0) && tauDecay.test(2)) {// tau->e, tau->e
-                    hGenCat->Fill(4); 
-                    genCategory = 4;
-                } else if (tauDecay.test(1) && tauDecay.test(3)) {// tau->mu, tau->mu
-                    hGenCat->Fill(5); 
-                    genCategory = 5;
-                } else if ((tauDecay.test(1) && tauDecay.test(2)) || (tauDecay.test(0) && tauDecay.test(3))) {// tau->e, tau->mu
-                    hGenCat->Fill(6); 
-                    genCategory = 6;
-                } else if (tauDecay.test(0) && tauCount == 1) {// tau->e, tau->h
-                    hGenCat->Fill(7); 
-                    genCategory = 7;
-                } else if (tauDecay.test(1) && tauCount == 1) {// tau->mu, tau->h
-                    hGenCat->Fill(8); 
-                    genCategory = 8;
-                } else if (tauCount == 0) {// tau->h, tau->h
-                    hGenCat->Fill(9); 
-                    genCategory = 9;
-                }
-            } else if ((wDecay.test(0) && wDecay.test(5)) || (wDecay.test(2) && wDecay.test(3))) {// W->e, W->tau
-                if (tauDecay.test(0)) {// tau->e
-                    hGenCat->Fill(10);
-                    genCategory = 10;
-                } else if (tauDecay.test(1)) {// tau->mu
-                    hGenCat->Fill(11);
-                    genCategory = 11;
-                } else if (tauDecay.none()) {// tau->h
-                    hGenCat->Fill(12);
-                    genCategory = 12;
-                }
-            } else if ((wDecay.test(1) && wDecay.test(5)) || (wDecay.test(2) && wDecay.test(4))) {// W->mu, W->tau
-                if (tauDecay.test(0)) {// tau->e
-                    hGenCat->Fill(13);
-                    genCategory = 13;
-                } else if (tauDecay.test(1)) {// tau->mu
-                    hGenCat->Fill(14);
-                    genCategory = 14;
-                } else if (tauDecay.none()) {// tau->h
-                    hGenCat->Fill(15);
-                    genCategory = 15;
-                }
-            } 
-        } else if (wCount == 1) { // semileptonic
-            if (wDecay.test(0)) {// W->e, W->h
-                hGenCat->Fill(16); 
-                genCategory = 16;
-            } else if (wDecay.test(1)) {// W->mu, W->h
-                hGenCat->Fill(17); 
-                genCategory = 17;
-            } else if (wDecay.test(2)) {// W->tau, W->h
-                if (tauDecay.test(0)) {// tau->e
-                    hGenCat->Fill(18);
-                    genCategory = 18;
-                } else if (tauDecay.test(1)) {// tau->mu
-                    hGenCat->Fill(19);
-                    genCategory = 19;
-                } else if (tauDecay.none()) {// tau->h
-                    hGenCat->Fill(20);
-                    genCategory = 20;
-                }
-            }
-        } else { // hadronic
-            hGenCat->Fill(21); 
-            genCategory = 21;
-        }
-
+        } 
         
         // 3.d) genTausHad = genTaus - genTausLep
         for (unsigned i = 0; i < genTaus.size(); ++i) {
@@ -496,43 +308,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
             }
             if (isHad) genTausHad.push_back(genTaus[i]);
         }
-
-        // 3.e) get code for tauDecayMode;
-        std::string genTau1Daughters("0000000");
-        std::string genTau2Daughters("0000000");
-        for (unsigned i = 0; i < genTaus.size(); ++i) {
-          for (unsigned j = 0; j < genTausDaughters.size(); ++j) {
-            TGenParticle* mother = (TGenParticle*) fGenParticleArr->At(genTausDaughters[j]->parent);
-            if (genTaus[i]->pt == mother->pt && genTaus[i]->eta== mother->eta && genTaus[i]->phi==mother->phi){
-              int pdgid = abs(genTausDaughters[j]->pdgId);
-              int daughterDigitPos = -1;
-
-              if (pdgid == 11) { daughterDigitPos = 0; }
-              else if (pdgid == 13) {daughterDigitPos = 1;}
-              else if (pdgid ==111) {daughterDigitPos = 2;}
-              else if (pdgid ==211) {daughterDigitPos = 3;}
-              else if (pdgid ==311) {daughterDigitPos = 4;}
-              else if (pdgid ==321) {daughterDigitPos = 5;}
-              else if (pdgid >=100) {daughterDigitPos = 6;}
-
-              if (i == 0 && daughterDigitPos>=0) genTau1Daughters[daughterDigitPos] = char(int(genTau1Daughters[daughterDigitPos])+1);
-              if (i == 1 && daughterDigitPos>=0) genTau2Daughters[daughterDigitPos] = char(int(genTau2Daughters[daughterDigitPos])+1);
-            }
-
-          }
-        }
-
-        genTauOneDaughters = std::atoi(genTau1Daughters.c_str());
-        genTauTwoDaughters = std::atoi(genTau2Daughters.c_str());
-        if (genTaus.size()==2) {
-          if (genTaus[1]->pt>genTaus[0]->pt){
-            genTauTwoDaughters = std::atoi(genTau1Daughters.c_str());
-            genTauOneDaughters = std::atoi(genTau2Daughters.c_str());
-          }
-        }
-        
-        // cout << "tau Decay modes are [e,mu,pi0,pi+,k0,k+,h]: " <<genTau1Daughters << "," <<  genTau2Daughters << endl;
-        // cout << "------------" << endl;
     } else {
         genWeight = 1.0;
         nPU = 0;
@@ -541,7 +316,7 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
 
     }
 
-    // cout << nPU << endl;
+
     ///////////////////
     // Select objects//
     ///////////////////
@@ -574,10 +349,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
             passTriggerNames.push_back(triggerNames[i]);
         }
     }
-
-    bool muonTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoMu24_v*") != passTriggerNames.end();
-    muonTriggered = muonTriggered || find(passTriggerNames.begin(), passTriggerNames.end(), "HLT_IsoTkMu24_v*") != passTriggerNames.end();
-    bool electronTriggered = find(passTriggerNames.begin(), passTriggerNames.end(), singleElectronTriggerName) != passTriggerNames.end();
 
     if (!passTrigger)
         return kTRUE;
@@ -621,32 +392,26 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                 && muon->nValidHits > 0
                 && fabs(muon->d0)   < 0.2
                 && fabs(muon->dz)   < 0.5
-                && GetMuonIsolation(muon)/muon->pt < 0.25 // loose muon
            ) {
-            
-
             if (GetMuonIsolation(muon)/muonP4.Pt() <  0.15){
                 muons.push_back(muon);
+                veto_muons.push_back(muonP4);
             } else {
                 fail_muons.push_back(muon);
             }
-            veto_muons.push_back(muonP4);
-        }
+        } 
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
     sort(fail_muons.begin(), fail_muons.end(), sort_by_higher_pt<TMuon>);
     nMuons = muons.size();
     nFailMuons = fail_muons.size();
-
-    // fill hist if muonTriggered and leading muon is good.
-    if (muonTriggered && nMuons>0){
-        if (muons[0]->pt>25){
-            hTotalEvents->Fill(5);
-        }
-    }
+    cout<<"finish muon loop"<<endl;
     
 
 
+
+
+    
     /* -------- ELECTRONS ---------*/
     vector<TElectron*> electrons,fail_electrons;
     vector<TLorentzVector> veto_electrons;
@@ -668,19 +433,17 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
         electronP4.SetPtEtaPhiM(electron->pt, electron->eta, electron->phi, 511e-6);
 
         if (
-                electron->pt > 20
+                electron->pt > 10
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
-                && particleSelector->PassElectronIso(electron, cuts->looseElIso, cuts->EAEl)
 
            ) {
-            
             if (particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl) ){
                 electrons.push_back(electron);
+                veto_electrons.push_back(electronP4);
             } else {
                 fail_electrons.push_back(electron);
             }
-            veto_electrons.push_back(electronP4);
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -688,13 +451,10 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
 
     nElectrons = electrons.size();
     nFailElectrons = fail_electrons.size();
+    cout<<"finish electron loop"<<endl;
 
-    // fill hist if muonTriggered and leading muon is good.
-    if (electronTriggered && nElectrons>0){
-        if (electrons[0]->pt>30){
-            hTotalEvents->Fill(6);
-        }
-    }
+
+
 
     
     /* -------- TAUS ---------*/
@@ -753,25 +513,6 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                     }
                 }
             }
-            
-            // // 2. MC events with electron -> tau_h
-            // if (genOverlap == false){
-            //     // 2.a) check overlap with  electron
-            //     bool genElectronOverlap = false;
-            //     for (unsigned i = 0; i < genElectrons.size(); ++i) {
-            //         TLorentzVector genP4;
-            //         genP4.SetPtEtaPhiM(genElectrons[i]->pt, genElectrons[i]->eta, genElectrons[i]->phi, genElectrons[i]->mass); 
-            //         if (tauP4.DeltaR(genP4) < 0.3) {
-            //             genElectronOverlap = true;
-            //             genOverlap = true;
-            //             break;
-            //         }
-            //     }
-            //     // 2.b) apply correction for electron -> tau_h
-            //     if (genElectronOverlap) {
-            //         tau->pt *= 1.1;
-            //     }
-            // }
         }
 
         if( 
@@ -780,7 +521,7 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3newDMwLT) // <-------------------tau id
+                && (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwLT)
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
             ) {
@@ -790,46 +531,25 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
     }
     sort(taus.begin(), taus.end(), sort_by_higher_pt<TTau>);
     nTaus = taus.size();
+    cout<<"finish tau loop"<<endl;
     
 
-    /* -------- PHOTONS --------  */
-    vector<TLorentzVector> prefiring_photons;
-    for (int i=0; i<fPhotonArr->GetEntries(); i++) {
-        TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
-        TLorentzVector photonP4;
-        photonP4.SetPtEtaPhiM(photon->pt, photon->eta, photon->phi, 0.);
-        // prefiring_photons
-        if( photon->pt>20 && fabs(photon->eta)<3.0 && fabs(photon->eta)>2.0 ){
-            prefiring_photons.push_back(photonP4);
-        }
-    }
-
-
+    
     /* -------- JETS ---------*/
     TClonesArray* jetCollection;
     jetCollection = fAK4CHSArr;
 
-    //std::vector<TJet*> jets;
-    std::vector<TJet*> vetoed_jets;
-    vector<TLorentzVector> prefiring_jets;
-
+    std::vector<TJet*> jets, vetoedJets;
     TLorentzVector hadronicP4;
     float sumJetPt = 0;
 
     // set nJet and nBJet counters to 0
-    ResetJetCounters();
+    nJets = 0;
+    nBJets = 0;
     for (int i=0; i < jetCollection->GetEntries(); i++) {
         TJet* jet = (TJet*) jetCollection->At(i);
         assert(jet);
-        
-        // prefiring_jets
-        if (jet->pt>20 && fabs(jet->eta) < 3.0 && fabs(jet->eta)>2.0 ){
-            TLorentzVector jetP4_raw; 
-            jetP4_raw.SetPtEtaPhiM(jet->pt, jet->eta, jet->phi, jet->mass);
-            prefiring_jets.push_back(jetP4_raw);
-        }
-        
-        
+
         // apply JEC offline and get scale uncertainties
         double jec = particleSelector->JetCorrector(jet, "DummyName");
         jet->pt = jet->ptRaw*jec;
@@ -867,7 +587,7 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
         for (const auto& tau: veto_taus) {
             if (jetP4.DeltaR(tau) < 0.4) {
                 tauOverlap = true;
-                vetoed_jets.push_back(jet);
+                vetoedJets.push_back(jet);
                 break;
             }
         }
@@ -880,39 +600,27 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
                 && !elOverlap
                 && !tauOverlap
             ) {
-            if (isData){
-                // std::cout<<jet->pt<<std::endl;
-                // for data pass pt threshold
-                if (jet->pt > 30){
-                    ++nJets;
-                    if (jet->csv > 0.8484) ++nBJets;
-                }
 
+            jets.push_back(jet);
+            ++nJets;
+            hadronicP4 += jetP4;
+            sumJetPt += jetP4.Pt();
+
+            if (isData){ 
+                if (jet->csv > 0.8484) ++nBJets;
             } else {
-                // for MC apply corrections and variate systematics
-                JetCounting(jet,jerc, gRand);
-            }
-
-            if (jet->pt > 30) {
-                hadronicP4 += jetP4;
-                sumJetPt += jetP4.Pt();
+                float rNumber = rng->Uniform(1.);
+                if (particleSelector->BTagModifier(jet, "CSVM", "central", rNumber)) ++nBJets;
             }
 
         }
     }
 
+    cout<<"finish jet loop"<<endl;
     // sort jet by higher btag
     // std::sort(jets .begin(), jets .end(), sort_by_btag<TJet>);
-    
 
-    // use the highest jet multiplicities given all systematic variations
-    unsigned nJetList[] = {nJets, nJetsJESUp, nJetsJESDown, nJetsJERUp, nJetsJERDown};
-    unsigned nBJetList[] = {nBJets, nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown, 
-                            nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown};
-    // cut are maximum of counters which systematic variation
-    nJetsCut  = *std::max_element(nJetList, nJetList+sizeof(nJetList)/sizeof(unsigned));
-    nBJetsCut = *std::max_element(nBJetList, nBJetList+sizeof(nBJetList)/sizeof(unsigned));
-    // std::cout<<nJetsCut<<", "<<nBJetsCut<<std::endl;
+
     // save ht
     htSum = sumJetPt;
     ht    = hadronicP4.Pt();
@@ -921,37 +629,38 @@ Bool_t TauAnalyzer::Process(Long64_t entry)
     /* -------- MET ---------*/
     met    = fInfo->pfMETC;
     metPhi = fInfo->pfMETCphi;
- 
+
 
     ///////////////////////////////
     /* Apply analysis selections */
     ///////////////////////////////
 
-    hTotalEvents->Fill(7);
+
+    hTotalEvents->Fill(5);
     string channel = "";
     if        (nTaus > 0 ){
         
       channel = "tau";
 
-      TLorentzVector tauP4;
-      tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
-      tauPt  = taus[0]->pt;
-      tauEta = taus[0]->eta;
-      tauDecayMode      = taus[0]->decaymode;
-      tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
+    //   TLorentzVector tauP4;
+    //   tauP4.SetPtEtaPhiM(taus[0]->pt, taus[0]->eta, taus[0]->phi, taus[0]->m);
+    //   tauPt  = taus[0]->pt;
+    //   tauEta = taus[0]->eta;
+    //   tauDecayMode      = taus[0]->decaymode;
+    //   tauMVA            = taus[0]->rawIsoMVA3newDMwLT;
 
-      pair <float, float> tauVetoedJetPtPair;
-      tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoed_jets);
-      tauVetoedJetPt    = tauVetoedJetPtPair.first;
-      tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
+    //   pair <float, float> tauVetoedJetPtPair;
+    //   tauVetoedJetPtPair= GetTauVetoedJetPt(tauP4, vetoedJets);
+    //   tauVetoedJetPt    = tauVetoedJetPtPair.first;
+    //   tauVetoedJetPtUnc = tauVetoedJetPtPair.second;
 
-      if (!isData) {
-        tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, false); // useHadronFlavor = false
-        tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoed_jets, true);  // useHadronFlavor = true
-      }
+    //   if (!isData) {
+    //     tauGenFlavor    = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, false); // useHadronFlavor = false
+    //     tauGenFlavorHad = GetTauGenFlavor(tauP4,genTausHad,genElectrons,genMuons,vetoedJets, true);  // useHadronFlavor = true
+    //   }
 
       hTotalEvents->Fill(6);
-    }else {
+    } else {
         return kTRUE;
     }
 
@@ -1043,7 +752,7 @@ int TauAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
                                         vector<TGenParticle*> genTausHad, 
                                         vector<TGenParticle*> genElectrons, 
                                         vector<TGenParticle*> genMuons,
-                                        vector<TJet*> vetoed_jets, 
+                                        vector<TJet*> vetoedJets, 
                                         bool useHadronFlavor )
 {
     int flavor = 26;
@@ -1086,16 +795,16 @@ int TauAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
     // check if can be tagged by jet flavor
     if (flavor==26){
         float jetPtMax = - 1.0;
-        for (unsigned i = 0; i < vetoed_jets.size(); ++i) {
+        for (unsigned i = 0; i < vetoedJets.size(); ++i) {
 
 
             TLorentzVector jetP4; 
-            jetP4.SetPtEtaPhiM(vetoed_jets[i]->pt, vetoed_jets[i]->eta, vetoed_jets[i]->phi, vetoed_jets[i]->mass);
+            jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
             if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
                 if(useHadronFlavor) {
-                    flavor = vetoed_jets[i]->hadronFlavor;
+                    flavor = vetoedJets[i]->hadronFlavor;
                 } else {
-                    flavor = abs(vetoed_jets[i]->partonFlavor);
+                    flavor = abs(vetoedJets[i]->partonFlavor);
                 }
                 jetPtMax = jetP4.Pt();
             }
@@ -1108,7 +817,7 @@ int TauAnalyzer::GetTauGenFlavor(  TLorentzVector p4,
 }
 
 
-pair<float, float> TauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoed_jets)
+pair<float, float> TauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet*> vetoedJets)
 {
 
     float jetPt = -1;
@@ -1118,17 +827,17 @@ pair<float, float> TauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet
     // check if can be tagged by jet flavor
 
     float jetPtMax = - 1.0;
-    for (unsigned i = 0; i < vetoed_jets.size(); ++i) {
+    for (unsigned i = 0; i < vetoedJets.size(); ++i) {
 
         TLorentzVector jetP4; 
-        jetP4.SetPtEtaPhiM(vetoed_jets[i]->pt, vetoed_jets[i]->eta, vetoed_jets[i]->phi, vetoed_jets[i]->mass);
+        jetP4.SetPtEtaPhiM(vetoedJets[i]->pt, vetoedJets[i]->eta, vetoedJets[i]->phi, vetoedJets[i]->mass);
 
         if (jetP4.DeltaR(p4) < 0.4 && jetP4.Pt()>jetPtMax) {
             // cout<<"Energy Jet: "<<jetPtMax<<","<< jetP4.Pt() << endl;
 
             // save 
             jetPt       = jetP4.Pt();
-            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoed_jets[i], "Total"));
+            jetPtUnc    = jetPt * float(particleSelector->JetUncertainty(vetoedJets[i], "Total"));
             jetPtUnc    = abs(jetPtUnc);
 
             jetPtMax = jetP4.Pt();
@@ -1139,144 +848,3 @@ pair<float, float> TauAnalyzer::GetTauVetoedJetPt(TLorentzVector p4, vector<TJet
 }
 
 
-
-
-float TauAnalyzer::GetTriggerSF(EfficiencyContainer eff1, EfficiencyContainer eff2)
-{
-    pair<double, double> trigEff1, trigEff2;
-    trigEff1 = eff1.GetEff();
-    trigEff2 = eff2.GetEff();
-
-    float sf = 1.;
-    if (trigEff1.second > 0 && trigEff2.second <= 0){
-        sf *= trigEff1.first/trigEff1.second;
-    }
-    
-    if (trigEff1.second <= 0 && trigEff2.second > 0){
-        sf *= trigEff2.first/trigEff2.second;
-    }
-    if (trigEff1.second > 0 && trigEff2.second > 0){
-        sf *= trigEff1.first/trigEff1.second;
-        sf *= trigEff2.first/trigEff2.second;
-    }
-
-    //if (trigEff1.second > 0 || trigEff2.second > 0) {
-    //  sf = (1 - (1 - trigEff1.first)*(1 - trigEff2.first))/(1 - (1 - trigEff1.second)*(1 - trigEff2.second));
-    //}
-
-
-    return sf;
-}
-
-float TauAnalyzer::GetTriggerSFError(EfficiencyContainer eff1, EfficiencyContainer eff2)
-{
-    pair<double, double> trigEff1, trigEff2, trigErr1, trigErr2;
-    trigEff1 = eff1.GetEff();
-    trigEff2 = eff2.GetEff();
-    trigErr1 = eff1.GetErr();
-    trigErr2 = eff2.GetErr();
-
-    //cout << trigEff1.first << " :: " << trigEff1.second << " :: "
-    //     << trigEff2.first << " :: " << trigEff2.second << endl;
-
-    //cout << trigErr1.first << " :: " << trigErr1.second << " :: "
-    //     << trigErr2.first << " :: " << trigErr2.second << endl;
-
-    float denom = 1 - (1 - trigEff1.second)*(1 - trigEff2.second);
-    float dEffData1 = (1 - trigEff2.first)/denom;
-    float dEffData2 = (1 - trigEff1.first)/denom;
-    float dEffMC1   = -(1 - trigEff2.second)/pow(denom, 2);
-    float dEffMC2   = -(1 - trigEff1.second)/pow(denom, 2);
-
-    float sfVar = pow(trigErr1.first*dEffData1, 2)
-        + pow(trigErr2.first*dEffData2, 2)
-        + pow(trigErr1.second*dEffMC1, 2)
-        + pow(trigErr2.second*dEffMC2, 2);
-    return sfVar;
-}
-
-void TauAnalyzer::ResetJetCounters()
-{
-    nJets = nBJets = 0;
-    nJetsCut       = nBJetsCut        = 0;
-    nJetsJESUp     = nJetsJESDown     = 0;
-    nJetsJERUp     = nJetsJERDown     = 0;
-    nBJetsJESUp    = nBJetsJESDown    = 0;
-    nBJetsJERUp    = nBJetsJERDown    = 0;
-    nBJetsBTagUp   = nBJetsBTagDown   = 0;
-    nBJetsMistagUp = nBJetsMistagDown = 0;
-}
-
-void TauAnalyzer::JetCounting(TJet* jet, float jerc_nominal, float resRand)
-{
-    float jetPt = jet->pt;
-    //std::string bTagMethod = "MVAT";
-    std::string bTagMethod = "CSVM";
-
-    float rNumber = rng->Uniform(1.);
-    if (jet->pt > 30) {
-
-        // nominal
-        ++nJets;
-        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) ++nBJets;
-
-        // b tag up
-        if (particleSelector->BTagModifier(jet, bTagMethod, "up", rNumber)) ++nBJetsBTagUp;
-             
-        // b tag down
-        if (particleSelector->BTagModifier(jet, bTagMethod, "down", rNumber))  ++nBJetsBTagDown;
-
-        // misttag up
-        if (particleSelector->BTagModifier(jet, bTagMethod, "upMistag", rNumber)) ++nBJetsMistagUp;
-        
-        // mistag down
-        if (particleSelector->BTagModifier(jet, bTagMethod, "downMistag", rNumber)) ++nBJetsMistagDown;
-    }
-
-    // jet energy corrections
-    double jec = particleSelector->JetCorrector(jet, "DummyName");
-    float jecUnc = particleSelector->JetUncertainty(jet,"Total");
-    
-    // JES up
-    jet->pt = jet->ptRaw*jec*(1 + jecUnc)*jerc_nominal;
-    if (jet->pt > 30) {
-        ++nJetsJESUp;
-        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
-            ++nBJetsJESUp;
-        } 
-    }
-
-    // JES down
-    jet->pt = jet->ptRaw*jec*(1 - jecUnc)*jerc_nominal;
-    if (jet->pt > 30) {
-        ++nJetsJESDown;
-        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
-            ++nBJetsJESDown;
-        } 
-    }
-
-    // Jet resolution corrections
-    pair<float, float> resPair = particleSelector->JetResolutionAndSF(jet, 1);
-    float jerc = 1 + resRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
-
-    // JER up
-    jet->pt = jet->ptRaw*jec*jerc;
-    if (jet->pt > 30) {
-        ++nJetsJERUp;
-        if (particleSelector->BTagModifier(jet, bTagMethod,"central", rNumber)) { 
-            ++nBJetsJERUp;
-        }     
-    }
-
-    // JER down
-    resPair     = particleSelector->JetResolutionAndSF(jet, -1);
-    jerc        = 1 + resRand*sqrt(std::max((double)resPair.second*resPair.second - 1, 0.));
-    jet->pt     = jet->ptRaw*jec*jerc;
-    if (jet->pt > 30) {
-        ++nJetsJERDown;
-        if (particleSelector->BTagModifier(jet, bTagMethod, "central", rNumber)) { 
-            ++nBJetsJERDown;
-        } 
-    }
-    jet->pt = jetPt;
-}

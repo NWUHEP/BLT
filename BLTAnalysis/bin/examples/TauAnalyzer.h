@@ -69,8 +69,6 @@ public:
     std::map<string, TH1D*> eventCounts;
     TH1D *hGenCat;
 
-    std::string singleElectronTriggerName = "";
-
     // Lumi mask
     RunLumiRangeMap lumiMask;
 
@@ -110,11 +108,13 @@ public:
     Float_t eventWeight;
 
     // lepton variable
-
+    TLorentzVector leptonOneP4, leptonTwoP4;
+    Float_t leptonOneIso, leptonTwoIso;
+    Int_t leptonOneFlavor, leptonTwoFlavor;
 
     // tau variable
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
-    Float_t tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc, tauPt, tauEta;
+    Float_t tauPt, tauEta, tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc;
 
     // ht
     Float_t htSum, ht, htPhi;
@@ -133,16 +133,9 @@ private:
 
 
     // weights and uncertainties
-    Float_t prefiringWeight, triggerWeight, puWeight, topPtWeight, zPtWeight;
-    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar;
-    Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
+    Float_t triggerWeight, puWeight, topPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t triggerVar, puVar, topPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
 
-
-    // modified multiplicities for jet related uncertainties
-    unsigned nJetsCut, nBJetsCut;
-    unsigned nJetsJESUp,  nJetsJESDown,  nJetsJERUp,  nJetsJERDown;
-    unsigned nBJetsJESUp, nBJetsJESDown, nBJetsJERUp, nBJetsJERDown;
-    unsigned nBJetsBTagUp, nBJetsBTagDown, nBJetsMistagUp, nBJetsMistagDown;
 
     // helper functions
     float GetMuonIsolation(const baconhep::TMuon*);

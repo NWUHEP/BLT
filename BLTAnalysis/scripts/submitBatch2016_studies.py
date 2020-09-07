@@ -3,26 +3,54 @@ import BLT.BLTAnalysis.BatchMaster as bm
 
 import sys
 
-# to run interactively
-
-# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
-# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_W1JetsToLNu/Summer16_W1JetsToLNu_bacon_00.root 100000 w1jet w1jet single_lepton 2016 1
-
-
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 executable = 'execBatch.sh'
 selection  = 'single_lepton'
 period     = '2016'
-analyzer   = 'SinglelepAnalyzer'
-
-data_samples = ['single_mu', 'single_el']
-mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets', 'qcd']
 
 
-# data_samples = []
-# mc_samples   = ['ttbar_systematics']
+
+
+# # to run interactively
+# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
+# SinglelepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_W1JetsToLNu/Summer16_W1JetsToLNu_bacon_00.root 100000 w1jet w1jet single_lepton 2016 1
+# ####################################
+# analyzer     = 'SinglelepAnalyzer'
+# data_samples = ['single_mu', 'single_el']
+# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets', 'qcd']
+
+
+
+
+
+
+# # to run interactively
+# # LLTauAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
+# # LLTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+# ####################################
+# analyzer   = 'LLTauAnalyzer'
+# data_samples = ['single_mu', 'single_el']
+# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets']
+
+
+
+
+
+
+
+
+
+# to run interactively
+# TauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
+####################################
+analyzer     = 'TauAnalyzer'
+data_samples = []
+mc_samples   = ['ttbar', 'ttbar_systematics']
+
+
+
 
 ''' 
     Set job configurations.  
@@ -76,7 +104,6 @@ data_dict['single_mu'] = [
            nJobs     = 30,
            suffix    = 'muon_2016H'
           ),
-
         ]
 
 data_dict['single_el'] = [
@@ -134,12 +161,12 @@ mc_dict['zjets'] = [
     # Drell-Yan
     cfg(data_name = 'DYJetsToLL_M-50_amcatnlo',
         path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-50_amcatnlo',
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'zjets_m-50_amcatnlo'
        ),
     cfg(data_name = 'DYJetsToLL_M-10to50_amcatnlo',
         path     = '/eos/uscms/store/group/lpcbacon/12/Summer16_DYJetsToLL_M-10to50_amcatnlo',
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'zjets_m-10to50_amcatnlo'
        ),
     ]
@@ -149,25 +176,26 @@ mc_dict['wjets'] = [
     # W+jets
     cfg(data_name = 'W1JetsToLNu',
         path     = '{0}/Summer16_W1JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w1jets'
        ),
     cfg(data_name = 'W2JetsToLNu',
         path     = '{0}/Summer16_W2JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w2jets'
        ),
     cfg(data_name = 'W3JetsToLNu',
         path     = '{0}/Summer16_W3JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w3jets'
        ),
     cfg(data_name = 'W4JetsToLNu',
         path     = '{0}/Summer16_W4JetsToLNu'.format(path),
-        nJobs    = 40,
+        nJobs    = 30,
         suffix   = 'w4jets'
        ),
     ]
+
 
 
 mc_dict['gjets'] = [
@@ -199,13 +227,67 @@ mc_dict['gjets'] = [
        ),
     ]
 
+
 mc_dict['ttbar'] = [
     # top
     cfg(data_name = 'ttbar_inclusive',
         path     = '{0}/Summer16_TT_powheg'.format(path),
-        nJobs    = 50,
+        nJobs    = 30,
         suffix   = 'ttbar_inclusive'
-       ),    
+       ), 
+    ]
+
+mc_dict['ttbar_systematics'] = [
+    # top full gen
+    cfg(data_name = 'ttbar_inclusive_tauReweight',
+        path     = '/eos/uscms/store/user/zchen/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/CRAB3/200520_221006/0000',
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_tauReweight'
+       ),
+    # fsr
+    cfg(data_name = 'ttbar_inclusive_fsrUp',
+        path     = '{0}/Summer16_TT_powheg_fsrup'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_fsrUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_fsrDown',
+        path     = '{0}/Summer16_TT_powheg_fsrdown'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_fsrDown'
+       ),
+    # isr
+    cfg(data_name = 'ttbar_inclusive_isrUp',
+        path     = '{0}/Summer16_TT_powheg_isrup'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_isrUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_isrDown',
+        path     = '{0}/Summer16_TT_powheg_isrdown'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_isrDown'
+       ),
+    # underline event
+    cfg(data_name = 'ttbar_inclusive_ueUp',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4up'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_ueUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_ueDown',
+        path     = '{0}/Summer16_TT_powheg_TuneCUETP8M2T4down'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_ueDown'
+       ),
+    # matrix element and parton shower matching
+    cfg(data_name = 'ttbar_inclusive_mepsUp',
+        path     = '{0}/Summer16_TT_powheg_hdampUP'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_mepsUp'
+       ),
+    cfg(data_name = 'ttbar_inclusive_mepsDown',
+        path     = '{0}/Summer16_TT_powheg_hdampDOWN'.format(path),
+        nJobs    = 20,
+        suffix   = 'ttbar_inclusive_mepsDown'
+       ),
     ]
 
 mc_dict['t'] = [
@@ -230,6 +312,8 @@ mc_dict['t'] = [
         nJobs    = 10,
         suffix   = 'tbar_t'
        ),
+
+    
     ]
 
 
@@ -320,6 +404,7 @@ mc_dict['qcd'] = [
        ),
     ]
 
+
 batch_list = []
 batch_list += sum([data_dict[n] for n in data_samples], []) 
 batch_list += sum([mc_dict[n] for n in mc_samples], []) 
@@ -333,5 +418,3 @@ batch = bm.BatchMaster(config_list = batch_list,
                        analyzer    = analyzer
                      )
 batch.submit_to_batch()
-
-

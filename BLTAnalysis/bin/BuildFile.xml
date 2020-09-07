@@ -3,9 +3,12 @@
 <flags CXXFLAGS="-g -Wall"/>
 
 <bin file="MultilepAnalyzer.cc" name="MultilepAnalyzer"></bin>
-<bin file="MultilepLLTauAnalyzer.cc" name="MultilepLLTauAnalyzer"></bin>
-<bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin>
 <bin file="SinglelepAnalyzer.cc" name="SinglelepAnalyzer"></bin>
+<bin file="LLTauAnalyzer.cc" name="LLTauAnalyzer"></bin>
+<bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin>
+
+<!-- <bin file="TauAnalyzer.cc" name="TauAnalyzer"></bin> -->
+
 
 
 <!-- <bin file="ZTauTauAnalyzer.cc" name="ZTauTauAnalyzer"></bin>

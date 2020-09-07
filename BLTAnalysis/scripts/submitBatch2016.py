@@ -7,10 +7,6 @@ import sys
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 # MultilepAnalyzer /eos/uscms/store/group/lpcbacon/mmackenz/crab_ntupler/WJetsToLNu_amcatnlo/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16/WJetsToLNu_1.root 100000 WJetsToLNu WJetsToLNu single_lepton 2016 1
-# MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
-# MultilepLLTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
-
-
 
 ''' Specify parameters '''
 cfg        = bm.JobConfig

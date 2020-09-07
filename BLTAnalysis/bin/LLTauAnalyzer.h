@@ -13,8 +13,8 @@
 // =============================================================================
 
 
-#ifndef TauAnalyzer_HH
-#define TauAnalyzer_HH
+#ifndef LLTauAnalyzer_HH
+#define LLTauAnalyzer_HH
 
 
 // Analysis tools
@@ -53,10 +53,10 @@
 #include <regex>
 
 
-class TauAnalyzer: public BLTSelector {
+class LLTauAnalyzer: public BLTSelector {
 public:
-    TauAnalyzer();
-    ~TauAnalyzer();
+    LLTauAnalyzer();
+    ~LLTauAnalyzer();
 
     void   Begin(TTree *tree);
     Bool_t Process(Long64_t entry);
@@ -110,11 +110,16 @@ public:
     Float_t eventWeight;
 
     // lepton variable
-
+    TLorentzVector leptonOneP4, leptonTwoP4, leptonThreeP4;
+    Float_t leptonOneIso, leptonTwoIso;
+    Int_t leptonOneFlavor, leptonTwoFlavor;
+    Float_t leptonOneD0, leptonTwoD0;
+    Float_t leptonOneDz, leptonTwoDz;
+    Float_t leptonOneSip3d, leptonTwoSip3d;
 
     // tau variable
     Int_t tauDecayMode, tauGenFlavor, tauGenFlavorHad;
-    Float_t tauMVA, tauVetoedJetPt, tauVetoedJetPtUnc, tauPt, tauEta;
+    Float_t leptonThreeIso, tauVetoedJetPt, tauVetoedJetPtUnc;
 
     // ht
     Float_t htSum, ht, htPhi;
@@ -125,7 +130,6 @@ public:
     // object counters
     UInt_t nMuons, nElectrons, nTaus, nJets, nBJets;
     UInt_t nFailMuons, nFailElectrons;
-
     ////////////////////////////////
 
 
@@ -133,8 +137,8 @@ private:
 
 
     // weights and uncertainties
-    Float_t prefiringWeight, triggerWeight, puWeight, topPtWeight, zPtWeight;
-    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar;
+    Float_t prefiringWeight, triggerWeight, puWeight, topPtWeight, zPtWeight,leptonOneIDWeight, leptonTwoIDWeight, leptonOneRecoWeight, leptonTwoRecoWeight;
+    Float_t prefiringVar, triggerVar, puVar, topPtVar, zPtVar, leptonOneIDVar, leptonTwoIDVar, leptonOneRecoVar, leptonTwoRecoVar;
     Float_t eleTriggerVarTagSyst, eleTriggerVarProbeSyst;
 
 
@@ -156,4 +160,4 @@ private:
 
 };
 
-#endif  // TauAnalyzer_HH
+#endif  // LLTauAnalyzer_HH

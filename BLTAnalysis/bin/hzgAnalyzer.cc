@@ -444,15 +444,32 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             if (
                     particle->status == 23 
                     && (fabs(particle->pdgId) < 6 || particle->pdgId == 21) 
-                    && particle->parent != -2
+                    && particle->parent >= 0
                ) {
                 ++count;
             }
 
             if (    (fabs(particle->pdgId) == 11 || fabs(particle->pdgId) == 13) 
                     && particle->fromHardProcessFinalState 
+                    && particle->parent >= 0
                 ) {
-                    genLeptons.push_back(particle);
+
+                    TGenParticle* leptonParent = (TGenParticle*) fGenParticleArr->At(particle->parent);
+                    while (leptonParent->parent >= 0 && fabs(leptonParent->pdgId) != 23) {
+                        leptonParent = (TGenParticle*) fGenParticleArr->At(leptonParent->parent);
+                    }
+
+                    if (leptonParent->parent >= 0 && fabs(leptonParent->pdgId) == 23) {            
+                        TGenParticle* leptonGrandparent = (TGenParticle*) fGenParticleArr->At(leptonParent->parent);
+                        while (leptonGrandparent->parent >= 0 && fabs(leptonGrandparent->pdgId) != 25) {
+                            leptonGrandparent = (TGenParticle*) fGenParticleArr->At(leptonGrandparent->parent);
+                        }
+                        if (fabs(leptonGrandparent->pdgId) == 25) {
+                            genLeptons.push_back(particle);
+                        }
+                    }
+                            
+
             }
                 
             // saving photons     

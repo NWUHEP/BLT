@@ -29,6 +29,7 @@
 #include "BaconAna/DataFormats/interface/TVertex.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
+#include "BaconAna/DataFormats/interface/TPFPart.hh"
 
 // JSON file parser
 #include "BaconAna/Utils/interface/RunLumiRangeMap.h"
@@ -88,6 +89,7 @@ public :
     TClonesArray            *fAK4PuppiArr;
     TClonesArray            *fCA15PuppiArr;
     TClonesArray            *fAddCA15PuppiArr;
+    TClonesArray            *fPFPartArr;   
 
     TBranch                 *b_Info;
     TBranch                 *b_GenEvtInfo;
@@ -109,6 +111,7 @@ public :
     TBranch                 *b_AddCA8PuppiArr;
     TBranch                 *b_CA15PuppiArr;
     TBranch                 *b_AddCA15PuppiArr;
+    TBranch                 *b_PFPartArr;
 
     TFile                   *fCurrentFile;
     TH1D                    *hTotalEvents;
@@ -155,6 +158,7 @@ void BLTSelector::Init(TTree *tree)
     fAK4PuppiArr             = 0;
     fCA15PuppiArr            = 0;
     fAddCA15PuppiArr         = 0;
+    fPFPartArr               = 0;
 
     fChain->SetBranchAddress("Info", &fInfo, &b_Info);
     fChain->SetBranchAddress("GenEvtInfo", &fGenEvtInfo, &b_GenEvtInfo);
@@ -175,6 +179,7 @@ void BLTSelector::Init(TTree *tree)
     //fChain->SetBranchAddress("AK4Puppi", &fAK4PuppiArr, &b_AK4PuppiArr);
     //fChain->SetBranchAddress("CA15Puppi", &fCA15PuppiArr, &b_CA15PuppiArr);
     //fChain->SetBranchAddress("AddCA15Puppi", &fAddCA15PuppiArr, &b_AddCA15PuppiArr);
+    fChain->SetBranchAddress("PFPart", &fPFPartArr, &b_PFPartArr);
 }
 
 #endif  // BLTSELECTOR_HH

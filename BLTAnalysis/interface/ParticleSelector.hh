@@ -8,6 +8,7 @@
 #include "BaconAna/DataFormats/interface/TPhoton.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
+#include "BaconAna/DataFormats/interface/TPFPart.hh"
 
 #include "BLT/BLTAnalysis/interface/BLTHelper.hh"
 #include "BLT/BLTAnalysis/interface/Parameters.hh"
@@ -53,6 +54,7 @@ public:
     // Photons
     bool PassPhotonMVA(const baconhep::TPhoton* ph, string) const;
     float GetPhotonIsolation(const baconhep::TPhoton* pho, const float rho) const;
+    float GetPFPhotonIsolation(const baconhep::TPFPart* pf_pho, const float rho) const;
     //float GetPhotonWorstChargedIsolation(baconhep::TPhoton* pho, TClonesArray* pfCands, TClonesArray* vertices, baconhep::TVertex* pv) const; // on hold
 
     // Taus

@@ -219,7 +219,6 @@ void hzgAnalyzer::Begin(TTree *tree)
         tree->Branch("photonERes", &photonERes);
         tree->Branch("photonE", &photonE);
         tree->Branch("photonErrE", &photonErrE);
-        //tree->Branch("photonWorstChIso", &photonWorstChIso); // on hold
         tree->Branch("passElectronVeto", &passElectronVeto);
 
         // jets
@@ -714,6 +713,24 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     } 
     sort(photons.begin(), photons.end(), sort_by_higher_pt<TPhoton>);
 
+    /* PF PHOTONS */
+    vector <TPFPart*> pf_photons;
+    for (int i=0; i<fPFPartArr->GetEntries(); i++) {
+        TPFPart* pf_part = (TPFPart*) fPFPartArr->At(i);
+        assert(pf_part);
+
+        if (
+                pf_part->pfType == 22 
+                && pf_part->pt > 2.
+                && fabs(pf_part->eta) < 2.4 
+                && particleSelector->GetPFPhotonIsolation(pf_part, fInfo->rhoJet)/pf_part->pt < 1.8
+           ) {
+            pf_photons.push_back(pf_part);
+        }
+    }
+    sort(pf_photons.begin(), pf_photons.end(), sort_by_higher_pt<TPFPart>);
+
+
     /* JETS */
     TClonesArray* jetCollection;
     jetCollection = fAK4CHSArr;
@@ -995,8 +1012,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             photonSCEta = photons[0]->scEta;
             photonSCPhi = photons[0]->scPhi;
             photonMVA = photons[0]->mvaFall17V2;
-            //std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photons[0], isData);
-            //photonCorrMVA = corrPhotonMVAOut[9];
         
             photonERes = photons[0]->ecalEnergyErrPostCorr / photons[0]->calibE;
             photonE = photons[0]->calibE;
@@ -1101,8 +1116,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonEta = photonP4.Eta();
         photonPhi = photonP4.Phi();
         photonMVA = photons[0]->mvaFall17V2;
-        //std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photons[0], isData);
-        //photonCorrMVA = corrPhotonMVAOut[9];
         passElectronVeto = photons[0]->passElectronVeto;  
         //if (!isData)
         //    photonR9 = weights->GetCorrectedPhotonR9(*photons[0]);
@@ -1301,7 +1314,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             return kTRUE;
 
         eventCounts[region]->Fill(1);
-        //hTotalEvents->Fill(7);
 
         if (params->selection == "mmg") {
             if (leptonOneP4.Pt() <= 20.0) 
@@ -1324,7 +1336,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TLorentzVector dileptonP4 = leptonOneP4 + leptonTwoP4;
 
         // L1EMTF cut 
-        //if (params->selection == "mmg") {
         if (params->selection == "mmg" && params->period == "2016") {
             if (
                 fabs(leptonOneP4.DeltaPhi(leptonTwoP4)) < 70.0*(M_PI/180.0)
@@ -1334,7 +1345,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                )
                 return kTRUE;
         }
-        //hTotalEvents->Fill(8); 
         eventCounts[region]->Fill(2);
         
         // checking lepton matching
@@ -1426,14 +1436,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
 
         if (!hasValidPhoton)
             return kTRUE;
-        //hTotalEvents->Fill(9);
         eventCounts[region]->Fill(3);
 
         TLorentzVector photonP4;
         photonP4.SetPtEtaPhiM(photons[photonIndex]->calibPt, photons[photonIndex]->eta, photons[photonIndex]->phi, 0.);
         if (photonP4.Pt() < 15.0)
             return kTRUE;
-        //hTotalEvents->Fill(10);
         eventCounts[region]->Fill(4);
         
         if (sync) {

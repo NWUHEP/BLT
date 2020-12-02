@@ -843,6 +843,23 @@ float ParticleSelector::GetPhotonIsolation(const baconhep::TPhoton* pho, const f
     return combIso;
 }
 
+float ParticleSelector::GetPFPhotonIsolation(const baconhep::TPFPart* pf_pho, const float rho) const
+{
+    int iEta = 0;
+    float etaBins[8] = {0., 1., 1.479, 2.0, 2.2, 2.3, 2.4, 2.5};
+    float effArea[8] = {0.1703, 0.1715, 0.1213, 0.1230, 0.1635, 0.1937, 0.2393};
+    for (unsigned i = 0; i < 8; ++i) {
+        if (fabs(pf_pho->eta) > etaBins[i] && fabs(pf_pho->eta) < etaBins[i+1]) {
+            iEta = i;
+            break;
+        }
+    }
+
+    float combIso = pf_pho->chHadIso03 + std::max(0., (double)pf_pho->neuHadIso03 + pf_pho->gammaIso03 - rho*effArea[iEta]);
+
+    return combIso;
+}
+
 void ParticleSelector::ApplyMuonMomentumCorrection(baconhep::TMuon* mu, bool isData) const
 {
     double muonSF = 1.;

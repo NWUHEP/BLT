@@ -895,6 +895,7 @@ float get_z(float p_mc_1, float p_data_1, float p_mc_2, float p_data_2) {
 
 vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* ph, bool isData) const
 {
+  const std::string _cmssw_base = getenv("CMSSW_BASE");
   // this function would return the corrected variables and also the MVA scores
   // they are ordered as:
   // SigmaIEtaIEta
@@ -1000,8 +1001,8 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       tmvaReaderEGMPhoID[iBE]->AddVariable("esEnergyOverRawE", &phoESEnToRawE_);
     }
 
-    if (iBE == 0) tmvaReaderEGMPhoID[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/EgammaPhoId_94X_barrel_BDT.weights.xml"); // FIX ME
-    else tmvaReaderEGMPhoID[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/EgammaPhoId_94X_endcap_BDT.weights.xml"); // FIX ME
+    if (iBE == 0) tmvaReaderEGMPhoID[0]->BookMVA("BDT", _cmssw_base + "/src/BLT/BLTAnalysis/data/tmvaWeightFiles/EgammaPhoId_94X_barrel_BDT.weights.xml"); // FIX ME
+    else tmvaReaderEGMPhoID[1]->BookMVA("BDT", _cmssw_base + "/src/BLT/BLTAnalysis/data/tmvaWeightFiles/EgammaPhoId_94X_endcap_BDT.weights.xml"); // FIX ME
   }
   
   // set MVA variables
@@ -1041,9 +1042,17 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
   sieieFull5x5     = ph->sieie;
   sieipFull5x5     = ph->sieip;
   s4Full5x5        = ph->e2x2/ph->e5x5;
-  phoPFPhoIso_     = ph->phoPhIso;
+  //phoPFPhoIso_     = ph->phoPhIso;
+  phoPFPhoIso_     = ph->phoNeuHadIso; // THERE WAS A BUG AT NTUPLE LEVEL SWAPPING PH and NEU ISO 
   phoPFChIso_      = ph->phoChIso; 
   phoPFChIsoWorst_ = ph->phoWorstChIso; 
+
+  //std::cout << "photon SCEta, Pt, sieie, sieip, scEtaWidth, scPhiWidth, R9, S4, phoIso, chIso, worstChIso, MVA" << std::endl;
+  //std::cout << phoSCEta_ << ", " << phoEt_ << ", " << sieieFull5x5 << ", " << sieipFull5x5 << ", " << phoSCEtaWidth_ << ", " << 
+  //             phoSCPhiWidth_ << ", " << phoR9Full5x5_ << ", " << s4Full5x5 << ", " << phoPFPhoIso_ << ", " << phoPFChIso_ << ", " << 
+  //             phoPFChIsoWorst_ << ", " << ph->mvaFall17V2 << std::endl;
+
+  //std::cout << "WHAT IS LISTED AS phoNeuHadIso = " << ph->phoNeuHadIso << std::endl;
   
   float mva = tmvaReaderEGMPhoID[iBE]->EvaluateMVA("BDT");
   
@@ -1079,26 +1088,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
        
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderSieie[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_sieie.xml"); // FIX ME
 	  fSieie[0] = new TFormula("", "x[0]*0.0001104662098613408-3.3204630331623054e-05");
 	} else {
-	  tmvaReaderSieie[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_sieie.xml"); // FIX ME
 	  fSieie[1] = new TFormula("", "x[0]*0.00047618253683114065+0.0003225000376058697");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderSieie[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_sieie.xml"); // FIX ME
 	  fSieie[0] = new TFormula("", "x[0]*9.584385303930019e-05-5.1717290076120845e-05");
 	} else {
-	  tmvaReaderSieie[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_sieie.xml"); // FIX ME
 	  fSieie[1] = new TFormula("", "x[0]*0.0004952022425841057+0.000232510955048542");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderSieie[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_sieie.xml"); // FIX ME
 	  fSieie[0] = new TFormula("", "x[0]*9.447610685463367e-05-1.338798598885145e-05");
 	} else {
-	  tmvaReaderSieie[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_sieie.xml"); // FIX ME
+	  tmvaReaderSieie[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_sieie.xml"); // FIX ME
 	  fSieie[1] = new TFormula("", "x[0]*0.00047765361707808197+0.00033791164231124736");
 	}
       }    
@@ -1134,26 +1143,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderSieip[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_sieip.xml"); // FIX ME
 	  fSieip[0] = new TFormula("", "x[0]*9.256491692147542e-07-3.2280634187410214e-08");
 	} else {
-	  tmvaReaderSieip[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_sieip.xml"); // FIX ME
 	  fSieip[1] = new TFormula("", "x[0]*2.2162202063046954e-05-9.087623072804566e-06");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderSieip[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_sieip.xml"); // FIX ME
 	  fSieip[0] = new TFormula("", "x[0]*1.0669183816085082e-06-3.2259631995695154e-08");
 	} else {
-	  tmvaReaderSieip[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_sieip.xml"); // FIX ME
 	  fSieip[1] = new TFormula("", "x[0]*1.9968203087899473e-05-1.1005423958127062e-05");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderSieip[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_sieip.xml"); // FIX ME
 	  fSieip[0] = new TFormula("", "x[0]*1.025769961188504e-06-2.1602032511843264e-08");
 	} else {
-	  tmvaReaderSieip[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_sieip.xml"); // FIX ME
+	  tmvaReaderSieip[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_sieip.xml"); // FIX ME
 	  fSieip[1] = new TFormula("", "x[0]*1.976322925152308e-05-1.1049352291879044e-05");
 	}
       }    
@@ -1189,26 +1198,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderEtaWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
 	  fEtaWidth[0] = new TFormula("", "x[0]*0.0003420906834020758-1.2947742904550509e-05");
 	} else {
-	  tmvaReaderEtaWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
 	  fEtaWidth[1] = new TFormula("", "x[0]*0.000527115361936753+0.00032721686342924994");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderEtaWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
 	  fEtaWidth[0] = new TFormula("", "x[0]*0.0003493050480966255-0.00016565428928989791");
 	} else {
-	  tmvaReaderEtaWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
 	  fEtaWidth[1] = new TFormula("", "x[0]*0.0005480486104594688+0.0002232480231738592");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderEtaWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_etaWidth.xml"); // FIX ME
 	  fEtaWidth[0] = new TFormula("", "x[0]*0.0003381714524934305-3.983385867640729e-06");
 	} else {
-	  tmvaReaderEtaWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
+	  tmvaReaderEtaWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_etaWidth.xml"); // FIX ME
 	  fEtaWidth[1] = new TFormula("", "x[0]*0.000547223078659973+0.0004153295725724329");
 	}
       }    
@@ -1244,26 +1253,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderPhiWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
 	  fPhiWidth[0] = new TFormula("", "x[0]*0.0025889840810865723+0.0011585117927925426");
 	} else {
-	  tmvaReaderPhiWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
 	  fPhiWidth[1] = new TFormula("", "x[0]*0.00262391873289608+0.0009113112561151201");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderPhiWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
 	  fPhiWidth[0] = new TFormula("", "x[0]*0.002104991113194962+0.0007377486601366596");
 	} else {
-	  tmvaReaderPhiWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
 	  fPhiWidth[1] = new TFormula("", "x[0]*0.0019464228762895372+0.0009612037536670028");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderPhiWidth[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_phiWidth.xml"); // FIX ME
 	  fPhiWidth[0] = new TFormula("", "x[0]*0.0019421618661353145+0.0007529814748217659");
 	} else {
-	  tmvaReaderPhiWidth[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
+	  tmvaReaderPhiWidth[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_phiWidth.xml"); // FIX ME
 	  fPhiWidth[1] = new TFormula("", "x[0]*0.002128917659751403+0.0012794900435001803");
 	}
       }    
@@ -1299,26 +1308,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
 	
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderR9[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_r9.xml"); // FIX ME
+	  tmvaReaderR9[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_r9.xml"); // FIX ME
 	  fR9[0] = new TFormula("", "x[0]*0.00915591682273384+0.00042335154161760036");
 	} else {
-	  tmvaReaderR9[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_r9.xml"); // FIX ME
+	  tmvaReaderR9[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_r9.xml"); // FIX ME
 	  fR9[1] = new TFormula("", "x[0]*0.010253359666186235-0.0031073467744174854");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderR9[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_r9.xml"); // FIX ME
+	  tmvaReaderR9[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_r9.xml"); // FIX ME
 	  fR9[0] = new TFormula("", "x[0]*0.009489495430770628-0.002028252255487417");
 	} else {
-	  tmvaReaderR9[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_r9.xml"); // FIX ME
+	  tmvaReaderR9[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_r9.xml"); // FIX ME
 	  fR9[1] = new TFormula("", "x[0]*0.014832657700482338-0.007372621685483638");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderR9[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_r9.xml"); // FIX ME 
+	  tmvaReaderR9[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_r9.xml"); // FIX ME 
 	  fR9[0] = new TFormula("", "x[0]*0.010041591228904162-0.0034957641959179053");
 	} else {
-	  tmvaReaderR9[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_r9.xml"); // FIX ME
+	  tmvaReaderR9[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_r9.xml"); // FIX ME
 	  fR9[1] = new TFormula("", "x[0]*0.014926955853444557-0.00869450644995956");
 	}
       }    
@@ -1354,26 +1363,26 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderS4[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_s4.xml"); // FIX ME
+	  tmvaReaderS4[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_s4.xml"); // FIX ME
 	  fS4[0] = new TFormula("", "x[0]*0.007630080763117303+0.00038370660197839523");
 	} else {
-	  tmvaReaderS4[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_s4.xml"); // FIX ME
+	  tmvaReaderS4[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_s4.xml"); // FIX ME
 	  fS4[1] = new TFormula("", "x[0]*0.011291341541304956-0.0049337720663549245");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderS4[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_s4.xml"); // FIX ME
+	  tmvaReaderS4[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_s4.xml"); // FIX ME
 	  fS4[0] = new TFormula("", "x[0]*0.0065310642236871275-0.0014767145572411322");
 	} else {
-	  tmvaReaderS4[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_s4.xml"); // FIX ME
+	  tmvaReaderS4[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_s4.xml"); // FIX ME
 	  fS4[1] = new TFormula("", "x[0]*0.014044106856233973-0.008718535579634146");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderS4[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_s4.xml"); // FIX ME
+	  tmvaReaderS4[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_s4.xml"); // FIX ME
 	  fS4[0] = new TFormula("", "x[0]*0.00728814761466437-0.002791432255344395");
 	} else {
-	  tmvaReaderS4[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_s4.xml"); // FIX ME
+	  tmvaReaderS4[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_s4.xml"); // FIX ME
 	  fS4[1] = new TFormula("", "x[0]*0.014542940630291212-0.011083602033276074");
 	}
       }    
@@ -1413,44 +1422,44 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_p2t_EB_phoIso.xml"); // FIX ME 
-	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_p2t_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_p2t_EB_phoIso.xml"); // FIX ME 
+	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_p2t_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
 	  fPhoIso[0] = new TFormula("", "x[0]*0.0935077084495785+0.039768874381154895");
 	} else {
-	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_p2t_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_p2t_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_p2t_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_p2t_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
 	  fPhoIso[1] = new TFormula("", "x[0]*0.08596048057765085-0.012660368261709964");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) { 
-	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_p2t_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_p2t_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_p2t_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_p2t_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
 	  fPhoIso[0] = new TFormula("", "x[0]*0.1256188820912958+0.06895645737583889");
 	} else {
-	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_p2t_EE_phoIso.xml"); // FIX ME 
-	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_p2t_EE_phoIso.xml"); // FIX ME 
-	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_p2t_EE_phoIso.xml"); // FIX ME 
+	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_p2t_EE_phoIso.xml"); // FIX ME 
+	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
 	  fPhoIso[1] = new TFormula("", "x[0]*0.0886983137006268+0.025296074198263616");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_p2t_EB_phoIso.xml"); // FIX ME 
-	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_p2t_EB_phoIso.xml"); // FIX ME 
-	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_p2t_EB_phoIso.xml"); // FIX ME 
+	  tmvaReaderPhoIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_p2t_EB_phoIso.xml"); // FIX ME 
+	  tmvaReaderPhoIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_phoIso.xml"); // FIX ME
 	  fPhoIso[0] = new TFormula("", "x[0]*0.12040089375899635+0.07988597084627963");
 	} else {
-	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_p2t_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_p2t_EE_phoIso.xml"); // FIX ME
-	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_p2t_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_p2t_EE_phoIso.xml"); // FIX ME
+	  tmvaReaderPhoIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_phoIso.xml"); // FIX ME
 	  fPhoIso[1] = new TFormula("", "x[0]*0.06640579530911996+0.005250037356742843");
 	}
       }    
@@ -1511,61 +1520,61 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
       
       if (_parameters.period == "2016") {
 	if (iBE == 0) {
-	  tmvaReaderChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_3Cat_EB_chIso_chIsoWorst.xml");  // FIX ME
-	  tmvaReaderChIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_chIso.xml"); // FIX ME 
-	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME 
-	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_3Cat_EB_chIso_chIsoWorst.xml");  // FIX ME
+	  tmvaReaderChIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_chIso.xml"); // FIX ME 
+	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME 
+	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
 	  fChIso[0] = new TFormula("", "x[0]*0.06188532145612949+0.02015489488479011");
 	  fWorstChIso[0] = new TFormula("", "x[0]*0.05524731145218942+0.003043560613187335");
 	} else { 
-	  tmvaReaderChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_chIso.xml"); // FIX ME 
-	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_chIso.xml"); // FIX ME 
+	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2016/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
 	  fChIso[1] = new TFormula("", "x[0]*0.09449158290398274+0.005233862600715372");
 	  fWorstChIso[1] = new TFormula("", "x[0]*0.07908877024409315-0.016709346023939642");
 	}
       } else if (_parameters.period == "2017") {
 	if (iBE == 0) {
-	  tmvaReaderChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
-	  tmvaReaderChIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
-	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_chIso.xml"); // FIX ME 
-	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME 
-	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
+	  tmvaReaderChIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
+	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_chIso.xml"); // FIX ME 
+	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME 
+	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
 	  fChIso[0] = new TFormula("", "x[0]*0.07795545910678636+0.04056159366893253");
 	  fWorstChIso[0] = new TFormula("", "x[0]*0.09341274835827507+0.09945467977615818");
 	} else {
-	  tmvaReaderChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_chIso.xml"); // FIX ME
-	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_chIso.xml"); // FIX ME
+	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2017/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
 	  fChIso[1] = new TFormula("", "x[0]*0.08121688032488544+0.012777520521935815");
 	  fWorstChIso[1] = new TFormula("", "x[0]*0.08261618370104969-0.0002665169782493232");
 	}
       } else if (_parameters.period == "2018") {
 	if (iBE == 0) {
-	  tmvaReaderChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMC[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
-	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_chIso.xml"); // FIX ME
-	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMC[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_3Cat_EB_chIso_chIsoWorst.xml"); // FIX ME 
+	  tmvaReaderChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_chIso.xml"); // FIX ME
+	  tmvaReaderWorstChIsoTail[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EB_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderWorstChIsoMorph[0]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EB_chIsoWorst.xml"); // FIX ME
 	  fChIso[0] = new TFormula("", "x[0]*0.09683323426563749+0.05272420382216636");
 	  fWorstChIso[0] = new TFormula("", "x[0]*0.09610418976923851+0.12885914702326673");
 	} else {
-	  tmvaReaderChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
-	  tmvaReaderChIsoData[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMC[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_chIso.xml"); // FIX ME
-	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
-	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", "BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_chIso.xml"); // FIX ME
+	  tmvaReaderChIsoData[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/data_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMC[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/mc_clf_3Cat_EE_chIso_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_chIso.xml"); // FIX ME
+	  tmvaReaderWorstChIsoTail[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalTailRegressor_EE_chIsoWorst.xml"); // FIX ME
+	  tmvaReaderWorstChIsoMorph[1]->BookMVA("BDT", _cmssw_base +"/src/BLT/BLTAnalysis/data/tmvaWeightFiles/2018/weights_finalRegressor_EE_chIsoWorst.xml"); // FIX ME
 	  fChIso[1] = new TFormula("", "x[0]*0.07311271907865564+0.015334704146744094");
 	  fWorstChIso[1] = new TFormula("", "x[0]*0.07549508562988608+0.02261090428387391");
 	}
@@ -1706,16 +1715,28 @@ vector<float> ParticleSelector::GetCorrectedPhotonMVA(const baconhep::TPhoton* p
     phoSCEtaWidth_   = corrEtaWidth;
     phoSCPhiWidth_   = corrPhiWidth;
     phoR9Full5x5_    = corrR9;
-    s4Full5x5        = corrS4;
+    //  s4Full5x5        = corrS4;
     phoPFPhoIso_     = corrPhoIso;
     phoPFChIso_      = corrChIso;
     phoPFChIsoWorst_ = corrWorstChIso;
+
     
     float corrmva = tmvaReaderEGMPhoID[iBE]->EvaluateMVA("BDT");   
+    
+    //std::cout << "photon corr_sieie, corr_sieip, corr_scEtaWidth, corr_scPhiWidth, corr_R9, corr_S4, corr_phoIso, corr_ChIso, corr_worstChIso, mva, corr_MVA" << std::endl;
+    //std::cout << sieieFull5x5 << ", " << sieipFull5x5 << ", " << phoSCEtaWidth_ << ", " << phoSCPhiWidth_ << ", " << phoR9Full5x5_ << ", " << s4Full5x5 << ", " << 
+    //             phoPFPhoIso_ << ", " << phoPFChIso_ << ", " << phoPFChIsoWorst_ << ", " << mva << ", " << corrmva << std::endl;
 
     corrValues.push_back(mva);
     corrValues.push_back(corrmva);
     //cout<<"mva        : "<<mva<<" "<<corrmva<<endl;
+    //
+    //std::cout << "mva POG, preCorr, postCorrNoS4:" << std::endl;
+    //std::cout << ph->mvaFall17V2 << ", " << mva << ", " << corrmva << std::endl;
+    //s4Full5x5        = corrS4;
+    //corrmva = tmvaReaderEGMPhoID[iBE]->EvaluateMVA("BDT");   
+    //std::cout << corrmva << std::endl;
+
     
   } else {
     corrValues.push_back(0);

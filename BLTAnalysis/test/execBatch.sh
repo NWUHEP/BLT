@@ -14,8 +14,8 @@ PERIOD=$5
 TOPDIR=$PWD
 
 # lpc
-export SCRAM_ARCH=slc6_amd64_gcc530
-export CMSSW_VERSION=CMSSW_8_0_20
+export SCRAM_ARCH=slc7_amd64_gcc820
+export CMSSW_VERSION=CMSSW_11_1_2_patch3
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
 # nut3
@@ -45,6 +45,7 @@ cat input.txt
 #zjpsiAnalyzerV2 input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 hzgAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
+#hltPrintoutAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 #hzgAnalyzerUCSBSync input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT
 
 #gbrTrainAnalyzer input.txt -1 $DATANAME $SUFFIX $SELECTION $PERIOD $COUNT

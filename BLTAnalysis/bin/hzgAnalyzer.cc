@@ -215,6 +215,7 @@ void hzgAnalyzer::Begin(TTree *tree)
         tree->Branch("photonR9", &photonR9);
         tree->Branch("photonRawR9", &photonRawR9);
         tree->Branch("photonMVA", &photonMVA);
+        tree->Branch("photonMVAWeight", &photonMVAWeight);
         tree->Branch("photonERes", &photonERes);
         tree->Branch("photonE", &photonE);
         tree->Branch("photonErrE", &photonErrE);
@@ -400,19 +401,24 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
     bool sync = false;
     if (sync) {
         if (!(
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1352 && fInfo->evtNum == 135137) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 384 && fInfo->evtNum == 38393) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1724 && fInfo->evtNum == 172397) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 55 && fInfo->evtNum == 5477) || 
-                (fInfo->runNum == 1 && fInfo->lumiSec == 248 && fInfo->evtNum == 24701) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 606 && fInfo->evtNum == 60508) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1486 && fInfo->evtNum == 148572) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1959 && fInfo->evtNum == 195854) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 41 && fInfo->evtNum == 4003) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 1196 && fInfo->evtNum == 119539) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 182 && fInfo->evtNum == 18102) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 407 && fInfo->evtNum == 40623) ||
-                (fInfo->runNum == 1 && fInfo->lumiSec == 802 && fInfo->evtNum == 80177) 
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 1352 && fInfo->evtNum == 135137) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 384 && fInfo->evtNum == 38393) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 1724 && fInfo->evtNum == 172397) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 55 && fInfo->evtNum == 5477) || 
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 248 && fInfo->evtNum == 24701) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 606 && fInfo->evtNum == 60508) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 1486 && fInfo->evtNum == 148572) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 1959 && fInfo->evtNum == 195854) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 41 && fInfo->evtNum == 4003) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 1196 && fInfo->evtNum == 119539) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 182 && fInfo->evtNum == 18102) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 407 && fInfo->evtNum == 40623) ||
+                //(fInfo->runNum == 1 && fInfo->lumiSec == 802 && fInfo->evtNum == 80177) 
+                (fInfo->evtNum == 162007) ||
+                (fInfo->evtNum == 162031) ||
+                (fInfo->evtNum == 162038) ||
+                (fInfo->evtNum == 162041) ||
+                (fInfo->evtNum == 162255) 
             )) 
         {
             return kTRUE;
@@ -691,11 +697,6 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         TPhoton* photon = (TPhoton*) fPhotonArr->At(i);
         assert(photon);
 
-        std::cout << "NEW PHOTON" << std::endl;
-        std::cout << "photon mva = " << photon->mvaFall17V2 << std::endl;
-        std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photon, isData);
-        std::cout << "corrected photon mva = " << corrPhotonMVAOut.at(9) << std::endl;
-        
         if (
                 photon->pt > 10
                 && fabs(photon->scEta) < 2.5 
@@ -708,6 +709,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             TLorentzVector photonP4;
             photonP4.SetPtEtaPhiM(photon->calibPt, photon->eta, photon->phi, 0.);
             veto_photons.push_back(photonP4);
+
         }
     } 
     sort(photons.begin(), photons.end(), sort_by_higher_pt<TPhoton>);
@@ -993,6 +995,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
             photonSCEta = photons[0]->scEta;
             photonSCPhi = photons[0]->scPhi;
             photonMVA = photons[0]->mvaFall17V2;
+            //std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photons[0], isData);
+            //photonCorrMVA = corrPhotonMVAOut[9];
         
             photonERes = photons[0]->ecalEnergyErrPostCorr / photons[0]->calibE;
             photonE = photons[0]->calibE;
@@ -1097,10 +1101,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonEta = photonP4.Eta();
         photonPhi = photonP4.Phi();
         photonMVA = photons[0]->mvaFall17V2;
+        //std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photons[0], isData);
+        //photonCorrMVA = corrPhotonMVAOut[9];
         passElectronVeto = photons[0]->passElectronVeto;  
-        if (!isData)
-            photonR9 = weights->GetCorrectedPhotonR9(*photons[0]);
-        else 
+        //if (!isData)
+        //    photonR9 = weights->GetCorrectedPhotonR9(*photons[0]);
+        //else 
             photonR9 = photons[0]->r9_full5x5;
 
         // DY photon overlap removal
@@ -1682,6 +1688,12 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         photonSCEta = photons[photonIndex]->scEta;
         photonSCPhi = photons[photonIndex]->scPhi;
         photonMVA = photons[photonIndex]->mvaFall17V2;
+
+        std::vector<float> corrPhotonMVAOut = particleSelector->GetCorrectedPhotonMVA(photons[photonIndex], isData);
+        photonMVAWeight = 1.;
+        if (!isData) {
+            photonMVAWeight = corrPhotonMVAOut[10] / corrPhotonMVAOut[9];
+        }
         
         photonERes = photons[photonIndex]->ecalEnergyErrPostCorr / photonP4.E();
         photonE = photonP4.E();
@@ -1693,7 +1705,7 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         passElectronVeto = photons[photonIndex]->passElectronVeto;  
 
         photonRawR9 = photons[photonIndex]->r9_full5x5;
-        if (!isData) {
+        /*if (!isData) {
             photonR9 = weights->GetCorrectedPhotonR9(*photons[photonIndex]);
             if (sync) {
                 std::cout << "event, uncorrected r9, corrected r9: " << 
@@ -1701,14 +1713,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                              photons[photonIndex]->r9_full5x5 << ", " << 
                              weights->GetCorrectedPhotonR9(*photons[photonIndex]) << std::endl;
             }
-        }
-        else photonR9 = photons[photonIndex]->r9_full5x5;
-        if (photonRawR9 != 0.) {
+        }*/
+        //else {
+            photonR9 = photons[photonIndex]->r9_full5x5;
+        //}
+        /*if (photonRawR9 != 0.) {
             photonR9Weight = photonR9 / photonRawR9;
         }
         else {
             photonR9Weight = 1.;
-        }
+        }*/
 
         // kinematic fit
         KinZfitter* kinZfitter = new KinZfitter(isData);

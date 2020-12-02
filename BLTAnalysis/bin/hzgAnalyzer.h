@@ -130,7 +130,7 @@ public:
     Float_t photonRawPt;
     Float_t photonSCPt, photonSCEta, photonSCPhi;
     Float_t photonR9, photonRawR9;
-    Float_t photonMVA;
+    Float_t photonMVA, photonMVAWeight;
     Float_t photonERes;
     Float_t photonE, photonErrE;
     //Float_t photonWorstChIso; // on hold

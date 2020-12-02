@@ -5,7 +5,7 @@ import sys
 ''' Specify parameters '''
 cfg        = bm.JobConfig
 selection = 'eeg'
-periods = [2017]
+periods = [2018]
 path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
 executable = 'execBatch.sh'
 
@@ -489,116 +489,121 @@ electron_data_18.extend([
 
 mc_18 = []
 mc_18.extend([
-    cfg(data_name = 'DYJetsToLL_M50_2018',
-        path      = '{0}/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX_RunIIAutumn18MiniAOD_tmp/'.format(path),
-        nJobs     = 50,
-        suffix    = 'zjets_M50_2018'
-        ),
-    cfg(data_name = 'ZGToLLG_2018', 
-        path      = '{0}/ZGToLLG_01J_LoosePtlPtg_5f_TuneCP5_13TeV-amcatnloFXFX_RunIIAutumn18MiniAOD_tmp/'.format(path),
-        nJobs     = 50,
-        suffix    = 'zg_llg_2018'
-        ),
+    #cfg(data_name = 'DYJetsToLL_M50_2018',
+    #    path      = '{0}/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX_RunIIAutumn18MiniAOD_tmp/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'zjets_M50_2018'
+    #    ),
+    #cfg(data_name = 'ZGToLLG_2018', 
+    #    path      = '{0}/ZGToLLG_01J_LoosePtlPtg_5f_TuneCP5_13TeV-amcatnloFXFX_RunIIAutumn18MiniAOD_tmp/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'zg_llg_2018'
+    #    ),
 
-    cfg(data_name = 'hzg_gluglu_M120_2018',
-        path      = '{0}/GluGluHToZG_M-120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_gluglu_M120_2018'
-        ),
-    cfg(data_name = 'hzg_vbf_M120_2018',
-        path      = '{0}/VBFHToZG_M-120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_vbf_M120_2018'
-        ),
-    cfg(data_name = 'hzg_wplush_M120_2018',
-        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wplush_M120_2018'
-        ),
-    cfg(data_name = 'hzg_wminush_M120_2018',
-        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wminush_M120_2018'
-        ),
-    cfg(data_name = 'hzg_zh_M120_2018',
-        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_zh_M120_2018'
-        ),
-    cfg(data_name = 'hzg_tth_M120_2018',
-        path      = '{0}/ttHToZG_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50, 
-        suffix    = 'hzg_tth_M120_2018'
-        ),
-    
+    #cfg(data_name = 'hzg_gluglu_M120_2018',
+    #    path      = '{0}/GluGluHToZG_M-120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_gluglu_M120_2018'
+    #    ),
+    #cfg(data_name = 'hzg_vbf_M120_2018',
+    #    path      = '{0}/VBFHToZG_M-120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_vbf_M120_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wplush_M120_2018',
+    #    path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wplush_M120_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wminush_M120_2018',
+    #    path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wminush_M120_2018'
+    #    ),
+    #cfg(data_name = 'hzg_zh_M120_2018',
+    #    path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_zh_M120_2018'
+    #    ),
+    #cfg(data_name = 'hzg_tth_M120_2018',
+    #    path      = '{0}/ttHToZG_ZToLL_M120_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50, 
+    #    suffix    = 'hzg_tth_M120_2018'
+    #    ),
+    #
+    #cfg(data_name = 'hzg_gluglu_M125_2018',
+    #    path      = '{0}/GluGluHToZG_M-125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_gluglu_M125_2018'
+    #    ),
     cfg(data_name = 'hzg_gluglu_M125_2018',
-        path      = '{0}/GluGluHToZG_M-125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
+        path      = '{0}/aug_20/GluGluHToZG_M-125_TuneCP5_13TeV-powheg-pythia8_RunIIAutumn18MiniAOD/'.format(path),
+        nJobs     = 10,
         suffix    = 'hzg_gluglu_M125_2018'
         ),
-    cfg(data_name = 'hzg_vbf_M125_2018',
-        path      = '{0}/VBFHToZG_M-125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_vbf_M125_2018'
-        ),
-    cfg(data_name = 'hzg_wplush_M125_2018',
-        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wplush_M125_2018'
-        ),
-    cfg(data_name = 'hzg_wminush_M125_2018',
-        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wminush_M125_2018'
-        ),
-    cfg(data_name = 'hzg_zh_M125_2018',
-        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_zh_M125_2018'
-        ),
-    cfg(data_name = 'hzg_tth_M125_2018',
-        path      = '{0}/ttHToZG_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50, 
-        suffix    = 'hzg_tth_M125_2018'
-        ),
-    
-    cfg(data_name = 'hzg_gluglu_M130_2018',
-        path      = '{0}/GluGluHToZG_M-130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_gluglu_M130_2018'
-        ),
-    cfg(data_name = 'hzg_vbf_M130_2018',
-        path      = '{0}/VBFHToZG_M-130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_vbf_M130_2018'
-        ),
-    cfg(data_name = 'hzg_wplush_M130_2018',
-        path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wplush_M130_2018'
-        ),
-    cfg(data_name = 'hzg_wminush_M130_2018',
-        path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_wminush_M130_2018'
-        ),
-    cfg(data_name = 'hzg_zh_M130_2018',
-        path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50,
-        suffix    = 'hzg_zh_M130_2018'
-        ),
-    cfg(data_name = 'hzg_tth_M130_2018',
-        path      = '{0}/ttHToZG_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
-        nJobs     = 50, 
-        suffix    = 'hzg_tth_M130_2018'
-        ),
+    #cfg(data_name = 'hzg_vbf_M125_2018',
+    #    path      = '{0}/VBFHToZG_M-125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_vbf_M125_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wplush_M125_2018',
+    #    path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wplush_M125_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wminush_M125_2018',
+    #    path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wminush_M125_2018'
+    #    ),
+    #cfg(data_name = 'hzg_zh_M125_2018',
+    #    path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_zh_M125_2018'
+    #    ),
+    #cfg(data_name = 'hzg_tth_M125_2018',
+    #    path      = '{0}/ttHToZG_ZToLL_M125_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50, 
+    #    suffix    = 'hzg_tth_M125_2018'
+    #    ),
+    #
+    #cfg(data_name = 'hzg_gluglu_M130_2018',
+    #    path      = '{0}/GluGluHToZG_M-130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_gluglu_M130_2018'
+    #    ),
+    #cfg(data_name = 'hzg_vbf_M130_2018',
+    #    path      = '{0}/VBFHToZG_M-130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_vbf_M130_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wplush_M130_2018',
+    #    path      = '{0}/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wplush_M130_2018'
+    #    ),
+    #cfg(data_name = 'hzg_wminush_M130_2018',
+    #    path      = '{0}/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_wminush_M130_2018'
+    #    ),
+    #cfg(data_name = 'hzg_zh_M130_2018',
+    #    path      = '{0}/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50,
+    #    suffix    = 'hzg_zh_M130_2018'
+    #    ),
+    #cfg(data_name = 'hzg_tth_M130_2018',
+    #    path      = '{0}/ttHToZG_ZToLL_M130_13TeV_powheg_RunIIAutumn18MiniAOD/'.format(path),
+    #    nJobs     = 50, 
+    #    suffix    = 'hzg_tth_M130_2018'
+    #    ),
     ])
 
 batch_18_samples = []
-if selection == 'mmg':
-    batch_18_samples += muon_data_18
-elif selection == 'eeg':
-    batch_18_samples += electron_data_18
+#if selection == 'mmg':
+#    batch_18_samples += muon_data_18
+#elif selection == 'eeg':
+#    batch_18_samples += electron_data_18
 batch_18_samples += mc_18
 
 batch_18 = bm.BatchMaster(config_list = batch_18_samples, 

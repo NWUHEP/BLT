@@ -1763,6 +1763,49 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         }
 
         std::map<unsigned int, TLorentzVector> selectedFsrMap;
+
+        // FSR photons for muon channel
+        int leptonOneFSRIndex = -1;
+        int leptonTwoFSRIndex = -1;
+        float minDROne = 0.012;
+        float minDRTwo = 0.012;
+        if (params->selection == "mmg") {
+            for (unsigned int i=0; i < pf_photons.size(); i++) {
+                TPFPart *tmpFSR = pf_photons.at(i);
+                TLorentzVector tmpFSRP4;
+                tmpFSRP4.SetPtEtaPhiM(tmpFSR->pt, tmpFSR->eta, tmpFSR->phi, 0.);
+                float drLeptonOneFSR = tmpFSRP4.DeltaR(leptonOneP4);
+                float drLeptonTwoFSR = tmpFSRP4.DeltaR(leptonTwoP4);
+                if (
+                        drLeptonOneFSR < 0.4 
+                        && (drLeptonOneFSR / pow(tmpFSR->pt, 2)) < minDROne
+                    ) {
+                        leptonOneFSRIndex = i;
+                        minDROne = drLeptonOneFSR / pow(tmpFSR->pt, 2);
+                }
+                if (
+                        drLeptonTwoFSR < 0.4 
+                        && (drLeptonTwoFSR / pow(tmpFSR->pt, 2)) < minDRTwo
+                    ) {
+                        leptonTwoFSRIndex = i;
+                        minDRTwo = drLeptonTwoFSR / pow(tmpFSR->pt, 2);
+                }
+            }
+            if (leptonOneFSRIndex != -1) {
+                TPFPart *fsrPhoton = pf_photons.at(leptonOneFSRIndex);
+                TLorentzVector FSRP4;
+                FSRP4.SetPtEtaPhiM(fsrPhoton->pt, fsrPhoton->eta, fsrPhoton->phi, 0.);
+                selectedFsrMap[0] = FSRP4;
+            }
+            if (leptonTwoFSRIndex != -1) {
+                TPFPart *fsrPhoton = pf_photons.at(leptonTwoFSRIndex);
+                TLorentzVector FSRP4;
+                FSRP4.SetPtEtaPhiM(fsrPhoton->pt, fsrPhoton->eta, fsrPhoton->phi, 0.);
+                selectedFsrMap[1] = FSRP4;
+            }
+        }
+                        
+
         kinZfitter->Setup(selectedLeptons, selectedFsrMap, pTerr);
         kinZfitter->KinRefitZ();
         std::vector<TLorentzVector> refitP4s;

@@ -359,6 +359,8 @@ void hzgAnalyzer::Begin(TTree *tree)
         tree->Branch("jetTwoMatched", &jetTwoMatched);
         tree->Branch("leptonOneMatched", &leptonOneMatched);
         tree->Branch("leptonTwoMatched", &leptonTwoMatched);
+        tree->Branch("leptonOneHasFSR", &leptonOneHasFSR);
+        tree->Branch("leptonTwoHasFSR", &leptonTwoHasFSR);
         tree->Branch("photonMatched", &photonMatched);
 
         outTrees[region] = tree;
@@ -1765,6 +1767,8 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
         std::map<unsigned int, TLorentzVector> selectedFsrMap;
 
         // FSR photons for muon channel
+        leptonOneHasFSR = false;
+        leptonTwoHasFSR = false;
         int leptonOneFSRIndex = -1;
         int leptonTwoFSRIndex = -1;
         float minDROne = 0.012;
@@ -1792,12 +1796,14 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 }
             }
             if (leptonOneFSRIndex != -1) {
+                leptonOneHasFSR = true;
                 TPFPart *fsrPhoton = pf_photons.at(leptonOneFSRIndex);
                 TLorentzVector FSRP4;
                 FSRP4.SetPtEtaPhiM(fsrPhoton->pt, fsrPhoton->eta, fsrPhoton->phi, 0.);
                 selectedFsrMap[0] = FSRP4;
             }
             if (leptonTwoFSRIndex != -1) {
+                leptonTwoHasFSR = true;
                 TPFPart *fsrPhoton = pf_photons.at(leptonTwoFSRIndex);
                 TLorentzVector FSRP4;
                 FSRP4.SetPtEtaPhiM(fsrPhoton->pt, fsrPhoton->eta, fsrPhoton->phi, 0.);

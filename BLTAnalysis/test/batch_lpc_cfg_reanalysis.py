@@ -167,232 +167,232 @@ electron_data_16.extend([
 mc_16 = []
 mc_16.extend([
 
-    #cfg(data_name = 'DYJetsToLL_M50_2016', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/corderom/james/mc_2016/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_DYJets_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRu/200922_144944/0000/',
-    #    nJobs     = 50,
-    #    suffix    = 'zjets_M50_2016'
-    #    ),
+    cfg(data_name = 'DYJetsToLL_M50_2016', 
+        path      = '/eos/uscms/store/group/lpcbacon/corderom/james/mc_2016/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_DYJets_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRu/200922_144944/0000/',
+        nJobs     = 50,
+        suffix    = 'zjets_M50_2016'
+        ),
 
-    #cfg(data_name = 'ZGToLLG_2016', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/zichen/ZGToLLG_01J_LoosePtlPtg_5f_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_ZGToLLG_01J_LoosePtlPtg_5f_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond/200812_184026/0000/',
-    #    nJobs     = 50,
-    #    suffix    = 'zg_llg_2016'
-    #    ),
-    #cfg(data_name = 'LLAJJ_EWK_M50_2016', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/zichen/LLAJJ_EWK_MLL-50_MJJ-120_13TeV-madgraph-pythia8/2016_mc_prod_TEST_V2_LLAJJ_EWK_MLL-50_MJJ-120_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200812_184341/0000/',
-    #    nJobs     = 50,
-    #    suffix    = 'zg_ewk_2016'
-    #    ),
+    cfg(data_name = 'ZGToLLG_2016', 
+        path      = '/eos/uscms/store/group/lpcbacon/zichen/ZGToLLG_01J_LoosePtlPtg_5f_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_ZGToLLG_01J_LoosePtlPtg_5f_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond/200812_184026/0000/',
+        nJobs     = 50,
+        suffix    = 'zg_llg_2016'
+        ),
+    cfg(data_name = 'LLAJJ_EWK_M50_2016', 
+        path      = '/eos/uscms/store/group/lpcbacon/zichen/LLAJJ_EWK_MLL-50_MJJ-120_13TeV-madgraph-pythia8/2016_mc_prod_TEST_V2_LLAJJ_EWK_MLL-50_MJJ-120_13TeV-madgraph-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200812_184341/0000/',
+        nJobs     = 50,
+        suffix    = 'zg_ewk_2016'
+        ),
 
-    #cfg(data_name = 'TTJets_2016_part0', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'ttjets_2016'
-    #    ),
-    #cfg(data_name = 'TTJets_2016_part1', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0001/',
-    #    nJobs     = 25,
-    #    suffix    = 'ttjets_2016'
-    #    ),
-    #cfg(data_name = 'TTJets_2016_part2', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0002/',
-    #    nJobs     = 25,
-    #    suffix    = 'ttjets_2016'
-    #    ),
+    cfg(data_name = 'TTJets_2016_part0', 
+        path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0000/',
+        nJobs     = 25,
+        suffix    = 'ttjets_2016'
+        ),
+    cfg(data_name = 'TTJets_2016_part1', 
+        path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0001/',
+        nJobs     = 25,
+        suffix    = 'ttjets_2016'
+        ),
+    cfg(data_name = 'TTJets_2016_part2', 
+        path      = '/eos/uscms/store/group/lpcbacon/zichen/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/2016_mc_prod_TEST_V2_TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asym/200812_184203/0002/',
+        nJobs     = 25,
+        suffix    = 'ttjets_2016'
+        ),
 
-    #cfg(data_name = 'hzg_gluglu_M125_2016',
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/GluGluHToZG_M-125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-125_13TeV_powheg_pythia8_cmkuo-ggF_HZg_M125_Summer16_minAODv3_v1-bd3e7bcff6c9bcad356e/200914_142146/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hzg_gluglu_M125_2016'
-    #    ),
-    #cfg(data_name = 'hzg_vbf_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext/200811_015754/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hzg_vbf_M125_2016'
-    #    ),
+    cfg(data_name = 'hzg_gluglu_M125_2016',
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/GluGluHToZG_M-125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-125_13TeV_powheg_pythia8_cmkuo-ggF_HZg_M125_Summer16_minAODv3_v1-bd3e7bcff6c9bcad356e/200914_142146/0000/',
+        nJobs     = 25,
+        suffix    = 'hzg_gluglu_M125_2016'
+        ),
+    cfg(data_name = 'hzg_vbf_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext/200811_015754/0000/',
+        nJobs     = 25,
+        suffix    = 'hzg_vbf_M125_2016'
+        ),
     cfg(data_name = 'hzg_wplush_M125_2016',
         path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WplusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WplusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_a/200811_020242/0000/',
         nJobs     = 3,
         suffix    = 'hzg_wplush_M125_2016'
         ),
-    #cfg(data_name = 'hzg_wminush_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_020423/0000/',
-    #    nJobs     = 9,
-    #    suffix    = 'hzg_wminush_M125_2016'
-    #    ),
-    #cfg(data_name = 'hzg_zh_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_020105/0000/',
-    #    nJobs     = 7,
-    #    suffix    = 'hzg_zh_M125_2016'
-    #    ),
-    #cfg(data_name = 'hzg_tth_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_015929/0000/',
-    #    nJobs     = 5, 
-    #    suffix    = 'hzg_tth_M125_2016'
-    #    ),
-    #
-    #cfg(data_name = 'hzg_gluglu_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToZG_M-120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_/200811_020604/0000/',
-    #    nJobs     = 14,
-    #    suffix    = 'hzg_gluglu_M120_2016'
-    #    ),
-    #cfg(data_name = 'hzg_vbf_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200811_020740/0000/',
-    #    nJobs     = 16,
-    #    suffix    = 'hzg_vbf_M120_2016'
-    #    ),
-    #cfg(data_name = 'hzg_wplush_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_a/200811_021225/0000/',
-    #    nJobs     = 9,
-    #    suffix    = 'hzg_wplush_M120_2016'
-    #    ),
-    #cfg(data_name = 'hzg_wminush_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_021400/0000/',
-    #    nJobs     = 9,
-    #    suffix    = 'hzg_wminush_M120_2016'
-    #    ),
-    #cfg(data_name = 'hzg_zh_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_021050/0000/',
-    #    nJobs     = 8,
-    #    suffix    = 'hzg_zh_M120_2016'
-    #    ),
-    #cfg(data_name = 'hzg_tth_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_020914/0000/',
-    #    nJobs     = 6, 
-    #    suffix    = 'hzg_tth_M120_2016'
-    #    ),
-    #
-    #cfg(data_name = 'hzg_gluglu_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToZG_M-130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_/200811_021546/0000/',
-    #    nJobs     = 15,
-    #    suffix    = 'hzg_gluglu_M130_2016'
-    #    ),
-    #cfg(data_name = 'hzg_vbf_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200811_021720/0000/',
-    #    nJobs     = 15,
-    #    suffix    = 'hzg_vbf_M130_2016'
-    #    ),
-    #cfg(data_name = 'hzg_wplush_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_a/200811_022154/0000/',
-    #    nJobs     = 5,
-    #    suffix    = 'hzg_wplush_M130_2016'
-    #    ),
-    #cfg(data_name = 'hzg_wminush_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_022326/0000/',
-    #    nJobs     = 5,
-    #    suffix    = 'hzg_wminush_M130_2016'
-    #    ),
-    #cfg(data_name = 'hzg_zh_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_022022/0000/',
-    #    nJobs     = 4,
-    #    suffix    = 'hzg_zh_M130_2016'
-    #    ),
-    #cfg(data_name = 'hzg_tth_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_021851/0000/',
-    #    nJobs     = 12, 
-    #    suffix    = 'hzg_tth_M130_2016'
-    #    ),
-    #
-    #cfg(data_name = 'hmumu_gluglu_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_152118/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_gluglu_M125_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_vbf_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_152247/0000/',
-    #    nJobs     = 10,
-    #    suffix    = 'hmumu_vbf_M125_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wplush_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_152715/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_wplush_M125_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wminush_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_152847/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_wminush_M125_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_zh_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_152547/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_zh_M125_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_tth_M125_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M125_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M125_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_152417/0000/',
-    #    nJobs     = 25, 
-    #    suffix    = 'hmumu_tth_M125_2016'
-    #    ),
-    #
-    #cfg(data_name = 'hmumu_gluglu_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_153016/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_gluglu_M120_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_vbf_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_153158/0000/',
-    #    nJobs     = 9,
-    #    suffix    = 'hmumu_vbf_M120_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wplush_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_153633/0000/',
-    #    nJobs     = 3,
-    #    suffix    = 'hmumu_wplush_M120_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wminush_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_153802/0000/',
-    #    nJobs     = 4,
-    #    suffix    = 'hmumu_wminush_M120_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_zh_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_153502/0000/',
-    #    nJobs     = 12,
-    #    suffix    = 'hmumu_zh_M120_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_tth_M120_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M120_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M120_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_153329/0000/',
-    #    nJobs     = 25, 
-    #    suffix    = 'hmumu_tth_M120_2016'
-    #    ),
-    #
-    #cfg(data_name = 'hmumu_gluglu_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_153956/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'hmumu_gluglu_M130_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_vbf_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_154136/0000/',
-    #    nJobs     = 5,
-    #    suffix    = 'hmumu_vbf_M130_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wplush_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_154620/0000/',
-    #    nJobs     = 5,
-    #    suffix    = 'hmumu_wplush_M130_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_wminush_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_154808/0000/',
-    #    nJobs     = 7,
-    #    suffix    = 'hmumu_wminush_M130_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_zh_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_154444/0000/',
-    #    nJobs     = 6,
-    #    suffix    = 'hmumu_zh_M130_2016'
-    #    ),
-    #cfg(data_name = 'hmumu_tth_M130_2016',
-    #    path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M130_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M130_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_154311/0000/',
-    #    nJobs     = 25, 
-    #    suffix    = 'hmumu_tth_M130_2016'
-    #    ),
+    cfg(data_name = 'hzg_wminush_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_020423/0000/',
+        nJobs     = 9,
+        suffix    = 'hzg_wminush_M125_2016'
+        ),
+    cfg(data_name = 'hzg_zh_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_020105/0000/',
+        nJobs     = 7,
+        suffix    = 'hzg_zh_M125_2016'
+        ),
+    cfg(data_name = 'hzg_tth_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_015929/0000/',
+        nJobs     = 5, 
+        suffix    = 'hzg_tth_M125_2016'
+        ),
+    
+    cfg(data_name = 'hzg_gluglu_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToZG_M-120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_/200811_020604/0000/',
+        nJobs     = 14,
+        suffix    = 'hzg_gluglu_M120_2016'
+        ),
+    cfg(data_name = 'hzg_vbf_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200811_020740/0000/',
+        nJobs     = 16,
+        suffix    = 'hzg_vbf_M120_2016'
+        ),
+    cfg(data_name = 'hzg_wplush_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WplusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_a/200811_021225/0000/',
+        nJobs     = 9,
+        suffix    = 'hzg_wplush_M120_2016'
+        ),
+    cfg(data_name = 'hzg_wminush_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_021400/0000/',
+        nJobs     = 9,
+        suffix    = 'hzg_wminush_M120_2016'
+        ),
+    cfg(data_name = 'hzg_zh_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_021050/0000/',
+        nJobs     = 8,
+        suffix    = 'hzg_zh_M120_2016'
+        ),
+    cfg(data_name = 'hzg_tth_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_020914/0000/',
+        nJobs     = 6, 
+        suffix    = 'hzg_tth_M120_2016'
+        ),
+    
+    cfg(data_name = 'hzg_gluglu_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToZG_M-130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_GluGluHToZG_M-130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_/200811_021546/0000/',
+        nJobs     = 15,
+        suffix    = 'hzg_gluglu_M130_2016'
+        ),
+    cfg(data_name = 'hzg_vbf_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToZG_M-130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_VBFHToZG_M-130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200811_021720/0000/',
+        nJobs     = 15,
+        suffix    = 'hzg_vbf_M130_2016'
+        ),
+    cfg(data_name = 'hzg_wplush_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WplusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_a/200811_022154/0000/',
+        nJobs     = 5,
+        suffix    = 'hzg_wplush_M130_2016'
+        ),
+    cfg(data_name = 'hzg_wminush_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WminusH_HToZG_WToAll_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_/200811_022326/0000/',
+        nJobs     = 5,
+        suffix    = 'hzg_wminush_M130_2016'
+        ),
+    cfg(data_name = 'hzg_zh_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_ZToAll_HToZG_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymp/200811_022022/0000/',
+        nJobs     = 4,
+        suffix    = 'hzg_zh_M130_2016'
+        ),
+    cfg(data_name = 'hzg_tth_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToZG_ZToLL_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ttHToZG_ZToLL_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3/200811_021851/0000/',
+        nJobs     = 12, 
+        suffix    = 'hzg_tth_M130_2016'
+        ),
+    
+    cfg(data_name = 'hmumu_gluglu_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_152118/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_gluglu_M125_2016'
+        ),
+    cfg(data_name = 'hmumu_vbf_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M125_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_152247/0000/',
+        nJobs     = 10,
+        suffix    = 'hmumu_vbf_M125_2016'
+        ),
+    cfg(data_name = 'hmumu_wplush_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_152715/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_wplush_M125_2016'
+        ),
+    cfg(data_name = 'hmumu_wminush_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_152847/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_wminush_M125_2016'
+        ),
+    cfg(data_name = 'hmumu_zh_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M125_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M125_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_152547/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_zh_M125_2016'
+        ),
+    cfg(data_name = 'hmumu_tth_M125_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M125_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M125_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_152417/0000/',
+        nJobs     = 25, 
+        suffix    = 'hmumu_tth_M125_2016'
+        ),
+    
+    cfg(data_name = 'hmumu_gluglu_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_153016/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_gluglu_M120_2016'
+        ),
+    cfg(data_name = 'hmumu_vbf_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M120_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_153158/0000/',
+        nJobs     = 9,
+        suffix    = 'hmumu_vbf_M120_2016'
+        ),
+    cfg(data_name = 'hmumu_wplush_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_153633/0000/',
+        nJobs     = 3,
+        suffix    = 'hmumu_wplush_M120_2016'
+        ),
+    cfg(data_name = 'hmumu_wminush_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_153802/0000/',
+        nJobs     = 4,
+        suffix    = 'hmumu_wminush_M120_2016'
+        ),
+    cfg(data_name = 'hmumu_zh_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M120_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M120_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_153502/0000/',
+        nJobs     = 12,
+        suffix    = 'hmumu_zh_M120_2016'
+        ),
+    cfg(data_name = 'hmumu_tth_M120_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M120_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M120_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_153329/0000/',
+        nJobs     = 25, 
+        suffix    = 'hmumu_tth_M120_2016'
+        ),
+    
+    cfg(data_name = 'hmumu_gluglu_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/GluGluHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8/2016_mc_prod_TEST_V2_GluGluHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnloFXFX_pythia8_RunIISummer16MiniAODv3-PUMoriond17_/200812_153956/0000/',
+        nJobs     = 25,
+        suffix    = 'hmumu_gluglu_M130_2016'
+        ),
+    cfg(data_name = 'hmumu_vbf_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/VBFHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnlo_pythia8/2016_mc_prod_TEST_V2_VBFHToMuMu_M130_TuneCP5_PSweights_13TeV_amcatnlo_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcR/200812_154136/0000/',
+        nJobs     = 5,
+        suffix    = 'hmumu_vbf_M130_2016'
+        ),
+    cfg(data_name = 'hmumu_wplush_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WPlusH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WPlusH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v/200812_154620/0000/',
+        nJobs     = 5,
+        suffix    = 'hmumu_wplush_M130_2016'
+        ),
+    cfg(data_name = 'hmumu_wminush_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/WMinusH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_WMinusH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_/200812_154808/0000/',
+        nJobs     = 7,
+        suffix    = 'hmumu_wminush_M130_2016'
+        ),
+    cfg(data_name = 'hmumu_zh_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ZH_HToMuMu_M130_13TeV_powheg_pythia8/2016_mc_prod_TEST_V2_ZH_HToMuMu_M130_13TeV_powheg_pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/200812_154444/0000/',
+        nJobs     = 6,
+        suffix    = 'hmumu_zh_M130_2016'
+        ),
+    cfg(data_name = 'hmumu_tth_M130_2016',
+        path      = '/eos/uscms/store/user/corderom/JAMES/mc_2016/ttHToMuMu_M130_TuneCP5_PSweights_13TeV-powheg-pythia8/2016_mc_prod_TEST_V2_ttHToMuMu_M130_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2/200812_154311/0000/',
+        nJobs     = 25, 
+        suffix    = 'hmumu_tth_M130_2016'
+        ),
 
     ])
 
 batch_16_samples = []
-#if selection == 'mmg':
-#    batch_16_samples += muon_data_16
-#elif selection == 'eeg':
-#    batch_16_samples += electron_data_16
+if selection == 'mmg':
+    batch_16_samples += muon_data_16
+elif selection == 'eeg':
+    batch_16_samples += electron_data_16
 batch_16_samples += mc_16
 
 batch_16 = bm.BatchMaster(config_list = batch_16_samples, 
@@ -869,10 +869,10 @@ mc_17.extend([
 
 
 batch_17_samples = []
-#if selection == 'mmg':
-#    batch_17_samples += muon_data_17
-#elif selection == 'eeg':
-#    batch_17_samples += electron_data_17
+if selection == 'mmg':
+    batch_17_samples += muon_data_17
+elif selection == 'eeg':
+    batch_17_samples += electron_data_17
 batch_17_samples += mc_17
 
 batch_17 = bm.BatchMaster(config_list = batch_17_samples, 
@@ -1009,46 +1009,46 @@ muon_data_18.extend([
 electron_data_18 = []
 electron_data_18.extend([
 
-    #cfg(data_name = 'electron_2018A_part0', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part1', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0001/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part2', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0002/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part3', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0003/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part4', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0004/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part5', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0005/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_part6', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0006/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
-    #cfg(data_name = 'electron_2018A_recovery', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_A_recovery_EGamma_Run2018A-17Sep2018-v2/200923_214917/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018A'
-    #    ),
+    cfg(data_name = 'electron_2018A_part0', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0000/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part1', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0001/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part2', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0002/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part3', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0003/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part4', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0004/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part5', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0005/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_part6', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018A-17Sep2018-v2/200902_141330/0006/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
+    cfg(data_name = 'electron_2018A_recovery', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_A_recovery_EGamma_Run2018A-17Sep2018-v2/200923_214917/0000/',
+        nJobs     = 25,
+        suffix    = 'electron_2018A'
+        ),
 
     cfg(data_name = 'electron_2018B_part0', 
         path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_B_retry_EGamma_Run2018B-17Sep2018-v1/201001_012459/0000/',
@@ -1101,102 +1101,102 @@ electron_data_18.extend([
         suffix    = 'electron_2018B'
         ),
 
-    #cfg(data_name = 'electron_2018C_part0', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018C'
-    #    ),
-    #cfg(data_name = 'electron_2018C_part1', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0001/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018C'
-    #    ),
-    #cfg(data_name = 'electron_2018C_part2', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0002/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018C'
-    #    ),
+    cfg(data_name = 'electron_2018C_part0', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0000/',
+        nJobs     = 25,
+        suffix    = 'electron_2018C'
+        ),
+    cfg(data_name = 'electron_2018C_part1', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0001/',
+        nJobs     = 25,
+        suffix    = 'electron_2018C'
+        ),
+    cfg(data_name = 'electron_2018C_part2', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/EGamma/2018_dataABC_prod_aug_20_EGamma_AC_retry_EGamma_Run2018C-17Sep2018-v1/200902_141533/0002/',
+        nJobs     = 25,
+        suffix    = 'electron_2018C'
+        ),
 
-    #cfg(data_name = 'electron_2018D_part0', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part0/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part1', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part1/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part2', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part2/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part3', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part3/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part4', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part4/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part5', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part5/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_part6', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part6/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part0', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0000/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part1', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0001/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part2', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0002/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part3', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0003/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part4', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0004/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part5', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0005/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part6', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0006/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part7', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0007/',
-    #    nJobs     = 25,
-    #    suffix    = 'electron_2018D'
-    #    ),
-    #cfg(data_name = 'electron_2018D_recovery_part8', 
-    #    path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_part2_EGamma_Run2018D-22Jan2019-v2/200923_212059/0000/',
-    #    nJobs     = 5,
-    #    suffix    = 'electron_2018D'
-    #    ),
+    cfg(data_name = 'electron_2018D_part0', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part0/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part1', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part1/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part2', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part2/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part3', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part3/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part4', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part4/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part5', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part5/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_part6', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma_Run2018D-22Jan2019-v2_part6/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part0', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0000/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part1', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0001/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part2', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0002/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part3', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0003/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part4', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0004/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part5', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0005/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part6', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0006/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part7', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_EGamma_Run2018D-22Jan2019-v2/200902_162204/0007/',
+        nJobs     = 25,
+        suffix    = 'electron_2018D'
+        ),
+    cfg(data_name = 'electron_2018D_recovery_part8', 
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/EGamma/2018_dataD_prod_aug_20_EGammaD_recovery_part2_EGamma_Run2018D-22Jan2019-v2/200923_212059/0000/',
+        nJobs     = 5,
+        suffix    = 'electron_2018D'
+        ),
     ])
 
 mc_18 = []
@@ -1457,7 +1457,7 @@ if selection == 'mmg':
     batch_18_samples += muon_data_18
 elif selection == 'eeg':
     batch_18_samples += electron_data_18
-#batch_18_samples += mc_18
+batch_18_samples += mc_18
 
 batch_18 = bm.BatchMaster(config_list = batch_18_samples, 
                        stage_dir   = 'batch',

@@ -200,6 +200,7 @@ public:
     Float_t vbfPtBalance;
     Bool_t jetOneMatched, jetTwoMatched;
     Bool_t leptonOneMatched, leptonTwoMatched;
+    Bool_t leptonOneHasFSR, leptonTwoHasFSR;
     Bool_t photonMatched;
 
     //ClassDef(hzgAnalyzer,0);

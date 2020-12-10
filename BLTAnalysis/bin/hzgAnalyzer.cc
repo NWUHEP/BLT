@@ -415,11 +415,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 //(fInfo->runNum == 1 && fInfo->lumiSec == 182 && fInfo->evtNum == 18102) ||
                 //(fInfo->runNum == 1 && fInfo->lumiSec == 407 && fInfo->evtNum == 40623) ||
                 //(fInfo->runNum == 1 && fInfo->lumiSec == 802 && fInfo->evtNum == 80177) 
-                (fInfo->evtNum == 162007) ||
-                (fInfo->evtNum == 162031) ||
-                (fInfo->evtNum == 162038) ||
-                (fInfo->evtNum == 162041) ||
-                (fInfo->evtNum == 162255) 
+                (fInfo->evtNum == 19912366) ||
+                (fInfo->evtNum == 684090264) ||
+                (fInfo->evtNum == 748416957) ||
+                (fInfo->evtNum == 279854484) ||
+                (fInfo->evtNum == 913742338) ||
+                (fInfo->evtNum == 849188570) ||
+                (fInfo->evtNum == 735270523) ||
+                (fInfo->evtNum == 783177910) ||
+                (fInfo->evtNum == 59631027) ||
+                (fInfo->evtNum == 764266489) 
             )) 
         {
             return kTRUE;
@@ -1778,14 +1783,22 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 TPFPart *tmpFSR = pf_photons.at(i);
                 TLorentzVector tmpFSRP4;
                 tmpFSRP4.SetPtEtaPhiM(tmpFSR->pt, tmpFSR->eta, tmpFSR->phi, 0.);
+
+                if (tmpFSRP4.DeltaR(photonP4) < 0.1) continue;
+                
+                TLorentzVector Zfsr = leptonOneP4 + leptonTwoP4 + tmpFSRP4;
+                if (fabs(Zfsr.M() - ZMASS) > fabs(dileptonP4.M() - ZMASS)) continue;
+                
                 float drLeptonOneFSR = tmpFSRP4.DeltaR(leptonOneP4);
                 float drLeptonTwoFSR = tmpFSRP4.DeltaR(leptonTwoP4);
+
                 if (
                         drLeptonOneFSR < 0.4 
                         && (drLeptonOneFSR / pow(tmpFSR->pt, 2)) < minDROne
                     ) {
                         leptonOneFSRIndex = i;
                         minDROne = drLeptonOneFSR / pow(tmpFSR->pt, 2);
+                        continue;
                 }
                 if (
                         drLeptonTwoFSR < 0.4 
@@ -1810,7 +1823,16 @@ Bool_t hzgAnalyzer::Process(Long64_t entry)
                 selectedFsrMap[1] = FSRP4;
             }
         }
-                        
+
+        if (sync) {
+            if (leptonOneFSRIndex != -1) {
+            std::cout << "FSR 0 pt, eta, phi: " << pf_photons[leptonOneFSRIndex]->pt << ", " << pf_photons[leptonOneFSRIndex]->eta << ", " << pf_photons[leptonOneFSRIndex]->phi << std::endl;
+            }
+            if (leptonTwoFSRIndex != -1) {
+            std::cout << "FSR 1 pt, eta, phi: " << pf_photons[leptonTwoFSRIndex]->pt << ", " << pf_photons[leptonTwoFSRIndex]->eta << ", " << pf_photons[leptonTwoFSRIndex]->phi << std::endl;
+            }
+        }
+                    
 
         kinZfitter->Setup(selectedLeptons, selectedFsrMap, pTerr);
         kinZfitter->KinRefitZ();

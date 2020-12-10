@@ -6,7 +6,6 @@ import sys
 cfg        = bm.JobConfig
 selection = 'mmg'
 periods = [2016]
-#path        = '/eos/uscms/store/group/lpcbacon/jbueghly/'
 executable = 'execBatch.sh'
 
 ''' 
@@ -1302,8 +1301,8 @@ mc_18.extend([
         suffix    = 'hzg_gluglu_M125_2018'
         ),
     cfg(data_name = 'hzg_vbf_M125_2018',
-        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/VBFHToZG_M-125_TuneCP5_13TeV-powheg-pythia8/2018_vbf_signal_rerun_VBFHToZG_M-125_TuneCP5_13TeV-powheg-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/200727_195010/0000/',
-        nJobs     = 50,
+        path      = '/eos/uscms/store/group/lpcbacon/jbueghly/aug_20/VBFHToZG_M-125_TuneCP5_13TeV-powheg-pythia8/2018_mc_prod_aug_20_hzg_vbf_pfpart_fix_VBFHToZG_M-125_TuneCP5_13TeV-powheg-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/201204_231549/0000/',
+        nJobs     = 15,
         suffix    = 'hzg_vbf_M125_2018'
         ),
     cfg(data_name = 'hzg_wplush_M125_2018',

@@ -827,7 +827,7 @@ Bool_t LLTauAnalyzer::Process(Long64_t entry)
                 && !muOverlap
                 && !elOverlap
                 && (tau->hpsDisc & baconhep::kByDecayModeFinding)
-                && (tau->hpsDisc & baconhep::kByVTightIsolationMVA3newDMwLT) //<----------------------------- tau ID
+                && (tau->hpsDisc & baconhep::kByTightIsolationMVA3newDMwLT) //<----------------------------- tau ID
                 && (tau->hpsDisc & baconhep::kByMVA6VTightElectronRejection)
                 && (tau->hpsDisc & baconhep::kByTightMuonRejection3)
             ) {
@@ -1006,7 +1006,7 @@ Bool_t LLTauAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(5);
 
-        if (dimuonP4.M()<12 || (dimuonP4.M() > 80 && dimuonP4.M() < 102))
+        if (dimuonP4.M()<12)
             return kTRUE;
         eventCounts[channel]->Fill(6);
 
@@ -1151,7 +1151,7 @@ Bool_t LLTauAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(5);
 
-        if (dielectronP4.M()<12 || (dielectronP4.M() > 80 && dielectronP4.M() < 102))
+        if (dielectronP4.M()<12)
             return kTRUE;
         eventCounts[channel]->Fill(6);
 

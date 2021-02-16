@@ -1428,9 +1428,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         TLorentzVector electronP4, tauP4;
         electronP4.SetPtEtaPhiM(electrons[0]->pt, electrons[0]->eta, electrons[0]->phi, 511e-6);
@@ -1546,9 +1546,9 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             return kTRUE;
         eventCounts[channel]->Fill(3);
 
-        if (nJetsCut < 2 || nBJetsCut < 1)
-            return kTRUE;
-        eventCounts[channel]->Fill(4);
+        // if (nJetsCut < 2 || nBJetsCut < 1)
+        //     return kTRUE;
+        // eventCounts[channel]->Fill(4);
 
         TLorentzVector muonP4, tauP4;
         muonP4.SetPtEtaPhiM(muons[0]->pt, muons[0]->eta, muons[0]->phi, 0.10566);

@@ -30,9 +30,9 @@ period     = '2016'
 # # LLTauAnalyzer /eos/uscms/store/group/lpcbacon/12a/SingleMuon_Run2016C-03Feb2017-v1/SingleMuon_Run2016C-03Feb2017-v1_bacon_00.root 100000 muon_2016C muon_2016C single_lepton 2016 1
 # # LLTauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 # ####################################
-# analyzer   = 'LLTauAnalyzer'
-# data_samples = ['single_mu', 'single_el']
-# mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets']
+analyzer   = 'LLTauAnalyzer'
+data_samples = ['single_mu', 'single_el']
+mc_samples   = ['ttbar', 'wjets', 'zjets', 't', 'diboson','gjets']
 
 
 
@@ -45,9 +45,9 @@ period     = '2016'
 # to run interactively
 # TauAnalyzer /eos/uscms/store/group/lpcbacon/12/Summer16_TT_powheg/Summer16_TT_powheg_bacon_090.root 100000 ttbar_inclusive ttbar_inclusive single_lepton 2016 1
 ####################################
-analyzer     = 'TauAnalyzer'
-data_samples = []
-mc_samples   = ['ttbar', 'ttbar_systematics']
+#analyzer     = 'TauAnalyzer'
+#data_samples = []
+#mc_samples   = ['ttbar', 'ttbar_systematics']
 
 
 

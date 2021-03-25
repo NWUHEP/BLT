@@ -673,17 +673,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 && muon->nValidHits > 0
                 && fabs(muon->d0)   < 0.2
                 && fabs(muon->dz)   < 0.5
-                // && GetMuonIsolation(muon)/muon->pt < 0.25 // loose muon
+                && GetMuonIsolation(muon)/muon->pt < 0.25 // loose muon
            ) {
             
 
             if (GetMuonIsolation(muon)/muonP4.Pt() <  0.15){
                 muons.push_back(muon);
-                veto_muons.push_back(muonP4);
-            } else if (GetMuonIsolation(muon)/muon->pt < 0.25) {
+            } else {
                 fail_muons.push_back(muon);
             }
-            
+            veto_muons.push_back(muonP4);
         }
     }
     sort(muons.begin(), muons.end(), sort_by_higher_pt<TMuon>);
@@ -724,17 +723,16 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 electron->pt > 20
                 && fabs(electron->scEta) < 2.5
                 && particleSelector->PassElectronID(electron, cuts->tightElID)
-                // && particleSelector->PassElectronIso(electron, cuts->looseElIso, cuts->EAEl)
+                && particleSelector->PassElectronIso(electron, cuts->looseElIso, cuts->EAEl)
 
            ) {
             
             if (particleSelector->PassElectronIso(electron, cuts->tightElIso, cuts->EAEl) ){
                 electrons.push_back(electron);
-                veto_electrons.push_back(electronP4);
-            } else if (particleSelector->PassElectronIso(electron, cuts->looseElIso, cuts->EAEl)) {
+            } else {
                 fail_electrons.push_back(electron);
             }
-            
+            veto_electrons.push_back(electronP4);
         }
     }
     sort(electrons.begin(), electrons.end(), sort_by_higher_pt<TElectron>);
@@ -925,34 +923,6 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
                 break;
             }
         }
-
-
-
-        //fail_e+tau or fail_e+jets
-        if (nElectrons == 0 && nMuons == 0 && ( nTaus == 0 || nTaus == 1) && nFailElectrons == 1 && nFailMuons == 0) {
-            for (const auto& fel: fail_electrons) {
-                TLorentzVector felP4;
-                felP4.SetPtEtaPhiM(fel->pt, fel->eta, fel->phi, 511e-6);
-                if (jetP4.DeltaR(felP4) < 0.4) {
-                    elOverlap = true;
-                    break;
-                }
-            }
-        }
-
-        //fail_mu+tau or fail_mu+jets
-        if (nElectrons == 0 && nMuons == 0 && ( nTaus == 0 || nTaus == 1) && nFailElectrons == 0 && nFailMuons == 1) {
-            for (const auto& fmu: fail_muons) {
-                TLorentzVector fmuP4;
-                fmuP4.SetPtEtaPhiM(fmu->pt, fmu->eta, fmu->phi,  0.10566);
-                if (jetP4.DeltaR(fmuP4) < 0.4) {
-                    muOverlap = true;
-                    break;
-                }
-            }
-        }
-
-
 
         // save good jets
         if (
@@ -1444,7 +1414,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             
 
         }
-    } else if (nElectrons == 1 && nMuons == 0 && nTaus == 1) { // e+tau selection
+    } else if (nElectrons == 1 && nMuons == 0 && nTaus == 1 && nFailElectrons == 0 ) { // e+tau selection
         
         channel = "etau";
         eventCounts[channel]->Fill(1);
@@ -1562,7 +1532,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= prefiringWeight;
 
         }
-    } else if (nElectrons == 0 && nMuons == 1 && nTaus == 1) { // mu+tau selection
+    } else if (nElectrons == 0 && nMuons == 1 && nTaus == 1 && nFailMuons== 0) { // mu+tau selection
 
         channel = "mutau";
         eventCounts[channel]->Fill(1);
@@ -1670,7 +1640,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             
 
         }
-    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 1 && nFailElectrons == 1 && nFailMuons == 0) { // e+tau fakes selection
+    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 1 && nFailElectrons == 1 ) { // e+tau fakes selection
 
         channel = "etau_fakes";
         eventCounts[channel]->Fill(1);
@@ -1789,7 +1759,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             
 
         }
-    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 1 && nFailElectrons == 0 && nFailMuons == 1) { // mu+tau fakes selection
+    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 1 && nFailMuons== 1) { // mu+tau fakes selection
 
         channel = "mutau_fakes";
         eventCounts[channel]->Fill(1);
@@ -1895,7 +1865,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             
 
         }
-    } else if (nElectrons == 1 && nMuons == 0 && nTaus == 0) { // e+4j selection
+    } else if (nElectrons == 1 && nMuons == 0 && nTaus == 0 && nFailElectrons == 0) { // e+4j selection
 
         channel = "e4j";
         eventCounts[channel]->Fill(1);
@@ -1989,7 +1959,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             prefiringVar    = pow(effs.first/effs.second, 2)*(pow(errs.first/effs.first, 2) + pow(errs.second/effs.second, 2));
             eventWeight *= prefiringWeight;
         }
-    } else if (nElectrons == 0 && nMuons == 1 && nTaus == 0) { // mu+4j selection
+    } else if (nElectrons == 0 && nMuons == 1 && nTaus == 0 && nFailMuons== 0) { // mu+4j selection
 
         channel = "mu4j";
         eventCounts[channel]->Fill(1);
@@ -2076,7 +2046,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
         }
-    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 0 && nFailElectrons == 0 && nFailMuons == 1) { // fail_mu+4j selection
+    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 0 && nFailMuons== 1) { // fail_mu+4j selection
 
         channel = "mu4j_fakes";
         eventCounts[channel]->Fill(1);
@@ -2163,7 +2133,7 @@ Bool_t MultilepAnalyzer::Process(Long64_t entry)
             eventWeight *= triggerWeight;
 
         }
-    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 0 && nFailElectrons == 1 && nFailMuons == 0) { // fail_e+4j selection
+    } else if (nElectrons == 0 && nMuons == 0 && nTaus == 0 && nFailElectrons == 1) { // fail_e+4j selection
 
         channel = "e4j_fakes";
         eventCounts[channel]->Fill(1);

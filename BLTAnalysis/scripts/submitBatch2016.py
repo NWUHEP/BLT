@@ -126,7 +126,6 @@ data_dict['single_el'] = [
 
 
 
-path = '/eos/uscms/store/group/lpcbacon/12d'
 mc_dict['zjets'] = [
     # Drell-Yan
     cfg(data_name = 'DYJetsToLL_M-50_amcatnlo',
